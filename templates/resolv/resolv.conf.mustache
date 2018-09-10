@@ -1,0 +1,16 @@
+### Controlled by CFengine3, template file
+#
+## SVN Info
+#   $Id: resolv.conf.mustache 23774 2017-08-04 13:08:20Z bas $
+#   $URL: https://subtrac.surfsara.nl/osd/beowulf/svn/trunk/cfengine3/templates/resolv/resolv.conf.mustache $
+#
+
+
+search {{#vars.sara_data.resolv.search}}{{{domain}}} {{/vars.sara_data.resolv.search}}
+{{#vars.sara_data.resolv.nameservers}}
+nameserver {{{ip}}}
+{{/vars.sara_data.resolv.nameservers}}
+
+{{#vars.sara_data.resolv.options}}
+options {{{.}}} 
+{{/vars.sara_data.resolv.options}}

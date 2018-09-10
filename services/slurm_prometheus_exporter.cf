@@ -1,0 +1,125 @@
+#
+## slurm_prometheus_exporter @SURFsara
+#
+bundle common slurm_prometheus_exporter()
+{
+    vars:
+        "exclude_list" slist => { ".svn", ".git" };
+
+        "service_name" string => "slurm_prometheus_exporter";
+        "daemon_name" string => "/opt/slurm_prometheus_exporter/slurm_prometheus_exporter";
+
+        "template_2_destination" data => parsejson('
+            {
+                "slurm_prometheus_exporter.default.mustache": "/etc/default/slurm_prometheus_exporter"
+            }
+        ');
+    systemd::
+        "reload" string => "$(paths.path[systemctl]) reload $(service_name)";
+        "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+
+    !systemd::
+        "reload" string => "/etc/init.d/$(service_name) reload";
+        "restart" string => "/etc/init.d/$(service_name) restart";
+
+}
+
+bundle agent slurm_prometheus_exporter_install()
+{
+    files:
+        "/opt/slurm_prometheus_exporter"
+            #copy_from => secure_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-$(sara_data.slurm_prometheus_exporter[version])", "$(sys.policy_hub)"),
+            comment => "Copy the binaries of slurm_prometheus_exporter",
+            copy_from => sara_sync_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-$(sara_data.slurm_prometheus_exporter[version])", "hash"),
+            depth_search =>  recurse_ignore("inf", "@(slurm_prometheus_exporter.exclude_list)" ),
+            classes => results("namespace", "slurm_prometheus_exporter_updated");
+}
+
+bundle agent slurm_prometheus_exporter_config()
+{
+    classes:
+        "reload_slurm_prometheus_exporter" or => {
+            "sara_etc_default_slurm_prometheus_exporter"
+        };
+
+        "restart_slurm_prometheus_exporter" or => {
+            "slurm_prometheus_exporter_updated_repaired",
+            "slurm_prometheus_exporter_systemd_updated_repaired"
+        };
+
+    files:
+      systemd::
+        "/etc/systemd/system/slurm_prometheus_exporter.service"
+            copy_from => secure_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter.service", "$(sys.policy_hub)"),
+            classes => results("namespace", "slurm_prometheus_exporter_systemd_updated");
+
+      !systemd::
+        "/etc/init.d/slurm_prometheus_exporter"
+            copy_from => secure_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter.initd", "$(sys.policy_hub)"),
+            classes => results("namespace", "slurm_prometheus_exporter_initd_updated");
+
+        "/etc/init.d/slurm_prometheus_exporter"
+            perms   => mog("0755", "root", "root");
+
+    services:
+        "$(slurm_prometheus_exporter.service_name)"
+            service_policy => "start";
+
+    methods:
+        "" usebundle => sara_template_autorun("slurm_prometheus_exporter");
+
+    commands:
+        "$(paths.path[systemctl])  -q daemon-reload"
+            ifvarclass => "slurm_prometheus_exporter_systemd_updated";
+
+        "$(slurm_prometheus_exporter.reload)"
+            ifvarclass => "slurm_prometheus_exporter_initd_updated";
+
+        "$(slurm_prometheus_exporter.reload)"
+            ifvarclass => "reload_slurm_prometheus_exporter";
+
+        "$(paths.path[systemctl]) daemon-reload"
+            ifvarclass => "restart_slurm_prometheus_exporter";
+
+        "$(slurm_prometheus_exporter.restart)"
+            ifvarclass => "restart_slurm_prometheus_exporter";
+}
+
+bundle agent slurm_prometheus_exporter_daemon_check()
+{
+    processes:
+        "$(slurm_prometheus_exporter.daemon_name)"
+            comment => "Check if GPU Prometheus exporter is running",
+            process_count   => check_range("$(slurm_prometheus_exporter.daemon_name)", "1", "1"),
+            process_select  => sara_select_parent_process("1");
+
+    commands:
+        "$(slurm_prometheus_exporter.restart)"
+            ifvarclass => canonify("$(slurm_prometheus_exporter.daemon_name)_out_of_range");
+}
+
+bundle agent slurm_prometheus_exporter_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_slurm_prometheus_exporter" };
+
+    methods:
+        "" usebundle => sara_data_autorun("slurm_prometheus_exporter");
+        "" usebundle => slurm_prometheus_exporter_install();
+        "" usebundle => slurm_prometheus_exporter_config();
+        "" usebundle => slurm_prometheus_exporter_daemon_check();
+}
+@if minimum_version(99.9)
+
+= slurm_prometheus_exporter =
+[source:trunk/cfengine3/config/bundles/services/surfsara/slurm_prometheus_exporter.cf source slurm_prometheus_exporter.cf]
+
+This bundle will generate these/this file(s) from mustache templates:
+
+If one of the files is changed then the following ""class"" will be set:
+
+These templates are located in:
+ * templates/slurm_prometheus_exporter
+ * templates/slurm_prometheus_exporter/json
+
+@endif

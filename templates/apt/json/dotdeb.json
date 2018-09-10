@@ -1,0 +1,17 @@
+{
+    "dotdeb": {
+        "repo_key": "89DF5277",
+        "repo": [
+            {
+                "name": "dotdeb_repo",
+                "desc": "dotdeb repo for php7.0",
+                "url": "deb http://mirror.nl.leaseweb.net/dotdeb/ $(apt.os_name) all"
+            },
+            {
+                "name": "dotdeb_src_repo",
+                "desc": "dotdeb source repo for php7.0",
+                "url": "deb-src http://mirror.nl.leaseweb.net/dotdeb/ $(apt.os_name) all"
+            }
+        ]
+    }
+}

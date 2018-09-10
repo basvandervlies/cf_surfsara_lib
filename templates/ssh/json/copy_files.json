@@ -1,0 +1,9 @@
+{
+    "copy_files": {
+        "ssh_host_dsa_key": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0600", "owner": "root", "group": "root", "restart": "yes" },
+        "ssh_host_dsa_key.pub": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0644", "owner": "root", "group": "root", "restart": "yes" },
+        "ssh_host_rsa_key": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0600", "owner": "root", "group": "root", "restart": "yes" },
+        "ssh_host_rsa_key.pub": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0644", "owner": "root", "group": "root", "restart": "yes" }
+
+    }
+}

@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+# Author: Jaap Dijkshoorn/Bas van der Vlies @SURFsara
+# Date  : 03 August 2011
+# Desc. : Import specified key to apt-key:
+#  1) Check if the key is already imported
+#  2) If not import the key (5 attemps are made)
+#  3) Check if the import was succesful
+
+APT_KEY=/usr/bin/apt-key
+GPG=/usr/bin/gpg
+
+GPG_SERVER="pool.sks-keyservers.net"
+GPG_CMD="$GPG --keyserver $GPG_SERVER  --recv-key $1"
+
+### Functions
+#
+apt_is_key_installed()
+{
+    count=`$APT_KEY export $1  2>&1 | grep -c 'PUBLIC KEY'`
+    if [ $count -eq 2 ]
+    then
+        # echo "Key is already installed: $1"
+        exit 0
+    fi
+}
+
+apt_check_import()
+{
+    count=`$APT_KEY export $1  2>&1 | grep -c 'PUBLIC KEY'`
+    if [ $count -ne 2 ]
+    then
+        echo "failed to import key: $1"
+        exit 1
+    fi
+}
+
+import_key()
+{
+    attempts=1
+    $GPG_CMD
+    while [[ $? -ne 0 && $attempts -lt 5 ]]; do
+        ((attempts++))
+        $GPG_CMD
+    done
+
+    case ${attempts} in
+        5)
+            echo "`basename $0` Could not fetch gpg key: $1 from: $GPG_SERVER"
+            exit 1
+            ;;
+        *)
+            a=1
+            ;;
+    esac
+
+    $GPG -a --export $1 | $APT_KEY add -
+}
+#
+### End Functions
+
+
+if [ $# -lt 1 ]
+then
+    echo "Usage: `basename $0` <keyid>"
+    exit 1
+fi
+
+
+apt_is_key_installed $1
+import_key
+apt_check_import $1
+
+#gpg --keyserver pgpkeys.mit.edu --recv-key 1285491434D8786F
+#gpg --keyserver pool.sks-keyservers.net --recv-key $1

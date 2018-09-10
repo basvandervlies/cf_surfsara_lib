@@ -1,0 +1,10 @@
+#
+#  SURFsara storage.cf
+#
+body volume sara_min_free_space(free)
+{
+    check_foreign  => "true";
+    freespace      => "$(free)";
+    sensible_size  => "0";
+    sensible_count => "0";
+}

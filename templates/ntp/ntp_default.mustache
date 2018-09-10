@@ -1,0 +1,11 @@
+###
+# Managed by: CFengine
+# SURFsara Bas van der Vlies
+#
+{{#classes.debian}}
+NTPD_OPTS="{{{vars.sara_data.ntp.daemon_options}}}"
+{{/classes.debian}}
+
+{{#classes.centos}}
+OPTIONS="{{{vars.sara_data.ntp.daemon_options}}}"
+{{/classes.centos}}

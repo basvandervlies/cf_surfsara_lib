@@ -1,0 +1,12 @@
+{
+    "mozilla_backports": {
+        "repo_key": "06C4AE2A",
+        "repo": [
+            {
+                "name": "mozilla_backport_repo",
+                "desc": "mozilla backports repo for installing firefox",
+                "url": "deb http://mozilla.debian.net/ $(apt.os_name)-backports firefox-release"
+            }
+        ]
+    }
+}

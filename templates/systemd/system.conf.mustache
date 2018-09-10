@@ -1,0 +1,8 @@
+## Override system.conf settings file by CFEngine
+#
+# See the systemd-system.conf man page for more information.
+#
+[Manager]
+{{#vars.sara_data.systemd.system_conf}}
+{{{@}}}={{{.}}}
+{{/vars.sara_data.systemd.system_conf}}

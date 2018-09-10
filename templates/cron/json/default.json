@@ -1,0 +1,4 @@
+{
+    "allow_users": [ "root" ],
+    "deny_users": [ ]
+}

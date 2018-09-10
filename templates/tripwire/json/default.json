@@ -1,0 +1,3 @@
+{
+    "standard": [ "/bin/bash", "/usr/bin/last", "/bin/ls", "/usr/bin/openssl", "/bin/ps",  "/usr/bin/ssh", "/usr/sbin/sshd" ]
+}

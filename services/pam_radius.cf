@@ -1,0 +1,169 @@
+#
+## pam_radius.cf @SURFsara
+#
+bundle common pam_radius()
+{
+    vars:
+        any::
+            ## Mustache templates
+            "template_2_destination" data => parsejson('{
+                "pam_radius.mustache"  : "$(config_file)",
+                }');
+
+        debian::
+            "config_file" string => "/etc/pam_radius_auth.conf";
+            "owner"             string => "root";
+            "group"             string => "root";
+            "mode"              string => "0600";
+
+        centos::
+            "config_file" string => "/etc/pam_radius.conf";
+            "owner"             string => "root";
+            "group"             string => "root";
+            "mode"              string => "0600";
+}
+
+bundle agent pam_radius_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_pam_radius" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("pam_radius");
+            "" usebundle => pam_radius_install();
+            "" usebundle => pam_radius_surfsara_config();
+}
+
+bundle agent pam_radius_install()
+{
+    vars:
+        debian::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "freeradius-utils": "",
+                        "libpam-radius-auth": ""
+                    }
+                }
+            ');
+
+        centos::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "pam_radius": ""
+                    }
+                }
+            ');
+
+    methods:
+        any::
+            "" usebundle => sara_service_packages("pam_radius", "@(pam_radius_install.packages)");
+}
+
+bundle agent pam_radius_surfsara_config()
+{
+    vars:
+        any::
+            "pam_config_file_class"    string => canonify("sara$(pam_radius.config_file)");
+
+    classes:
+        "pam_radius_report" or => { $(pam_config_file_class) };
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("pam_radius");
+
+    reports:
+        pam_radius_report::
+            "$(pam_radius.config_file) had been changed";
+}
+
+@if minimum_version(99.9)
+= PAM_RADIUS =
+[source:trunk/cfengine3/config/bundles/pam_radius.cf source pam_radius.cf]
+
+PAM Radius Module allows any PAM-capable machine to become a RADIUS client for authentication and accounting requests. The actual authentication will be performed by a RADIUS server.
+
+This bundle install the software on a node and generete the file from mustache templates:
+ * /etc/pam_radius_auth.conf (debian) or  /etc/pam_radius.conf (centos), cfengine variable : $(pam_radius.config_file)
+
+When the configuration flle has been changed the following class will be set:
+ * canonify("sara$(pam_radius.config_file)");
+
+These files wille be generated  with the aid of mustache templates with json data.
+The templates are located in:
+ * templates/pam_radius
+ * templates/pam_radius/json
+
+== Usage ==
+The bundle is called with:
+ * `"" usebundle => pam_radius_autorun;`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    any::
+        "pam_radius_json_files" slist => { "surfsara.json" };
+}}}
+
+The variable must be ''pam_radius_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== DEBUG ===
+
+if you want to debug this bundle set the `DEBUG_pam_radius` class, eg:
+ * `DDEBUG_pam_radius`
+
+=== SETUP ===
+The variables are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "servers": [
+        { "server" : "127.0.0.1", "secret" : "changme", "timeout" : "3" }
+    ]
+}
+}}}
+
+=== Def Usage ===
+
+To activate the bundle in our environment, set the following class in `def.json` host file:
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": [
+            ....
+            "pam_radius",
+            ....
+        ],
+        "pam": {
+            "json_files": [ "policy_server.json" ]
+        }
+    },
+}}}
+
+Here are some examples how to use it:
+ * specify pam_radius configuration in def.cf:
+{{{
+#!cf3
+vars:
+    "pam_radius_json_files" slist => { "policy_server.json" };
+}}}
+ * Set/Override the servers option in ''def.json'':
+{{{
+#!json
+        "pam_radius" : {
+            "servers": [ { "server" : "192.168.0.1", "secret" : "geheim", "timeout" : "5" } ]
+        },
+}}}
+ * override servers setting in def.cf
+{{{
+#!cf3
+vars:
+    "pam_radius" data => parsejson( '{ "servers": [{ "server" : "192.168.0.1", "secret" : "geheim", "timeout" : "5" }]  }' );
+}}}
+
+@endif

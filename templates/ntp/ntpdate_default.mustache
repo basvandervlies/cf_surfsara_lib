@@ -1,0 +1,23 @@
+### 
+#
+# Managed by: CFengine, 
+# SURFsara Bas van der Vlies
+#
+# servers to check
+#
+{{#classes.debian}}
+NTPSERVERS="{{#vars.sara_data.ntp.server}} {{{.}}} {{/vars.sara_data.ntp.server}}"
+#
+# additional options for ntpdate
+#NTPOPTIONS="-v"
+#
+NTPOPTIONS="-u"
+{{/classes.debian}}
+
+{{#classes.centos}}
+# Options for ntpdate
+OPTIONS="-U ntp -s -b {{#vars.sara_data.ntp.server}} {{{.}}} {{/vars.sara_data.ntp.server}}"
+
+# Set to 'yes' to sync hw clock after successful ntpdate
+SYNC_HWCLOCK=no
+{{/classes.centos}}

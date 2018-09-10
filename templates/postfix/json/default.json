@@ -1,0 +1,59 @@
+{
+    "alias_root_email_address": "example@$(sys.domain)",
+    "alias_database": [
+        "hash:/etc/aliases"
+    ],
+    "alias_maps": [
+        "hash:/etc/aliases"
+    ],
+    "virtual_alias_maps": [
+        {
+            "protocol" : "",
+            "delimiter" : "",
+            "dest" : ""
+        }
+    ],
+    "append_dot_mydomain": "no",
+    "biff": "no",
+    "debugger_command": "",
+    "empty_address_recipient": "devnull",
+    "file_aliases_lines": [
+    ],
+    "file_header_checks_lines": [
+    ],
+    "file_transport_lines": [
+    ],
+    "header_checks": [
+        "regexp:/etc/postfix/header_checks"
+    ],
+    "inet_interfaces": "loopback-only",
+    "inet_protocols": "ipv4",
+    "mailman_destination_recipient_limit": false,
+    "master_cf_extra_interfaces": [
+    ],
+    "message_size_limit": 10240000,
+    "mydestination": [
+        "$myhostname",  "localhost.$mydomain", "localhost", ".$mydomain"
+    ],
+    "mydomain": "$(sys.domain)",
+    "mynetworks": [
+        "127.0.0.0/8"
+    ],
+    "myorigin": "$myhostname",
+    "myhostname": "$(sys.fqhost)",
+    "recipient_delimiter": "+",
+    "recipient_canonical_maps": [
+        "hash:/etc/postfix/recipient_canonical"
+    ],
+    "relay_domains": [
+        "$mydestination"
+    ],
+    "relayhost": "[mta.yourdomain.nl]",
+    "smtpd_banner": "SURFsara ESMTP host",
+    "smtpd_port": "smtp",
+    "transport_maps": [
+        "hash:/etc/postfix/transport"
+    ],
+    "unknown_local_recipient_reject_code": 550,
+    "virtual_mailbox_limit": 0
+}

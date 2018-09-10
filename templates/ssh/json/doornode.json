@@ -1,0 +1,25 @@
+{
+    "Banner": "/etc/ssh/sshd_banner",
+    "matches": [
+         { "match" : "match Address $(sys.policy_hub)", "settings" : [ "PermitRootLogin yes" ] },
+         { "match" : "match User *,!root", 
+            "settings" : [ 
+                "AllowAgentForwarding no",
+                "AllowTCPForwarding no", 
+                "X11Forwarding no", 
+                "ForceCommand /usr/sara/bin/doornode" 
+            ] 
+         }
+    ],
+    "matches_client" : [
+            { "match" : "Host *", 
+                "settings" : [
+                    "ForwardAgent yes",
+                    "ForwardX11 yes",
+                    "HostbasedAuthentication yes",
+                    "EnableSSHKeysign yes",
+                    "HashKnownHosts yes"
+                ]
+            }
+    ]
+}

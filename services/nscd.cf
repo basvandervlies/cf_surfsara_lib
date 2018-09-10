@@ -1,0 +1,221 @@
+#
+## nscd.cf @SURFsara
+#
+bundle common nscd
+{
+    vars:
+        any::
+            "template_2_destination" data => parsejson('
+                {
+                    "nscd.mustache"  : "$(config_file)",
+                }
+            ');
+
+            "config_file" string => "/etc/nscd.conf";
+            "owner" string => "root";
+            "group" string => "root";
+            "mode" string => "0644";
+            "daemon_name" string => "nscd";
+            "service_name" string => "nscd";
+
+    systemd::
+            "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+    !systemd::
+            "restart" string => "$(paths.path[service]) $(service_name) restart";
+}
+
+bundle agent nscd_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_nscd" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("nscd");
+            "" usebundle => nscd_install();
+            "" usebundle => nscd_surfsara_config();
+            "" usebundle => nscd_daemons_check();
+}
+
+bundle agent nscd_daemons_check
+{
+    processes:
+        any::
+            "$(nscd.daemon_name)"
+                comment 	    => "Check if nscd is running with PPID=1",
+                process_count   => check_range("$(nscd.daemon_name)", "1", "1"),
+                process_select  => sara_select_parent_process("1");
+
+    commands:
+        any::
+            "$(nscd.restart)"
+                ifvarclass => canonify("$(nscd.daemon_name)_out_of_range");
+
+    reports:
+        any::
+            "nscd_daemons_check : $(nscd.restart)"
+                ifvarclass => canonify("$(nscd.daemon_name)_out_of_range");
+}
+
+bundle agent nscd_install()
+{
+    vars:
+        debian|centos::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "nscd": ""
+                    }
+                }
+            ');
+
+    methods:
+        any::
+            "" usebundle => sara_service_packages("nscd", "@(nscd_install.packages)");
+}
+
+bundle agent nscd_surfsara_config()
+{
+    vars:
+        any::
+            "nscd_config_file_class" string => canonify("sara$(nscd.config_file)");
+
+    classes:
+        "NSCD_RESTART" or => {
+            "$(nscd_config_file_class)",
+        };
+
+    files:
+        any::
+            "$(nscd.config_file)"
+                 perms => mog("$(nscd.mode)", "$(nscd.owner)", "$(nscd.group)");
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("nscd");
+
+    commands:
+       NSCD_RESTART::
+            "$(nscd.restart)";
+
+    reports:
+       NSCD_RESTART::
+            "$(nscd.config_file) has been regenerated: $(nscd.restart)";
+
+}
+@if minimum_version(99.9)
+= NSCD =
+[source:trunk/cfengine3/config/bundles/nscd.cf source nscd.cf]
+
+This bundle will generate these files from mustache templates:
+ * /etc/nscd.conf
+
+f one of the files is changed then the followong ''class'' will be set:
+ * sara_etc_nscd_conf
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/nscd/
+ * templates/nscd/json
+
+== Usage ==
+
+The bundle is called with:
+ * `"" usebundle => nscd_autorun()`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    debian::
+        "nscd_json_files" slist => { "disable_cache.json" };
+}}}
+
+The variable must be ''nscd_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== Debug ===
+
+If you want to debug these bundle set the `DEBUG_nscd` class, eg:
+ * `-DDEBUG_nscd`
+
+
+=== Setup ===
+The variables that are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "cache_group": {
+        "check-files " : "yes",
+        "negative-time-to-live" : "60",
+        "persistent": "yes",
+        "positive-time-to-live" : "3600",
+        "shared": "yes",
+        "suggested-size" : "211"
+    },
+    "cache_hosts": {
+        "check-files " : "yes",
+        "negative-time-to-live" : "20",
+        "persistent": "yes",
+        "positive-time-to-live" : "3600",
+        "shared": "yes",
+        "suggested-size" : "211"
+    },
+    "cache_passwd": {
+        "check-files " : "yes",
+        "negative-time-to-live" : "20",
+        "persistent": "yes",
+        "positive-time-to-live" : "600",
+        "shared": "yes",
+        "suggested-size" : "211"
+    },
+    "debug-level" : "0",
+    "enable-cache-group" : "yes",
+    "enable-cache-hosts" : "yes",
+    "enable-cache-passwd" : "yes",
+    "max_threads" : "5",
+    "paranoia" : "no",
+    "reload-count" : "5",
+    "restart-internal" : "3600",
+    "threads" : "3"
+}
+}}}
+
+=== Def usage  ===
+
+The following must be set in the specific ''def.json'' hostfile
+{{{
+#!json
+    "vars": {
+        ...
+        "sara_services_enabled": [ "nscd" ],
+        ...,
+        "nscd": {
+            ...
+            "json_files": [ "disable_cache.json" ],
+            ...
+        }
+    },
+}}}
+
+Here are some examples how to use it:
+ * specify nscd configuration in def.cf:
+{{{
+#!cf3
+vars:
+    "nscd_json_files" slist => { "disable_cache.json" };
+}}}
+ * Set/Override the daemon options variable in ''def.json'':
+{{{
+#!json
+        "nscd" : {
+            "debug-level": "1"
+        },
+}}}
+ * override server setting in def.cf
+{{{
+#!cf3
+vars:
+    "nscd" data => parsejson( '{ "max-threads" :  "7" }' );
+}}}
+@endif

@@ -1,0 +1,179 @@
+#
+##  nvidia_gpu_prometheus_exporter.cf @SURFsara
+#
+bundle common nvidia_gpu_prometheus_exporter()
+{
+    vars:
+        any::
+            "service_name" string => "nvidia_gpu_prometheus_exporter";
+            "systemd_file" string => "/etc/systemd/system/nvidia_gpu_prometheus_exporter.service";
+            "initd_file"   string => "/etc/init.d/$(service_name)";
+
+            #"daemon_name" string => "/opt/nvidia_gpu_prometheus_exporter/nvidia_gpu_prometheus_exporter";
+
+        systemd::
+            "template_2_destination" data => parsejson('
+                {
+                    "nvidia_gpu_prometheus_exporter.default.mustache": "/etc/default/$(service_name)",
+                    "systemd.mustache": "$(systemd_file)"
+                }
+            ');
+            "reload" string => "$(paths.path[systemctl]) reload $(service_name)";
+            "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+
+        !systemd::
+            "template_2_destination" data => parsejson('
+                {
+                    "nvidia_gpu_prometheus_exporter.default.mustache": "/etc/default/$(service_name)",
+                    "initd.mustache": "$(initd_file)"
+                }
+            ');
+            "reload"  string => "$(initd_file) reload";
+            "restart" string => "$(initd_file) restart";
+
+}
+
+bundle agent nvidia_gpu_prometheus_exporter_install()
+{
+    classes:
+        "nvidia_gpu_prometheus_exporter_copy_dirs_set" expression => isvariable("sara_data.nvidia_gpu_prometheus_exporter[copy_dirs]");
+
+    methods:
+        nvidia_gpu_prometheus_exporter_copy_dirs_set::
+            "" usebundle => sara_service_copy_dirs("nvidia_gpu_prometheus_exporter");
+}
+
+bundle agent nvidia_gpu_prometheus_exporter_config()
+{
+    services:
+        "$(nvidia_gpu_prometheus_exporter.service_name)"
+            service_policy => "start";
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("nvidia_gpu_prometheus_exporter");
+
+    commands:
+        systemd::
+            "$(paths.path[systemctl]) daemon-reload"
+                ifvarclass => or(
+                    canonify("sara$(nvidia_gpu_prometheus_exporter.systemd_file)")
+                );
+
+            "$(nvidia_gpu_prometheus_exporter.restart)"
+                ifvarclass => or(
+                    canonify("sara$(nvidia_gpu_prometheus_exporter.systemd_file)")
+                );
+
+}
+
+bundle agent nvidia_gpu_prometheus_exporter_restart
+{
+    commands:
+        "$(nvidia_gpu_prometheus_exporter.restart)";
+}
+
+bundle agent nvidia_gpu_prometheus_exporter_daemon_check()
+{
+    vars:
+        "name" string => "$(sara_data.nvidia_gpu_prometheus_exporter[dir])/$(nvidia_gpu_prometheus_exporter.service_name)";
+
+    processes:
+        "$(name)"
+            comment => "Check if GPU Prometheus exporter is running",
+            process_count   => check_range("$(name)", "1", "1"),
+            process_select  => sara_select_parent_process("1");
+
+    methods:
+        any::
+            "" usebundle => nvidia_gpu_prometheus_exporter_restart,
+                ifvarclass => canonify("$(name)_out_of_range");
+
+    reports:
+        "$(this.bundle): check $(name)"
+           ifvarclass => "DEBUG|DEBUG_nvidia_gpu_prometheus_exporter|DEBUG_$(this.bundle)";
+
+}
+
+bundle agent nvidia_gpu_prometheus_exporter_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_nvidia_gpu_prometheus_exporter" };
+
+    methods:
+        "" usebundle => sara_data_autorun("nvidia_gpu_prometheus_exporter");
+        "" usebundle => nvidia_gpu_prometheus_exporter_install();
+        "" usebundle => nvidia_gpu_prometheus_exporter_config();
+        "" usebundle => nvidia_gpu_prometheus_exporter_daemon_check();
+}
+@if minimum_version(99.9)
+
+= nvidia_gpu_prometheus_exporter =
+[source:trunk/cfengine3/config/bundles/services/surfsara/nvidia_gpu_prometheus_exporter.cf source nvidia_gpu_prometheus_exporter.cf]
+
+This bundle will generate these/this file(s) from mustache templates:
+
+ * /etc/default/nvidia_gpu_prometheus_exporter
+
+If one of the files is changed then the following ""class"" will be set:
+ * sara_etc_default_nvidia_gpu_prometheus_exporter
+ * sara_etc_systemd_system_nvidia_gpu_prometheus_exporter_service
+ * sara_etc_init_d_nvidia_gpu_prometheus_exporter 
+
+These templates are located in:
+ * templates/nvidia_gpu_prometheus_exporter
+ * templates/nvidia_gpu_prometheus_exporter/json
+
+== Usage ==
+
+This is called with:
+ * `"" usebundle => nvidia_gpu_prometheus_exporter_autorun();
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    any::
+        "nvidia_gpu_prometheus_exporter_json_files" slist => { "sara.json" };
+}}}
+
+The variable must be ''nvidia_gpu_prometheus_exporter_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== DEBUG ===
+
+if you want to debug this bundle set the `DEBUG_nvidia_gpu_prometheus_exporter` class, eg:
+ * `DDEBUG_nvidia_gpu_prometheus_exporter`
+
+== Setup ==
+The variables are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "args": "--collector.textfile.directory=$(sara_data.nvidia_gpu_prometheus_exporter_exporter[collector_dir])",
+    "collector_dir": "/run/prometheus/nvidia_gpu_prometheus_exporter",
+    "copy_dirs": [],
+    "cron_job": {},
+    "dir": "/opt/nvidia_gpu_prometheus_exporter"
+}
+
+=== copy_dirs ===
+
+When this variabele is set it will copy the directoy to the specified destination and can run a a bundle
+if there are changes, eg:
+{{{
+#!json
+{
+    "copy_dirs": [
+        {
+            "dest": "$(sara_data.nvidia_gpu_prometheus_exporter[dir])",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "purge": "true",
+            "run_bundle": "nvidia_gpu_prometheus_exporter_restart",
+            "source": "cf_bundles_dir/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"
+        }
+    ],
+}
+}}}
+
+@endif

@@ -1,0 +1,175 @@
+#
+## singularity.cf @SURFsara
+#
+bundle common singularity
+{
+    vars:
+
+        any::
+            "config_dir" string => "/etc/singularity";
+            "config_file" string => "$(config_dir)/singularity.conf";
+
+            "template_2_destination" data => parsejson('
+                    {
+                        "singularity.mustache" : "$(config_file)",
+                    }
+                ');
+
+        centos::
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "singularity" : "latest"
+                        }
+                    }
+                ');
+        debian::
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "singularity-container" : "latest"
+                        }
+                    }
+                ');
+}
+
+bundle agent singularity_autorun
+{
+    meta:
+            "tags" slist => { "autorun", "template_singularity" };
+
+    methods:
+        debian|centos::
+            "" usebundle => sara_data_autorun("singularity");
+            "" usebundle => singularity_install;
+            "" usebundle => singularity_config;
+
+    reports:
+        !(debian|centos)::
+            "$(this.bundle): Only debian|centos support for now";
+}
+
+bundle agent singularity_install()
+{
+    methods:
+        "" usebundle => sara_service_packages("singularity", "@(singularity.packages)");
+}
+
+bundle agent singularity_config()
+{
+    vars:
+        any::
+            "singularity_config_file_class" string => canonify("sara$(singularity.config_file)");
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("singularity");
+
+    reports:
+        any::
+            "$(singularity.config_file) config file has been updated"
+                ifvarclass => "$(singularity_config_file_class)";
+}
+
+@if minimum_version(99.9)
+
+= Singularity =
+
+This bundle install singularity software on a node. For now only ''Debian wheezy'' is supported.
+
+This bundle will generate these files from mustache templates:
+ * /etc/singularity/singularity.conf
+
+f one of the files is changed then the followong ''class'' will be set:
+ * sara_etc_singularity_singularity._conf
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/singularity/
+ * templates/singularity/json
+
+== Usage ==
+
+This is called with:
+ * `"" usebundle => singularity_autorun();
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    any::
+        "singularity_json_files" slist => { "disable_overlay.json" };
+}}}
+
+The variable must be ''singularity_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== DEBUG ===
+
+if you want to debug this bundle set the `DEBUG_singularity` class, eg:
+ * `-DDEBUG_singularity`
+
+=== Setup ===
+The variables that are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "allow_pid_ns": "yes",
+    "allow_setuid": "yes",
+    "bind_path": [],
+    "config_group": "yes",
+    "config_passwd": "yes",
+    "config_resolv_conf": "yes",
+    "container_dir ": "/var/singularity/mnt",
+    "enable_overlay": "yes",
+    "mount_dev": "yes",
+    "mount_home": "yes",
+    "mount_hostfs": "no",
+    "mount_proc": "yes",
+    "mount_slave": "yes",
+    "mount_sys": "yes",
+    "mount_tmp": "yes",
+    "sessiondir_prefix": "/tmp/.singularity-session-",
+    "user_bind_control": "yes"
+}
+}}}
+
+=== Def usage  ===
+
+The following must be set in the specific ''def.json'' hostfile
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": [
+            ...
+            "singularity",
+            ...
+            ],
+            "singularity": {
+            }
+    },
+}}}
+
+Here are some examples how to use it:
+ * specify ntp configuration in def.cf:
+{{{
+#!cf3
+vars:
+    "singularity_json_files" slist => { "disable_overlay.json" };
+}}}
+ * Set/Override the daemon options variable in ''def.json'':
+{{{
+#!json
+        "singularity" : {
+            "json_files": [ "test_server.json" ],
+            "enable_overlay": "no"
+        },
+}}}
+ * override server setting in def.cf
+{{{
+#!cf3
+vars:
+    "singularity" data => parsejson( '{ "enable_overlay":  "no"  }' );
+}}}
+
+@endif

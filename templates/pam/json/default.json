@@ -1,0 +1,81 @@
+{
+    "common-account": {
+        "comment": "only local logins",
+        "rules": [
+            "account [success=1 new_authtok_reqd=done default=ignore]   pam_unix.so",
+            "account requisite                                          pam_deny.so",
+            "account required                                           pam_permit.so"
+        ]
+    },
+    "common-auth": {
+        "comment": "only local logins",
+        "rules": [
+            "auth [success=1 default=ignore]    pam_unix.so nullok_secure",
+            "auth requisite                     pam_deny.so",
+            "auth required                      pam_permit.so"
+        ]
+    },
+    "common-password": {
+        "comment": "only local logins",
+        "rules": [
+            "auth [success=1 default=ignore]    pam_unix.so obscure sha512",
+            "auth requisite pam_deny.so",
+            "auth required pam_permit.so"
+        ]
+    },
+    "common-session": {
+        "comment": "only local logins",
+        "rules": [
+            "session [default=1]     pam_permit.so",
+            "session requisite       pam_deny.so",
+            "session required        pam_permit.so",
+            "session required        pam_unix.so"
+        ]
+    },
+    "common-session-noninteractive": {
+        "comment": "only local logins",
+        "rules": [
+            "session [default=1]     pam_permit.so",
+            "session requisite       pam_deny.so",
+            "session required        pam_permit.so",
+            "session required        pam_unix.so"
+        ]
+    },
+    "sudo-radius": {
+        "comment": "radius",
+        "rules": [
+            "auth required pam_radius_auth.so skip_passwd retry=1"
+        ]
+    },
+    "system-auth": [
+        "#",
+        "# Auth section",
+        "#",
+        "auth        required      pam_env.so",
+        "auth        required      pam_faildelay.so delay=2000000",
+        "auth        sufficient    pam_fprintd.so",
+        "auth        sufficient    pam_unix.so nullok try_first_pass",
+        "auth        requisite     pam_succeed_if.so uid >= 1000 quiet_success",
+        "auth        required      pam_deny.so",
+        "#",
+        "# Account section",
+        "#",
+        "account     required      pam_unix.so",
+        "account     sufficient    pam_localuser.so",
+        "account     sufficient    pam_succeed_if.so uid < 1000 quiet",
+        "account     required      pam_permit.so",
+        "#",
+        "# Password section",
+        "#",
+        "password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=",
+        "password    sufficient    pam_unix.so sha512 shadow nullok try_first_pass use_authtok",
+        "password    required      pam_deny.so                                                                                                                                                     ",
+        "#",
+        "# Session section",
+        "#",
+        "session     optional      pam_keyinit.so revoke",
+        "session     required      pam_limits.so",
+        "session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid",
+        "session     required      pam_unix.so"
+    ]
+}

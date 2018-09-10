@@ -1,0 +1,132 @@
+#
+#  SURFsara services.cf
+#
+@if minimum_version(99.9)
+= services.cf =
+
+You can control which services must be run by specifying the following variable in:
+ * def.json
+{{{
+#!json
+"sara_services_enabled": [ "ssh", "ntp" ]
+}}}
+ * def.cf
+{{{
+#!cf3
+"sara_services_enabled" slist => [ "ssh", "ntp" ];
+}}}
+
+This variable will include the cfengine services file from the directory
+`def.sara_services_dir` (default value: surfsara/services) and run all bundles that have
+the meta tag, eg: `template_ssh`. The bundle run can be protected by an class
+statement, default is `any`, eg:
+{{{
+#!json
+"ssh": {
+    "run_class": "debian|centos"
+}
+}}}
+
+This will run the ssh service only for debian and centos hosts.
+@endif
+bundle common sara_services
+{
+    vars:
+        "enabled" slist => { @(def.sara_services_enabled) },
+            ifvarclass => and(
+                    isvariable("def.sara_services_enabled")
+                );
+
+        "enabled" slist => {},
+            ifvarclass => and(
+                    not(isvariable("def.sara_services_enabled"))
+                );
+
+        "dir" string => ifelse(
+            isvariable( "def.sara_services_dir"), $(def.sara_services_dir),
+            "services/surfsara");
+
+    classes:
+        "sara_services_set" expression => isvariable("def.sara_services_enabled");
+}
+
+bundle agent sara_services_autorun
+{
+    vars:
+        "inputs" slist => maplist("$(sara_services.dir)/$(this).cf", @(sara_services.enabled));
+
+    methods:
+        sara_services_set::
+            "" usebundle => sara_services_data(@(sara_services.enabled)),
+                comment => "fetch/merge json data for all enabled services";
+            "" usebundle => sara_services_run("$(sara_services.enabled)");
+
+    reports:
+        sara_services_set::
+            "$(this.bundle) service enabled: $(sara_services.enabled)"
+                ifvarclass => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+        !sara_services_set::
+            "$(this.bundle) no service enabled, set 'def.sara_services_enabled'"
+                ifvarclass => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+}
+
+bundle agent sara_services_data(services)
+{
+    methods:
+        "" usebundle => sara_data_autorun("$(services)");
+}
+
+bundle agent sara_services_run(service)
+{
+    vars:
+        any::
+            "run_bundles" slist => bundlesmatching(".*", "template_$(service)"),
+                comment => "Fetch all bundles by tage name in all namespaces";
+
+            "run_class_var" slist => getvalues("sara_data.$(service)[run_class]"),
+                comment => "Only run service when the specified classes are set";
+
+            "run_class_var_str" string => format("%S", "run_class_var"),
+                ifvarclass => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+
+    classes:
+        any::
+            "run_class_set" expression => reglist("@(run_class_var)", ".+"),
+                comment => "Service has specified classes. so check if there are met, if not set assume 'any' class";
+
+            "run_class" expression => "$(run_class_var)",
+                comment => "Run service if run_class definitions are met",
+                ifvarclass => "run_class_set";
+
+    methods:
+        any::
+            "" usebundle => $(run_bundles),
+                comment => "Run service bundle if run_class is met or if run_class is absent",
+                classes => results("namespace", "$(service)"),
+                ifvarclass => or(
+                    "run_class",
+                    "!run_class_set"
+                    );
+
+    reports:
+        any::
+            "$(this.bundle): '$(service)' is enabled for `any' class"
+                ifvarclass => and(
+                    "DEBUG|DEBUG_services|DEBUG_$(this.bundle)",
+                    "!run_class_set"
+                    );
+
+            "$(this.bundle): '$(service)' is only enabled for class: `$(run_class_var_str)`"
+                ifvarclass => and(
+                        "DEBUG|DEBUG_services|DEBUG_$(this.bundle)",
+                        "run_class_set"
+                        );
+}
+
+
+body file control
+{
+    inputs => {
+        @(sara_services_autorun.inputs)
+    };
+}

@@ -1,0 +1,146 @@
+#
+## sara_user_consume_resources.cf @SURFsara
+#
+bundle common sara_user_consume_resources
+{
+}
+
+bundle agent sara_user_consume_resources_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_sara_user_consume_resources" };
+
+    classes:
+        any::
+            "sara_user_consume_resources_files_set" expression => isvariable("def.sara_user_consume_resources_json_files");
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("sara_user_consume_resources");
+            "" usebundle => sara_user_consume_resources_check();
+
+    reports:
+        DEBUG_sara_user_consume_resources::
+            "$(this.bundle): has been called";
+}
+
+bundle agent sara_user_consume_resources_check()
+{
+    vars:
+        any::
+            "exclude_owners_str" string => join(" ", "sara_data.sara_user_consume_resources[exclude_owners]");
+            "exclude_owners" slist => getvalues("sara_data.sara_user_consume_resources[exclude_owners]"),
+                comment => "JSO list must be converted to CFengine slist";
+
+    processes:
+        any::
+            ".*"
+                comment => "Kill processes that use to much resources",
+                signals => { "term", "kill"},
+                action => sara_action,
+                process_select => sara_user_consume_resources_select(
+                    "$(sara_data.sara_user_consume_resources[max_minutes])",
+                    "$(sara_data.sara_user_consume_resources[max_memory])",
+                    @(exclude_owners),
+                    "$(sara_data.sara_user_consume_resources[exclude_processes])");
+
+                    #"@(sara_data.sara_user_consume_resources[exclude_owners])",
+    reports:
+        DEBUG_sara_user_consume_resources::
+            "$(this.bundle) is called with args:
+                $(sara_data.sara_user_consume_resources[max_minutes])
+                $(sara_data.sara_user_consume_resources[max_memory])
+                $(exclude_owners_str)
+                $(sara_data.sara_user_consume_resources[exclude_processes])";
+}
+
+body process_select sara_user_consume_resources_select(minutes, memory, excluded_owners, exclude_commands_regex)
+{
+    command        => "$(exclude_commands_regex)";
+    process_owner   => { @(excluded_owners) };
+    ttime_range     => irange(accumulated(0,0,0,0,"$(minutes)",0), accumulated(1,0,0,0,0,0));
+    rsize           => irange("$(memory)", 'inf');
+    process_result  => "(ttime|rsize).!(process_owner|command)";
+}
+
+@if minimum_version(99.9)
+= sara_user_consume_resources =
+[source:trunk/cfengine3/config/bundles/sara_user_consume_resources.cf source sara_user_consume_resources.cf]
+
+This will kill processes that consume to much resources. The resources at this moment are:
+ * exclude_owners: Is a list of process owners that are ''NOT'' killed
+ * exclude_processes:   A regular expression of processes that are exclude from being killed
+ * memory:  Kill process that use more memory then specified.
+ * minutes:  Kill process that run longer then specified minutes
+
+iNo template file are generated, we only need josn file(s) as input. The location of this
+file(s) are:
+ * templates/sara_user_consume_resources/json
+
+the default json values are:
+{{{
+#!json
+{
+    "exclude_owners": [ "root", "ganglia", "daemon", "postfix", "nslcd", "ntp", "bind" ],
+    "exclude_processes": "^(/bin/|/usr/bin)?(ssh|scp|rsync|cp|mv|tar|gzip|bzip2|unzip|zip).*",
+    "max_memory": "1038336",
+    "max_minutes": "10"
+}
+}}}
+
+First it will ''terminate'' the process if this fails then ''kill'' it.  Here is a simple example
+{{{
+#!cf3
+methods:
+    "" => sara_user_consume_resources_autorun();
+}}}
+
+== DEBUG ==
+
+If you want to debug this bundle set the `DEBUG_sara_user_consume_resources` class, eg:
+ * `-DDEBUG_sara_user_consume_resources`
+
+== Def usage ==
+
+The following must be set in the specific ''def.json'' hostfile
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": [
+            ...
+            "sara_user_consume_resources",
+            ...
+            ],
+            "sara_user_consume_resources_autorun": {
+            }
+        }
+    },
+}}}
+
+Here is an example to for a json file in  (def.cf):
+{{
+#!cf3
+vars:
+    "sara_user_consume_resources_json_files" slist => { "lisa.json" ];
+
+}}}
+
+Same can also be set in `def.json`
+{{{
+#!json
+    "vars": {
+        "sara_user_consume_resources": {
+            "json_files": [ "lisa.json" ]
+        }
+    },
+}}}
+
+{{{
+#!json
+    "vars": {
+        "sara_user_consume_resources": {
+            "max_minutes": "20"
+        },
+    },
+}}}
+@endif

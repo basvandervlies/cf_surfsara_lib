@@ -1,0 +1,5 @@
+{
+    "/tmp": { "freespace": "18%" },
+    "/var/log": { "freespace": "28%" },
+    "/boot": { "freespace": "18M" }
+}

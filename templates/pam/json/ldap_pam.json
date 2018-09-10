@@ -1,0 +1,13 @@
+{
+    "centos": {
+        "$(pam.dir)/system-auth" : "system-auth"
+    },
+    "debian": {
+        "$(pam.dir)/common-account" : "common-account-ldap",
+        "$(pam.dir)/common-auth" : "common-auth-ldap",
+        "$(pam.dir)/common-password" : "common-password-ldap",
+        "$(pam.dir)/common-session" : "common-session-ldap",
+        "$(pam.dir)/common-session-noninteractive" : "common-session-noninteractive-ldap",
+        "$(pam.dir)/sudo" : "sudo-radius"
+    }
+}

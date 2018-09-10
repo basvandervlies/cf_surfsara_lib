@@ -1,0 +1,5 @@
+{
+    "enable-cache-group" : "no",
+    "enable-cache-hosts" : "no",
+    "enable-cache-passwd" : "no"
+}

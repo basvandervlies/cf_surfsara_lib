@@ -1,0 +1,79 @@
+{
+    "AddressFamily": "any",
+    "AllowTcpForwarding": "yes",
+    "authorized_keys_command" : "/opt/ssh-ldap-pubkey/bin/ssh-ldap-pubkey-wrapper",
+    "authorized_keys_commanduser" :  "nobody",
+    "AuthorizedKeysFile": "%h/.ssh/authorized_keys",
+    "Banner": "none",
+    "Banner_system": "SURFsara",
+    "Banner_system_url": "http://www.surfsara.nl",
+    "ChallengeResponseAuthentication": "no",
+    "classes": {
+        "SSH_USE_DEPRICATED_OPTIONS": [ "debian_7", "centos" ]
+    },
+    "HostbasedAuthentication": "yes",
+    "HostKey": [
+        { "key" : "/etc/ssh/ssh_host_rsa_key" },
+        { "key" : "/etc/ssh/ssh_host_dsa_key" }
+    ],
+    "IgnoreRhosts": "yes",
+    "IgnoreUserKnownHosts": "no",
+    "KeyRegenerationInterval": "3600",
+    "ListenAddress": [
+        { "address": "::" },
+        { "address": "0.0.0.0" }
+    ],
+    "LoginGraceTime": "120", 
+    "LogLevel": "INFO", 
+    "matches" : [
+        { "match" : "match Address $(sys.policy_hub)", "settings" : [
+            "PermitRootLogin yes"
+            ]
+        }
+    ],
+    "matches_client" : [
+        { "match" : "Host localhost", "settings" : [ 
+            "ForwardAgent yes", 
+            "ForwardX11 yes"
+            ] 
+        },
+        { "match" : "Host *", "settings" : [ 
+            "GSSAPIAuthentication yes",
+            "GSSAPIDelegateCredentials no",
+            "HashKnownHosts yes",
+            "HostbasedAuthentication no",
+            "ForwardAgent no", 
+            "ForwardX11 no",
+            "SendEnv LANG LC_*"
+            ] 
+        }
+    ],
+    "MaxAuthTries": "6", 
+    "MaxSessions": "10", 
+    "PasswordAuthentication": "yes", 
+    "permit_root": [], 
+    "PermitEmptyPasswords": "no", 
+    "PermitRootLogin": "no", 
+    "Port": "22", 
+    "PrintLastLog": "yes",
+    "PrintMotd": "no",
+    "Protocol": "2",
+    "PubkeyAuthentication": "yes",
+    "RhostsRSAAuthentication": "yes",
+    "RSAAuthentication": "yes",
+    "ServerKeyBits": "768",
+    "setup_dir": "",
+    "StrictModes": "yes",
+    "Subsystem": [
+        { "service" : "sftp" , "path" : "$(ssh.sftp_server_path)" }
+    ],
+    "SyslogFacility": "AUTH",
+    "TCPKeepAlive": "yes",
+    "UseDNS": "no" ,
+    "UseLogin": "no" ,
+    "UsePAM": "yes" ,
+    "UsePrivilegeSeparation": "yes" ,
+    "X11DisplayOffset": "10" ,
+    "X11Forwarding": "yes",
+    "X11UseLocalhost": "yes"
+}

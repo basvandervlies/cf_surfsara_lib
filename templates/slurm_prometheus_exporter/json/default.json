@@ -1,0 +1,15 @@
+{
+    "args": "",
+    "collector_dir": "/run/prometheus/slurm_prometheus_exporter",
+    "copy_dirs": [
+        {
+            "dest": "$(sara_data.slurm_prometheus_exporter[dir])",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "purge": "true",
+            "run_bundle": "slurm_prometheus_exporter_restart",
+            "source": "cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-1.0"
+        }
+    ],
+    "dir": "/opt/slurm_prometheus_exporter",
+    "version": "1.0"
+}

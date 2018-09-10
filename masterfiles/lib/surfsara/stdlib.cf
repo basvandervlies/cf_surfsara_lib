@@ -1,0 +1,46 @@
+#
+# SURFsara CFengine Lib (SCL) is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+bundle common surfsara_stdlib_common
+{
+    vars:
+        any::
+            "standard" slist => {
+                "$(this.promise_dirname)/bundles.cf",
+                "$(this.promise_dirname)/common.cf",
+                "$(this.promise_dirname)/files.cf",
+                "$(this.promise_dirname)/packages.cf",
+                "$(this.promise_dirname)/processes.cf",
+                "$(this.promise_dirname)/services.cf",
+                "$(this.promise_dirname)/storage.cf",
+            };
+
+            "version" string => "SURFSARA Library 0.9.0";
+
+        SURFSARA_SKIP_DEF_CF_INCLUDE::
+            "def" slist => { };
+        !SURFSARA_SKIP_DEF_CF_INCLUDE::
+            "def" slist => { "$(this.promise_dirname)/def.cf" };
+
+  reports:
+    verbose_mode::
+      "$(this.bundle): adding $(version) inputs='$(standard)'";
+}
+
+body file control
+{
+    inputs => {
+        @(surfsara_stdlib_common.standard),
+        @(surfsara_stdlib_common.def)
+    };
+}

@@ -1,0 +1,14 @@
+{
+    "host_alias": {
+        "USERHOST" : "login*, software*"
+    },
+    "user_alias": {
+        "LISA_ADMIN" : "admin1, admin2",
+        "LISA_ADVISORS": "user1, user2"
+    },
+    "user_permissions": [
+        { "user" : "root", "args"  : "ALL = (ALL) ALL" },
+        { "user" : "LISA_ADMIN", "args" : "USERHOST = PASSWD: ALL" },
+        { "user" : "LISA_ADVISORS", "args" : "USERHOST = PASSWD: SU_USER" }
+    ]
+}

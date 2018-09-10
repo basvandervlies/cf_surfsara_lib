@@ -1,0 +1,195 @@
+#
+# systemd.cf  @SURFsara
+#
+bundle common systemd
+{
+    vars:
+        any::
+            "scripts_dir" string => "/opt/systemd_scripts",
+                comment => "Will be removed. replaced by systemd_config";
+
+            "config_dir" string => "/etc/systemd";
+
+            "system_conf_dir" string => "$(config_dir)/system.conf.d";
+            "user_conf_dir" string => "$(config_dir)/user.conf.d";
+
+            "reload" string => "$(paths.path[systemctl]) daemon-reload";
+
+            "template_2_destination" data => parsejson('
+                {
+                    "system.conf.mustache": "$(system_conf_dir)/surfsara.conf"
+                    "user.conf.mustache": "$(user_conf_dir)/surfsara.conf"
+                }
+            ');
+
+        debian|centos|redhat::
+            "dir"  string => "/etc/systemd/system";
+}
+
+bundle agent systemd_autorun()
+{
+    meta:
+        "tags"  slist => { "autorun", "template_systemd" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("systemd");
+            "" usebundle => systemd_config();
+}
+
+bundle agent systemd_config()
+{
+    classes:
+        "SYSTEMD_RELOAD" or => {
+            "sara_etc_systemd_system_conf_d_surfsara_conf",
+            "sara_etc_systemd_user_conf_d_surfsara_conf"
+        };
+
+    files:
+        any::
+            "$(sara_data.systemd[script_dir])/."
+                comment => "Create the systemd scripts irecrtory if it does not exists",
+                perms => mog("0700", "root", "root"),
+                create => "true";
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("systemd");
+
+    commands:
+        SYSTEMD_RELOAD::
+            "$(systemd.reload)";
+
+    reports:
+        DEBUG_systemd::
+            "$(this.bundle) has run with script_dir: $(sara_data.systemd[script_dir])";
+}
+
+
+bundle agent systemd_install_and_check_service(service_file)
+{
+    vars:
+        "service_name" string => lastnode("$(service_file)","/");
+
+    classes:
+        "def_set" expression => isvariable("sara_data.systemd[script_dir]"),
+                comment => "Check for backword compatible, will be removed";
+
+    files:
+        any::
+            "$(systemd.dir)/$(service_name)"
+                comment => "Copy the systemd service file to the $(systemd.dir) directory",
+                copy_from => secure_cp("$(service_file)", "$(sys.policy_hub)"),
+                classes => results("namespace", "systemd_service_$(service_name)");
+
+            "$(systemd.dir)/$(service_name)"
+                perms => mog("644", "root", "root");
+
+        !def_set::
+            "$(systemd.scripts_dir)/."
+                comment => "Will be replaced by systemd_config()",
+                perms => mog("0700", "root", "root"),
+                create => "true";
+
+
+    services:
+        "$(service_name)" service_policy => "start", # uses `standard_services`
+            classes => results("namespace","systemd_service_$(service_name)");
+
+    commands:
+        "$(paths.path[systemctl]) daemon-reload"
+                ifvarclass => canonify("systemd_service_$(service_name)_repaired");
+
+    reports:
+        any::
+            "$(service_name) has been enabled/started"
+                ifvarclass => canonify("systemd_service_$(service_name)_repaired");
+}
+
+bundle agent systemd_disable_service(service_name)
+{
+    services:
+        "$(service_name)" service_policy => "stop", # uses `standard_services`
+            comment => "Must use 'stop' wil stop and disable teh service",
+            classes => results("namespace","systemd_service_$(service_name)");
+}
+
+
+@if minimum_version(99.9)
+= systemd =
+
+This bundle will generate overides for system.conf and user.conf in:
+ * /etc/systemd/system.conf.d/surfsara.conf
+ * /etc/systemd/user.conf.d/surfsara.conf
+
+The defaults are empty and can overriden by `key = value` pair.
+
+It can also handle the installation and deletion of systemd services The service
+files are installed for:
+ * debian, redhat, centos : /lib/systemd/system
+
+== Usage ==
+
+The bundle is called with:
+ *  `"" usebundle => systemd_autorun();`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+vars:
+    any::
+        "systemd_json_files" slist => { "cpu_memory_accounting.json" };
+}}}
+
+The variable must be ''systemd_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== DEBUG ===
+
+f you want to debug this bundle set the `DEBUG_dhclient` class, eg:
+ * `-DDEBUG_systemd`
+
+=== Setup ===
+{{{
+#!json
+{
+    "system_conf": {
+         "DefaultCPUAccounting": "yes",
+         "DefaultMemoryAccounting": "yes"
+    }
+}
+}}}
+
+=== Def Usage ===
+The following must be set in host specific host file: `def.json`
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled" : [
+            ....
+            "systemd",
+            ....
+        ]
+        "systemd": {
+            "system_conf": {
+                "DefaultCPUAccounting": "yes",
+                "DefaultMemoryAccounting": "yes"
+            }
+        }
+    }
+}}}
+
+== bundle systemd_install_and_check_service(service_file) ==
+
+This bundles will install a systemd service file and check the service:
+ * Copy the `service_file` from specified location
+ * If its enabled, if not enable service
+ * If its running, if not start service
+
+== bundle systemd_disable_service(service_name) ==
+
+Will disable the service name.
+
+
+@endif

@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# Author: Bas van der Vlies
+# Date  : 15 Juni 2011
+# Desc. : Change the value of a field in the debconf database
+#
+# SVN Info:
+# 	$Id: sara_change_debconf_field 17149 2015-12-18 06:33:54Z jaap $
+# 	$URL: https://subtrac.surfsara.nl/osd/beowulf/svn/trunk/cfengine3/data/bundles/mirror_copy/usr/sara/sbin/sara_change_debconf_field $
+
+## We always need the field and value
+##  ie. dash/sh false
+if [ $# -lt 2 ]
+then
+    echo "=debconf_response= Need arguments <field> and <value>"
+    echo "+APT_DEBCONF_ERROR"
+    exit 1
+fi
+
+## Some needed vars
+PKG=$1
+FIELD=$2
+TYPE=$3
+VALUE=$4
+CLASS=$5
+CHANGE_DEBCONF_VALUE=0
+DEBCONF_GET=/usr/bin/debconf-communicate
+DEBCONF_SET=/usr/bin/debconf-set-selections
+
+## First get current value
+RESULT=$(echo "get ${FIELD}" | $DEBCONF_GET 2>/dev/null)
+
+## When result is not empty, compare the result with the value
+if [ -n "${RESULT}" ]
+then
+    RESULT=$(echo $RESULT | cut -d " " -f 2-)
+
+    ## Only adjust the debconf when the value is not equal with the result
+    if [ "$RESULT" != "$VALUE" ]
+    then
+        CHANGE_DEBCONF_VALUE=1
+        echo "=response=Changing value for '${FIELD}' from '${RESULT}' to '${VALUE}'"
+    fi
+else
+    CHANGE_DEBCONF_VALUE=1
+    echo "=response=Setting value for '${FIELD}' to '${VALUE}'"
+fi
+
+## Only set something when we actual change something
+if [ $CHANGE_DEBCONF_VALUE -eq 1 ]
+then
+    _result=$(echo "${PKG} ${FIELD} ${TYPE} ${VALUE}" | $DEBCONF_SET 2>&1)
+
+    if [ $? -eq 0 ]
+    then
+        echo "+APT_DEBCONF_${CLASS}_CHANGED"
+    else
+        echo "+APT_DEBCONF_${CLASS}_ERROR"
+        echo "=response=${_result}"
+        exit 1
+    fi
+else
+    echo "+APT_DEBCONF_${CLASS}_NOT_CHANGED"
+fi
+
+exit 0

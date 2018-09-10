@@ -1,0 +1,377 @@
+#
+## ssh.cf  @SURFsara
+#
+bundle common ssh()
+{
+    vars:
+        any::
+            "config_dir"  string => "/etc/ssh";
+
+            "banner_file" string => "$(config_dir)/sshd_banner";
+            "client_file" string => "$(config_dir)/ssh_config";
+            "server_file" string => "$(config_dir)/sshd_config";
+            "ssh_keygen"  string => "/usr/bin/ssh-keygen";
+
+            "owner" string => "root";
+            "group" string => "root";
+
+            ## Mustache templates
+            "template_2_destination" data => parsejson('
+                    {
+                        "ssh.mustache"  : "$(client_file)",
+                        "sshd.mustache" : "$(server_file)",
+                        "sshd_banner.mustache"  : "$(banner_file)",
+                    }
+                ');
+
+        debian.!debian8::
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "openssh-client" : "",
+                            "openssh-server" : "",
+                            "openssh-blacklist" : ""
+                        }
+                    }
+                ');
+
+        debian_8::
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "dbus" : "",
+                            "libpam-systemd" : "",
+                            "openssh-client" : "",
+                            "openssh-server" : "",
+                            "openssh-blacklist" : ""
+                        }
+                    }
+                ');
+
+        debian::
+            "service_name"      string => "ssh";
+            "sftp_server_path"  string => "/usr/lib/openssh/sftp-server",
+                comment => "Used in ssh default.json";
+
+        centos::
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "openssh" : "",
+                            "openssh-askpass" : "",
+                            "openssh-clients" : "",
+                            "openssh-ldap" : "",
+                            "openssh-server" : "",
+                        }
+                    }
+                ');
+            "service_name"      string => "sshd";
+            "sftp_server_path"  string => "/usr/libexec/openssh/sftp-server",
+                comment => "Used in ssh default.json";
+
+        systemd::
+            "restart"          string => "$(paths.path[systemctl]) restart $(service_name)";
+        !systemd::
+            "restart"          string => "$(paths.path[service]) $(service_name) restart";
+}
+
+bundle agent ssh_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_ssh" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("ssh");
+            "" usebundle => ssh_install();
+            "" usebundle => ssh_surfsara_config();
+            "" usebundle => ssh_daemons_check();
+}
+
+bundle agent ssh_daemons_restart()
+{
+    commands:
+        any::
+            "$(ssh.restart)";
+
+    reports:
+        any::
+            "sshd has been restarted";
+}
+
+bundle agent ssh_daemons_check()
+{
+    processes:
+        debian|centos::
+            "/usr/sbin/sshd.*"
+                comment     => "Check if sshd is running",
+                process_count   => check_range("ssh", "1", "999999"),
+                process_select  => sara_select_parent_process("1");
+
+    methods:
+        ssh_out_of_range::
+            "any" usebundle => ssh_daemons_restart();
+
+    reports:
+        ssh_out_of_range::
+            "No sshd process is running with PPID 1";
+
+}
+
+bundle agent ssh_install()
+{
+    methods:
+        "" usebundle => sara_service_packages("ssh", "@(ssh.packages)");
+}
+
+bundle agent ssh_surfsara_config()
+{
+    vars:
+        any::
+            "ssh_config_files" slist => getvalues("ssh.template_2_destination");
+
+    classes:
+        any::
+            "ssh_copy_files_set" expression => isvariable("sara_data.ssh[copy_files]"),
+                comment => "Must we copy extra files for ssh bundle";
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("ssh");
+            "" usebundle => ssh_daemons_restart(),
+                ifvarclass => or(
+                    canonify("sara$(ssh.server_file)")
+                    );
+
+        ssh_copy_files_set::
+            "" usebundle => sara_service_copy_files("ssh");
+
+    files:
+        any::
+            "$(ssh.config_dir)/.*_key"
+                comment         => "Make sure that all key files are 0600 and owner root",
+                perms           => mog("0600", "root", "root");
+
+           "$(ssh_config_files)"
+                comment         => "Make sure that the config files are 0644 and owner root",
+                perms           => mog("0644", "root", "root");
+
+        centos::
+            "/usr/bin/rsh"
+                comment         => "This is only needed for CentOS for software that still depend on rsh command",
+                perms           => mog("0777", "root", "root"),
+                link_from       => ln_s("/usr/bin/ssh"),
+                move_obstructions => "true";
+
+    commands:
+        SSH_KEYGEN::
+            "$(ssh.ssh_keygen) $(sara_data.ssh[keygen_opt])";
+}
+@if minimum_version(99.9)
+
+= SSH =
+
+This bundle installs ssh software on a node.
+
+This bundle will generate these files from mustache templates:
+ * /etc//ssh/ssh.conf
+ * /etc//ssh/sshd_banner
+ * /etc//ssh/sshd.conf
+
+If one of the files is changed then the following ''class'' will be set:
+ * sara_etc_ssh_ssh_conf
+ * sara_etc_ssh_sshd_banner
+ * sara_etc_ssh_sshd_conf
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/ssh/
+ * templates/ssh/json
+
+The following clases can be set via def.cf/json:
+ *  use_depricated_options:  These options are not used anymore , default true  on centos and debian_7
+ *  keygen: Must we generate host keys, command line options can bet set via json
+
+== Usage ==
+
+This is called with:
+ * `"" usebundle => ssh_autorun();
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    any::
+        "ssh_json_files" slist => { "policy_server.json" };
+}}}
+
+The variable must be ''ssh_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== DEBUG ===
+
+if you want to debug this bundle set the `DEBUG_ssh` class, eg:
+ * `DDEBUG_ssh`
+
+== Setup ==
+The variables are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "AddressFamily": "any",
+    "AllowTcpForwarding": "yes",
+    "authorized_keys_command" : "/opt/ssh-ldap-pubkey/bin/ssh-ldap-pubkey-wrapper",
+    "authorized_keys_commanduser" :  "nobody",
+    "AuthorizedKeysFile": "%h/.ssh/authorized_keys",
+    "Banner": "none",
+    "Banner_system": "SURFsara",
+    "Banner_system_url": "http://www.surfsara.nl",
+    "ChallengeResponseAuthentication": "no",
+    "copy_files": [],
+    "HostbasedAuthentication": "yes",
+    "HostKey": [
+        { "key" : "/etc/ssh/ssh_host_rsa_key" },
+        { "key" : "/etc/ssh/ssh_host_dsa_key" }
+    ],
+    "IgnoreRhosts": "yes",
+    "IgnoreUserKnownHosts": "no",
+    "KeyRegenerationInterval": "3600",
+    "keygen_opt": "-A",
+    "ListenAddress": [
+        { "address": "::" },
+        { "address": "0.0.0.0" }
+    ],
+    "LoginGraceTime": "120",
+    "LogLevel": "INFO",
+    "matches" : [
+        { "match" : "match Address $(sys.policy_hub)", "settings" : [
+            "PermitRootLogin yes"
+            ]
+        }
+    ],
+    "matches_client" : [
+        { "match" : "Host localhost", "settings" : [
+            "ForwardAgent yes",
+            "ForwardX11 yes"
+            ]
+        },
+        { "match" : "Host *", "settings" : [
+            "GSSAPIAuthentication yes",
+            "GSSAPIDelegateCredentials no",
+            "HashKnownHosts yes",
+            "HostbasedAuthentication no",
+            "ForwardAgent no",
+            "ForwardX11 no",
+            "SendEnv LANG LC_*"
+            ]
+        }
+    ],
+    "MaxAuthTries": "6",
+    "MaxSessions": "10",
+    "PasswordAuthentication": "yes",
+    "permit_root": [],
+    "PermitEmptyPasswords": "no",
+    "PermitRootLogin": "no",
+    "Port": "22",
+    "PrintLastLog": "yes",
+    "PrintMotd": "no",
+    "Protocol": "2",
+    "PubkeyAuthentication": "yes",
+    "RhostsRSAAuthentication": "yes",
+    "RSAAuthentication": "yes",
+    "ServerKeyBits": "768",
+    "StrictModes": "yes",
+    "Subsystem": [
+        { "service" : "sftp" , "path" : "$(ssh.sftp_server_path)" }
+    ],
+    "SyslogFacility": "AUTH",
+    "TCPKeepAlive": "yes",
+    "UseDNS": "no" ,
+    "UseLogin": "no" ,
+    "UsePAM": "yes" ,
+    "UsePrivilegeSeparation": "yes" ,
+    "X11DisplayOffset": "10" ,
+    "X11Forwarding": "yes"
+}
+}}}
+
+=== copy_files ===
+
+When this variable is set it will coyy the specified file to the `ssh.config_dir`. copy_files has the
+following format:
+{{{
+#!json
+"": [
+{
+    "dest": "Destination path with filename",
+    "src": "The filename path on the policy server/cf-hub",
+    "mode":  "The mode bits",
+    "owner": "File owner",
+    "group": "File group",
+    "run_bundle": "This bundle will run if the file gets copied"
+}
+]
+}}}
+
+example:
+{{{
+#!json
+"copy_files": [
+    {
+        "dest": "$(ssh.config_dir)/shosts.equiv",
+        "src": "cf_bundles_dir/ssh/lisa/shosts.equiv",
+        "mode": "0644", "owner": "root", "group": "root",
+    },
+    {
+        "dest": "$(ssh.config_dir)/ssh_known_hosts2",
+        "src": "cf_bundles_dir/ssh/lisa/ssh_known_hosts2",
+        "mode": "0644", "owner": "root", "group": "root",
+        "run_bundle": "ssh_daemons_restart"
+    }
+}
+}}}
+
+where `cf_bundles_dir` is a ''cf-serverd shortcut''.
+
+== Def usage  ==
+
+The following must be set in the specific ''def.json'' hostfile
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": {
+            ...
+            "ssh",
+            ...
+        },
+        "ssh": {
+        }
+    },
+}}}
+
+Here are some examples how to use it:
+ * specify ssh configuration in def.cf:
+{{{
+#!cf3
+vars:
+    "ssh_json_files" slist => { "policy_server.json" };
+}}}
+ * Set/Override the daemon options variable in ''def.json'':
+{{{
+#!json
+        "ssh" : {
+            "classes": {
+                "keygen": [ "any" ]
+            },
+            "MaxAuthTries": "6",
+            "X11Forwarding": "no",
+        },
+}}}
+ * override server setting in def.cf
+{{{
+#!cf3
+vars:
+    "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
+}}}
+
+@endif

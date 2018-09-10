@@ -1,0 +1,219 @@
+#
+## sudo.cf @SURFsara
+#
+bundle common sudo
+{
+    vars:
+        any::
+            "template_2_destination" data => parsejson('
+                {
+                    "sudo.mustache" : "$(surfsara_file)",
+                }
+            ');
+
+        debian|centos::
+            "file"              string => "/etc/sudoers";
+            "dir"               string => "/etc/sudoers.d";
+            "file_name"         string => "surfsara";
+            "surfsara_file"     string => "$(dir)/$(file_name)";
+            "owner"             string => "root";
+            "group"             string => "root";
+            "mode"              string => "0440";
+}
+
+bundle agent sudo_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_sudo" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("sudo");
+            "" usebundle => sudo_install();
+            "" usebundle => sudo_surfsara_config();
+
+    reports:
+        DEBUG_sudo::
+            "$(this.bundle): surfsara sudo template run";
+}
+
+bundle agent sudo_install()
+{
+    vars:
+
+        debian|centos::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "sudo": "",
+                    }
+                }
+            ');
+
+    methods:
+        any::
+            "" usebundle => sara_service_packages("sudo", "@(sudo_install.packages)");
+}
+
+bundle agent sudo_surfsara_config()
+{
+    vars:
+        any::
+            "sudo_config_file_class" string => canonify("sara$(sudo.surfsara_file)");
+            "exclude_list"           slist  => { "$(sudo.file_name)" };
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("sudo");
+
+    files:
+        SUDO_ONLY_ONE_CONFIG_FILE::
+            "$(sudo.dir)/.*"
+                    comment         => "Remove all files in this directory, only one $(sudo.file_name) allowed",
+                    delete          => tidy,
+                    file_select     => exclude(@(exclude_list));
+
+    reports:
+        any::
+            "$(this.bundle): $(sudo.file) file has changed"
+               ifvarclass => "$(sudo_default_file_class)";
+
+        DEBUG_sudo.SUDO_ONLY_ONE_CONFIG_FILE::
+            "$(this.bundle): Only 'surfsara' config allowed in '$(sudo.dir)'";
+
+}
+@if minimum_version(99.9)
+= SUDO =
+[source:trunk/cfengine3/config/bundles/sudo.cf source sudo.cf]
+
+This bundle will generate these files from mustache templates:
+ * /etc/sudoers.d/surfsara
+
+f one of the files is changed then the followong ''class'' will be set:
+ * sara_etc_sudoers_d_surfsara
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/sudo/
+ * templates/sudo/json
+
+The default is to pnlt allow one config file in `/etc/sudoers.d`:
+ * surfsara
+
+You can override it by disabbeling class `ONLY_ONE_CONFIG_FILE` in the
+sudo json data secton, eg:
+ * def.json
+{{{
+#json
+{
+    "sudo": {
+        "classes": {
+            "ONLY_ONE_CONFIG_FILE": [ "unset" ]
+        }
+    }
+}
+}}}
+ * example.cf
+{{{
+#!cf3
+classes:
+    "SUDO_ONLY_ONE_CONFIG_FILE" expression => "unset";
+}}}
+
+
+== Usage ==
+
+The bundle is called with:
+ * `"" usebundle => sudo_autorun()`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    debian::
+        "sudo_json_files" slist => { "lisa.json" };
+}}}
+
+The variable must be ''sudo_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== Debug ===
+
+If you want to debug these bundle set the `DEBUG_sudo` class, eg:
+ * `-DDEBUG_sudo`
+
+
+=== Setup ===
+The variables that are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "classes": {
+        "ONLY_ONE_CONFIG_FILE": [ "any" ]
+    }
+    "cmnd_alias": [
+        { "alias" : "SU_USER", "args" : "/bin/su - [[\:alpha\:]]*, !/bin/su - root, !/bin/su - root *" },
+        { "alias" : "SUX_USER", "args" : "/usr/bin/sux - [[\:alpha\:]]*, !/usr/bin/sux - root, !/usr/bin/sux - root *" }
+    ],
+    "defaults": [
+        { "defaults" : "Defaults", "args" : "fqdn" },
+        { "defaults" : "Defaults", "args" : "mail_no_user" },
+        { "defaults" : "Defaults", "args" : "mail_no_perms" },
+        { "defaults" : "Defaults", "args" : "!mail_badpass" },
+        { "defaults" : "Defaults", "args" : "mailsub=\"*** Sudo SECURITY information for %h ***\"" },
+        { "defaults" : "Defaults", "args" : "mailto=\"security@lists.surfsara.nl\"" }
+    ],
+    "group_permissions": [
+        { "group" : "root", "args" : "ALL = (ALL) ALL" }
+    ],
+    "host_alias": {
+    },
+    "user_alias": {
+    },
+    "user_permissions": [
+        { "user" : "root", "args"  : "ALL = (ALL) ALL" }
+    ]
+}}}
+
+=== Def usage  ===
+
+The following must be set in the specific ''def.json'' hostfile
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": [
+            ...
+            "sudo",
+            ...
+        ],
+        "sudo": {
+            "json_files": [ "lisa.json" ]
+        },
+    },
+}}}
+
+Here are some examples how to use it:
+ * specify sudo configuration in def.cf:
+{{{
+#!cf3
+vars:
+    "sudo_json_files" slist => { "lisa.json" };
+}}}
+ * Set/Override the daemon options variable in ''def.json'':
+{{{
+#!json
+    "sudo": {
+        "USERHOST" : "r25n3, r25n4, batch1, login*, software*",
+        "SOFTWARE" : "software*",
+        "FILESERVER" : "fs*",
+        "json_files": [ "lisa.json" ]
+    },
+}}}
+ * override server setting in def.cf
+{{{
+#!cf3
+vars:
+    "sudo" data => parsejson( '{ "USERHOST":  "r25n3, r25n4, batch1, login*, software*"  }' );
+
+}}}
+@endif

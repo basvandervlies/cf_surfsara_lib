@@ -1,0 +1,12 @@
+{
+    "centos": {
+        "$(pam.dir)/system-auth" : "system-auth"
+    },
+    "debian": {
+        "$(pam.dir)/common-account" : "common-account",
+        "$(pam.dir)/common-auth" : "common-auth",
+        "$(pam.dir)/common-password" : "common-password",
+        "$(pam.dir)/common-session" : "common-session",
+        "$(pam.dir)/common-session-noninteractive" : "common-session-noninteractive"
+    }
+}

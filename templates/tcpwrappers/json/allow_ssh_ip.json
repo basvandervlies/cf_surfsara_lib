@@ -1,0 +1,8 @@
+{
+    "allow_ssh": [
+        { 
+            "allow": "$(sys.policy_hub)", 
+            "desc": "Allow CFengine policy hub" 
+        }
+    ]
+}

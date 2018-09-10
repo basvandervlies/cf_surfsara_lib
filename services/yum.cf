@@ -1,0 +1,251 @@
+#
+## yum.cf  @SURFsara
+#
+bundle common yum
+{
+    vars:
+        any::
+            "yum_command"   string => "/usr/bin/yum";
+            "config_file"   string => "/etc/yum.conf";
+            "config_dir"    string => "/etc/yum";
+            "repos_dir"     string => "/etc/yum.repos.d";
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "yum-plugin-security" : ""
+                        }
+                    }
+                ');
+
+            "template_2_destination" data => parsejson('
+                {
+                    "yum.conf.mustache": "$(config_file)"
+                }
+            ');
+}
+
+bundle agent yum_action()
+{
+    methods:
+        Security::
+            "yum_action:security"   usebundle => yum_security_update();
+
+        Upgrade|Upgrade_force::
+            "yum_action:update"     usebundle => yum_update();
+}
+
+bundle agent yum_update()
+{
+    commands:
+        "$(yum.yum_command)"
+            args => "--quiet clean all";
+
+        "$(yum.yum_command)"
+            args => "--quiet list updates";
+
+        "$(yum.yum_command)"
+            args => "--quiet --assumeyes update";
+}
+
+bundle agent yum_security_update()
+{
+    commands:
+        "$(yum.yum_command)"
+            args => "--quiet clean all";
+
+        "$(yum.yum_command)"
+            args => "--quiet --security list updates";
+
+        "$(yum.yum_command)"
+            args => "--quiet --security --assumeyes update";
+}
+
+bundle agent yum_autorun()
+{
+    meta:
+        "tags"  slist => {"autorun", "template_yum"};
+
+    methods:
+        "" usebundle => sara_data_autorun("yum");
+        "" usebundle => yum_install();
+        "" usebundle => yum_surfsara_config();
+        "" usebundle => yum_repository();
+}
+
+bundle agent yum_install
+{
+    methods:
+        "" usebundle => sara_service_packages("yum", "@(yum.packages)");
+}
+
+bundle agent yum_surfsara_config
+{
+    methods:
+        "" usebundle => sara_mustache_autorun("yum");
+}
+
+bundle agent yum_repository()
+{
+    classes:
+        "YUM_REPOS_FILE_LIST_POPULATED"  expression => reglist("@(repository_exclude_files)", ".*repo$");
+
+    vars:
+        any::
+            "template_file" string => "repository.mustache";
+
+            "repository_names" slist => getindices("sara_data.$(this.bundle)");
+
+            "repository_exclude_files" slist => maplist("$(this).repo", @(repository_names));
+            "template_2_destination" data => parsejson('{ "$(template_file)" :  "no_destination_defined_is_generated"  }');
+
+
+        DEBUG_yum|DEBUG_yum_repository::
+            "repository_exclude_files_str" string => format("%S", repository_exclude_files);
+            "template_2_destination_str" string => format("%S", template_2_destination);
+
+    files:
+        ## Well i need to wait to the slist repositories_files is actually filled with data
+        YUM_REPOS_FILE_LIST_POPULATED::
+            "$(yum.repos_dir)"
+                comment         => "Remove yum files that are not maintained by CFEngine",
+                delete          => sara_tidyfiles,
+                file_select     => sara_exclude_files("@(repository_exclude_files)"),
+                depth_search    => recurse("inf");
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("$(this.bundle)");
+            "" usebundle => sara_mustache_copy("$(this.bundle)", "repository.mustache");
+
+        YUM_REPOS_FILE_LIST_POPULATED::
+            "" usebundle => sara_mustache_cf_data_2_file("$(this.bundle)", "$(template_file)", "$(yum.repos_dir)/$(repository_names).repo", "$(repository_names)" );
+
+    reports:
+        DEBUG_yum|DEBUG_yum_repository::
+            "$(this.bundle): repository_file excluded from deletion: $(repository_exclude_files_str)";
+            "$(this.bundle): $(template_2_destination_str)";
+}
+
+@if minimum_version(99.9)
+= YUM =
+[source:trunk/cfengine3/config/bundles/yum.cf source yum.cf]
+
+This bundle will configure the:
+ * yum.conf -> sara_yum_conf class will set
+ * repo files in /etc/yum.repos.d
+
+
+These will be generated with the aid of the mustache templates with json data.
+The templates/json files are located in:
+ * templates/yum/
+ * templates/yum/json
+ * templates/yum_repository/
+ * templates/yum_repository/json
+
+
+== Usage ==
+{{{
+#!cf3
+  "" usebundle => yum_autorun();
+}}}
+
+=== DEBUG ===
+
+If you want to debug these bundle set the `DEBUG_yum` class, eg:
+ * `-DDEBUG_yum`
+
+=== Setup ===
+
+The variables are set in default.json and can be overwritten.
+ * yum default json
+{{{
+#!json
+{
+    "assumeyes": "1",
+    "proxy": "",
+    "use_proxy": false
+}
+}}}
+ * yum repository default
+{{{
+#!json
+{
+    "CentOS" : {
+        "repo": [
+            {
+                "name": "base",
+                "desc": "CentOS-$releasever - Base",
+                "baseurl": "http://mirror.centos.org/centos/$releasever/os/$basearch/",
+                "gpgkey": "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6",
+                "gpgcheck": "1"
+            },
+            {
+                "name": "updates",
+                "desc": "CentOS-$releasever - Updates",
+                "baseurl": "http://mirror.centos.org/centos/$releasever/updates/$basearch/",
+                "gpgkey": "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6",
+                "gpgcheck": "1"
+            },
+            {
+                "name": "extras",
+                "desc": "CentOS-$releasever - Extras",
+                "baseurl": "http://mirror.centos.org/centos/$releasever/extras/$basearch/",
+                "gpgkey": "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6",
+                "gpgcheck": "1"
+            }
+       ]
+    }
+}
+}}}
+
+== Def usage ===
+
+The following class must be set in the specific ''def.json'' hostfile:
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": [
+            ...
+            "yum",
+            ...
+        ],
+        "yum": {
+        }
+    },`
+}}}
+
+With yum you can specify 2 different type of lists for external json data:
+ 1. yum_json_files --> yum.conf
+ 1. yum_repository_json_files --> yum repo files
+
+Here are some examples how to use it.
+ * add an extra repo:
+  * def.cf
+{{{
+#!cf3
+    any::
+        "yum_repository_files" slist => { "epel.json" };
+}}}
+    * def.json
+{{{
+#!json
+    "vars": {
+        "yum_repository_files": [ "epel.json" ],
+     },
+}}}
+ * override yum conf setting:
+  * def.cf
+{{{
+#!cf3
+    vars:
+        "yum" data => parsejson( '{ "assumeyes":  "0"  }' );
+}}}
+  * def.json
+{{{
+#!json
+    "vars":
+        "yum": {
+            "assumeyes":  "0"
+        },
+}}}
+@endif

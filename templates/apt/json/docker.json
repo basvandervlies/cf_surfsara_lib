@@ -1,0 +1,12 @@
+{
+    "docker": {
+        "repo_key": "58118E89F3A912897C070ADBF76221572C52609D",
+        "repo": [
+            {
+                "name": "docker_repo",
+                "desc": "docker",
+                "url": "deb https://apt.dockerproject.org/repo debian-$(apt.os_name) main"
+            }
+        ]
+    }
+}

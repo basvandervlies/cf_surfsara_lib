@@ -1,0 +1,19 @@
+{
+    "allow_pid_ns": "yes",
+    "allow_setuid": "yes",
+    "bind_path": [],
+    "config_group": "yes",
+    "config_passwd": "yes",
+    "config_resolv_conf": "yes",
+    "container_dir": "/var/singularity/mnt",
+    "enable_overlay": "yes",
+    "mount_dev": "yes",
+    "mount_home": "yes",
+    "mount_hostfs": "no",
+    "mount_proc": "yes",
+    "mount_slave": "yes",
+    "mount_sys": "yes",
+    "mount_tmp": "yes",
+    "sessiondir_prefix": "/tmp/.singularity-session-",
+    "user_bind_control": "yes"
+}

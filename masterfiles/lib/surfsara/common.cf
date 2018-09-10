@@ -1,0 +1,14 @@
+#
+#  SURFsara common.cf
+#
+
+## cmd_repair in cfengine stdlib does not define # kept_return code :-(
+# see: https://github.com/cfengine/masterfiles/pull/290
+#
+body classes sara_cmd_repair(return_code,class_prefix)
+{
+    kept_returncodes => { "0" };
+    repaired_returncodes => { "$(return_code)" };
+    promise_repaired => { "$(class_prefix)_failed" };
+    promise_kept     => { "$(class_prefix)_succeeded" };
+}

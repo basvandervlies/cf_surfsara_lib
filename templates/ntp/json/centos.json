@@ -1,0 +1,3 @@
+{
+    "daemon_options": "-u ntp:ntp -p /var/run/ntpd.pid -g"
+}

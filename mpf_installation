@@ -1,0 +1,126 @@
+#!/bin/sh
+
+## Some defaults can be overriden by command line opts
+#
+CFENGINE_DIR=/var/cfengine
+CFENGINE_MASTERFILES_DIR=$CFENGINE_DIR/masterfiles
+CFENGINE_TEMPLATES_DIR=$CFENGINE_DIR/templates
+CFENGINE_MODULES_DIR=$CFENGINE_DIR/modules
+
+SURFSARA_LIB="masterfiles/lib/surfsara"
+SURFSARA_AUTORUN_SERVICE="masterfiles/services/autorun/surfsara.cf"
+
+SURFSARA_TEMPLATES="templates"
+SURFSARA_SERVICES="services"
+SURFSARA_MODULES="modules"
+
+
+### Functions
+print_usage()
+{
+    echo "$(basename $0) [-c <cfengine_dir] [-m <masterfiles_dir>] [ -t <template_dir>] "
+}
+
+while getopts "hc:m:t:" opt
+do
+    case $opt in
+      c)
+        CFENGINE_DIR="$OPTARG"
+        CFENGINE_MASTERFILES_DIR=$CFENGINE_DIR/masterfiles
+        CFENGINE_TEMPLATES_DIR=$CFENGINE_DIR/templates
+        CFENGINE_MODULES_DIR=$CFENGINE_DIR/modules
+      ;;
+      m)
+        CFENGINE_MASTERFILES_DIR="$OPTARG"
+      ;;
+      h)
+        print_usage
+        exit 0
+      ;;
+      t)
+        CFENGINE_TEMPLATES_DIR="$OPTARG"
+      ;;
+      \?)
+        echo "-----------------------------------------------------"
+        echo "            Received an invalid option"
+        echo "-----------------------------------------------------"
+        print_usage
+        exit 1
+      ;;
+    esac
+done
+
+##
+CFENGINE_SERVICES_DIR=$CFENGINE_MASTERFILES_DIR/services
+
+echo "MPF installation settings":
+cat << EOF
+    dir: $CFENGINE_DIR
+    masterfiles: $CFENGINE_MASTERFILES_DIR
+    templates: $CFENGINE_TEMPLATES_DIR
+    modules: $CFENGINE_MODULES_DIR
+EOF
+
+if [ ! -d $CFENGINE_MASTERFILES_DIR ]
+then
+    echo "CFengine masterfiles Directory: $CFENGINE_MASTERFILES_DIR does NOT exists"
+    exit 1
+fi
+
+if [ -d $CFENGINE_MASTERFILES_DIR/lib/surfsara ]
+then
+    ### what to do about def.cf
+    echo "Updating surfsara library and autorun file"
+    cp  $SURFSARA_LIB/* $CFENGINE_MASTERFILES_DIR/lib/surfsara
+else
+    echo "Installing surfsara library and autorun file"
+    cp --no-dereference -R $SURFSARA_LIB $CFENGINE_MASTERFILES_DIR/lib/
+fi
+
+### THis is always updated
+cp $SURFSARA_AUTORUN_SERVICE $CFENGINE_SERVICES_DIR/autorun
+
+
+if [  -d $CFENGINE_SERVICES_DIR/surfsara ]
+then
+    echo "Updating surfsara services"
+    cp $SURFSARA_SERVICES/* $CFENGINE_SERVICES_DIR/surfsara
+else
+    echo "Installing surfsara services"
+    mkdir $CFENGINE_SERVICES_DIR/surfsara
+    cp $SURFSARA_SERVICES/* $CFENGINE_SERVICES_DIR/surfsara
+fi
+
+### Templates and json files
+#
+
+if [ ! -d  $CFENGINE_TEMPLATES_DIR ]
+then
+    mkdir $CFENGINE_TEMPLATES_DIR
+fi
+
+cd  $SURFSARA_TEMPLATES || exit 1
+for d in *
+do
+        if [ -d $CFENGINE_TEMPLATES_DIR/$d ]
+        then
+            echo "Updating mustache template(s) and default.json: $d"
+            templates=$(ls $d/*.mustache 2>/dev/null)
+            if [ ! -z "$templates" ]
+            then
+                cp $d/*.mustache $CFENGINE_TEMPLATES_DIR/$d
+            fi
+            cp $d/json/default.json $CFENGINE_TEMPLATES_DIR/$d/json
+        else
+            echo "Installing  mustache template(s) and json file(s): $d"
+            cp --no-dereference -R $d $CFENGINE_TEMPLATES_DIR
+        fi
+done
+
+### Modules
+#
+if [ ! -d  $CFENGINE_MODULES_DIR/surfsara ]
+then
+    mkdir $CFENGINE_MODULES_DIR/surfsara
+fi
+cp -a $SURFSARA_MODULES/* $CFENGINE_MODULES_DIR/surfsara

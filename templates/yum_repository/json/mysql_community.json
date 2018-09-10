@@ -1,0 +1,13 @@
+{
+    "mysql57-community" : {
+        "repo": [
+            {
+                "name": "mysql57",
+                "desc": "MySQL 5.7 Community Server",
+                "baseurl": "http://repo.mysql.com/yum/mysql-5.7-community/el/$releasever/$basearch/",
+                "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql",
+                "gpgcheck": "1"
+            }
+        ]
+    }
+}

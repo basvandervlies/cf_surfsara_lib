@@ -1,0 +1,11 @@
+{
+    "nameservers": [
+        { "ip": "$(sys.policy_hub)", "desc": "cfengine_policy_hub" },
+        { "ip": "145.100.29.146", "desc": "ns1.surfsara.nl"},
+        { "ip": "145.100.29.131", "desc": "ns2.surfsara.nl"}
+    ],
+    "search": [
+        { "domain": "cua.surfsara.nl" },
+        { "domain": "surfsara.nl" }
+    ]
+}

@@ -1,0 +1,159 @@
+#
+## check_space.cf @SURFsara
+#
+bundle agent check_space_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_check_space" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("check_space");
+            "" usebundle => check_space_surfsara_config();
+}
+
+bundle agent check_space_surfsara_config()
+{
+    vars:
+        "paths" slist => getindices("sara_data.check_space");
+
+    storage:
+        any::
+            "$(paths)"
+                comment => "Checking if $(paths) has enough free space",
+                volume => sara_min_free_space("$(sara_data.check_space[$(paths)][freespace])"),
+                classes => results("namesppace", "check_space_$(paths)");
+
+    methods:
+        any::
+            "" usebundle => "$(sara_data.check_space[$(paths)][run_bundle])",
+                ifvarclass => and(
+                    canonify("check_space_$(paths)_failed"),
+                    isvariable("sara_data.check_space[$(paths)][run_bundle]")
+                    );
+
+    commands:
+        any::
+            "$(sara_data.check_space[$(paths)][command])"
+                contain => in_shell,
+                ifvarclass => and(
+                    canonify("check_space_$(paths)_failed"),
+                    isvariable("sara_data.check_space[$(paths)][command]")
+                    );
+
+    reports:
+        any::
+            "Disk space for $(paths) is below: $(sara_data.check_space[$(paths)][freespace])!"
+                ifvarclass => and(canonify("check_space_$(paths)_failed"));
+
+        DEBUG_check_space::
+            "$(this.bundle): $(paths) freespace: $(sara_data.check_space[$(paths)][freespace])";
+}
+
+bundle agent check_space_run_bundle_test()
+{
+    reports:
+        "$(this.bundle): Has benn called";
+}
+
+@if minimum_version(99.9)
+
+= check_space  =
+[source:trunk/cfengine3/config/bundles/check_space.cf source check_space.cf]
+
+This bundles check the given filesystems if there is enought freespace. When there is
+not enough freespace is will:
+ * report it
+ * run an specified command, if set
+ * run an specified bundles, if set
+ * set a class bases on the directories: `canonify("check_space_$(path))")`
+
+== Usage ==
+
+The bundle is called with:
+{{{
+#!cf3
+methods:
+ "" usebundle => check_space_autorun(),`
+        classes => results("namespace", "check_space");
+}}}
+
+When we do not specifiy any json data files then only `default.json` will be read. We use the `xlasses` to determine if the oromise is keot or failed. So we can eg clean 'tmp':
+ * check_space_failed
+ * check_space_kept
+
+You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    any::
+        "check_space_json_files" slist => { "tmp.json" };
+}}}
+ * def.json
+{{{
+#!json
+"vars": {
+    "tripwire": {
+        "json_files": [ "tmp.json" ]
+    }
+}
+}}}
+
+
+The variable must be ''check_space_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== Debug ===
+
+If you want to debug this bundle set the `DEBUG_tripwire` class, eg:
+    * `-DDEBUG_check_space`
+
+=== Setup ===
+
+The `default.json` is an empty file. The structure is as follows:
+{{{
+#!json
+"path": {
+    "freespace": Absolute or percentage minimum disk space that should be available before.
+    "command": If specified then run this command if condition is met.
+    "run_bundle": If specified then run this bundle if condition is met.
+}
+}}}
+
+You can specfy more then one path,
+
+
+The example below will:check:
+  1.  `/tnp` and run a command if it is low on space:
+  1.  `/boot` and run a bundle if it is low on space:
+{{{
+!#json
+{
+    "/tmp": { "freespace": "99%", "command": "/bin/echo hello check_space"  },
+    "/boot": { "freespace": "98%", "run_bundle": "check_space_run_bundle_test" }
+}
+}}}
+
+=== Def usage ===
+
+Here is an example how to use it in:
+ * def.cf
+{{{
+#!cf3
+vars:
+    "check_space" data => parsejson('{
+        "json_files": [ "tmp.json" ],
+        "/scratch": { "freespace": "10%" }
+    }');
+}}}
+
+ * def.json
+{{{
+#!json
+"vars": {
+    "check_space": {
+        "json_fles": [ "tmp.json" ],
+        "/scratch": { "freespace": "5%" }
+    }
+}
+}}}
+@endif

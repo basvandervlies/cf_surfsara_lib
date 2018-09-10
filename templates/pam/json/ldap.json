@@ -1,0 +1,120 @@
+{
+    "common-account-ldap": {
+        "comment": "Setup for local and ldap  logins",
+        "rules": [
+            "account [success=1 new_authtok_reqd=done default=ignore] pam_unix.so",
+            "account requisite pam_deny.so",
+            "account required pam_permit.so",
+            "account required pam_listfile.so onerr=fail item=group sense=allow file=/etc/security/group.allow",
+            "account [success=ok new_authtok_reqd=done ignore=ignore user_unknown=ignore authinfo_unavail=ignore default=bad] pam_ldap.so minimum_uid=1000"
+        ]
+    },
+    "common-account-ldap-slurm": {
+        "comment": "Setup for local and ldap logins + allow uses that have a job running",
+        "rules": [
+            "account [success=1 new_authtok_reqd=done default=ignore] pam_unix.so",
+            "account requisite pam_deny.so",
+            "account required pam_permit.so",
+            "account sufficient pam_slurm.so",
+            "account required pam_listfile.so onerr=fail item=group sense=allow file=/etc/security/group.allow",
+            "account [success=ok new_authtok_reqd=done ignore=ignore user_unknown=ignore authinfo_unavail=ignore default=bad] pam_ldap.so minimum_uid=1000"
+        ]
+    },
+    "common-account-ldap-torque": {
+        "comment": "Setup for local and ldap logins + allow uses that have a job running",
+        "rules": [
+            "account [success=1 new_authtok_reqd=done default=ignore] pam_unix.so",
+            "account requisite pam_deny.so",
+            "account required pam_permit.so",
+            "account sufficient pam_pbssimpleauth.so",
+            "account required pam_listfile.so onerr=fail item=group sense=allow file=/etc/security/group.allow",
+            "account [success=ok new_authtok_reqd=done ignore=ignore user_unknown=ignore authinfo_unavail=ignore default=bad] pam_ldap.so minimum_uid=1000"
+        ]
+    },
+    "common-auth-ldap": {
+        "comment": "Setup for local and ldap  logins",
+        "rules": [
+            "auth [success=2 default=ignore] pam_unix.so nullok_secure",
+            "auth [success=1 default=ignore] pam_ldap.so minimum_uid=1000 use_first_pass",
+            "auth requisite pam_deny.so",
+            "auth required pam_permit.so"
+        ]
+    },
+    "common-password-ldap": {
+        "comment": "Setup for local and ldap  logins",
+        "rules": [
+            "password [success=2 default=ignore] pam_unix.so obscure sha512",
+            "password [success=1 default=ignore] pam_ldap.so minimum_uid=1000 try_first_pass",
+            "password requisite pam_deny.so",
+            "password required pam_permit.so"
+        ]
+    },
+    "common-session-ldap": {
+            "comment": "Setup for local and ldap  logins",
+            "rules": [
+                "session required   pam_mkhomedir.so skel=/etc/skel/ umask=0027",
+                "session sufficient pam_unix.so",
+                "session sufficient pam_ldap.so minimum_uid=1000 use_first_pass",
+                "session required   pam_warn.so",
+                "session required   pam_deny.so"
+            ]
+    },
+    "common-session-ldap-limits": {
+            "comment": "Setup for local and ldap  logins",
+            "rules": [
+                "session required   pam_mkhomedir.so skel=/etc/skel/ umask=0027",
+                "session required   pam_systemd.so",
+                "session required   pam_exec.so type=open_session /etc/security/limits.sh",
+                "session sufficient pam_unix.so",
+                "session sufficient pam_ldap.so minimum_uid=1000 use_first_pass",
+                "session required   pam_warn.so",
+                "session required   pam_deny.so"
+            ]
+    },
+    "common-session-noninteractive-ldap": {
+        "comment": "Setup for local and ldap  logins",
+        "rules": [
+            "session [default=1]                pam_permit.so",
+            "session requisite                  pam_deny.so",
+            "session required                   pam_permit.so",
+            "session required                   pam_unix.so",
+            "session [success=ok default=ignore] pam_ldap.so minimum_uid=1000"
+        ]
+    },
+    "system-auth": {
+        "comment": "Setup for local and ldap  logins",
+        "rules": [
+            "## AUTH section",
+            "#",
+            "auth required      pam_env.so",
+            "auth sufficient    pam_unix.so nullok try_first_pass",
+            "auth requisite     pam_succeed_if.so uid >= 1000 quiet_success",
+            "auth sufficient    pam_sss.so forward_pass",
+            "auth required      pam_deny.so",
+            "#",
+            "## ACCOUNT section",
+            "#",
+            "account required                                       pam_unix.so broken_shadow",
+            "account [default=1 success=ignore]                     pam_succeed_if.so quiet uid >= 1000",
+            "account required                                       pam_listfile.so onerr=fail item=group sense=allow file=/etc/security/group_allow",
+            "account [default=1 success=ignore]                     pam_succeed_if.so quiet uid >= 1000",
+            "account [default=bad success=ok user_unknown=ignore]   pam_sss.so",
+            "account required                                       pam_permit.so",
+            "#",
+            "## PASSWORD section",
+            "#",
+            "password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=",
+            "password    sufficient    pam_unix.so sha512 shadow nullok try_first_pass use_authtok",
+            "password sufficient    pam_sss.so use_authtok",
+            "password    required      pam_deny.so",
+            "#",
+            "## SESSION  section",
+            "#",
+            "session     optional      pam_keyinit.so revoke",
+            "session     required      pam_limits.so",
+            "session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid",
+            "session     optional      pam_sss.so",
+            "session     required      pam_unix.so"
+        ]
+    }
+}

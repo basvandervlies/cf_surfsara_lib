@@ -1,0 +1,35 @@
+{
+    "cache_group": {
+        "check-files " : "yes",
+        "negative-time-to-live" : "60",
+        "persistent": "yes",
+        "positive-time-to-live" : "3600",
+        "shared": "yes",
+        "suggested-size" : "211"
+    },
+    "cache_hosts": {
+        "check-files " : "yes",
+        "negative-time-to-live" : "20",
+        "persistent": "yes",
+        "positive-time-to-live" : "3600",
+        "shared": "yes",
+        "suggested-size" : "211"
+    },
+    "cache_passwd": {
+        "check-files " : "yes",
+        "negative-time-to-live" : "20",
+        "persistent": "yes",
+        "positive-time-to-live" : "600",
+        "shared": "yes",
+        "suggested-size" : "211"
+    },
+    "debug-level" : "0",
+    "enable-cache-group" : "yes",
+    "enable-cache-hosts" : "yes",
+    "enable-cache-passwd" : "yes",
+    "max-threads" : "5",
+    "paranoia" : "no",
+    "reload-count" : "5",
+    "restart-internal" : "3600",
+    "threads" : "3"
+}

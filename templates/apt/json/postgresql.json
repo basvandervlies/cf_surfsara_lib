@@ -1,0 +1,12 @@
+{
+    "postgresql": {
+        "repo_key": "ACCC4CF8",
+        "repo": [
+            {
+                "name": "postgresql_repo",
+                "desc": "postgresql repository",
+                "url": "deb http://apt.postgresql.org/pub/repos/apt/ $(apt.os_name)-pgdg 9.6"
+            }
+        ]
+    }
+}

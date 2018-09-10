@@ -1,0 +1,576 @@
+#
+## apt.cf @SURFsara
+#
+bundle common apt
+{
+    vars:
+        any::
+            "check_command" string => "/usr/bin/apt-get check";
+            "config_dir" string => "/etc/apt";
+            "dpkg_command" string => "/usr/bin/dpkg";
+            "dpkg_reconfigure"string => "/usr/sbin/dpkg-reconfigure";
+            "command" string => "/usr/bin/apt";
+            "repos_dir" string => "$(config_dir)/sources.list.d";
+
+            "packages"  data => parsejson('{
+                "install": {
+                    "debconf-utils": ""
+                    "apt-transport-https": ""
+                }
+            }');
+
+        debian_6|debian_7::
+            "pkg_command" string => "/usr/bin/apt-get";
+
+        !(debian_6|debian_7)::
+            # Not stable yet 5 Apr 2018
+            #"pkg_command" string => "/usr/bin/apt";
+            "pkg_command" string => "/usr/bin/apt-get";
+
+        debian_6::
+            "os_name" string => "squeeze";
+        debian_7::
+            "os_name" string => "wheezy";
+        debian_8::
+            "os_name" string => "jessie";
+        debian_9::
+            "os_name" string => "stretch";
+        debian_10::
+            "os_name" string => "buster";
+        debian_11::
+            "os_name" string => "bullseye";
+}
+
+bundle agent apt_autorun()
+{
+    vars:
+        APT_OS_VERSION_CHECK::
+            "os_updates" string => "on";
+        !APT_OS_VERSION_CHECK::
+            "os_updates" string => "off";
+        APT_AUTOMATIC_SECURITY_UPDATE::
+            "security_updates" string => "on";
+        !APT_AUTOMATIC_SECURITY_UPDATE::
+            "security_updates" string => "off";
+
+    classes:
+        "apt_debconf_set" expression => isvariable("sara_data.apt[debconf]"),
+            comment => "Must we modify debconf settings";
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("apt");
+            "" usebundle => apt_install();
+            "" usebundle => apt_repository();
+
+        APT_AUTOREMOVE::
+            "" usebundle => apt_autoremove();
+
+        APT_AUTOMATIC_SECURITY_UPDATE::
+            "" usebundle => apt_security_update_silent(),
+                    comment => "Only run once a hour due to if_elapsed",
+                    ifvarclass => "$(sara_data.apt[security_schedule])",
+                    action => if_elapsed(50);
+
+        APT_CHECK_STATUS::
+            "" usebundle => apt_check_status();
+
+        APT_KILL_PKG_MANAGER::
+            "" usebundle => apt_kill_pkg_manager();
+
+        APT_OS_VERSION_CHECK::
+            "" usebundle => apt_os_version();
+
+        APT_SYSTEMD_DISABLE::
+            "" usebundle => apt_systemd_disable(),
+                    comment => "Only run once a day",
+                    action => if_elapsed_day;
+
+        Security::
+            "" usebundle => apt_security_update(""),
+                comment => "set via de command line,i -DSecurity";
+
+        Upgrade|Upgrade_force::
+            "" usebundle => apt_package_update(""),
+                comment => "set via de command line, -DUpgrade";
+
+        # Must be ported to def.json
+        apt_debconf_set::
+            "" usebundle => apt_debconf(),
+                ifvarclass => "$(sara_data.apt[debconf_schedule])";
+
+    reports:
+        DEBUG|DEBUG_apt::
+            "$(this.bundle): has been called and automatic security update is: $(security_updates)";
+            "$(this.bundle): has been called and automatic os update is: $(os_updates)";
+}
+
+bundle agent apt_autoremove()
+{
+    commands:
+        any::
+            "$(apt.command)"
+                args => "autoremove",
+                ifvarclass => "$(sara_data.apt[autoremove_schedule])";
+}
+
+bundle agent apt_kill_pkg_manager()
+{
+    vars:
+        "apt_cmds" slist => { "apt-get", "aptitude" };
+
+    methods:
+        debian::
+            "" usebundle => sara_kill_process("$(apt_cmds)",1),
+                classes =>  results("bundle", "$(this.bundle)_$(apt_cmds)" );
+
+    reports:
+        "$(this.bundle): $(apt_cmds) was killed on host $(sys.host) running longer then a hour"
+            ifvarclass => or( canonify("$(this.bundle)_$(apt_cmds)_repaired") );
+}
+
+bundle agent apt_os_version()
+{
+    vars:
+        debian::
+            "os_class_list" slist => classesmatching("debian.*");
+            "os_class_string" string => format("%S", os_class_list);
+
+    classes:
+        any::
+            "apt_os_version_set"  expression => isvariable("def.apt[os_version]");
+
+        apt_os_version_set::
+            "apt_os_version_ok" expression => reglist(@(os_class_list), "$(def.apt[os_version])");
+
+    methods:
+        !apt_os_version_ok.apt_os_version_set::
+            "" usebundle => apt_package_update("-y dist-upgrade");
+
+    reports:
+        apt_os_version_set.DEBUG_apt::
+            "$(this.bundle): OS version is set in def.cf to: $(def.apt[os_version])";
+
+        !apt_os_version_set::
+            "$(this.bundle): AUTOMATIC OS update failed due to missing setting in def.cf/json file, eg:";
+            "   apt: { os_version: debian_9_4 }";
+
+        !apt_os_version_ok.apt_os_version_set::
+            "Debian version MISMATCH: $(def.apt[os_version]) not in $(os_class_string)";
+}
+
+
+bundle agent apt_systemd_disable()
+{
+    vars:
+        any::
+            "systemd_services_timers" slist => { "apt-daily.timer", "apt-daily-upgrade.timer" };
+
+    methods:
+        debian_9::
+            "" usebundle => systemd_disable_service("$(systemd_services_timers)");
+
+    commands:
+        "$(paths.path[systemctl]) stop $(systemd_services_timers)"
+            ifvarclass => canonify("systemd_service_$(systemd_services_timers)_repaired");
+}
+
+
+bundle agent apt_package_update(update_option)
+{
+    vars:
+        Upgrade_force::
+            "update_option" string => "-y dist-upgrade";
+
+        Upgrade::
+            "update_option" string => "-y upgrade";
+
+    commands:
+        debian::
+            "$(apt.dpkg_command)"   args => "--configure -a";
+            "$(apt.pkg_command)"    args => "update";
+            "$(apt.pkg_command)"    args => "$(update_option)";
+            "$(apt.pkg_command)"    args => "clean";
+
+    reports:
+        debian::
+            "Package update on host $(sys.host)";
+
+}
+
+bundle agent apt_security_update_silent()
+{
+    methods:
+        any::
+            "" usebundle => apt_security_update("-qq"),
+                comment => "Show only the packages that are updated",
+                action => immediate;
+}
+
+bundle agent apt_security_update(options)
+{
+
+    vars:
+        debian::
+            "apt_return_codes" slist => { "1" , "2" , "100" };
+            "dpkg_options" slist => maplist("-o $(this)", getvalues("sara_data.apt[security_options]"));
+            "dpkg_options_str" string => join(" ", dpkg_options);
+
+    commands:
+        debian::
+            "$(apt.pkg_command) update"
+                comment => "Update the repository indexes else we get out of sync",
+                contain => in_shell_and_silent,
+                classes => sara_cmd_repair( "@(apt_return_codes)",  "apt_update");
+
+            "$(apt.pkg_command) -y upgrade"
+                comment => "New security update command",
+                contain => in_shell,
+                args => "$(dpkg_options_str) $(options)",
+                classes => sara_cmd_repair( "@(apt_return_codes)",  "apt_upgrade");
+
+        apt_upgrade_failed|apt_update_failed::
+            "$(apt.pkg_command) --fix-broken install"
+                comment => "Fix the apt",
+                contain => in_shell;
+            "$(apt.dpkg_command) --configure -a"
+                comment => "Fix dpkg interruption",
+                contain => in_shell;
+
+    reports:
+        apt_update_failed::
+            "$(this.bundle): apt update FAILED on host  $(sys.host), running commands to fix it ";
+
+        apt_upgrade_failed::
+            "$(this,bundle): apt -y upgrade FAILED on host  $(sys.host), running commands to fix it";
+
+        DEBUG_apt|Security::
+            "$(this.bundle): has run with the dpkg options: '$(dpkg_options_str)'";
+}
+
+bundle agent apt_check_status()
+{
+    classes:
+        !apt_ok.debian::
+           "apt_ok"    expression => returnszero("/bin/ps -ef | grep apt | grep -v grep >/dev/null 2>&1 || $(apt.check_command) >/dev/null 2>&1 && true","useshell");
+
+    commands:
+        !apt_ok::
+            "$(apt.check_command)"
+                comment => "Check how APT/DPKG is doing";
+
+    reports:
+        !apt_ok::
+            "$(this.bundle): ERROR! Package manager returned an error!";
+}
+
+bundle agent apt_repository()
+{
+    vars:
+        any::
+            "template_file" string => "repository.mustache";
+            "template_list" slist => { "$(template_file)" };
+
+        !apt_repository_json_files_set::
+            "repo_files" slist => { getvalues("sara_data.apt[repo_files]") };
+        apt_repository_json_files_set::
+            "repo_files" slist => { getvalues("sara_data.apt[repo_files]"), "@(def.apt_repository_json_files)" },
+                comment => "Support old behaviour till we converted everything to new apt setup";
+
+    classes:
+        "apt_repository_json_files_set" expression => isvariable("def.apt_repository_json_files"),
+                comment => "Support old behaviour till we converted everything to new apt setup";
+
+    methods:
+        any::
+            "" usebundle => sara_json_copy("apt", "@(repo_files)");
+            "" usebundle => sara_mustache_copy("apt", "@(template_list)");
+            "" usebundle => apt_repository_generate("$(template_file)", "@(repo_files)");
+
+    reports:
+        (DEBUG|DEBUG_apt|DEBUG_apt_repository)::
+            "$(this.bundle): Specified repository files: $(repo_files)";
+
+}
+
+bundle agent apt_repository_generate(template_file, repo_files)
+{
+    vars:
+        any::
+            "json_dir" string => "$(def.node_template_dir)/apt";
+
+            "repo_data" data => parsejson("{}");
+            "repo_data" data => mergedata("repo_data", readjson("$(json_dir)/$(repo_files)"));
+            "repo_data" data => data_expand("repo_data");
+
+            "repo_data_str" string => format("%S", "repo_data"),
+                ifvarclass => "DEBUG|DEBUG_apt|DEBUG_apt_repository";
+
+            "repository_names" slist => getindices("repo_data");
+            "repository_exclude_files" slist => maplist("$(this).list", @(repository_names));
+
+        DEBUG|DEBUG_apt|DEBUG_apt_repository::
+            "repository_exclude_files_str" string => format("%S", repository_exclude_files);
+
+    classes:
+        any::
+            "apt_import_key_cmd_exists" expression => fileexists("$(sara_data.apt[import_key])");
+
+    files:
+        any::
+            "$(apt.repos_dir)/$(repository_names).list"
+                create          => "true",
+                edit_template   => "/etc/node_status/templates/apt/$(template_file)",
+                template_method => "mustache",
+                template_data   => mergedata("repo_data[$(repository_names)]");
+
+            "$(apt.repos_dir)"
+                comment         => "Remove apt repository files that are not maintained by CFEngine",
+                delete          => sara_tidyfiles,
+                file_select     => sara_exclude_files("@(repository_exclude_files)"),
+                depth_search    => recurse("inf");
+
+        APT_SOURCES_FILE_REMOVE::
+            "/etc/apt/sources.list"
+                comment         => "Remove previously used (link) sources.list file",
+                delete          => tidy;
+
+    methods:
+        apt_import_key_cmd_exists::
+            "" usebundle => apt_repository_key("$(repository_names)", "$(repo_data[$(repository_names)][repo_key])"),
+                comment => "Check if the repo key is known";
+
+    reports:
+        DEBUG|DEBUG_apt|DEBUG_apt_repository::
+            "$(this.bundle): repository_file excluded from deletion: $(repository_exclude_files_str)";
+            "$(this.bundle): Merged data repository files: $(repo_data_str)";
+
+        !apt_import_key_cmd_exists::
+            "$(this.bundle): import keys command not found or set: '$(sara_data.apt[import_key])'";
+}
+
+bundle agent apt_repository_key(name, key)
+{
+    vars:
+        any::
+            "filename" string => "$(def.node_template_dir)/apt/$(name).key";
+            "import_key_error_codes" slist => { "1", "2", "3" };
+
+    files:
+        any::
+            "$(filename)"
+                comment => "Create key file name in bundle template directory",
+                create => "true",
+                edit_line => sara_var_to_file("$(key)"),
+                edit_defaults => empty,
+                classes => results("bundle", "apt_repository_key_$(key)");
+
+       apt_repository_key_cmd_failed::
+            "$(filename)"
+                comment => "Import of APT Key failed so remove it",
+                delete => tidy;
+
+    commands:
+        any::
+            "$(apt.import_key_cmd) $(key)"
+                contain => in_shell,
+                classes => sara_cmd_repair ( "@(import_key_error_codes)", "apt_repository_key_cmd" ),
+                action => if_elapsed("50"),
+                ifvarclass => or(
+                    canonify("apt_repository_key_$(key)_repaired"),
+                    "$(sara_data.apt[key_check_schedule])",
+                    "APT_FORCE_KEY_CMD"
+                    );
+
+    reports:
+        any::
+            "$(this.bundle): Generated $(filename) with $(key)"
+                ifvarclass => and(
+                                canonify("apt_repository_key_$(key)_repaired"),
+                                "DEBUG_apt|DEBUG_apt_repository|DEBUG"
+                                );
+
+        DEBUG_apt|DEBUG_apt_repository::
+            "$(this.bundle): Checking repository:$(name) with key:$(key)";
+}
+
+bundle agent apt_debconf()
+{
+    vars:
+        "index" slist => getindices("sara_data.apt[debconf]");
+
+    classes:
+        "debconf_module_exists" expression => fileexists("$(sara_data.apt[debconf_module])");
+
+    methods:
+        debconf_module_exists::
+            "" usebundle => apt_debconf_set(
+                "$(sara_data.apt[debconf][$(index)][package])",
+                "$(sara_data.apt[debconf][$(index)][field])",
+                "$(sara_data.apt[debconf][$(index)][type])",
+                "$(sara_data.apt[debconf][$(index)][value])");
+
+@if minimum_version(3.11)
+            "" usebundle => sara_show_data("sara_data", "apt[debconf][$(index)]"),
+                ifvarclass => "DEBGU|DEBUG_apt)|DEBUG_$(this.bundle)";
+@endif
+    reports:
+        !debconf_module_exists::
+            "$(this.bundle): Module '$(sara_data.apt[debconf_module])' not found, skipping debconf settings";
+}
+
+bundle agent apt_debconf_set(package, field, type, value)
+{
+    vars:
+        "debconf_module" string => "$(sara_data.apt[debconf_module])";
+        "return_codes" slist => { "1" };
+
+        "class" string => canonify("$(field)"),
+            comment => "$(field) will be used for setting unique classes in debconf module";
+
+    commands:
+        any::
+            "$(debconf_module)"
+                args   => "$(package) $(field) $(type) $(value) $(class)",
+                comment => "Run $(debconf_module) $(field) $(value)",
+                ifvarclass => "!(APT_DEBCONF_$(class)_CHANGED|APT_DEBCONF_$(class)_NOT_CHANGED)",
+                module => "true";
+
+        !dpkg_reconfigure_succeeded::
+            "DEBIAN_FRONTEND=noninteractive $(apt.dpkg_reconfigure) $(package)"
+                comment => "Run $(apt.dpkg_reconfigure) $(package)",
+                contain => in_shell,
+                ifvarclass => "APT_DEBCONF_$(class)_CHANGED",
+                classes => sara_cmd_repair("@(return_codes)",  "dpkg_reconfigure");
+
+    reports:
+        any::
+            "$(this.bundle): $(debconf.response)"
+                ifvarclass => "APT_DEBCONF_$(class)_CHANGED|APT_DEBCONF_$(class)_ERROR|APT_DEBCONF_ERROR";
+
+        dpkg_reconfigure_failed::
+            "$(this.bundle): Failed to run '$(apt.dpkg_reconfigure)' for package '$(package)'";
+}
+
+bundle agent apt_install()
+{
+    methods:
+        any::
+            "" usebundle => sara_service_packages("apt", "@(apt.packages)");
+}
+
+@if minimum_version(99.9)
+# apt.cf
+
+This bundle will be used to:
+ * generate repository files in /etc/apt/sources.list.d
+ * install apt packages
+
+The following actions are proctected by an class:
+ * automatic install security uodate (AUTOMATIC_SECURITY_UPDATE)
+ * automatic remove obsolete packages (AUTOREMOVE)
+ * check the status of the package manager (CHECK_STATUS)
+ * kill apt/aptitude processes that run more then 1 hour (KILL_PKG_MANAGER)
+ * Check the debian release and upgrade if needed (OS_VERSION_CHECK)
+ * setting debconf values for package field(s), controlled via  json data
+ * disable systemctl timer services for apt, may interfere with cfengine (APT_SYSTEMD_DISABLE)
+ * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
+
+The option classes can be set in def.cf/json:
+```
+"apt": {
+    "classes": {
+        "AUTOMATIC_SECURITY_UPDATE": "any",
+        "AUTOREMOVE": "any"
+        "APT_SYSTEMD_DISABLE": "systemd"
+    }
+}
+```
+
+## Usage
+
+he bundle is called with:
+ *  `"" usebundle => apt_autorun();`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+```
+vars:
+    any::
+        "apt_json_files" slist => { "debconf.json" };
+```
+
+The variable must be ''apt_json_files'' and with this setup 1 extra json file will be  merged.
+
+### DEBUG
+
+if you want to debug this bundle set the `DEBUG_apt` class, eg:
+ * `-DDEBUG_apt`
+
+## Setup
+
+These variables are set in `default.json` and can be overriden:
+```
+{
+    "autoremove_schedule": [ "Day1" ],
+    "debconf": {},
+    "debconf_module": "$(sys.workdur)/modules/surfsara/debconf",
+    "import_key": "$(sys.workdur)/modules/surfsara/apt_import_key",
+    "debconf_schedule":  [ "Min00_05" ],
+    "key_check_schedule": [ "Day1" ],
+    "security_schedule": [ "Hr00", "Hr06", "Hr12", "Hr18" ],
+    "security_options": [
+            "Dir::Etc::sourceparts=/dev/null",
+            "Dir::Etc::SourceList=$(apt.repos_dir)/debian_security.list",
+            "Dpkg::Options::=--force-confdef",
+            "Dpkg::Options::=--force-confold"
+    ]
+
+}
+```
+
+### Def Usage
+
+The following must be set in host specific host file: `def.json`
+```
+"vars": {
+    "sara_services_enabled": [
+            ...
+            "apt",
+            ...
+    ],
+    "apt": {
+        "classes": {
+            "AUTOMATIC_SECURITY_UPDATE": "any"
+        },
+        "json_files": [ "debconf.json" ]
+    }
+}
+```
+
+### Debconf
+
+Debconf is a configuration system for Debian packages. When `debconf` json data
+is set. The apt bundle will configure the package with these values, eg:
+```
+{
+    "debconf": [
+        {
+            "package": "dash",
+            "field": "dash/sh",
+            "type": "boolean",
+            "value": "false"
+        },
+        {
+            "package": "debconf",
+            "field": "debconf/frontend",
+            "type": "select",
+            "value": "Noninteractive"
+        }
+    ]
+}
+```
+
+This will configure the packages `dash` and `debconf`.
+@endif

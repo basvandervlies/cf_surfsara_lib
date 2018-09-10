@@ -1,0 +1,25 @@
+{
+    "debian": {
+        "repo": [
+            {
+                "name": "debian_repo",
+                "desc": "this is the local surfsara ftpserver as a source for packages",
+                "url": "deb http://httpredir.debian.org/debian $(apt.os_name) main contrib"
+            },
+            {
+                "name": "debian_sources_repo",
+                "desc": "this is the local surfsara ftpserver as a source for packages",
+                "url": "deb-src http://httpredir.debian.org/debian $(apt.os_name) main contrib"
+            }
+        ]
+    },
+    "debian_security": {
+        "repo": [
+            {
+                "name": "debian_security_repo",
+                "desc": "repo for security updates debian",
+                "url": "deb http://security.debian.org/ $(apt.os_name)/updates main contrib"
+            }
+        ]
+    }
+}

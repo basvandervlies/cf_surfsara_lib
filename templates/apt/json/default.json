@@ -1,0 +1,12 @@
+{
+    "autoremove_schedule": [ "Day1" ],
+    "debconf_schedule":  [ "Min00_05" ],
+    "key_check_schedule": [ "Day1" ],
+    "security_schedule": [ "Hr00", "Hr06", "Hr12", "Hr18" ],
+    "security_options": [
+            "Dir::Etc::sourceparts=/dev/null",
+            "Dir::Etc::SourceList=$(apt.repos_dir)/debian_security.list",
+            "Dpkg::Options::=--force-confdef",
+            "Dpkg::Options::=--force-confold"
+    ]
+}

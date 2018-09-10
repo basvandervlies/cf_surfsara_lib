@@ -1,0 +1,15 @@
+{
+    "nameservers": [
+        { "ip": "145.100.29.146", "desc": "ns1.surfsara.nl"},
+        { "ip": "145.100.29.131", "desc": "ns2.surfsara.nl"}
+    ],
+    "domain": "surfsara.nl",
+    "options": [
+        "ndots:1"
+    ],
+    "search": [
+        { "domain": "surfsara.nl" },
+        { "domain": "sara.nl" }
+    ]
+}
+

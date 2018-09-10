@@ -1,0 +1,185 @@
+#
+## files.cf @SURFsara
+#
+## https://tracker.mender.io/browse/CFE-2434 bug in passing data containers with vars
+#
+body copy_from sara_cp_dir(bundle_name, var, server)
+{
+    servers     => { "$(server)" };
+    compare     => "$($(bundle_name).$(var)[compare])";
+    source      => "$($(bundle_name).$(var)[source])";
+    purge       => "$($(bundle_name).$(var)[purge])";
+    preserve    => "$($(bundle_name).$(var)[preserve])";
+    type_check  => "$($(bundle_name).$(var)[type_check])";
+}
+
+bundle agent sara_cp_dir_default
+{
+    vars:
+       any::
+            "attributes" data => parsejson('{
+                "compare": "digest",
+                "preserve": "true",
+                "purge": "false",
+                "sync": "false",
+                "type_check": "false"
+                }');
+}
+
+@if minimum_version(99.9)
+`sara_make_cron_file`  bundle install system cronjob in `/etc/cron.d`. The
+bundle is called with:
+ * sara_make_cron_file(name, data)
+
+Where:
+ * name: is the name of the cronjob file
+ * data: Json data. eg: 2 minute cronjob
+{{{
+#!json
+{
+    "minute": "*/2",
+    "hour": "*",
+    "day_of_month": "*",
+    "month": "*",
+    "day_of_week": "*",
+    "user": "root",
+    "command": "/bin/ls"
+}
+@endif
+bundle agent sara_make_cron_file(name, data)
+{
+    vars:
+        any::
+            "cron_dir" string => "/etc/cron.d";
+            "header" string => "## Maintained by CFengine$(const.n)#$(const.n)";
+
+            "template" string => "$(header){{{minute}}} {{{hour}}} {{{day_of_month}}} {{{month}}} {{{day_of_week}}} {{{user}}} {{{command}}}";
+
+            "job_str" string => string_mustache( "$(template)", "@(data)");
+
+    classes:
+        any::
+            "CRON_VIXIE" expression => isdir("$(cron_dir)");
+
+    files:
+@if minimum_version(3.12)
+        CRON_VIXIE::
+            "$(cron_dir)/$(name)"
+                comment => "Vixie cron: one command per file",
+                create => "true",
+                edit_template_string   => "$(template)$(const.n)",
+                template_method => "inline_mustache",
+                template_data => "@(data)",
+                classes => results("namespace", "sara_make_cron_file_$(name)");
+@endif
+
+    methods:
+        CRON_VIXIE.(cfengine_3_10|cfengine_3_7)::
+            "" usebundle => file_make("$(cron_dir)/$(name)", "$(job_str)"),
+                classes => results("namespace", "sara_make_cron_file_$(name)");
+
+    reports:
+        any::
+            "'$(name)' is installed in $(cron_dir): $(const.n)$(job_str)"
+                ifvarclass => "DEBUG|DEBUG_$(this.bundle)";
+
+        !CRON_VIXIE::
+            "No Vixie cron software installed";
+}
+
+bundle agent sara_service_copy_dirs(bundle_name)
+{
+vars:
+    any::
+        "index" slist => getindices("sara_data.$(bundle_name)[copy_dirs]");
+
+        "cp_attr_$(index)" data => mergedata("sara_cp_dir_default.attributes", "sara_data.$(bundle_name)[copy_dirs][$(index)]"),
+            comment => "Merge each definition the copy default attributes";
+
+    cfengine_3_7|cfengine_3_10::
+        "debug_str" string => format("%S", "sara_data.$(bundle_name)[copy_dirs]"),
+            comment => "Old debug method",
+            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+
+classes:
+    any::
+        "$(bundle_name)_copy_dirs_$(index)_run_bundle" expression => isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][run_bundle]"),
+            comment => "Must we run a bundle when a directory is changed";
+
+files:
+    any::
+        ## Can not use $(this.bundle) in copy_from body, bug?
+        "$(sara_data.$(bundle_name)[copy_dirs][$(index)][dest])"
+            comment => "Copy bundle dirs and set class if there is a change",
+            copy_from => sara_cp_dir("sara_service_copy_dirs", "cp_attr_$(index)", "$(sys.policy_hub)"),
+            depth_search => recurse_ignore("inf", "$(sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs])" ),
+            classes => results("namespace", "$(bundle_name)_copy_dirs_$(index)");
+
+methods:
+    any::
+        "" usebundle => "$(sara_data.$(bundle_name)[copy_dirs][$(index)][run_bundle])",
+            ifvarclass => and(
+                canonify("$(bundle_name)_copy_dirs_$(index)_repaired"),
+                canonify("$(bundle_name)_copy_dirs_$(index)_run_bundle")
+                );
+
+@if minimum_version(3.11)
+        "" usebundle => sara_show_data("sara_data", "$(bundle_name)[copy_dirs][$(index)]"),
+            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+        "" usebundle => sara_show_data("$(this.bundle)", "cp_attr_$(index)"),
+            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+@endif
+
+reports:
+    cfengine_3_7|cfengine_3_10::
+        "$(this.bundle):$(bundle_name):$(debug_str)"
+            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+}
+
+bundle agent sara_service_copy_files(bundle_name)
+{
+vars:
+    any::
+        "index" slist => getindices("sara_data.$(bundle_name)[copy_files]");
+
+    cfengine_3_7|cfengine_3_10::
+        "debug_str" string => format("%S", "sara_data.$(bundle_name)[copy_files]"),
+            comment => "Old debug method",
+            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+
+classes:
+    any::
+        "$(bundle_name)_copy_files_$(index)_run_bundle" expression => isvariable("sara_data.$(bundle_name)[copy_files][$(index)][run_bundle]"),
+            comment => "Must we run a bundle when a file is copied";
+
+files:
+    any::
+        "$(sara_data.$(bundle_name)[copy_files][$(index)][dest])"
+            comment => "Copy bundle files and set class if its get copied",
+            copy_from => secure_cp("$(sara_data.$(bundle_name)[copy_files][$(index)][src])", "$(sys.policy_hub)"),
+            classes => results("namespace", "$(bundle_name)_copy_files_$(index)");
+
+        "$(sara_data.$(bundle_name)[copy_files][$(index)][dest])"
+            comment => "Check permission",
+            perms => mog( "$(sara_data.$(bundle_name)[copy_files][$(index)][mode])",
+                "$(sara_data.$(bundle_name)[copy_files][$(index)][owner])",
+                "$(sara_data.$(bundle_name)[copy_files][$(index)][group])");
+
+methods:
+    any::
+        "" usebundle => "$(sara_data.$(bundle_name)[copy_files][$(index)][run_bundle])",
+            ifvarclass => and(
+                canonify("$(bundle_name)_copy_files_$(index)_repaired"),
+                canonify("$(bundle_name)_copy_files_$(index)_run_bundle")
+                );
+
+@if minimum_version(3.11)
+        "" usebundle => sara_show_data("sara_data", "$(bundle_name)[copy_files][$(index)]"),
+            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+@endif
+
+reports:
+    cfengine_3_7|cfengine_3_10::
+        "$(this.bundle):$(bundle_name):$(debug_str)"
+            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+}

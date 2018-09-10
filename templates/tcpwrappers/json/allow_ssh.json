@@ -1,0 +1,8 @@
+{
+    "allow_ssh": [
+        { 
+            "allow": "ALL", 
+            "desc": "ssh access is allowed"
+        }
+    ]
+}

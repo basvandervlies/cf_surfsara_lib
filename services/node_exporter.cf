@@ -1,0 +1,214 @@
+#
+## node_exporter.cf @SURFsara
+#
+bundle common node_exporter()
+{
+    vars:
+        any::
+            "service_name" string => "node_exporter";
+            "systemd_file" string => "/etc/systemd/system/node_exporter.service";
+
+        systemd::
+            "template_2_destination" data => parsejson('
+                {
+                    "node_exporter.default.mustache": "/etc/default/node_exporter",
+                    "systemd.mustache": "$(systemd_file)"
+                }
+            ');
+
+            "reload" string => "$(paths.path[systemctl]) reload $(service_name)";
+            "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+
+        !systemd::
+            "template_2_destination" data => parsejson('
+                {
+                    "node_exporter.default.mustache": "/etc/default/node_exporter"
+                    "initd.mustache": "/etc/init.d/node_exporter"
+                }
+            ');
+            "reload" string => "/etc/init.d/$(service_name) reload";
+            "restart" string => "/etc/init.d/$(service_name) restart";
+
+}
+
+bundle agent node_exporter_install()
+{
+    classes:
+        "node_exporter_copy_dirs_set" expression => isvariable("sara_data.node_exporter[copy_dirs]");
+
+    methods:
+        node_exporter_copy_dirs_set::
+            "" usebundle => sara_service_copy_dirs("node_exporter");
+}
+
+bundle agent node_exporter_config()
+{
+    classes:
+        "node_exporter_cron" expression => isvariable("sara_data.node_exporter[cron_job]");
+
+    services:
+        "$(node_exporter.service_name)"
+            service_policy => "start";
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("node_exporter");
+        node_exporter_cron::
+            "" usebundle => sara_make_cron_file("sys2prometheus","@(sara_data.node_exporter[cron_job])");
+
+    commands:
+        systemd::
+            "$(paths.path[systemctl]) daemon-reload"
+                ifvarclass => or(
+                    canonify("sara$(node_exporter.systemd_file)")
+                );
+
+            "$(node_exporter.restart)"
+                ifvarclass => or(
+                    canonify("sara$(node_exporter.systemd_file)")
+                );
+}
+
+bundle agent node_exporter_restart
+{
+    commands:
+        "$(node_exporter.restart)";
+}
+
+bundle agent node_exporter_daemon_check()
+{
+    vars:
+        "name" string => "$(sara_data.node_exporter[dir])/$(node_exporter.service_name)";
+
+    processes:
+        "$(name)"
+            comment => "Check if Prometheus is running",
+            process_count   => check_range("$(name)", "1", "1"),
+            process_select  => sara_select_parent_process("1");
+
+    methods:
+        any::
+            "" usebundle => node_exporter_restart,
+                ifvarclass => canonify("$(name)_out_of_range");
+
+    reports:
+        "$(this.bundle): check $(name)"
+           ifvarclass => "DEBUG|DEBUG_node_exporter|DEBUG_$(this.bundle)";
+}
+
+bundle agent node_exporter_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_node_exporter" };
+
+    methods:
+        "" usebundle => sara_data_autorun("node_exporter");
+        "" usebundle => node_exporter_install();
+        "" usebundle => node_exporter_config();
+        "" usebundle => node_exporter_daemon_check();
+}
+@if minimum_version(99.9)
+
+= node_exporter =
+[source:trunk/cfengine3/config/bundles/services/surfsara/node_exporter.cf source node_exporter.cf]
+
+This bundle will generate these/this file(s) from mustache templates:
+
+ * /etc/default/node_exporter
+ * /etc/systemd/system/node_exporter.service (systemd system)
+ * /etc/init.d/node_exporter (non systemd system)
+
+If one of the files is changed then the following ""class"" will be set:
+ * sara_etc_default_node_exporter
+ * sara_etc_systemd_system_node_exporter_service
+ * sara_etc_init_d_node_exporter
+
+These templates are located in:
+ * templates/node_exporter
+ * templates/node_exporter/json
+
+== Usage ==
+
+This is called with:
+ * `"" usebundle => node_exporter_autorun();
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    any::
+        "node_exporter_json_files" slist => { "sara.json" };
+}}}
+
+The variable must be ''node_exporter_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== DEBUG ===
+
+if you want to debug this bundle set the `DEBUG_node_exporter` class, eg:
+ * `DDEBUG_node_exporter`
+
+== Setup ==
+The variables are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "args": "--collector.textfile.directory=$(sara_data.node_exporter[collector_dir])",
+    "collector_dir": "/run/prometheus/node_exporter",
+    "copy_dirs": [],
+    "cron_job": {},
+    "dir": "/opt/node_exporter"
+}
+
+=== copy_dirs ===
+
+When this variabele is set it will copy the directoy to the specified destination and can run a a bundle
+if there are changes, eg:
+{{{
+#!json
+{
+    "copy_dirs": [
+        {
+            "dest": "$(sara_data.node_exporter[dir])",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "purge": "true",
+            "run_bundle": "node_exporter_restart",
+            "source": "cf_bundles_dir/prometheus_exporters/node_exporter-0.15.2"
+        }
+    ],
+}
+}}}
+
+=== cron_jon ===
+
+When this variabele is set it will create a cron file in  `/etc/cron.d` with name `sys2prometheus`, eg:
+{{{
+#!json
+{
+    "cron_job": {
+        "minute": "*/4",
+        "hour": "*",
+        "day_of_month": "*",
+        "month": "*",
+        "day_of_week": "*",
+        "user": "root",
+        "command": "/usr/sara/sbin/sys2prometheus 2>/dev/null"
+    },
+}
+
+== Def usage  ==
+
+The following must be set in the specific ''def.json'' hostfile
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": {
+            ...
+            "node_exporter",
+            ...
+            },
+            "node_exporter": {
+            }
+    },
+}}}
+@endif

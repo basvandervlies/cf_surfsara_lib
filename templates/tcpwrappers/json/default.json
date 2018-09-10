@@ -1,0 +1,15 @@
+{
+    "allow_all": [
+    ],
+    "allow_http": [
+    ],
+    "allow_extra": [
+    ],
+    "allow_nfs3": [
+    ],
+    "allow_ssh": [
+    ],
+    "deny_rules": [
+        { "deny": "ALL: ALL@ALL : deny", "desc": "Deny ALLl"}
+    ]
+}

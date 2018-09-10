@@ -1,0 +1,8 @@
+#
+#  SURFsara processes.cf
+#
+body process_select sara_select_parent_process(ppid)
+{
+    ppid => irange("$(ppid)", "$(ppid)");
+    process_result => "ppid";
+}

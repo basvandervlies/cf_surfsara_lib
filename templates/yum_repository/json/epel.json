@@ -1,0 +1,13 @@
+{
+    "epel" : {
+        "repo": [
+            { 
+                "name": "epel", 
+                "desc": "Extra packages for CentOS - Epel", 
+                "baseurl": "http://ftp.nluug.nl/pub/os/Linux/distr/fedora-epel/6/x86_64",
+                "gpgkey": "http://ftp.nluug.nl/pub/os/Linux/distr/fedora-epel/RPM-GPG-KEY-EPEL-$releasever",
+                "gpgcheck": "1"
+            }
+        ]
+    }
+}

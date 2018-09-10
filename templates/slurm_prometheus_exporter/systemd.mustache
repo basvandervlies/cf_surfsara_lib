@@ -1,0 +1,19 @@
+## CFengine generated this file
+#
+#  slurm_prometheus systemd  @SURfsara
+#
+[Unit]
+Description=Prometheus exporter for slurm_prometheus
+Documentation=https://github.com/vpenso/prometheus-slurm-exporter
+
+[Service]
+Restart=always
+EnvironmentFile=/etc/default/slurm_prometheus_exporter
+ExecStartPre=-/bin/mkdir -p {{{vars.sara_data.slurm_prometheus_exporter.collector_dir}}} >/dev/null 2>&1
+ExecStart={{{vars.sara_data.slurm_prometheus_exporter.dir}}}/slurm_prometheus_exporter $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+SendSIGKILL=no
+
+[Install]
+WantedBy=multi-user.target

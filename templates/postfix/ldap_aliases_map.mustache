@@ -1,0 +1,17 @@
+###
+#
+# This file is maintained by CFEngine
+#
+server_host = {{{ server }}}
+server_port = {{{ port }}}
+search_base = {{{ search_base }}}
+{{#bind}}
+bind = yes
+bind_dn = {{{bind_options.dn}}}
+bind_pw = {{{bind_options.pw}}}
+{{/bind}} 
+# look for entries with this
+query_filter = {{{ query_filter }}}
+
+# what attribute from the search result is returned
+result_attribute = {{{ result_attribute }}}

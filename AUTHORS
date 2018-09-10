@@ -1,0 +1,11 @@
+The SURFsara CFEngine mustache/json library authors:
+ * Bas van der Vlies (SURFsara)
+ * Dennis Stam (SURFsara)
+ * Jaao Dijkshoorn (SURFsara)
+ * Lucas Slim (SURFsara)
+ * Martijn Kruiten (SURFsara)
+ * Paul Reemeijer (SURFsara)
+
+Templates:
+ postfix: Dennis Stam (SURFsara)
+ yum: Dennis Stam (SURFsara) & Bas van der Vlies (SURFsara)

@@ -1,0 +1,16 @@
+{
+    "debconf": [
+        {
+            "package": "dash",
+            "field": "dash/sh",
+            "type": "boolean",
+            "value": "false"
+        },
+        {
+            "package": "debconf",
+            "field": "debconf/frontend",
+            "type": "select",
+            "value": "Noninteractive"
+        }
+    ]
+}

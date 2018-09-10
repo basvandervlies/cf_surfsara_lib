@@ -1,0 +1,17 @@
+{
+    "x2go": {
+        "repo_key": "5BFE2B6E",
+        "repo": [
+            {
+                "name": "x2go_repo",
+                "desc": "X2Go Repository (release builds)",
+                "url": "deb http://packages.x2go.org/debian $(apt.os_name) main"
+            },
+            {
+                "name": "x2go_src_repo",
+                "desc": "X2Go Repository (sources of release builds)",
+                "url": "deb-src http://packages.x2go.org/debian $(apt.os_name) main"
+            }
+        ]
+    }
+}

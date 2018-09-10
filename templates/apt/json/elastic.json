@@ -1,0 +1,12 @@
+{
+    "elastic": {
+        "repo_key": "46095ACC8548582C1A2699A9D27D666CD88E42B4",
+        "repo": [
+            {
+                "name": "elastic_repo",
+                "desc": "elastic",
+                "url": "deb http://ftp.surfsara.nl:3142/elk-mirror stable main"
+            }
+        ]
+    }
+}

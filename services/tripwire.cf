@@ -1,0 +1,128 @@
+#
+## tripwire.cf @SURFsara
+#
+bundle common tripwire()
+{
+    vars:
+        any::
+}
+
+bundle agent tripwire_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_tripwire" };
+
+    classes:
+        any::
+            "tripwire_files_set" expression => isvariable("def.tripwire_json_files"),
+                comment => "check this files";
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("tripwire");
+            "" usebundle => tripwire_surfsara_config();
+}
+
+bundle agent tripwire_surfsara_config()
+{
+    vars:
+        any::
+            "check_data" data => mergedata("sara_data.tripwire", '{ "json_files" : {} }'),
+                comment => "Filter ou 'json_files' section";
+            #"files" slist => getvalues("sara_data.tripwire");
+            "files" slist => getvalues("check_data");
+            "files_str" string =>  format("%S", "files");
+
+        DEBUG_tripwire::
+            "keys" slist => getindices("sara_data.tripwire");
+            "keys_str" string => format("%S",  "keys");
+
+
+    files:
+        "$(files)"
+            comment => "Security check",
+            changes => detect_all_change_using("md5");
+
+    reports:
+        DEBUG_tripwire::
+            "$(this.bundle): files to check: $(files_str)";
+            "$(this.bundle): keys  defined:  $(keys_str)";
+}
+
+
+
+@if minimum_version(99.9)
+= TRIPWIRE =
+[source:trunk/cfengine3/config/bundles/tripwire.cf source tripwire.cf]
+
+This bundle checks the given file(s) if they have changed (md5). It will report the changes
+and update the database with the new checksum value.
+
+No template file are generated, we only need josn file(s) as input. The location of this
+file(s) are:
+ * templates/tripwire/json
+
+== Usage ==
+
+This is called with:
+ * `"" usebundle => tripwire_autorun();
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+{{{
+#!cf3
+    any::
+        "tripwire_json_files" slist => { "tomcat.json" };
+}}}
+
+The variable must be ''tripwire_json_files'' and with this setup 1 extra json file will be  merged.
+
+=== Debug ===
+
+If you want to debug this bundle set the `DEBUG_tripwire` class, eg:
+ * `-DDEBUG_tripwire,RUN`
+
+=== Setup ===
+
+The variables are set in default.json and can be overwritten.
+{{{
+#!json
+{
+    "standard": [ "/bin/bash", "/bin/last", "/bin/ls", "/usr/bin/openssl", "/bin/ps",  "/usr/bin/ssh", "/usr/sbin/sshd" ]
+}
+}}}
+
+=== Def usage  ===
+The following must be set in the specific ''def.json'' hostfile
+{{{
+#!json
+    "vars": {
+        "sara_services_enabled": [
+            ...
+            "tripwire",
+            ...
+        ],
+        "tripwire": {
+        }
+    },
+}}}
+
+Here is an example to check also the apache binary (def.cf):
+{{{
+#!cf3
+vars:
+    "tripwire_json_files" slist => { "apache.json" ];
+
+}}}
+
+Same can also be set in `def.json`
+{{{
+#!json
+    "vars": {
+        "tripwire": {
+            "json_files": [ "apache.json" ]
+        }
+    },
+}}}
+@endif

@@ -1,0 +1,5 @@
+{
+    "servers": [
+        { "server" : "127.0.0.1", "secret" : "changme", "timeout" : "3" }
+    ]
+}

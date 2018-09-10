@@ -1,0 +1,5 @@
+{
+    "ListenAddress": [
+        { "address": "$(sys.ipv4[adm_ldap])" }
+    ]
+}

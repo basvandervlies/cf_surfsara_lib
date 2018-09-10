@@ -1,0 +1,220 @@
+#
+#  SURFsara packages.cf
+#
+@if minimum_version(99.9)
+== sara_service_packages ==
+This bundle handles  the service packages. The service bundle defines the default
+package(s) to install/remove and/or purge. It can be overriden with json data, eg:
+{{{
+#!json
+"vars": {
+    "ssh": {
+        "packages": {
+            "install": {
+                "openssh-server": "[version]"
+            }
+        }
+    },
+}
+}}}
+
+This will install the 'openssh-server' package and override the package definitions in the service bundle ssh.
+The '[version]' can be empty `""`. It will install any version of the package.
+
+Another example is to install and remove ssh packages in 'def.json':
+{{{
+#!json
+"vars": {
+    "ssh": {
+        "packages": {
+            "install": {
+                "openssh-server": "[version]"
+            }
+            "remove": {
+                "openssh-blacklist": "[version]"
+        }
+    },
+}
+}}}
+
+The following package actions are implemented:
+ * install : install the package
+ * purge: delete the package and all it configuration files
+ * remove: delete the package and preserve the configuration files
+@endif
+bundle agent sara_service_packages(bundle_name, data)
+{
+    vars:
+       sara_json_packages_specified::
+            "pkg_data" data => mergedata("{}", "sara_data.$(bundle_name)[packages]");
+            "debug_str" string => "Use 'def.json' service package definition";
+
+       !sara_json_packages_specified::
+            "pkg_data" data => mergedata("{}", "data");
+            "debug_str" string => "Use bundle service packages definition";
+
+
+        any::
+            "actions" slist => getindices("pkg_data");
+            "pkg_bundles" slist => maplist("sara_service_packages_$(this)", @(actions));
+
+    classes:
+        "sara_json_packages_specified" expression => isvariable("sara_data.$(bundle_name)[packages]"),
+            comment => "Do we override the bundle services package with def.json settings";
+
+    methods:
+        "" usebundle => $(pkg_bundles)("$(bundle_name)", "@(sara_service_packages.pkg_data)"),
+            comment => "package bundle implemented install/remove/purge";
+
+    reports:
+        "$(this.bundle): $(actions): $(debug_str))"
+            ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+
+bundle agent sara_service_package(bundle_name, package, version, action, options)
+{
+    classes:
+        "version_specified" expression => not(strcmp("", "$(version)"));
+        "options_specified" expression => not(strcmp("", "$(options)"));
+
+    vars:
+        "debug_str" string => ifelse(
+            "version_specified.options_specified", "version: '$(version)', package_options: '$(options)'",
+            "version_specified.!options_specified", "version: '$(version)', package_options: 'NA'",
+            "!version_specified.options_specified", "version: 'NA', package_options: '$(options)'",
+            "version: 'NA', package_options: 'NA'");
+
+    packages:
+        !version_specified::
+            "$(package)"
+                policy => "$(action)",
+                options => { "$(options)" };
+
+        version_specified::
+            "$(package)"
+                policy => "$(action)",
+                version => "$(version)",
+                options => { "$(options)" };
+
+    reports:
+        any::
+            "$(this.bundle): $(package):$(action)  with $(debug_str)"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+bundle agent sara_service_packages_install(bundle_name, pkg_data)
+{
+    vars:
+        any::
+            "packages" slist => getindices("pkg_data[install]");
+
+    methods:
+        any::
+            "" usebundle => sara_service_package("$(bundle_name)",
+                "$(packages)", "$(pkg_data[install][$(packages)])", "present", "");
+
+    reports:
+        any::
+            "$(this.bundle) has beeen called"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+bundle agent sara_service_packages_remove(bundle_name, pkg_data)
+{
+    vars:
+        any::
+            "packages" slist => getindices("pkg_data[remove]");
+
+    methods:
+        any::
+            "" usebundle => sara_service_package("$(bundle_name)",
+                "$(packages)", "$(pkg_data[remove][$(packages)])", "absent", "");
+
+    reports:
+        any::
+            "$(this.bundle) has beeen called"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+bundle agent sara_service_packages_purge(bundle_name, pkg_data)
+{
+    vars:
+        any::
+            "packages" slist => getindices("pkg_data[purge]");
+
+        debian::
+            "pkg_options" string => "--purge";
+        !debian::
+            "pkg_options" string => "";
+
+    methods:
+        any::
+            "" usebundle => sara_service_package("$(bundle_name)",
+                "$(packages)", "$(pkg_data[purge][$(packages)])", "absent", "$(pkg_options)");
+
+    reports:
+        any::
+            "$(this.bundle) has beeen called"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+###### Obsolete will be deleted
+##
+bundle agent sara_install_service_packages(bundle_name, default_packages)
+{
+    vars:
+        "package_data" data => mergedata("{}", "sara_data.$(bundle_name)[packages]"),
+            ifvarclass => and(
+                "sara_$(bundle_name)_packages_specified"
+                );
+
+        "package_data" data => mergedata("{}", "default_packages"),
+            ifvarclass => and(
+                "!sara_$(bundle_name)_packages_specified"
+                );
+
+        "packages_data_str" string => format("%S", "package_data"),
+            ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+
+        "packages" slist => getindices("package_data");
+
+
+    classes:
+        "sara_$(bundle_name)_packages_specified" expression => reglist("@(sara_data.$(bundle_name)[packages])", ".*");
+        #"sara_$(bundle_name)_packages_specified" expression => regarray("@(sara_data.$(bundle_name)[packages])", ".*");
+
+
+    methods:
+        any::
+            "" usebundle => sara_install_service_package("$(bundle_name)", "$(packages)", "$(package_data[$(packages)])"),
+                comment => "Install the package with version";
+
+    reports:
+        "$(this.bundle) packages: $(packages_data_str)"
+            ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+bundle agent sara_install_service_package(bundle_name, package, version)
+{
+    classes:
+        "version_specified" expression => not(strcmp("", "$(version)"));
+
+    packages:
+        !version_specified::
+            "$(package)"
+                policy => "present";
+
+        version_specified::
+            "$(package)"
+                policy => "present",
+                version => "$(version)";
+
+    reports:
+        !version_specified::
+            "$(this.bundle): Install package: $(package) with version: 'not specified'"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+        version_specified::
+            "$(this.bundle): Install package: '$(package)' with version: '$(version)'"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}

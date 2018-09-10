@@ -1,0 +1,16 @@
+{
+    "file_aliases_lines": [
+        {"name": "monitor-drac", "value": " example@example.nl"},
+        {"name": "beowulf", "value": "|\"/usr/bin/run_email2trac --project beowulf\""}
+    ],
+    "file_header_checks_lines": [
+        "/^Subject: .*DRAC 5/ FILTER rac_filter:dummy",
+        "/^Subject: .*Chassis Alert/ FILTER rac_filter:dummy",
+        "/^From: .*iDRAC.*/ FILTER rac_filter:dummy",
+        "/^From: .*ilom.*alert.*/ FILTER rac_filter:dummy"
+    ],
+    "master_cf_extra_interfaces": [
+        "rac_filter unix  -       n       n       -       10      pipe",
+        "  flags=Rq user=mail argv=/usr/sara/sbin/mail-rac-filter.py $recipient"
+    ],
+

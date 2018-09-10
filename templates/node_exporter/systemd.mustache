@@ -1,0 +1,19 @@
+## CFengine generated this file
+#
+#  node_exporter systemd  @SURfsara
+#
+[Unit]
+Description=Prometheus exporter for machine metrics
+Documentation=https://github.com/prometheus/node_exporter
+
+[Service]
+Restart=always
+EnvironmentFile=/etc/default/node_exporter
+ExecStartPre=-/bin/mkdir -p {{{vars.sara_data.node_exporter.collector_dir}}} >/dev/null 2>&1
+ExecStart={{{vars.sara_data.node_exporter.dir}}}/node_exporter $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+SendSIGKILL=no
+
+[Install]
+WantedBy=multi-user.target

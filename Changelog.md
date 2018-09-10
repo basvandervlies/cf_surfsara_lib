@@ -1,3 +1,8 @@
+#  Version: 0.X.X 
+
+ * Services added: apt
+
+
 #  Version: 0.9.4 (2018-09-07)
   * Bug fixed in:  `sara_service_copy_dirs` bundle, forgot to set `compare` value, default: `digest`
   * Bug fixed when using `-DTEMPLATE_LOCAL_COPY` cf-agent flag. Path to find templates dir was wrong.

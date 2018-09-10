@@ -1,6 +1,8 @@
 {
     "autoremove_schedule": [ "Day1" ],
     "debconf_schedule":  [ "Min00_05" ],
+    "debconf_module": "$(sys.workdir)/modules/surfsara/debconf",
+    "import_key": "$(sys.workdir)/modules/surfsara/apt_import_key",
     "key_check_schedule": [ "Day1" ],
     "security_schedule": [ "Hr00", "Hr06", "Hr12", "Hr18" ],
     "security_options": [

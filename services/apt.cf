@@ -515,8 +515,8 @@ These variables are set in `default.json` and can be overriden:
 {
     "autoremove_schedule": [ "Day1" ],
     "debconf": {},
-    "debconf_module": "$(sys.workdur)/modules/surfsara/debconf",
-    "import_key": "$(sys.workdur)/modules/surfsara/apt_import_key",
+    "debconf_module": "$(sys.workdir)/modules/surfsara/debconf",
+    "import_key": "$(sys.workdir)/modules/surfsara/apt_import_key",
     "debconf_schedule":  [ "Min00_05" ],
     "key_check_schedule": [ "Day1" ],
     "security_schedule": [ "Hr00", "Hr06", "Hr12", "Hr18" ],

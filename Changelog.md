@@ -2,6 +2,22 @@
 
  * Services added: apt
 
+## apt
+
+The services can do a lot of action.  Most actions are protected by a class statement. The following action are
+defined:
+ * generate repository files in /etc/apt/sources.list.d.
+ * install apt packages
+ * automatic install security uodate (AUTOMATIC_SECURITY_UPDATE)
+ * automatic remove obsolete packages (AUTOREMOVE)
+ * check the status of the package manager (CHECK_STATUS)
+ * kill apt/aptitude processes that run more then 1 hour (KILL_PKG_MANAGER)
+ * Check the debian release and upgrade if needed (OS_VERSION_CHECK)
+ * setting debconf values for package field(s), controlled via  json data
+ * disable systemctl timer services for apt, may interfere with cfengine (APT_SYSTEMD_DISABLE)
+ * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
+ 
+ capabilities
 
 #  Version: 0.9.4 (2018-09-07)
   * Bug fixed in:  `sara_service_copy_dirs` bundle, forgot to set `compare` value, default: `digest`

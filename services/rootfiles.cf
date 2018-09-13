@@ -1,0 +1,150 @@
+#################################################
+#
+# SVN info:
+#       $Id$
+#       $URL$
+#
+#####
+#####
+
+bundle common rootfiles(params)
+{
+    vars:
+        any::
+            "bundle_dir"    string => "cf_bundles_dir/rootfiles";
+
+            ## Mustache templates
+            "template_2_destination" data => parsejson('
+                    {
+                        "authorized_keys.mustache" : "/root/.ssh/authorized_keys"
+                    }
+                ');
+
+            "exclude_list"  string => "";
+}
+
+bundle agent rootfiles_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_rootfiles" };
+
+    methods:
+        "" usebundle => sara_data_autorun("rootfiles");
+        "" usebundle => rootfiles_surfsara_config();
+}
+
+bundle agent rootfiles_surfsara_config()
+{
+    vars:
+        any::
+            "source_dir" string => "$(sara_data.rootfiles[setup_dir])";
+            "no_module_load" string => "/root/.no_module_load";
+
+    classes:
+        "rootfiles_copy_dirs_set" expression => isvariable("sara_data.rootfiles[copy_dirs]");
+        "rootfiles_copy_files_set" expression => isvariable("sara_data.rootfiles[copy_files]");
+
+    files:
+        any::
+            "/root/.ssh/authorized_keys"
+                perms       => mog("0400", "root", "root");
+
+        ROOTFILES_NO_MODULE_LOAD::
+            "$(no_module_load)"
+                create => "true";
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("rootfiles");
+
+        rootfiles_copy_dirs_set::
+            "" usebundle => sara_service_copy_dirs("rootfiles");
+
+        rootfiles_copy_files_set::
+            "" usebundle => sara_service_copy_files("rootfiles");
+
+   reports:
+        rootfiles_source_dir_set::
+            "$(this.bundle): copied files $(rootfiles.files) from $(source_dir)"
+                ifvarclass => "DEBUG|DEBUG_rootfiles";
+
+        ROOTFILES_NO_MODULE_LOAD::
+            "$(this.bundle): Prevent default module loading $(no_module_load)"
+                ifvarclass => "DEBUG|DEBUG_rootfiles";
+}
+@if minimum_version(99.9)
+= rootfiles =
+
+This bundle will copy some important files to root environment
+
+== Usage ==
+
+The bundle is called with:
+ * `"" usebundle => rootfiles_autorun();`
+
+The default rootfiles setup directory to be copied is "surfsara" and is controlled via: `$(sara_data.rootfiles[setup_dur])`
+
+Only the files are copied from the source directory: (Must be rewritten to default,jsob)
+    * files:  "/root/.ssh/authorized_keys", "/root/.vimrc", "/root/.bashrc", "/root/sara_rootadminenv.sh, /root/.profile"
+    * directories: "/root/.subversion"
+
+You can control some behaviours of the ROOTFILES bundle via classes:
+{{{
+#!json
+"rootfiles": {
+    "classes": {
+        "NO_MODULE_LOAD": "any"
+    }
+}
+}}}
+
+explanation:
+  * ROOTFILES_NO_MODULE_LOAD : Will create ''/root/.no_module_load'' file. Prevent loading of standard modules.
+
+=== DEBUG ===
+
+If you want to debug these bundle set the `DEBUG_rootfiles` class, eg:
+ * `-DDEBUG_rootfiles`
+
+== SETUP ==
+{{{
+#json
+{
+   "host_authorized_keys": [
+        { "key_type": "#",  "key": "host_authorized_keys",  "comment": "to override" }
+   ],
+   "setup_dir": "cf_bundles_dir/rootfiles/surfsara",
+   "stepping_stone": [
+        { "key_type": "#",  "key": "stepping_stone",  "comment": "to override" }
+   ]
+}
+}}}
+
+=== Def Usage ===
+The following must be set in host specific host file: `def.json`
+{{{
+#!json
+    "classes": {
+        "ROOTFILES_BUNDLE": "any",
+    },
+}}}
+
+In def.cf/def.json you can override the ``rootfiles`` default values, eg def.json:
+{{{
+#!json
+{
+    "vars": {
+        "rootfiles": {
+            "setup_dir": "cf_bundles_dir/rootfiles/mona",
+            "stepping_stone_authorized_keys": [
+                {
+                "key_type": "ssh-rsa",
+                "key": "AAAAB3NzaC1yc2EAAAADAQABAAABAQCh+gjYr/XrrRyvih2V3u7RDMZMQE0NnJr3EU717lcRQ0ae9EZxn6lPYiG4xJoYLmSg885zYKTxff/fVMZYfHzLtzLylUhup8RP1XAAuiVcXMffFqE9mau+FpE2W6bEmtsxs/OboQ/AOfBtl1Lpghol0oM7kaYzZo4OBu39sJaLZIfB0Z1NPp8PVBgeDFxBlyfYDkeGIDAGltO8NsY+Di0QWFyfJVmLPzUllvu4tCs5XoK7zcFOnVUAlflDbEhaSAzll4J7yE1Eatl7Fx68m4uAAWVt0m0xqfWcoHKnKfmSPN94DiZnRyn81UR6rOAklNHNBqg+Pps5n7Ow8BBHBKFp",
+                "comment": "root@install1.cc.surfsara.nl"
+                }
+            ]
+        }
+    }
+}
+}}}
+@endif

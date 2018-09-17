@@ -6,7 +6,7 @@
 #  1) Check if the key is already imported
 #  2) If not import the key (5 attemps are made)
 #  3) Check if the import was succesful
-
+#
 APT_KEY=/usr/bin/apt-key
 GPG=/usr/bin/gpg
 
@@ -59,13 +59,11 @@ import_key()
 #
 ### End Functions
 
-
 if [ $# -lt 1 ]
 then
     echo "Usage: `basename $0` <keyid>"
     exit 1
 fi
-
 
 apt_is_key_installed $1
 import_key

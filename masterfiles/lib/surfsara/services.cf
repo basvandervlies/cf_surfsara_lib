@@ -1,31 +1,28 @@
 #
-#  SURFsara services.cf
+##  SURFsara services.cf
 #
 @if minimum_version(99.9)
-= services.cf =
+# services.cf
 
 You can control which services must be run by specifying the following variable in:
  * def.json
-{{{
-#!json
+```json
 "sara_services_enabled": [ "ssh", "ntp" ]
-}}}
+```
  * def.cf
-{{{
-#!cf3
+```
 "sara_services_enabled" slist => [ "ssh", "ntp" ];
-}}}
+```
 
 This variable will include the cfengine services file from the directory
 `def.sara_services_dir` (default value: surfsara/services) and run all bundles that have
 the meta tag, eg: `template_ssh`. The bundle run can be protected by an class
 statement, default is `any`, eg:
-{{{
-#!json
+```json
 "ssh": {
     "run_class": "debian|centos"
 }
-}}}
+```
 
 This will run the ssh service only for debian and centos hosts.
 @endif

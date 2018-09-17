@@ -77,7 +77,8 @@ else
     cp --no-dereference -R $SURFSARA_LIB $CFENGINE_MASTERFILES_DIR/lib/
 fi
 
-### THis is always updated
+### This is always updated
+#
 cp $SURFSARA_AUTORUN_SERVICE $CFENGINE_SERVICES_DIR/autorun
 
 
@@ -93,7 +94,6 @@ fi
 
 ### Templates and json files
 #
-
 if [ ! -d  $CFENGINE_TEMPLATES_DIR ]
 then
     mkdir $CFENGINE_TEMPLATES_DIR

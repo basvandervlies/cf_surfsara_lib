@@ -1,5 +1,5 @@
 #
-#  SURFsara storage.cf
+##  SURFsara storage.cf
 #
 body volume sara_min_free_space(free)
 {

@@ -220,7 +220,7 @@ bundle agent sara_json_copy(bundle_name, files)
             "$(def.node_template_dir)/$(bundle_name)/$(files)"
                 comment     => "Let's copy the json files",
                 perms       => mog("0600", "root", "root"),
-                copy_from   => local_cp("$(local_dir)/$(files)"),
+                copy_from   => local_dcp("$(local_dir)/$(files)"),
                 classes     => results("bundle","$(bundle_name)$(files)");
 
     reports:
@@ -369,9 +369,9 @@ bundle agent sara_mustache_copy(bundle_name, files)
                 comment     => "Let's copy the json files",
                 perms       => mog("0600", "root", "root"),
                 classes     => if_repaired("$(bundle_name)_mustache_copied"),
-                copy_from   => local_cp("$(local_dir)/$(files)");
+                copy_from   => local_dcp("$(local_dir)/$(files)");
                 # version 3.12/3,13
-                #copy_from   => local_cp("$(sys.policy_entry_dirname)/../$(bundle_template_dir)/$(files)");
+                #copy_from   => local_dcp("$(sys.policy_entry_dirname)/../$(bundle_template_dir)/$(files)");
 
     reports:
         any::

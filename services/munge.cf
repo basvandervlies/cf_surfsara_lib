@@ -1,0 +1,202 @@
+bundle common munge()
+{
+    vars:
+        any::
+            "config_dir"        string => "/etc/munge";
+            "munge_key_file"    string => "$(config_dir)/munge.key";
+
+        any::
+            "munge_bin"         string => "/usr/bin/munge";
+            "unmunge_bin"       string => "/usr/bin/unmunge";
+            "service_name"      string => "munge";
+            "packages"          data  => parsejson('
+                    {
+                        "install": {
+                            "munge" : "",
+                        }
+                    }
+                ');
+
+        systemd::
+            "restart"          string => "$(paths.path[systemctl]) restart $(service_name)";
+        !systemd::
+            "restart"          string => "$(paths.path[service]) $(service_name) restart";
+}
+
+bundle agent munge_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_munge" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("munge");
+            "" usebundle => munge_install();
+            "" usebundle => munge_config();
+            "" usebundle => munge_daemons_check();
+}
+
+bundle agent munge_daemons_restart()
+{
+    commands:
+        any::
+            "$(munge.restart)";
+
+    reports:
+        any::
+            "munged has been restarted";
+}
+
+bundle agent munge_daemons_check()
+{
+    processes:
+        any::
+            "/usr/sbin/munged.*"
+                comment     => "Check if munged is running",
+                process_count   => check_range("munged", "1", "1"),
+                process_select  => sara_select_parent_process("1");
+
+    methods:
+        munge_out_of_range::
+            "any" usebundle => munge_daemons_restart();
+
+    reports:
+        munge_out_of_range::
+            "No munged process is running with PPID 1";
+
+}
+
+bundle agent munge_install()
+{
+    methods:
+        "" usebundle => sara_service_packages("munge", "@(munge.packages)");
+}
+
+bundle agent munge_config()
+{
+    classes:
+        any::
+            "munge_copy_files_set" expression => isvariable("sara_data.munge[copy_files]"),
+                comment => "check if we should copy any files for the munge bundle";
+
+            "munge_key_string_set" expression => isvariable("sara_data.munge[munge_key_string]"),
+                comment => "check if we should generate the munge key from a payload";
+
+    methods:
+        any::
+            "" usebundle => munge_daemons_restart(),
+                ifvarclass => or(
+                    canonify("sara$(munge.munge_key_file)")
+                );
+
+        !munge_key_string_set.munge_copy_files_set::
+            "" usebundle => sara_service_copy_files("munge");
+
+    commands:
+        munge_key_string_set::
+            "/bin/echo $(munge.munge_key_string) | $(munge.unmunge_bin) -o $(munge.munge_key_file)";
+
+    files:
+        any::
+            "$(munge.munge_key_file)"
+                comment         => "Make sure that the key file is 0400 and owner root",
+                perms           => mog("0400", "root", "root");
+}
+@if minimum_version(99.9)
+
+# Munge
+
+This bundle generates or copies a munge key on a node.
+
+- `/etc/munge/munge.key`
+
+This bundle also makes sure that the proper owner (root:root) and permissions (400) are set.
+
+## Usage
+
+This bundle is called with:
+
+- `"" usebundle => munge_autorun();`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+
+- `def.cf`
+
+```
+    any::
+        "ssh_json_files" slist => { "policy_server.json" };
+```
+
+Which will then merge this json with the `default.json`.
+
+### Debug
+
+To debug this bundle set the `DEBUG_munge` class:
+
+- `-DDEBUG_munge`
+
+## Setup
+
+The variables are set in default.json and can be overwritten.
+
+```json
+{
+    "munge_key_string": "",
+    "copy_files": []
+}
+```
+
+### munge_key_string
+
+The munge_key_string should be a munge payload to generate the munge key with. You can generate the payload from an existing key with
+`munge -i <munge key file>`.
+
+### copy_files
+
+With this variable set it will copy the specified file (usually the muge key) to the specified destination. This variable will be ignored
+if `munge_key_string` is set. `copy_files` has the following format:
+
+```json
+"": [
+{
+    "dest": "Destination path with filename",
+    "src": "The filename path on the policy server/cf-hub",
+    "mode":  "The mode bits",
+    "owner": "File owner",
+    "group": "File group",
+    "run_bundle": "This bundle will run if the file gets copied"
+}
+]
+```
+
+example:
+
+```json
+"copy_files": [
+    {
+        "dest": "$(munge.munge_key_file)",
+        "src": "cf_bundles_dir/munge/lisa/munge.key",
+        "mode": "0400", "owner": "root", "group": "root",
+    }
+}
+```
+Where `cf_bundles_dir` is a ''cf-serverd shortcut''.
+
+## Def usage
+
+The following must be set in the specific ''def.json'' hostfile:
+
+```json
+    "vars": {
+        "sara_services_enabled": {
+            ...
+            "munge",
+            ...
+        },
+        "munge": {
+        }
+    },
+```
+
+@endif

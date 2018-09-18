@@ -102,3 +102,101 @@ bundle agent munge_config()
                 comment         => "Make sure that the key file is 0400 and owner root",
                 perms           => mog("0400", "root", "root");
 }
+@if minimum_version(99.9)
+
+# Munge
+
+This bundle generates or copies a munge key on a node.
+
+- `/etc/munge/munge.key`
+
+This bundle also makes sure that the proper owner (root:root) and permissions (400) are set.
+
+## Usage
+
+This bundle is called with:
+
+- `"" usebundle => munge_autorun();`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+
+- `def.cf`
+
+```
+    any::
+        "ssh_json_files" slist => { "policy_server.json" };
+```
+
+Which will then merge this json with the `default.json`.
+
+### Debug
+
+To debug this bundle set the `DEBUG_munge` class:
+
+- `-DDEBUG_munge`
+
+## Setup
+
+The variables are set in default.json and can be overwritten.
+
+```json
+{
+    "munge_key_string": "",
+    "copy_files": []
+}
+```
+
+### munge_key_string
+
+The munge_key_string should be a munge payload to generate the munge key with. You can generate the payload from an existing key with
+`munge -i <munge key file>`.
+
+### copy_files
+
+With this variable set it will copy the specified file (usually the muge key) to the specified destination. This variable will be ignored
+if `munge_key_string` is set. `copy_files` has the following format:
+
+```json
+"": [
+{
+    "dest": "Destination path with filename",
+    "src": "The filename path on the policy server/cf-hub",
+    "mode":  "The mode bits",
+    "owner": "File owner",
+    "group": "File group",
+    "run_bundle": "This bundle will run if the file gets copied"
+}
+]
+```
+
+example:
+
+```json
+"copy_files": [
+    {
+        "dest": "$(munge.munge_key_file)",
+        "src": "cf_bundles_dir/munge/lisa/munge.key",
+        "mode": "0400", "owner": "root", "group": "root",
+    }
+}
+```
+Where `cf_bundles_dir` is a ''cf-serverd shortcut''.
+
+## Def usage
+
+The following must be set in the specific ''def.json'' hostfile:
+
+```json
+    "vars": {
+        "sara_services_enabled": {
+            ...
+            "munge",
+            ...
+        },
+        "munge": {
+        }
+    },
+```
+
+@endif

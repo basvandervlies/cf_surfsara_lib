@@ -1,7 +1,7 @@
 # Version: 0.X.X
 
  * Services added: apt, munge
- * Only copy local files if  hashes differ, use  Use `local_dcp` of `local_cp`.
+ * Only copy local files if  hashes differ, use  `local_dcp` instead of `local_cp`.
 
 ## apt
 

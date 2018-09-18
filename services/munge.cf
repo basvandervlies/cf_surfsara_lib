@@ -1,0 +1,104 @@
+bundle common munge()
+{
+    vars:
+        any::
+            "config_dir"        string => "/etc/munge";
+            "munge_key_file"    string => "$(config_dir)/munge.key";
+
+        any::
+            "munge_bin"         string => "/usr/bin/munge";
+            "unmunge_bin"       string => "/usr/bin/unmunge";
+            "service_name"      string => "munge";
+            "packages"          data  => parsejson('
+                    {
+                        "install": {
+                            "munge" : "",
+                        }
+                    }
+                ');
+
+        systemd::
+            "restart"          string => "$(paths.path[systemctl]) restart $(service_name)";
+        !systemd::
+            "restart"          string => "$(paths.path[service]) $(service_name) restart";
+}
+
+bundle agent munge_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_munge" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("munge");
+            "" usebundle => munge_install();
+            "" usebundle => munge_config();
+            "" usebundle => munge_daemons_check();
+}
+
+bundle agent munge_daemons_restart()
+{
+    commands:
+        any::
+            "$(munge.restart)";
+
+    reports:
+        any::
+            "munged has been restarted";
+}
+
+bundle agent munge_daemons_check()
+{
+    processes:
+        any::
+            "/usr/sbin/munged.*"
+                comment     => "Check if munged is running",
+                process_count   => check_range("munged", "1", "1"),
+                process_select  => sara_select_parent_process("1");
+
+    methods:
+        munge_out_of_range::
+            "any" usebundle => munge_daemons_restart();
+
+    reports:
+        munge_out_of_range::
+            "No munged process is running with PPID 1";
+
+}
+
+bundle agent munge_install()
+{
+    methods:
+        "" usebundle => sara_service_packages("munge", "@(munge.packages)");
+}
+
+bundle agent munge_config()
+{
+    classes:
+        any::
+            "munge_copy_files_set" expression => isvariable("sara_data.munge[copy_files]"),
+                comment => "check if we should copy any files for the munge bundle";
+
+            "munge_key_string_set" expression => isvariable("sara_data.munge[munge_key_string]"),
+                comment => "check if we should generate the munge key from a payload";
+
+    methods:
+        any::
+            "" usebundle => munge_daemons_restart(),
+                ifvarclass => or(
+                    canonify("sara$(munge.munge_key_file)")
+                );
+
+        !munge_key_string_set.munge_copy_files_set::
+            "" usebundle => sara_service_copy_files("munge");
+
+    commands:
+        munge_key_string_set::
+            "/bin/echo $(munge.munge_key_string) | $(munge.unmunge_bin) -o $(munge.munge_key_file)";
+
+    files:
+        any::
+            "$(munge.munge_key_file)"
+                comment         => "Make sure that the key file is 0400 and owner root",
+                perms           => mog("0400", "root", "root");
+}

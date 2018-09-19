@@ -125,7 +125,7 @@ read. You can specify extra json data file via:
 
 ```
     any::
-        "ssh_json_files" slist => { "policy_server.json" };
+        "munge_json_files" slist => { "policy_server.json" };
 ```
 
 Which will then merge this json with the `default.json`.
@@ -178,6 +178,7 @@ example:
         "dest": "$(munge.munge_key_file)",
         "src": "cf_bundles_dir/munge/lisa/munge.key",
         "mode": "0400", "owner": "root", "group": "root",
+        "run_bundle": "munge_daemons_restart"
     }
 }
 ```

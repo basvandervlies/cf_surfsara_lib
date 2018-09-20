@@ -296,19 +296,21 @@ bundle agent sara_json_copy_and_merge(bundle_name)
             "bundle_local_set" expression => isvariable("def.$(bundle_name)[local_generated_json_files]");
 
     methods:
-        "" usebundle => sara_json_copy("$(bundle_name)", "@(copy_files)");
+        any::
+            "" usebundle => sara_json_copy("$(bundle_name)", "@(copy_files)");
 
-        ## Now for each template run this method, loop over the key values of data files
-        "" usebundle => sara_data("$(bundle_name)", "@(files)"),
-            comment => "Sara mustache merge data files bundle";
+            ## Now for each template run this method, loop over the key values of data files
+            "" usebundle => sara_data("$(bundle_name)", "@(files)"),
+               comment => "Sara mustache merge data files bundle";
+
+        def_local_set|bundle_local_set::
+            "" usebundle => sara_show_data("$(this.bundle)", "files"),
+                ifvarclass => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
 
     reports:
         any::
             "$(this.bundle) Note: only using: default.json"
                 ifvarclass => "!(bundle_set|def_set|local_set).(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
-
-            "$(this.bundle): called for $(bundle_name)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 }
 
 bundle agent sara_mustache_autorun(bundle_name)

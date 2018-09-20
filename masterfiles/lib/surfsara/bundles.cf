@@ -231,11 +231,11 @@ bundle agent sara_json_copy(bundle_name, files)
             "$(this.bundle):$(bundle_name):json file does not exists:$(files)"
                 ifvarclass => or( canonify("$(bundle_name)$(files)_failed") );
 
+            "$(this.bundle) copying json files from: $(local_dir)"
+                ifvarclass => "(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY).(DEBUG_$(bundle_name)|DEBUG)";
+
         TEMPLATE_SKIP_COPY|JSON_SKIP_COPY::
             "$(this.bundle): Skipped copying of json files";
-
-        TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
-            "$(this.bundle) copying json files from: $(local_dir)";
 }
 
 @if minimum_version(99.9)
@@ -378,11 +378,11 @@ bundle agent sara_mustache_copy(bundle_name, files)
             "$(this.bundle) template file : $(files_str)"
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 
+            "$(this.bundle) copying template files from: $(local_dir)"
+                ifvarclass => "(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY).(DEBUG_$(bundle_name)|DEBUG)";
+
         TEMPLATE_SKIP_COPY|MUSTACHE_SKIP_COPY::
             "$(this.bundle): Skipped copying of mustache files";
-
-        TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
-            "$(this.bundle) copying template files from: $(local_dir)";
 }
 
 @if minimum_version(99.9)

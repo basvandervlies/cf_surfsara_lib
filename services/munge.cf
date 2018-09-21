@@ -94,7 +94,8 @@ bundle agent munge_config()
 
     commands:
         munge_key_string_set::
-            "/bin/echo $(sara_data.munge[munge_key_string]) | $(munge.unmunge_bin) -o $(munge.munge_key_file)";
+            "/bin/echo $(sara_data.munge[munge_key_string]) | $(munge.unmunge_bin) -o $(munge.munge_key_file)"
+                contain => in_shell_and_silent;
 
     files:
         any::

@@ -100,8 +100,8 @@ bundle agent munge_config()
     files:
         any::
             "$(munge.munge_key_file)"
-                comment         => "Make sure that the key file is 0400 and owner root",
-                perms           => mog("0400", "root", "root");
+                comment         => "Make sure that the key file is 0600 and owner root",
+                perms           => mog("0600", "root", "root");
 }
 @if minimum_version(99.9)
 

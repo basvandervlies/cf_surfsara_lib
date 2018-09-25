@@ -1,7 +1,22 @@
-# Version: 0.X.X
+<!-- vim-markdown-toc GFM -->
+
+* [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
+    * [apt](#apt)
+    * [munge](#munge)
+* [Version: 0.9.4 (2018-09-07)](#version-094-2018-09-07)
+* [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
+
+<!-- vim-markdown-toc -->
+# Version: 0.9.8 (2018-09-25)
 
  * Services added: apt, munge
- * Only copy local files if  hashes differ, use  `local_dcp` instead of `local_cp`.
+ * Only copy local files if  hashes differ, use  `local_dcp` instead of `local_cp`
+ * Reduce the verbose output for local file(s) copy only to the debugged bundle
+ * Show json files used  when using `<bundle_name>_local_generated_json_files` option
+ * Fix systemd permission problem for user configuration settings, must be readable for everybody
+ * Added surfsara modules directory `$(sys.workdir)/modules/surfsara` in `mpf_installation` script:
+   * `apt_import_key`: Needed by apt bundle to import the repository key
+   * `debconf`: Needed by apt bundle to set package options
 
 ## apt
 

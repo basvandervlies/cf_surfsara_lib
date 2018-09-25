@@ -20,9 +20,9 @@
 
 ## apt
 
-The services can do a lot of action.  Most actions are protected by a class statement. The following action are
+The services can do a lot of action.  Most actions are protected by a class statement. The following actions are
 defined:
- * generate repository files in /etc/apt/sources.list.d.
+ * generate repository files in /etc/apt/sources.list.d
  * install apt packages
  * automatic install security uodate (`AUTOMATIC_SECURITY_UPDATE`)
  * automatic remove obsolete packages (`AUTOREMOVE`)

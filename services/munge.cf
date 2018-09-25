@@ -94,7 +94,8 @@ bundle agent munge_config()
 
     commands:
         munge_key_string_set::
-            "/bin/echo $(munge.munge_key_string) | $(munge.unmunge_bin) -o $(munge.munge_key_file)";
+            "/bin/echo $(sara_data.munge[munge_key_string]) | $(munge.unmunge_bin) -o $(munge.munge_key_file)"
+                contain => silent;
 
     files:
         any::
@@ -125,7 +126,7 @@ read. You can specify extra json data file via:
 
 ```
     any::
-        "ssh_json_files" slist => { "policy_server.json" };
+        "munge_json_files" slist => { "policy_server.json" };
 ```
 
 Which will then merge this json with the `default.json`.
@@ -178,6 +179,7 @@ example:
         "dest": "$(munge.munge_key_file)",
         "src": "cf_bundles_dir/munge/lisa/munge.key",
         "mode": "0400", "owner": "root", "group": "root",
+        "run_bundle": "munge_daemons_restart"
     }
 }
 ```

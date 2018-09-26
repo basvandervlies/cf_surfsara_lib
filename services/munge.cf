@@ -100,8 +100,8 @@ bundle agent munge_config()
     files:
         any::
             "$(munge.munge_key_file)"
-                comment         => "Make sure that the key file is 0400 and owner root",
-                perms           => mog("0400", "root", "root");
+                comment         => "Make sure that the key file is 0400 and owner munge",
+                perms           => mog("0400", "munge", "munge");
 }
 @if minimum_version(99.9)
 
@@ -111,7 +111,7 @@ This bundle generates or copies a munge key on a node.
 
 - `/etc/munge/munge.key`
 
-This bundle also makes sure that the proper owner (root:root) and permissions (400) are set.
+This bundle also makes sure that the proper owner (munge:munge) and permissions (400) are set.
 
 ## Usage
 

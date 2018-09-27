@@ -1,0 +1,12 @@
+{
+    "copy_dirs": [
+    ],
+    "copy_files": [
+    ],
+    "host_authorized_keys": [
+        { "key_type": "#",  "key": "host_authorized_keys",  "comment": "to override" }
+    ],
+    "stepping_stone": [
+        { "key_type": "#",  "key": "stepping_stone",  "comment": "to override" }
+    ]
+}

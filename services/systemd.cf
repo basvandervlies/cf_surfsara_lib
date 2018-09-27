@@ -47,10 +47,14 @@ bundle agent systemd_config()
 
     files:
         any::
-            "$(sara_data.systemd[script_dir])/."
-                comment => "Create the systemd scripts irecrtory if it does not exists",
+            "$(systemd.scripts_dir)/."
+                comment => "Create the systemd scripts directory if it does not exist",
                 perms => mog("0700", "root", "root"),
                 create => "true";
+
+            "$(systemd.user_conf_dir)/surfsara.conf"
+                comment         => "Make sure that the surfsara.conf file is 0644 and owner root",
+                perms           => mog("0644", "root", "root");
 
     methods:
         any::

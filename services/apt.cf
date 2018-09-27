@@ -372,7 +372,7 @@ bundle agent apt_repository_key(name, key)
 
     commands:
         any::
-            "$(apt.import_key_cmd) $(key)"
+            "$(sara_data.apt[import_key]) $(key)"
                 contain => in_shell,
                 classes => sara_cmd_repair ( "@(import_key_error_codes)", "apt_repository_key_cmd" ),
                 action => if_elapsed("50"),

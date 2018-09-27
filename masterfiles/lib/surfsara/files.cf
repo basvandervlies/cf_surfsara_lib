@@ -34,8 +34,7 @@ bundle is called with:
 Where:
  * name: is the name of the cronjob file
  * data: Json data. eg: 2 minute cronjob
-{{{
-#!json
+```json
 {
     "minute": "*/2",
     "hour": "*",
@@ -45,6 +44,7 @@ Where:
     "user": "root",
     "command": "/bin/ls"
 }
+```
 @endif
 bundle agent sara_make_cron_file(name, data)
 {

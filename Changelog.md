@@ -1,7 +1,50 @@
-#  Version: 0.X.X 
+<!-- vim-markdown-toc GFM -->
 
- * Services added: apt
+* [Version: 0.9.X (2018-xx-xx)](#version-09x-2018-xx-xx)
+* [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
+    * [apt](#apt)
+    * [munge](#munge)
+* [Version: 0.9.4 (2018-09-07)](#version-094-2018-09-07)
+* [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
+<!-- vim-markdown-toc -->
+# Version: 0.9.X (2018-xx-xx)
+
+ * Munge bundle fixes:
+   * Remove string option to error prune
+   * key file must be owned by user/group: munge
+   * Daemon check was wrong
+
+# Version: 0.9.8 (2018-09-25)
+
+ * Services added: apt, munge
+ * Only copy local files if  hashes differ, use  `local_dcp` instead of `local_cp`
+ * Reduce the verbose output for local file(s) copy only to the debugged bundle
+ * Show json files used  when using `<bundle_name>_local_generated_json_files` option
+ * Fix systemd permission problem for user configuration settings, must be readable for everybody
+ * Added surfsara modules directory `$(sys.workdir)/modules/surfsara` in `mpf_installation` script:
+   * `apt_import_key`: Needed by apt bundle to import the repository key
+   * `debconf`: Needed by apt bundle to set package options
+
+## apt
+
+The services can do a lot of action.  Most actions are protected by a class statement. The following actions are
+defined:
+ * generate repository files in /etc/apt/sources.list.d
+ * install apt packages
+ * automatic install security uodate (`AUTOMATIC_SECURITY_UPDATE`)
+ * automatic remove obsolete packages (`AUTOREMOVE`)
+ * check the status of the package manager (`CHECK_STATUS`)
+ * kill apt/aptitude processes that run more then 1 hour (`KILL_PKG_MANAGER`)
+ * Check the debian release and upgrade if needed (`OS_VERSION_CHECK`)
+ * setting debconf values for package field(s), controlled via  json data
+ * disable systemctl timer services for apt, may interfere with cfengine (`SYSTEMD_DISABLE`)
+ * remove /etc/apt/sources.list file (`SOURCES_FILE_REMOVE`)
+
+## munge
+
+MUNGE is an authentication service for creating and validating credentials:
+ * https://dun.github.io/munge/
 
 #  Version: 0.9.4 (2018-09-07)
   * Bug fixed in:  `sara_service_copy_dirs` bundle, forgot to set `compare` value, default: `digest`

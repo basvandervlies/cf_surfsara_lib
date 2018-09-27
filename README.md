@@ -112,9 +112,11 @@ See above to add `templates shortcut` to cf-serverd.
 There are several template setups for different services included with inline documentation. These setups are
 used in production at SURFsara.
 
+ * [apt.cf](services/apt.cf)
  * [check_space.cf](services/check_space.cf)
  * [cron.cf](services/cron.cf)
  * [dhclient.cf](services/dhclient.cf)
+ * [munge.cf](services/munge.cf)
  * [node_exporter.cf](services/node_exporter.cf)
  * [nscd.cf](services/nscd.cf)
  * [ntp.cf](services/ntp.cf)
@@ -123,18 +125,16 @@ used in production at SURFsara.
  * [pam_radius.cf](services/pam_radius.cf)
  * [postfix.cf](services/postfix.cf)
  * [resolv.cf](services/resolv.cf)
+ * [rootfiles.cf](services/rootfiles.cf)
  * [sara_user_consume_resources.cf](services/sara_user_consume_resources.cf)
  * [singularity.cf](services/singularity.cf)
  * [slurm_prometheus_exporter.cf](services/slurm_prometheus_exporter.cf)
  * [ssh.cf](services/ssh.cf)
  * [sudo.cf](services/sudo.cf)
+ * [systemd.cf](services/systemd.cf)
  * [tcpwrappers.cf](services/tcpwrappers.cf)
  * [tripwire.cf](services/tripwire.cf)
  * [yum.cf](services/yum.cf)
- * [apt.cf](services/apt.cf)
- * [munge.cf](services/munge.cf)
- * [rootfiles.cf](services/rootfiles.cf)
- * [systemd.cf](services/systemd.cf)
 
 To enable the template on your system:
  * MPF:

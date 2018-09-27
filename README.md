@@ -111,27 +111,31 @@ See above to add `templates shortcut` to cf-serverd.
 
 There are several template setups for different services included with inline documentation. These setups are
 used in production at SURFsara.
- 1. services/apt.cf
- 1. services/check_space.cf
- 1. services/cron.cf
- 1. services/dhclient.cf
- 1. services/node_exporter.cf
- 1. services/nscd.cf
- 1. services/ntp.cf
- 1. services/nvidia_gpu_prometheus_exporter.cf
- 1. services/pam.cf
- 1. services/pam_radius.cf
- 1. services/postfix.cf
- 1. services/resolv.cf
- 1. services/sudo.cf
- 1. services/sara_user_consume_resources.cf
- 1. services/singularity.cf
- 1. services/slurm_prometheus_exporter.cf
- 1. services/ssh.cf
- 1. services/systemd.cf
- 1. services/tcpwrappers.cf
- 1. services/tripwire.cf
- 1. services/yum.cf
+
+services
+ * [apt.cf](services/apt.cf)
+ * [check_space.cf](services/check_space.cf)
+ * [cron.cf](services/cron.cf)
+ * [dhclient.cf](services/dhclient.cf)
+ * [munge.cf](services/munge.cf)
+ * [node_exporter.cf](services/node_exporter.cf)
+ * [nscd.cf](services/nscd.cf)
+ * [ntp.cf](services/ntp.cf)
+ * [nvidia_gpu_prometheus_exporter.cf](services/nvidia_gpu_prometheus_exporter.cf)
+ * [pam.cf](services/pam.cf)
+ * [pam_radius.cf](services/pam_radius.cf)
+ * [postfix.cf](services/postfix.cf)
+ * [resolv.cf](services/resolv.cf)
+ * [rootfiles.cf](services/rootfiles.cf)
+ * [sara_user_consume_resources.cf](services/sara_user_consume_resources.cf)
+ * [singularity.cf](services/singularity.cf)
+ * [slurm_prometheus_exporter.cf](services/slurm_prometheus_exporter.cf)
+ * [ssh.cf](services/ssh.cf)
+ * [sudo.cf](services/sudo.cf)
+ * [systemd.cf](services/systemd.cf)
+ * [tcpwrappers.cf](services/tcpwrappers.cf)
+ * [tripwire.cf](services/tripwire.cf)
+ * [yum.cf](services/yum.cf)
 
 To enable the template on your system:
  * MPF:

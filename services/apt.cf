@@ -110,7 +110,7 @@ bundle agent apt_autoremove()
     commands:
         any::
             "$(apt.command)"
-                args => "autoremove",
+                args => "-y autoremove",
                 ifvarclass => "$(sara_data.apt[autoremove_schedule])";
 }
 

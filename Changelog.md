@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 0.9.X (2018-xx-xx)](#version-09x-2018-xx-xx)
 * [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
     * [apt](#apt)
     * [munge](#munge)
@@ -7,6 +8,13 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 0.9.X (2018-xx-xx)
+
+ * Munge bundle fixes:
+   * Remove string option to error prune
+   * key file must be owned by user/group: munge
+   * Daemon check was wrong
+
 # Version: 0.9.8 (2018-09-25)
 
  * Services added: apt, munge

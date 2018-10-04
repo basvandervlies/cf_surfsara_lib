@@ -37,52 +37,26 @@ bundle agent slurm_prometheus_exporter_install()
 
 bundle agent slurm_prometheus_exporter_config()
 {
-    classes:
-        "reload_slurm_prometheus_exporter" or => {
-            "sara_etc_default_slurm_prometheus_exporter"
-        };
-
-        "restart_slurm_prometheus_exporter" or => {
-            "slurm_prometheus_exporter_updated_repaired",
-            "slurm_prometheus_exporter_systemd_updated_repaired"
-        };
-
-    files:
-      systemd::
-        "/etc/systemd/system/slurm_prometheus_exporter.service"
-            copy_from => secure_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter.service", "$(sys.policy_hub)"),
-            classes => results("namespace", "slurm_prometheus_exporter_systemd_updated");
-
-      !systemd::
-        "/etc/init.d/slurm_prometheus_exporter"
-            copy_from => secure_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter.initd", "$(sys.policy_hub)"),
-            classes => results("namespace", "slurm_prometheus_exporter_initd_updated");
-
-        "/etc/init.d/slurm_prometheus_exporter"
-            perms   => mog("0755", "root", "root");
-
     services:
         "$(slurm_prometheus_exporter.service_name)"
             service_policy => "start";
 
     methods:
-        "" usebundle => sara_template_autorun("slurm_prometheus_exporter");
+        any::
+            "" usebundle => sara_mustache_autorun("slurm_prometheus_exporter");
 
     commands:
-        "$(paths.path[systemctl])  -q daemon-reload"
-            ifvarclass => "slurm_prometheus_exporter_systemd_updated";
+        systemd::
+            "$(paths.path[systemctl]) daemon-reload"
+                ifvarclass => or(
+                    canonify("sara$(slurm_prometheus_exporter.systemd_file)")
+                );
 
-        "$(slurm_prometheus_exporter.reload)"
-            ifvarclass => "slurm_prometheus_exporter_initd_updated";
-
-        "$(slurm_prometheus_exporter.reload)"
-            ifvarclass => "reload_slurm_prometheus_exporter";
-
-        "$(paths.path[systemctl]) daemon-reload"
-            ifvarclass => "restart_slurm_prometheus_exporter";
-
-        "$(slurm_prometheus_exporter.restart)"
-            ifvarclass => "restart_slurm_prometheus_exporter";
+        !systemd::
+            "$(slurm_gpu_prometheus_exporter.restart)"
+                ifvarclass => or(
+                    canonify("sara$(slurm_prometheus_exporter.systemd_file)")
+                );
 }
 
 bundle agent slurm_prometheus_exporter_daemon_check()

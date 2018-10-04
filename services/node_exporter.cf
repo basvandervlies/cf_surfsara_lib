@@ -63,6 +63,7 @@ bundle agent node_exporter_config()
                     canonify("sara$(node_exporter.systemd_file)")
                 );
 
+        !systemd::
             "$(node_exporter.restart)"
                 ifvarclass => or(
                     canonify("sara$(node_exporter.systemd_file)")

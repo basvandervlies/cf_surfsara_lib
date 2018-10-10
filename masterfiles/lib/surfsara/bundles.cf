@@ -45,6 +45,9 @@ bundle agent sara_data(bundle_name, json_files)
                 comment => "Expand CFengine variables found in countainer",
                 handle => "sara_data_$(bundle)_expand_data";
 
+            "$(bundle_name)" data => data_expand($(bundle_name)),
+                comment => "Expand CFengine variables found in countainer",
+                handle => "sara_data_$(bundle)_expand_data_2";
         ## Neeed if we want to DEBUG the json data, no 'with' promise attribute
         # for these cfengne versions
         #

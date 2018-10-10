@@ -60,6 +60,7 @@ bundle agent nvidia_gpu_prometheus_exporter_config()
                     canonify("sara$(nvidia_gpu_prometheus_exporter.systemd_file)")
                 );
 
+        !systemd::
             "$(nvidia_gpu_prometheus_exporter.restart)"
                 ifvarclass => or(
                     canonify("sara$(nvidia_gpu_prometheus_exporter.systemd_file)")

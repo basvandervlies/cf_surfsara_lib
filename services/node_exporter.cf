@@ -7,11 +7,13 @@ bundle common node_exporter()
         any::
             "service_name" string => "node_exporter";
             "systemd_file" string => "/etc/systemd/system/node_exporter.service";
+            "initd_file"   string => "/etc/init.d/$(service_name)";
+            "default_file" string => "/etc/default/node_exporter";
 
         systemd::
             "template_2_destination" data => parsejson('
                 {
-                    "node_exporter.default.mustache": "/etc/default/node_exporter",
+                    "node_exporter.default.mustache": "$(default_file)",
                     "systemd.mustache": "$(systemd_file)"
                 }
             ');
@@ -22,12 +24,12 @@ bundle common node_exporter()
         !systemd::
             "template_2_destination" data => parsejson('
                 {
-                    "node_exporter.default.mustache": "/etc/default/node_exporter"
-                    "initd.mustache": "/etc/init.d/node_exporter"
+                    "node_exporter.default.mustache": "$(default_file)"
+                    "initd.mustache": "$(initd_file)"
                 }
             ');
-            "reload" string => "/etc/init.d/$(service_name) reload";
-            "restart" string => "/etc/init.d/$(service_name) restart";
+            "reload"  string => "$(initd_file) reload";
+            "restart" string => "$(initd_file) restart";
 
 }
 
@@ -58,15 +60,17 @@ bundle agent node_exporter_config()
 
     commands:
         systemd::
-            "$(paths.path[systemctl]) daemon-reload"
+            "$(node_exporter.restart)"
                 ifvarclass => or(
-                    canonify("sara$(node_exporter.systemd_file)")
+                    canonify("sara$(node_exporter.systemd_file)"),
+                    canonify("sara$(node_exporter.default_file)")
                 );
 
         !systemd::
             "$(node_exporter.restart)"
                 ifvarclass => or(
-                    canonify("sara$(node_exporter.systemd_file)")
+                    canonify("sara$(node_exporter.initd_file)"),
+                    canonify("sara$(node_exporter.default_file)")
                 );
 }
 

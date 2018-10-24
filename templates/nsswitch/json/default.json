@@ -1,0 +1,16 @@
+{
+    "passwd"        : "files compat",
+    "passwd_compat" : "ldap",
+    "shadow"        : "files ldap",
+    "group"         : "files ldap",
+    "hosts"         : "files dns",
+    "ethers"        : "files",
+    "netmasks"      : "files",
+    "networks"      : "files",
+    "protocols"     : "files",
+    "rpc"           : "files",
+    "services"      : "files",
+    "netgroup"      : "ldap",
+    "automount"     : "ldap",
+    "aliases"       : "files"
+}

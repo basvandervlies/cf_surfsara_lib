@@ -1,0 +1,130 @@
+#####
+#
+# bundle to create nsswitch.conf @SURFsara
+#
+bundle common nsswitch(params)
+{
+    vars:
+
+        any::
+            "config_dir"        string => "/etc";
+            "file"              string => "$(config_dir)/nsswitch.conf";
+
+            ## Mustache templates
+            "template_2_destination" data => parsejson('
+                    {
+                        "nsswitch.mustache"  : "$(file)"
+                    }
+            ');
+}
+
+bundle agent nsswitch_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_nsswitch" };
+
+    methods:
+        "config" usebundle => sara_data_autorun("nsswitch");
+        "config" usebundle => nsswitch_surfsara_config();
+
+    reports:
+        DEBUG_nsswitch::
+            "$(this.bundle): DEBUG on";
+}
+
+bundle agent nsswitch_surfsara_config()
+{
+    classes:
+        any::
+            "nsswitch_copy_files_set" expression => isvariable("sara_data.nsswitch[copy_files]"),
+                comment => "Must we copy extra files for nsswitch bundle";
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("nsswitch");
+
+        nsswitch_copy_files_set::
+            "" usebundle => sara_service_copy_files("nsswitch");
+}
+@if minimum_version(99.9)
+
+# nsswitch.conf
+
+This bundle generates `/etc/nsswitch.conf`.
+
+this bundle will generate this file from mustache templates:
+ * /etc/nsswitch.conf
+
+If this file is changed then the following ''class'' will be set:
+ * sara_etc_nsswitch_conf
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/nsswitch/
+ * templates/nsswitch/json
+
+## Usage
+
+This is called with:
+ * `"" usebundle => nsswitch_autorun();`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+
+```
+    any::
+        "nsswitch_json_files" slist => { "policy_server.json" };
+```
+
+The variable must be `nsswitch_json_files` and with this setup 1 extra json file will be  merged.
+
+### DEBUG
+
+if you want to debug this bundle set the `DEBUG_nsswitch` class, eg:
+ * `DDEBUG_nsswitch`
+
+## Setup
+The variables are set in default.json and can be overwritten.
+
+```
+{
+    "passwd"        : "files compat",
+    "passwd_compat" : "ldap",
+    "shadow"        : "files ldap",
+    "group"         : "files ldap",
+    "hosts"         : "files dns",
+    "ethers"        : "files",
+    "netmasks"      : "files",
+    "networks"      : "files",
+    "protocols"     : "files",
+    "rpc"           : "files",
+    "services"      : "files",
+    "netgroup"      : "ldap",
+    "automount"     : "ldap",
+    "aliases"       : "ldap"
+}
+```
+## Def usage
+
+The following must be set in the specific `def.json` hostfile
+```
+    "vars": {
+        "sara_services_enabled": {
+            ...
+            "nsswitch",
+            ...
+        },
+        "nsswitch": {
+        }
+    },
+```
+
+Here are some examples how to use it:
+ * specify nsswitch configuration in def.cf:
+```
+vars:
+    "nsswitch_json_files" slist => { "policy_server.json" };
+```
+
+@endif

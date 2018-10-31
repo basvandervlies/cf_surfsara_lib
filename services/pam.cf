@@ -140,8 +140,7 @@ bundle agent pam_listfile_generate(file, data_section)
 {
     vars:
         any::
-            "header" string => "## Maintained by CFengine$(const.n)#$(const.n)";
-            "listfile_mustache" string => "$(header)
+            "listfile_mustache" string => "
 {{#pam_listfile.$(data_section)}}
 {{{.}}}
 {{/pam_listfile.$(data_section)}}

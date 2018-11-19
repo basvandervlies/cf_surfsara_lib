@@ -1,6 +1,8 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.X (2018-xx-xx)](#version-09x-2018-xx-xx)
+* [Version: 0.9.12 (2018-12-03)](#version-0912-2018-12-03)
+    * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
+    * [NHC (Node Health Check)](#nhc-node-health-check)
 * [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
     * [apt](#apt)
     * [munge](#munge)
@@ -8,12 +10,55 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 0.9.X (2018-xx-xx)
+# Version: 0.9.12 (2018-12-03)
 
- * Munge bundle fixes:
+ * Services added:  nsswitch, nhc
+ * apt service enhancements:
+   * autoremove added option `-y` to skip questions
+ * Munge service enhancements:
    * Remove string option to error prune
    * key file must be owned by user/group: munge
    * Daemon check was wrong
+ * Node\_exporter, slurm\_prometheus\_exporter service enhancements:
+   * init.d/systemd fixes
+   * rewrote to comply with the new standard
+ * Pam service enhancements:
+   * pam\_listfile can not contain comments `#`
+ * sara\_service\_copy\_dirs added mog option:, eg
+   * `mog : [ "0755", "root", "root" ]` # will set all dir/files to this mode
+   * changed the default of copy attribute `preserve` to `false` instead of `true`
+   * silence the verbose information when `files_single_copy` is set
+ * sara\_service\_copy\_files uses the same  keywords as  the dirs version:
+   * `src` is now renamed to `source`
+   * keywords `mode`, `owner` and `group` is replaced by `mog` keyword.
+   * Note this is a incompatible change. All files  have been converted to new format
+
+## Expand CFengine variables found in countainer (2 levels)
+
+It can now handle 2 level expansion, eg:
+```#json
+"copy_files": [
+            {
+                "dest": "$(sara_data.nvidia[dir])/$(sara_data.nvidia[script])",
+                "source": "cf_bundles_dir/nvidia/$(sara_data.nvidia[script])",
+                "mode": "0750", "owner": "root", "group": "root"
+            }
+]
+"script": "NVIDIA-Linux-x86_64-$(sara_data.nvidia[version]).run",
+"version": "410.57"
+```
+
+this will resolve `source` to : `cf_bundles_dir/nvidia/NVIDIA-Linux-x86_64-410.57.run`.
+                                                        },
+## NHC (Node Health Check)
+
+TORQUE, SLURM, and other schedulers/resource managers provide for a periodic
+"node health check" to be performed on each compute node to verify that the
+node is working properly. Nodes which are determined to be "unhealthy" can
+be marked as down or offline so as to prevent jobs from being scheduled or
+run on them. This helps increase the reliability and throughput of a cluster
+by reducing preventable job failures due to misconfiguration, hardware failure, etc.
+ * https://github.com/mej/nhc
 
 # Version: 0.9.8 (2018-09-25)
 

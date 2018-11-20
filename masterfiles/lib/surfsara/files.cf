@@ -113,7 +113,8 @@ files:
             comment => "Copy bundle dirs and set class if there is a change",
             copy_from => sara_cp_dir("sara_service_copy_dirs", "cp_attr_$(index)", "$(sys.policy_hub)"),
             depth_search => recurse_ignore("inf", "$(sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs])" ),
-            classes => results("namespace", "$(bundle_name)_copy_dirs_$(index)");
+            classes => results("namespace", "$(bundle_name)_copy_dirs_$(index)"),
+            ifvarclass => "!$(bundle_name)_copy_dirs_$(index)_kept";
 
 methods:
     any::

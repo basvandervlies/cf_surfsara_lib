@@ -169,7 +169,7 @@ bundle agent ssh_surfsara_config()
 }
 @if minimum_version(99.9)
 
-= SSH =
+# SSH
 
 This bundle installs ssh software on a node.
 
@@ -192,31 +192,29 @@ The following clases can be set via def.cf/json:
  *  use_depricated_options:  These options are not used anymore , default true  on centos and debian_7
  *  keygen: Must we generate host keys, command line options can bet set via json
 
-== Usage ==
+## Usage
 
 This is called with:
- * `"" usebundle => ssh_autorun();
+ * `"" usebundle => ssh_autorun();`
 
 When we do not specifiy any json data files then only `default.json` will be
 read. You can specify extra json data file via:
  * def.cf
-{{{
-#!cf3
+```
     any::
         "ssh_json_files" slist => { "policy_server.json" };
-}}}
+```
 
 The variable must be ''ssh_json_files'' and with this setup 1 extra json file will be  merged.
 
-=== DEBUG ===
+### DEBUG
 
 if you want to debug this bundle set the `DEBUG_ssh` class, eg:
  * `DDEBUG_ssh`
 
-== Setup ==
+## Setup
 The variables are set in default.json and can be overwritten.
-{{{
-#!json
+```#json
 {
     "AddressFamily": "any",
     "AllowTcpForwarding": "yes",
@@ -293,51 +291,46 @@ The variables are set in default.json and can be overwritten.
     "X11DisplayOffset": "10" ,
     "X11Forwarding": "yes"
 }
-}}}
+```
 
-=== copy_files ===
+### copy_files
 
 When this variable is set it will coyy the specified file to the `ssh.config_dir`. copy_files has the
 following format:
-{{{
-#!json
+```#json
 "": [
 {
     "dest": "Destination path with filename",
-    "src": "The filename path on the policy server/cf-hub",
-    "mode":  "The mode bits",
-    "owner": "File owner",
-    "group": "File group",
+    "source": "The filename path on the policy server/cf-hub",
+    "mog": [ "mode", "owner", "group" ]
     "run_bundle": "This bundle will run if the file gets copied"
 }
 ]
-}}}
+```
 
 example:
-{{{
-#!json
+```#json
 "copy_files": [
     {
         "dest": "$(ssh.config_dir)/shosts.equiv",
-        "src": "cf_bundles_dir/ssh/lisa/shosts.equiv",
-        "mode": "0644", "owner": "root", "group": "root",
+        "source": "cf_bundles_dir/ssh/lisa/shosts.equiv",
+        "mog": [ "0644", "root", "root" ]
     },
     {
         "dest": "$(ssh.config_dir)/ssh_known_hosts2",
-        "src": "cf_bundles_dir/ssh/lisa/ssh_known_hosts2",
-        "mode": "0644", "owner": "root", "group": "root",
+        "source": "cf_bundles_dir/ssh/lisa/ssh_known_hosts2",
+        "mog": [ "0644", "root", "root" ],
         "run_bundle": "ssh_daemons_restart"
     }
 }
-}}}
+```
 
 where `cf_bundles_dir` is a ''cf-serverd shortcut''.
 
-== Def usage  ==
+## Def usage
 
 The following must be set in the specific ''def.json'' hostfile
-{{{
-#!json
+```#json
     "vars": {
         "sara_services_enabled": {
             ...
@@ -347,18 +340,16 @@ The following must be set in the specific ''def.json'' hostfile
         "ssh": {
         }
     },
-}}}
+```
 
 Here are some examples how to use it:
  * specify ssh configuration in def.cf:
-{{{
-#!cf3
+```
 vars:
     "ssh_json_files" slist => { "policy_server.json" };
-}}}
+```
  * Set/Override the daemon options variable in ''def.json'':
-{{{
-#!json
+```#json
         "ssh" : {
             "classes": {
                 "keygen": [ "any" ]
@@ -366,12 +357,10 @@ vars:
             "MaxAuthTries": "6",
             "X11Forwarding": "no",
         },
-}}}
+```
  * override server setting in def.cf
-{{{
-#!cf3
+```
 vars:
     "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
-}}}
-
+```
 @endif

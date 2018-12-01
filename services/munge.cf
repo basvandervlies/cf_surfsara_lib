@@ -145,10 +145,8 @@ With this variable set it will copy the specified file (usually the munge key) t
 "": [
 {
     "dest": "Destination path with filename",
-    "src": "The filename path on the policy server/cf-hub",
-    "mode":  "The mode bits",
-    "owner": "File owner",
-    "group": "File group",
+    "source": "The filename path on the policy server/cf-hub",
+    "mog": [ "mode", "owner", "group" ],
     "run_bundle": "This bundle will run if the file gets copied"
 }
 ]
@@ -161,8 +159,8 @@ example:
 "copy_files": [
     {
         "dest": "$(munge.munge_key_file)",
-        "src": "cf_bundles_dir/munge/lisa/munge.key",
-        "mode": "0400", "owner": "munge", "group": "munge",
+        "source": "cf_bundles_dir/munge/lisa/munge.key",
+        "mog": [ "0400", "munge", "munge" ],
         "run_bundle": "munge_daemons_restart"
     }
 }

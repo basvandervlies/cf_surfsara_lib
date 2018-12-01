@@ -5,6 +5,7 @@
         {
             "dest": "$(sara_data.node_exporter[dir])",
             "exclude_dirs": [ ".git", ".svn" ],
+            "mog": [ "0755", "root", "root" ],
             "run_bundle": "node_exporter_restart",
             "source": "cf_bundles_dir/prometheus_exporters/node_exporter-0.15.2"
         }

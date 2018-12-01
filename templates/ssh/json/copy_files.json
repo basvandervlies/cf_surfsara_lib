@@ -1,9 +1,28 @@
 {
-    "copy_files": {
-        "ssh_host_dsa_key": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0600", "owner": "root", "group": "root", "restart": "yes" },
-        "ssh_host_dsa_key.pub": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0644", "owner": "root", "group": "root", "restart": "yes" },
-        "ssh_host_rsa_key": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0600", "owner": "root", "group": "root", "restart": "yes" },
-        "ssh_host_rsa_key.pub": { "source": "cf_bundles_dir/ssh/doornode", "mode": "0644", "owner": "root", "group": "root", "restart": "yes" }
-
+    "copy_files": [
+        {
+            "dest": "$(ssh.config_dir)/ssh_host_dsa_key",
+            "source": "cf_bundles_dir/ssh/doornode",
+            "mog": [ "0600", "root", "root" ],
+            "run_bundle": "ssh_daemons_restart"
+        },
+        {
+            "dest": "$(ssh.config_dir)/ssh_host_dsa_key.pub",
+            "source": "cf_bundles_dir/ssh/doornode",
+            "mog": [ "0644", "root", "root" ],
+            "run_bundle": "ssh_daemons_restart"
+        },
+        {
+            "dest": "$(ssh.config_dir)/ssh_host_rsa_key",
+            "source": "cf_bundles_dir/ssh/doornode",
+            "mog": [ "0644", "root", "root" ],
+            "run_bundle": "ssh_daemons_restart"
+        },
+        {
+            "dest": "$(ssh.config_dir)/ssh_host_rsa_key",
+            "source": "cf_bundles_dir/ssh/doornode",
+            "mog": [ "0644", "root", "root" ],
+            "run_bundle": "ssh_daemons_restart"
+        }
     }
 }

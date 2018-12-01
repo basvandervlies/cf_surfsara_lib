@@ -19,7 +19,7 @@ bundle agent sara_cp_dir_default
        any::
             "attributes" data => parsejson('{
                 "compare": "digest",
-                "preserve": "true",
+                "preserve": "false",
                 "purge": "false",
                 "sync": "false",
                 "type_check": "false"
@@ -106,6 +106,9 @@ classes:
         "$(bundle_name)_copy_dirs_$(index)_run_bundle" expression => isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][run_bundle]"),
             comment => "Must we run a bundle when a directory is changed";
 
+        "$(bundle_name)_copy_dirs_$(index)_mog_class" expression => isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][mog]"),
+            comment => "Must we set directory permission and doit recurse";
+
 files:
     any::
         ## Can not use $(this.bundle) in copy_from body, bug?
@@ -115,6 +118,17 @@ files:
             depth_search => recurse_ignore("inf", "$(sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs])" ),
             classes => results("namespace", "$(bundle_name)_copy_dirs_$(index)"),
             ifvarclass => "!$(bundle_name)_copy_dirs_$(index)_kept";
+
+        "$(sara_data.$(bundle_name)[copy_dirs][$(index)][dest])"
+            comment => "Set permission on all files/dirs if requested",
+            perms => mog(
+                "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][0])",
+                "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][1])",
+                "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][2])"
+            ),
+            depth_search => recurse_ignore("inf", "$(sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs])" ),
+            ifvarclass => "$(bundle_name)_copy_dirs_$(index)_mog_class";
+
 
 methods:
     any::
@@ -157,14 +171,16 @@ files:
     any::
         "$(sara_data.$(bundle_name)[copy_files][$(index)][dest])"
             comment => "Copy bundle files and set class if its get copied",
-            copy_from => secure_cp("$(sara_data.$(bundle_name)[copy_files][$(index)][src])", "$(sys.policy_hub)"),
+            copy_from => secure_cp("$(sara_data.$(bundle_name)[copy_files][$(index)][source])", "$(sys.policy_hub)"),
             classes => results("namespace", "$(bundle_name)_copy_files_$(index)");
 
         "$(sara_data.$(bundle_name)[copy_files][$(index)][dest])"
             comment => "Check permission",
-            perms => mog( "$(sara_data.$(bundle_name)[copy_files][$(index)][mode])",
-                "$(sara_data.$(bundle_name)[copy_files][$(index)][owner])",
-                "$(sara_data.$(bundle_name)[copy_files][$(index)][group])");
+            perms => mog(
+                "$(sara_data.$(bundle_name)[copy_files][$(index)][mog][0])",
+                "$(sara_data.$(bundle_name)[copy_files][$(index)][mog][1])",
+                "$(sara_data.$(bundle_name)[copy_files][$(index)][mog][2])"
+            );
 
 methods:
     any::

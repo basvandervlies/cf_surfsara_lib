@@ -5,6 +5,7 @@
         {
             "dest": "$(sara_data.nvidia_gpu_prometheus_exporter[dir])",
             "exclude_dirs": [ ".git", ".svn" ],
+            "mog": [ "0755", "root", "root" ],
             "purge": "true",
             "run_bundle": "nvidia_gpu_prometheus_exporter_restart",
             "source": "cf_bundles_dir/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"

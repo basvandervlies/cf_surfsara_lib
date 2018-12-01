@@ -1,0 +1,28 @@
+{
+    "commands_dir": "/opt/nhc/commands",
+    "common_section": [],
+    "copy_dirs": [],
+    "copy_files": [],
+    "debug": "0",
+    "df_flags": "-Tkal",
+    "dfi_flags": "-Tial",
+    "helper": {
+        "offline": "\"$HELPERDIR/node-mark-offline\"",
+        "reboot": "\"$HELPERDIR/node-mark-offline\""
+    },
+    "mark_offline": "1",
+    "max_sys_uid": "1000",
+    "mcelog": "mcelog",
+    "mcelog_args": "--client",
+    "mcelog_max_corrected_rate": "200",
+    "mcelog_max_uncorrected_rate": "0",
+    "nhc_auth_users": "\"root nobody\"",
+    "nhc_check_all": "1",
+    "nvidia_healthmon": "nvvs",
+    "nvidia_healthmon_args": "\"--scriptable --configless --verbose\"",
+    "rules": [],
+    "silent": "0",
+    "sysconfig_lines": [],
+    "timeout": "360",
+    "verbose": "1"
+}

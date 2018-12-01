@@ -1,0 +1,43 @@
+{
+    "common_section": [
+        "SLURM_SERVER_HOME=/var/spool/slurm-llnl"
+    ],
+    "copy_dirs": [
+        {
+            "dest": "$(sara_data.nhc[commands_dir])",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "purge": "false",
+            "source": "cf_bundles_dir/nhc/commands"
+        }
+    ],
+    "rules": [
+        {
+            "pattern": "/^r[0-9]/",
+            "comment": "General Section for all nodes",
+            "offline": [
+                "check_fs_used / 90%",
+                "check_fs_used /scratch 99%",
+                "check_hw_eth admin",
+                "check_hw_mcelog",
+                "check_hw_physmem_free 1MB",
+                "check_hw_swap_free 1MB",
+                "check_cmd_status -r 0 $(sara_data.nhc[commands_dir])/clean_node"
+            ],
+            "reboot": [
+                "check_file_test -n -e /etc/node_status/reboot_node"
+            ]
+        },
+        {
+            "pattern": "/^r(6|7)n/",
+            "comment": "Section for Fujitsu nodes",
+            "offline": [
+                "check_dmi_data_match -h 0x0000 -t 0 \"BIOS Information: Version: 4.6.5 Rev.4A27.3196\"",
+                "check_dmi_data_match -h 0x0023 -t 17 \"Memory Device: Speed: 1600 MHz\"",
+                "check_dmi_data_match -h 0x0004 -t 4 \"*Intel(R) Xeon(R) CPU E5-2650 v2 @ 2.60GHz\"",
+                "check_hw_cpuinfo 2 16 16",
+                "check_hw_physmem 32902364kB 32902364kB 3%"
+            ],
+            "reboot": []
+        }
+    ]
+}

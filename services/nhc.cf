@@ -1,0 +1,168 @@
+#
+##  nhc.cf @SURFsara
+#
+bundle common nhc
+{
+    vars:
+        any::
+            "scripts_dir"       string => "/etc/nhc/scripts";
+            "config_file"       string => "/etc/nhc/nhc.conf";
+
+        centos|redhat::
+            "helper_dir" string => "/usr/libexec/nhc";
+            "sysconfig_file" string => "/etc/sysconfig/nhc";
+        debian::
+            "helper_dir" string => "/usr/lib/nhc";
+            "sysconfig_file" string => "/etc/default/nhc";
+
+        any::
+            "template_2_destination" data => parsejson('
+                    {
+                        "nhc.conf.mustache": "$(nhc.config_file)",
+                        "sysconfig.mustache": "$(nhc.sysconfig_file)"
+                    }
+               ');
+}
+
+bundle agent nhc_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_nhc" };
+
+    methods:
+        any::
+            "" usebundle => nhc_install();
+            "" usebundle => nhc_config();
+}
+
+bundle agent nhc_install()
+{
+    vars:
+        debian::
+            "packages"  data  => parsejson('
+                {
+                    "install": {
+                        "lbnl-nhc" : "latest"
+                    }
+                }
+            ');
+
+    methods:
+        any::
+            "" usebundle => sara_service_packages("nhc", "@(nhc_install.packages)");
+}
+
+bundle agent nhc_config()
+{
+    classes:
+        any::
+            "nhc_copy_files_set" expression => isvariable("sara_data.nhc[copy_files]");
+            "nhc_copy_dirs_set" expression => isvariable("sara_data.nhc[copy_dirs]");
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("nhc");
+
+        nhc_copy_files_set::
+            "" usebundle => sara_service_copy_files("nhc");
+
+        nhc_copy_dirs_set::
+            "" usebundle => sara_service_copy_dirs("nhc");
+}
+@if minimum_version(99.9)
+# NHC
+
+The service file installs nhc software on a node and generates the following files:
+ * /etc/nhc/nhc.conf
+ * /etc/default/nhc (Debian)
+ * /etc/sysconfig/nhc (centos/redhat)
+
+If one of the files is changed then the following ''class'' will be set:
+ * sara_etc_nhc_conf
+ * sara_etc_default_nhc_conf or sara_etc_sysconfig_nhc
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/nhc/
+ * templates/nhc/json
+
+## Usage
+
+This is called with:
+ * `"" usebundle => nhc_autorun();`
+
+The prefered method is to run via the `sara_services_autorun` and add the service to `def.cf/def.json`:
+```
+    "vars": {
+        "sara_services_enabled": {
+            ...
+            "nhc",
+            ...
+        },
+        "nhc": {
+        }
+    },
+```
+
+### DEBUG
+
+if you want to debug this bundle set the `DEBUG_nhc` class, eg:
+ * `-DDEBUG_nhc`
+
+
+## Setup
+
+These variables are set in `default.json` and can be overriden:
+```
+{
+    "commands_dir": "/opt/nhc/commands",
+    "common_section": [],
+    "copy_dirs": [],
+    "copy_files": [],
+    "debug": "0",
+    "df_flags": "-Tkal",
+    "dfi_flags": "-Tial",
+    "helper": {
+        "offline": "\"$HELPERDIR/node-mark-offline\"",
+        "reboot": "\"$HELPERDIR/node-mark-reboot\""
+    },
+    "mark_offline": "1",
+    "max_sys_uid": "1000",
+    "nhc_auth_users": "\"root nobody\"",
+    "nhc_check_all": "1",
+    "nvidia_healthmon": "nvvs",
+    "nvidia_healthmon_args": "\"--scriptable --configless --verbose\"",
+    "rules": [],
+    "silent": "0",
+    "sysconfig_lines": [],
+    "timeout": "360",
+    "verbose": "1"
+}
+```
+
+### Def usage
+
+Here are some examples how to use it:
+ * specify nhc configuration in def.cf:
+```
+vars:
+    "nhc_json_files" slist => { "lisa.json" };
+```
+ * Copy extra files and override debug:
+```
+    "nhc" : {
+        "copy_files": {
+            "dest": "$(nhc.scripts_dir)/sara_health_checks.nhc",
+            "src": "cf_bundles_dir/nhc/scripts/sara_health_checks.nhc",
+            "mode": "0644", "owner": "root", "group": "root"
+        },
+        "debug": "1",
+    },
+```
+
+ * override server setting in def.cf
+```
+vars:
+    "nhc" data => parsejson( '{ "debug":  "1" }' );
+```
+@endif

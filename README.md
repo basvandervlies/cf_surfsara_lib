@@ -117,6 +117,7 @@ used in production at SURFsara.
  * [cron.cf](services/cron.cf)
  * [dhclient.cf](services/dhclient.cf)
  * [munge.cf](services/munge.cf)
+ * [nhc.cf](services/nhc.cf)
  * [node_exporter.cf](services/node_exporter.cf)
  * [nscd.cf](services/nscd.cf)
  * [ntp.cf](services/ntp.cf)

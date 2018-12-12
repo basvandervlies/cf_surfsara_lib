@@ -56,6 +56,10 @@ bundle agent sara_services_autorun
         sara_services_set::
             "" usebundle => sara_services_data(@(sara_services.enabled)),
                 comment => "fetch/merge json data for all enabled services";
+
+            "" usebundle => sara_services_data_expand(),
+                comment => "Expand cross reference bundle variables";
+
             "" usebundle => sara_services_run("$(sara_services.enabled)");
 
     reports:
@@ -71,6 +75,17 @@ bundle agent sara_services_data(services)
 {
     methods:
         "" usebundle => sara_data_autorun("$(services)");
+}
+
+bundle agent sara_services_data_expand()
+{
+    vars:
+        any::
+            "empty_list" slist  => { };
+
+    methods:
+        any::
+            "" usebundle => sara_data("expand_all_service_data", "@(empty_list)");
 }
 
 bundle agent sara_services_run(service)

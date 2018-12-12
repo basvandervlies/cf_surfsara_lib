@@ -25,11 +25,8 @@ by some cfengine bundles.
 bundle agent sara_data(bundle_name, json_files)
 {
     vars:
-        any::
+        !expand_all_service_bundles::
             "template_dir" string => "$(def.node_template_dir)/$(bundle_name)";
-
-            "files_str" string => format("%S", json_files),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
 
             "$(bundle_name)"  data  => parsejson("{}");
 
@@ -48,10 +45,18 @@ bundle agent sara_data(bundle_name, json_files)
             "$(bundle_name)" data => data_expand($(bundle_name)),
                 comment => "Expand CFengine variables found in countainer",
                 handle => "sara_data_$(bundle)_expand_data_2";
+
+        expand_all_service_bundles::
+            "$(def.sara_services_enabled)" data => data_expand($(def.sara_services_enabled)),
+                handle => "sara_data_expand_cross_reference_vars";
+
         ## Neeed if we want to DEBUG the json data, no 'with' promise attribute
-        # for these cfengne versions
+        # for these cfengne versions.
         #
-        cfengine_3_7|cfengine_3_10::
+        !expand_all_service_bundles.(cfengine_3_7|cfengine_3_10)::
+            "files_str" string => format("%S", json_files),
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
+
             "$(bundle_name)_str" string => format("%S", "$(bundle_name)"),
                 ifvarclass => and(
                                 canonify("sara_data_json_file_exists_$(json_files)"),
@@ -80,16 +85,31 @@ bundle agent sara_data(bundle_name, json_files)
 
     classes:
         any::
+            "expand_all_service_bundles" expression => strcmp("expand_all_service_data", "$(bundle_name)"),
+                comment => "Try to solve cross reference bundle variables";
+
+        !expand_all_service_bundles::
             "sara_data_json_file_exists_$(json_files)" expression => fileexists("$(template_dir)/$(json_files)"),
-                 comment => "Check if json file exists, then we can read it";
-            "sara_data_def_json_$(bundle_name)" expression => isvariable("def.$(bundle_name)");
+                comment => "Check if json file exists, then we can read it";
+
+            "sara_data_def_json_$(bundle_name)" expression => isvariable("def.$(bundle_name)"),
+                comment => "Def.json data defined";
+
 
     reports:
-        any::
-            "$(this.bundle): $(bundle_name) using json files: $(files_str)"
+@if minimum_version(3.11)
+        expand_all_service_bundles::
+            "$(this.bundle): Cross reference variable expanding for bundles
+                $(with)"
+                with => format("%S", "def.sara_services_enabled"),
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE|DEBUG_services";
+
+        !expand_all_service_bundles::
+            "$(this.bundle): $(bundle_name) using json files
+                $(with)"
+                with => format("%S", "json_files"),
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 
-@if minimum_version(3.11)
             "$(this.bundle): template_data:
                 $(with)"
                 comment => "Display the used template data",
@@ -108,7 +128,10 @@ bundle agent sara_data(bundle_name, json_files)
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 @endif
 
-        cfengine_3_10|cfengine_3_7::
+        !expand_all_service_bundles.(cfengine_3_10|cfengine_3_7)::
+            "$(this.bundle): $(bundle_name) using json files: $(files_str)"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+
             "$(this.bundle): template_data:
                 $($(bundle_name)_str)"
                 comment => "Display the used template data",

@@ -1,4 +1,5 @@
 {
+    "AcceptEnv": "",
     "AddressFamily": "any",
     "AllowTcpForwarding": "yes",
     "authorized_keys_command" : "/opt/ssh-ldap-pubkey/bin/ssh-ldap-pubkey-wrapper",
@@ -23,8 +24,8 @@
         { "address": "::" },
         { "address": "0.0.0.0" }
     ],
-    "LoginGraceTime": "120", 
-    "LogLevel": "INFO", 
+    "LoginGraceTime": "120",
+    "LogLevel": "INFO",
     "matches" : [
         { "match" : "match Address $(sys.policy_hub)", "settings" : [
             "PermitRootLogin yes"
@@ -32,29 +33,29 @@
         }
     ],
     "matches_client" : [
-        { "match" : "Host localhost", "settings" : [ 
-            "ForwardAgent yes", 
+        { "match" : "Host localhost", "settings" : [
+            "ForwardAgent yes",
             "ForwardX11 yes"
-            ] 
+            ]
         },
-        { "match" : "Host *", "settings" : [ 
+        { "match" : "Host *", "settings" : [
             "GSSAPIAuthentication yes",
             "GSSAPIDelegateCredentials no",
             "HashKnownHosts yes",
             "HostbasedAuthentication no",
-            "ForwardAgent no", 
+            "ForwardAgent no",
             "ForwardX11 no",
             "SendEnv LANG LC_*"
-            ] 
+            ]
         }
     ],
-    "MaxAuthTries": "6", 
-    "MaxSessions": "10", 
-    "PasswordAuthentication": "yes", 
-    "permit_root": [], 
-    "PermitEmptyPasswords": "no", 
-    "PermitRootLogin": "no", 
-    "Port": "22", 
+    "MaxAuthTries": "6",
+    "MaxSessions": "10",
+    "PasswordAuthentication": "yes",
+    "permit_root": [],
+    "PermitEmptyPasswords": "no",
+    "PermitRootLogin": "no",
+    "Port": "22",
     "PrintLastLog": "yes",
     "PrintMotd": "no",
     "Protocol": "2",

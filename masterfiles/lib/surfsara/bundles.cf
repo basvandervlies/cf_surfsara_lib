@@ -226,7 +226,9 @@ bundle agent sara_json_copy(bundle_name, files)
 
         TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
             "local_dir" string => "$(this.promise_dirname)/../../../../$(bundle_json_dir)",
-                comment => "Can be replace by $(sys.policy_entry_dirname)/../...";
+                comment => "Can be replaced by $(sys.policy_entry_dirname)/../...";
+            #"local_dir" string => "$(sys.policy_entry_dirname)/../$(bundle_json_dir)",
+            #    comment => "Can be replaced by $(sys.policy_entry_dirname)/../";
 
     files:
         any::
@@ -238,6 +240,7 @@ bundle agent sara_json_copy(bundle_name, files)
         !(TEMPLATE_SKIP_COPY|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY|JSON_SKIP_COPY)::
             "$(def.node_template_dir)/$(bundle_name)/$(files)"
                 comment     => "Let's copy the json files",
+                move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
                 copy_from   => remote_dcp("$(bundle_json_dir)/$(files)", "$(sys.policy_hub)"),
                 classes     => results("bundle","$(bundle_name)$(files)");
@@ -245,12 +248,19 @@ bundle agent sara_json_copy(bundle_name, files)
         TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
             "$(def.node_template_dir)/$(bundle_name)/$(files)"
                 comment     => "Let's copy the json files",
+                move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
                 copy_from   => local_dcp("$(local_dir)/$(files)"),
+                # must be done when https://github.com/cfengine/core/pull/3468
+                # is merged
+                #copy_from   => sara_template_local_dcp("$(local_dir)/$(files)"),
+                # version 3.12/3,13
+                #copy_from   => sara_template_local_dcp("$(sys.policy_entry_dirname)/../$(bundle_json_dir)/$(files)"),
                 classes     => results("bundle","$(bundle_name)$(files)");
 
     reports:
         any::
+            "$(sys.policy_entry_dirname)/../$(bundle_json_dir)/$(files)";
             "$(this.bundle): $(bundle_name) json file(s) : $(files_str)"
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
 
@@ -375,7 +385,9 @@ bundle agent sara_mustache_copy(bundle_name, files)
 
         TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
             "local_dir" string => "$(this.promise_dirname)/../../../../$(bundle_template_dir)",
-                comment => "Can be replace by $(sys.policy_entry_dirname)/../...";
+                comment => "Can be replaced by $(sys.policy_entry_dirname)/../...";
+            #"local_dir" string => "$(sys.policy_entry_dirname)/../$(bundle_template_dir)",
+            #    comment => "Can be replaced by $(sys.policy_entry_dirname)/../";
 
     files:
         any::
@@ -395,11 +407,12 @@ bundle agent sara_mustache_copy(bundle_name, files)
        TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
             "$(def.node_template_dir)/$(bundle_name)/$(files)"
                 comment     => "Let's copy the json files",
+                move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
                 classes     => if_repaired("$(bundle_name)_mustache_copied"),
                 copy_from   => local_dcp("$(local_dir)/$(files)");
                 # version 3.12/3,13
-                #copy_from   => local_dcp("$(sys.policy_entry_dirname)/../$(bundle_template_dir)/$(files)");
+                #copy_from   => sara_local_template_copy("$(sys.policy_entry_dirname)/../$(bundle_template_dir)/$(files)");
 
     reports:
         any::

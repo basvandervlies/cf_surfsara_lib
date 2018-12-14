@@ -260,7 +260,6 @@ bundle agent sara_json_copy(bundle_name, files)
 
     reports:
         any::
-            "$(sys.policy_entry_dirname)/../$(bundle_json_dir)/$(files)";
             "$(this.bundle): $(bundle_name) json file(s) : $(files_str)"
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
 

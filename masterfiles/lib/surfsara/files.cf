@@ -13,6 +13,13 @@ body copy_from sara_cp_dir(bundle_name, var, server)
     type_check  => "$($(bundle_name).$(var)[type_check])";
 }
 
+body copy_from sara_template_local_dcp(from)
+{
+    compare => "digest";
+    source => "$(from)";
+    copylink_patterns => { ".*" };
+}
+
 bundle agent sara_cp_dir_default
 {
     vars:

@@ -1,8 +1,9 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.12 (2018-12-03)](#version-0912-2018-12-03)
+* [Version: 0.9.15 (2018-12-03)](#version-0915-2018-12-03)
     * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
     * [NHC (Node Health Check)](#nhc-node-health-check)
+    * [Bundle services data](#bundle-services-data)
 * [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
     * [apt](#apt)
     * [munge](#munge)
@@ -10,9 +11,9 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 0.9.12 (2018-12-03)
+# Version: 0.9.15 (2018-12-03)
 
- * Services added:  nsswitch, nhc
+ * Services added:  nsswitch, nhc, slurm
  * apt service enhancements:
    * autoremove added option `-y` to skip questions
  * Munge service enhancements:
@@ -32,6 +33,7 @@
    * `src` is now renamed to `source`
    * keywords `mode`, `owner` and `group` is replaced by `mog` keyword.
    * Note this is a incompatible change. All files  have been converted to new format
+ * Always copy json/mustache files, do not check the type of the file.
 
 ## Expand CFengine variables found in countainer (2 levels)
 
@@ -59,6 +61,26 @@ be marked as down or offline so as to prevent jobs from being scheduled or
 run on them. This helps increase the reliability and throughput of a cluster
 by reducing preventable job failures due to misconfiguration, hardware failure, etc.
  * https://github.com/mej/nhc
+
+## Bundle services data
+
+Before we run all the bundles specified by `def.sara_services_enabled`. Will expand
+all the unresolved variables for all bundles defined by `def.sara_services_enabled`.
+So the order of defining the service bundles does not matter, eg:
+  *  nhc
+```#json
+{
+    "timeout": "$(sara_data.slurm[MessageTimeout])"
+}
+```
+
+ * slurm
+```#json
+{
+    "MessageTimeout": "20"
+}
+```
+This would not expand because the `nhc` json data is read first and then `slurm`.
 
 # Version: 0.9.8 (2018-09-25)
 

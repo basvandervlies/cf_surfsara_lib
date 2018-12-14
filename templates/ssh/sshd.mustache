@@ -1,9 +1,6 @@
 ##
 # Managed by CFengine, template generated
-#   SVN Info:
-#       $URL: https://subtrac.surfsara.nl/osd/beowulf/svn/trunk/cfengine3/templates/ssh/sshd.mustache $
-#       $Id: sshd.mustache 23205 2017-06-26 08:48:10Z lucas $
-#
+# SURFsara Bas van der Vlies
 
 # What ports, IPs and protocols we listen for
 Port {{{vars.sara_data.ssh.Port}}}
@@ -12,8 +9,8 @@ Port {{{vars.sara_data.ssh.Port}}}
 AddressFamily {{{vars.sara_data.ssh.AddressFamily}}}
 Protocol {{{vars.sara_data.ssh.Protocol}}}
 
-{{#vars.sara_data.ssh.ListenAddress}} 
-ListenAddress {{address}} 
+{{#vars.sara_data.ssh.ListenAddress}}
+ListenAddress {{address}}
 {{/vars.sara_data.ssh.ListenAddress}}
 
 
@@ -81,7 +78,7 @@ UseLogin {{{vars.sara_data.ssh.UseLogin}}}
 {{/classes.SSH_USE_DEPRICATED_OPTIONS}}
 
 # Allow client to pass locale environment variables
-#AcceptEnv LANG LC_*
+AcceptEnv {{{vars.sara_data.ssh.AcceptEnv}}}
 {{#vars.sara_data.ssh.Subsystem}}
 Subsystem {{service}} {{path}}
 {{/vars.sara_data.ssh.HostKey}}

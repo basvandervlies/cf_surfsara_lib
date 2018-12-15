@@ -1,0 +1,225 @@
+#!/usr/bin/python
+#
+# SVN Info
+#   $Id: cf_generate_doc.py 21645 2017-02-10 10:20:24Z paulr $
+#   $URL: https://subtrac.surfsara.nl/beowulf/svn/trunk/cfengine3/doc_generator/cf_generate_doc.py $
+#
+"""
+    Usage: icf_generate_doc [options] <cfengine_config_dir>>
+    Will generate Trac wiki pages from inline cfengine documentation
+"""
+import re
+import sys
+import os
+import urlparse
+import pprint
+
+from argparse import ArgumentParser
+
+cfengine_stdlib = [
+    'lib/cfengine_stdlib.cf',
+    'lib/3.6/',
+    'lib/3.7/',
+]
+
+
+cf_doc_regex = r'''
+    (?P<start>^@if[ \t]*minimum_version\(99[.]9\)[ \t]*$)
+    |(?P<end>^@endif[ \t]*$)
+'''
+cf_doc_re = re.compile(cf_doc_regex,  re.VERBOSE)
+
+def get_filepaths(directory, options):
+    """
+    This function will generate the file names in a directory
+    tree by walking the tree either top-down or bottom-up. For each
+    directory in the tree rooted at directory top (including top itself),
+    it yields a 3-tuple (dirpath, dirnames, filenames).
+    """
+    if options.VERBOSE or options.DEBUG:
+        print("function: get_filepaths")
+
+    file_paths = dict() # List which will store all of the full filepaths.
+
+    # Walk the tree.
+    for root, directories, files in os.walk(directory):
+
+        file_paths[root] = list();
+
+        for filename in files:
+            # Join the two strings in order to form the full filepath.
+            filepath = os.path.join(root, filename)
+            if options.DEBUG:
+                print("\t%s" %filepath)
+
+            file_paths[root].append(filepath)  # Add it to the list.
+
+    return file_paths  # Self-explanatory.
+
+
+
+def parse_2_md(source, dest, options):
+    if options.DEBUG:
+        print("function parse_cf_file: %s" %file)
+
+    fd = open(source, "r");
+
+    doc = False
+    data = list()
+    for l in fd.readlines():
+
+        if l.startswith('@if minimum_version(99.9)'):
+            doc = True
+            continue
+        elif l.startswith('@endif'):
+            doc = False
+            continue
+        else:
+            if doc:
+                if options.DEBUG:
+                    print("\t%s" %l)
+                data.append(l)
+
+    fd.close()
+
+    fd = open(dest, 'w')
+    lines = ''.join(data)
+    fd.writelines(lines)
+    fd.close()
+
+def generate_page_name(base_dir, filename, options):
+    """
+    Generate wiki page name
+    """
+    if options.DEBUG:
+        print("function generate_page_name")
+
+    wiki_name = filename[len(base_dir):]
+    wiki_name = wiki_name.replace('/','')
+    wiki_name = wiki_name.replace('.cf', "")
+    if options.DEBUG:
+        print("\t%s" %wiki_name)
+    return wiki_name
+
+
+def generate_md_files(dir_files, options):
+    """
+    Create the main page for the cfengine documentation
+    """
+    if options.VERBOSE:
+        print("function service_page")
+
+
+    for dir in dir_files.keys():
+
+        md_page = list()
+
+        if dir in [ 'services' ]:
+            md_page.append('')
+            md_page.append('# An index of all the services that have inline documentation')
+            md_page.append('')
+            fd = open('doc/services.md', 'w')
+            dest_dir = 'doc/services'
+            md_dir = 'services'
+        else:
+            md_page.append('')
+            md_page.append('# The library documentattion')
+            md_page.append('')
+            fd = open('doc/library.md', 'w')
+            dest_dir = 'doc/library'
+            md_dir = 'library'
+
+        files = dir_files[dir]
+        files.sort()
+
+        for f in files:
+            if f.endswith(".cf"):
+                page_name = generate_page_name(dir, f, options)
+
+                md_file =  "%s/%s.md" %(dest_dir, page_name)
+
+                md_page_dir = "%s/%s.md" %(md_dir, page_name)
+                line = ' * [%s](%s)' %(page_name, md_page_dir)
+                if options.DEBUG:
+                    print("\t%s" %line)
+                md_page.append(line)
+
+                parse_2_md(f, md_file, options)
+
+        lines = '\n'.join(md_page)
+        fd.writelines(lines)
+        fd.close()
+
+def main_page(rpc, base_page, doc_dir, options):
+    """
+    Create the main page for the cfengine documentation
+    """
+    footer = list()
+    if options.VERBOSE:
+        print("function main_page")
+
+    main_wiki = "%s/main.wiki" %(doc_dir)
+    with open(main_wiki, "r") as f:
+        data = f.readlines()
+        data = create_wiki_page(data, footer, options)
+        upload_wiki_page(rpc, base_page, data, options)
+    f.close()
+
+#def howto_pages(rpc, base_page, doc_dir, options):
+#    footer = list("\n[wiki:%s#Howtos Back to the Howto pages]" %(base_page)) if options.VERBOSE:
+#        print("function howto_pages")
+#    # code for statice sub pages that are referenced in main.wiki
+##
+#    content = get_filepaths(doc_dir,  options)
+#    for filename in content[doc_dir]:
+#        name =  os.path.basename(filename)
+#        if name != "main.wiki":
+#            wiki_name = "%s/Howto_%s" %(base_page, name)
+#            with open(filename, "r") as f:
+##                data = f.readlines()
+#                data = create_wiki_page(data, footer, options)
+#                upload_wiki_page(rpc, wiki_name, data, options)
+#            f.close()
+
+def add_arguments(p):
+    """
+    """
+    p.set_defaults(
+        DEBUG   = False,
+        VERBOSE = False,
+        DRY_RUN = False,
+    )
+
+    p.add_argument('-d', '--debug',
+        action  = 'store_true',
+        dest    = 'DEBUG',
+        help    = "Debug the program [default: False]"
+    )
+    p.add_argument('-n', '--dry-run',
+        action  = 'store_true',
+        dest    = 'DRY_RUN',
+        help    = "Show the executed statments [default: False]"
+    )
+    p.add_argument('-v', '--verbose',
+        action  = 'store_true',
+        dest    = 'VERBOSE',
+        help    = "Some important info [default: False]"
+    )
+
+
+if __name__ == '__main__':
+
+    parser = ArgumentParser(usage=__doc__)
+
+    add_arguments(parser)
+
+    options  = parser.parse_args()
+
+    if options.DEBUG:
+        pprint.pprint(options)
+
+    cf_files_1 = get_filepaths("services", options)
+    cf_files_2 = get_filepaths("masterfiles/lib/surfsara", options)
+    cf_files =  dict(cf_files_1, **cf_files_2)
+
+    generate_md_files(cf_files, options)

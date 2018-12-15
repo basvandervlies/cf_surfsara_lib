@@ -11,6 +11,13 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+@if minimum_version(99.9)
+# stdlib.cf
+
+Source: [stdlib.cf](/masterfiles/lib/surfsara/stdlib.cf)
+
+This is the the file that is included in the MPF or your own framework.
+@endif
 bundle common surfsara_stdlib_common
 {
     vars:

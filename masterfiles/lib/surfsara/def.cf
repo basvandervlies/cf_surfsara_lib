@@ -1,13 +1,26 @@
 #
 #  SURFsara def.cf
 #
+@if minimum_version(99.9)
+# def.cf
+
+Source: [def.cf](/masterfiles/lib/surfsara/def.cf)
+
+This is the standard `def.cf` used by cf_surfsara_lib. If your site has defined
+their own then set the class `SURFSARA_SKIP_DEF_CF_INCLUDE` and this file will
+not be included. The most important variable is:
+ * `node_template_dir` and its default value is: `$(sys.workdir)/node_templates`
+
+If you have your own `def.cf` then this variable **must** be set.
+
+@endif
 bundle agent def
 {
 vars:
     any::
         "node_template_dir" string => ifelse(
             isvariable( "node_template_dir"), $(node_template_dir),
-            "$(sys.workdir)/surfsara_templates");
+            "$(sys.workdir)/node_templates");
 
 # Template NTP example
     centos::

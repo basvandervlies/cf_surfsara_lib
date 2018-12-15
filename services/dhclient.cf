@@ -39,7 +39,9 @@ bundle agent dhclient_surfsara_config
 }
 
 @if minimum_version(99.9)
-= dhclient =
+# dhclient
+
+Source: [dhclient.cf](/services/dhclient.cf)
 
 For now this bundle generate only the 'dhclient-enter-hooks' file:
  * debian: /etc/dhcp/dhclient-enter-hooks.d/cfengine_generated
@@ -47,88 +49,77 @@ For now this bundle generate only the 'dhclient-enter-hooks' file:
 
 You can control what will be in in the hooks file by setting classes:
  *  def.cf/def.json, override json file. This will set `DHCLIENT_RESOLV_CONF` for `any`.
-{{{
-#!json
+```json
 "dhclient": {
     "classes": {
         "RESOLV_CONF": "any"
     }
 }
-}}}
+```
 
- * by setting `DHCLIENT_RESOLV_CONF` class.
+## Usage
 
-== Usage ==
-
-The bundle is called with:
+The bundle can be run via:
  *  `"" usebundle => dhclient_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "dhclient",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will aways read the [default.json](/templates/dhclient/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
+```
 vars:
     any::
         "dhclient_json_files" slist => { "override_resolv.json" };
-}}}
+```
 
-The variable must be ''dhclient_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be `dhclient_json_files` and with this setup 1 extra json file will be  merged.
 
-=== DEBUG ===
+### DEBUG
 
 f you want to debug this bundle set the `DEBUG_dhclient` class, eg:
  * `-DDEBUG_dhclient`
 
-=== Setup ===
-{{{
-#!json
-{
-    "resolv_conf":
-"
-        make_resolv_conf()
-        {
-            echo 'Disabled make_resolv_conf, maintained by CFengine (dhclient.cf)'
-        }
-"
-}
-}}}
+### def.cf/json
 
-=== Def Usage ===
+See [default.json](/templates/dhclient/json/default.json) what the default values are and
+which variables can be overriden.
+
 The following must be set in host specific host file: `def.json`
-{{{
-#!json
-    "classes": {
-        "DHCLIENT_BUNDLE": "any",
-    },
-    "vars": {
-        "sara_services_enabled": [
-            ...
-            "dhclient",
-            ...
-        ],
-        "dhclient": {
-            "classes": {
-                "RESOLV_CONF": "any"
-            }
+```json
+"classes": {
+    "DHCLIENT_BUNDLE": "any",
+},
+"vars": {
+    "dhclient": {
+        "classes": {
+            "RESOLV_CONF": "any"
         }
     }
-}}}
+}
+```
 
 In def.cf/def.json you can override the `resolv_conf` function, eg def.json:
-{{{
-#!json
-    "vars": {
-        "dhclient": {
-            "resolv_conf":
+```json
+"vars": {
+    "dhclient": {
+        "resolv_conf":
 "
 make_resol_conf()
 {
     <something you wrote>
 }
 "
-        },
-    }
-}}}
+    },
+}
+```
 @endif
 

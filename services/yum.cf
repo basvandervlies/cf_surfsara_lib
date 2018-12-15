@@ -127,13 +127,13 @@ bundle agent yum_repository()
 }
 
 @if minimum_version(99.9)
-= YUM =
-[source:trunk/cfengine3/config/bundles/yum.cf source yum.cf]
+# yum
+
+Source: [yum.cf](/services/yum.cf)
 
 This bundle will configure the:
  * yum.conf -> sara_yum_conf class will set
  * repo files in /etc/yum.repos.d
-
 
 These will be generated with the aid of the mustache templates with json data.
 The templates/json files are located in:
@@ -142,110 +142,77 @@ The templates/json files are located in:
  * templates/yum_repository/
  * templates/yum_repository/json
 
+## Usage
 
-== Usage ==
-{{{
-#!cf3
-  "" usebundle => yum_autorun();
-}}}
+The bundle can be run via:
+ *  `"" usebundle => yum_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "yum",
+            "..."
+    ]
+}
+```
 
-=== DEBUG ===
+The bundle will always read the [default.json](/templates/yum/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
+    any::
+        "yum_repository_json_files" slist => { "surfsara.json" };
+```
+
+The variable must be `yum_json_files` and with this setup 1 extra json file will be  merged.
+
+### DEBUG
 
 If you want to debug these bundle set the `DEBUG_yum` class, eg:
  * `-DDEBUG_yum`
 
-=== Setup ===
+## def.cf/json
 
-The variables are set in default.json and can be overwritten.
- * yum default json
-{{{
-#!json
-{
-    "assumeyes": "1",
-    "proxy": "",
-    "use_proxy": false
-}
-}}}
- * yum repository default
-{{{
-#!json
-{
-    "CentOS" : {
-        "repo": [
-            {
-                "name": "base",
-                "desc": "CentOS-$releasever - Base",
-                "baseurl": "http://mirror.centos.org/centos/$releasever/os/$basearch/",
-                "gpgkey": "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6",
-                "gpgcheck": "1"
-            },
-            {
-                "name": "updates",
-                "desc": "CentOS-$releasever - Updates",
-                "baseurl": "http://mirror.centos.org/centos/$releasever/updates/$basearch/",
-                "gpgkey": "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6",
-                "gpgcheck": "1"
-            },
-            {
-                "name": "extras",
-                "desc": "CentOS-$releasever - Extras",
-                "baseurl": "http://mirror.centos.org/centos/$releasever/extras/$basearch/",
-                "gpgkey": "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6",
-                "gpgcheck": "1"
-            }
-       ]
-    }
-}
-}}}
+See what the default values are and which variables can be overriden:j
+ * [yum default.json](/templates/yum/json/default.json)
+ * [yum repository default.json](/templates/yum_repository/json/default.json)
 
-== Def usage ===
-
-The following class must be set in the specific ''def.json'' hostfile:
-{{{
-#!json
-    "vars": {
-        "sara_services_enabled": [
-            ...
-            "yum",
-            ...
-        ],
-        "yum": {
-        }
-    },`
-}}}
 
 With yum you can specify 2 different type of lists for external json data:
  1. yum_json_files --> yum.conf
  1. yum_repository_json_files --> yum repo files
 
 Here are some examples how to use it.
- * add an extra repo:
-  * def.cf
-{{{
-#!cf3
-    any::
-        "yum_repository_files" slist => { "epel.json" };
-}}}
-    * def.json
-{{{
-#!json
-    "vars": {
-        "yum_repository_files": [ "epel.json" ],
-     },
-}}}
- * override yum conf setting:
-  * def.cf
-{{{
-#!cf3
-    vars:
-        "yum" data => parsejson( '{ "assumeyes":  "0"  }' );
-}}}
-  * def.json
-{{{
-#!json
-    "vars":
-        "yum": {
-            "assumeyes":  "0"
-        },
-}}}
+
+add an extra repo:
+ * def.cf
+```
+any::
+    "yum_repository_files" slist => { "epel.json" };
+```
+
+ * def.json
+```json
+"vars": {
+    "yum_repository_files": [ "epel.json" ],
+}
+```
+
+override yum conf setting:
+ * def.cf
+```
+vars:
+    "yum" data => parsejson( '{ "assumeyes":  "0"  }' );
+```
+
+ * def.json
+```json
+"vars": {
+    "yum": {
+        "assumeyes":  "0"
+    }
+}
+```
 @endif

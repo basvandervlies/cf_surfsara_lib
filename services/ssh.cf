@@ -168,8 +168,9 @@ bundle agent ssh_surfsara_config()
             "$(ssh.ssh_keygen) $(sara_data.ssh[keygen_opt])";
 }
 @if minimum_version(99.9)
+# ssh
 
-# SSH
+Source: [ssh.cf](/services/ssh.cf)
 
 This bundle installs ssh software on a node.
 
@@ -194,13 +195,24 @@ The following clases can be set via def.cf/json:
 
 ## Usage
 
-This is called with:
- * `"" usebundle => ssh_autorun();`
+The bundle can be run via:
+ *  `"" usebundle => apt_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "ssh",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will aways read the [default.json](/templates/ssh/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
 ```
+vars:
     any::
         "ssh_json_files" slist => { "policy_server.json" };
 ```
@@ -210,106 +222,42 @@ The variable must be ''ssh_json_files'' and with this setup 1 extra json file wi
 ### DEBUG
 
 if you want to debug this bundle set the `DEBUG_ssh` class, eg:
- * `DDEBUG_ssh`
+ * `-DDEBUG_ssh`
 
-## Setup
-The variables are set in default.json and can be overwritten.
-```#json
-{
-    "AddressFamily": "any",
-    "AllowTcpForwarding": "yes",
-    "authorized_keys_command" : "/opt/ssh-ldap-pubkey/bin/ssh-ldap-pubkey-wrapper",
-    "authorized_keys_commanduser" :  "nobody",
-    "AuthorizedKeysFile": "%h/.ssh/authorized_keys",
-    "Banner": "none",
-    "Banner_system": "SURFsara",
-    "Banner_system_url": "http://www.surfsara.nl",
-    "ChallengeResponseAuthentication": "no",
-    "copy_files": [],
-    "HostbasedAuthentication": "yes",
-    "HostKey": [
-        { "key" : "/etc/ssh/ssh_host_rsa_key" },
-        { "key" : "/etc/ssh/ssh_host_dsa_key" }
-    ],
-    "IgnoreRhosts": "yes",
-    "IgnoreUserKnownHosts": "no",
-    "KeyRegenerationInterval": "3600",
-    "keygen_opt": "-A",
-    "ListenAddress": [
-        { "address": "::" },
-        { "address": "0.0.0.0" }
-    ],
-    "LoginGraceTime": "120",
-    "LogLevel": "INFO",
-    "matches" : [
-        { "match" : "match Address $(sys.policy_hub)", "settings" : [
-            "PermitRootLogin yes"
-            ]
-        }
-    ],
-    "matches_client" : [
-        { "match" : "Host localhost", "settings" : [
-            "ForwardAgent yes",
-            "ForwardX11 yes"
-            ]
+## def.cf/json
+
+See [default.json](/templates/ssh/json/default.json) what the default values are and
+which variables can be overriden
+
+Here are some examples how to use it:
+
+ * specify ssh configuration in def.cf:
+```
+vars:
+    "ssh_json_files" slist => { "policy_server.json" };
+```
+
+ * Set/Override the daemon options variable in ''def.json'':
+```json
+        "ssh" : {
+            "classes": {
+                "keygen": [ "any" ]
+            },
+            "MaxAuthTries": "6",
+            "X11Forwarding": "no",
         },
-        { "match" : "Host *", "settings" : [
-            "GSSAPIAuthentication yes",
-            "GSSAPIDelegateCredentials no",
-            "HashKnownHosts yes",
-            "HostbasedAuthentication no",
-            "ForwardAgent no",
-            "ForwardX11 no",
-            "SendEnv LANG LC_*"
-            ]
-        }
-    ],
-    "MaxAuthTries": "6",
-    "MaxSessions": "10",
-    "PasswordAuthentication": "yes",
-    "permit_root": [],
-    "PermitEmptyPasswords": "no",
-    "PermitRootLogin": "no",
-    "Port": "22",
-    "PrintLastLog": "yes",
-    "PrintMotd": "no",
-    "Protocol": "2",
-    "PubkeyAuthentication": "yes",
-    "RhostsRSAAuthentication": "yes",
-    "RSAAuthentication": "yes",
-    "ServerKeyBits": "768",
-    "StrictModes": "yes",
-    "Subsystem": [
-        { "service" : "sftp" , "path" : "$(ssh.sftp_server_path)" }
-    ],
-    "SyslogFacility": "AUTH",
-    "TCPKeepAlive": "yes",
-    "UseDNS": "no" ,
-    "UseLogin": "no" ,
-    "UsePAM": "yes" ,
-    "UsePrivilegeSeparation": "yes" ,
-    "X11DisplayOffset": "10" ,
-    "X11Forwarding": "yes"
-}
+```
+
+ * override server setting in def.cf
+```
+vars:
+    "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
 ```
 
 ### copy_files
 
-When this variable is set it will coyy the specified file to the `ssh.config_dir`. copy_files has the
-following format:
-```#json
-"": [
-{
-    "dest": "Destination path with filename",
-    "source": "The filename path on the policy server/cf-hub",
-    "mog": [ "mode", "owner", "group" ]
-    "run_bundle": "This bundle will run if the file gets copied"
-}
-]
-```
-
-example:
-```#json
+When this variable is set it will copy the specified file to the `ssh.config_dir`, eg:
+```json
 "copy_files": [
     {
         "dest": "$(ssh.config_dir)/shosts.equiv",
@@ -322,45 +270,7 @@ example:
         "mog": [ "0644", "root", "root" ],
         "run_bundle": "ssh_daemons_restart"
     }
-}
+]
 ```
-
 where `cf_bundles_dir` is a ''cf-serverd shortcut''.
-
-## Def usage
-
-The following must be set in the specific ''def.json'' hostfile
-```#json
-    "vars": {
-        "sara_services_enabled": {
-            ...
-            "ssh",
-            ...
-        },
-        "ssh": {
-        }
-    },
-```
-
-Here are some examples how to use it:
- * specify ssh configuration in def.cf:
-```
-vars:
-    "ssh_json_files" slist => { "policy_server.json" };
-```
- * Set/Override the daemon options variable in ''def.json'':
-```#json
-        "ssh" : {
-            "classes": {
-                "keygen": [ "any" ]
-            },
-            "MaxAuthTries": "6",
-            "X11Forwarding": "no",
-        },
-```
- * override server setting in def.cf
-```
-vars:
-    "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
-```
 @endif

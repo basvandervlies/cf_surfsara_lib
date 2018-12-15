@@ -2,25 +2,39 @@
 #  SURFsara bundles.cf
 #
 @if minimum_version(99.9)
-# SURFSARA lib bundles documentation (github)
+# template.cf
 
-[source:trunk/cfengine3/config/lib/sara/bundles.cf source sara lib bundles.cf]
+Source: [templates.cf](/masterfiles/lib/surfsara/bundles.cf)
 
-## bundle sara_data(bundle_name, json_files)
+Here all bundles are listed that are involved in parsing json data and
+generating the templates files.
 
-This bundle will merge the json files into a data container which as the same name
+## sara_data(bundle_name, json_files)
+
+This bundle will merge the json files into a data container which has the same name
 as the given `bundle_name`. This data container can be accessed by other bundles
 as:
- * `sara_data.<bundle_name>.<variable_name>
+ * `sara_data.<bundle_name>.<variable_name>`
 
-NOTE: cfengine variables that are definied in the json files, eg: $(def.hostname)
+NOTE: cfengine variables that are definied in the json files, eg: `$(def.hostname)`
 are expanded.
 
-The json files are read from the following directory local on the host:
+The json files are read from the following local directory on the host:
  * `$(def.node_template_dir)/$(bundle_name)`
 
-This function is mostly used for the mustache templates and is also used
-by some cfengine bundles.
+There is one exception if the bundle name is `expand_all_service_data`. Then the
+bundle will loop over the list `def.sara_services_enabled` to expand cfengine variables.
+Now service bundles can can reference variables of other service bundles,eg
+```json
+{
+ "nhc": {
+     "timeout": "$(sara_data.slurm[MessageTimeout])"
+ },
+ "slurm": {
+    "MessageTimeout": "20"
+ }
+}
+```
 @endif
 bundle agent sara_data(bundle_name, json_files)
 {
@@ -149,17 +163,17 @@ bundle agent sara_data(bundle_name, json_files)
 }
 
 @if minimum_version(99.9)
-## sara_data_autorun
+## sara_data_autorun(bundle_name)
+
 This bundle wil take care of copying the json files from the policy hub to:
  * $(def.node_status_dir)/$(bundle_name)/json
 
-After the copying it will merge all json files and the parsed data is available in the:
- * cfengine:
- * mustache:
+After the copying it will merge all json files and the parsed data is available as:
+ * cfengin: `$(sara_data.<bundle_name>[<var>])`
+ * mustache: `vars.sara_data.<bundle_mame>.<var>`
 
 After merging it will determine if we have to set cfengine classes based on the json variable
-`classes` defined in bundle json data:
- * ` "" usebundle => sara_json_classes_2_cfengine("$(bundle_name)");`
+`classes` defined in the bundle json data.
 @endif
 bundle agent sara_data_autorun(bundle_name)
 {
@@ -170,20 +184,19 @@ bundle agent sara_data_autorun(bundle_name)
 
 
 @if minimum_version(99.9)
-## bundle sara_json_classes_2_cfengine( bundle_name)
-This bundle is internally and will set cfengine classes based on the json 'classes'
-variable  defined in the bundle json data, eg:
-{{{
-#!json
+## sara_json_classes_2_cfengine(bundle_name)
+
+This bundle is internally and will set cfengine classes based on the json `classes`
+variable defined in the bundle json data, eg:
+```json
 "dhclient": {
     "classes": {
         "RESOLV_CONF": "any"
-    },
+    }
 }
-}}}
+```
 
 This will set the class: `DHCLIENT_RESOLV_CONF` for class expression `any`.
-
 all classes wil be prefix by the `bundle_name` in uppercase.
 @endif
 bundle agent sara_json_classes_2_cfengine(bundle_name)
@@ -210,10 +223,10 @@ bundle agent sara_json_classes_2_cfengine(bundle_name)
 }
 
 @if minimum_version(99.9)
-## bundle sara_json_copy(bundle_name, json_files)
+## sara_json_copy(bundle_name, json_files)
+
 The bundle is internally and will take care of copying the json file(s) from the bundle data directory
-on the policy hub to a the local node directory. The bundle is called by:
- * sara_json_copy
+on the policy hub to a the local node directory.
 @endif
 bundle agent sara_json_copy(bundle_name, files)
 {
@@ -275,7 +288,7 @@ bundle agent sara_json_copy(bundle_name, files)
 }
 
 @if minimum_version(99.9)
-### bundle sara_json_copy_and_merge(bundle_name)
+## sara_json_copy_and_merge(bundle_name)
 
 It use the same setup as above. So the variables must be defined in:
  * `def.$(bundle_name)[json_files]`
@@ -290,10 +303,6 @@ It uses the following bundles:
 
 The bundle is called by:
  * sara_data_autorun or sara_mustache_autorun
-
-After the parsing the json data is available via:
- * mustache: `vars.sara_data.$(bundle_name).<variable_name>`
- * cfengine: `sara_data.$(bundle_name).<variable_name>`
 @endif
 bundle agent sara_json_copy_and_merge(bundle_name)
 {
@@ -349,6 +358,11 @@ bundle agent sara_json_copy_and_merge(bundle_name)
                 ifvarclass => "!(bundle_set|def_set|local_set).(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
 }
 
+@if minimum_version(99.9)
+## sara_mustache_autorun(bundle_name)
+
+This  bundle will take of copying the mustache template file(s) and expanding the template(s)
+@endif
 bundle agent sara_mustache_autorun(bundle_name)
 {
     vars:
@@ -370,7 +384,8 @@ bundle agent sara_mustache_autorun(bundle_name)
 }
 
 @if minimum_version(99.9)
-## bundle sara_mustache_copy(bundle_name, files)
+## sara_mustache_copy(bundle_name, files)
+
 The bundle is internally and will take care of copying the template file(s) from the bundle data directory
 on the policy hub to a the local node directory. The bundle is called by:
  * sara_mustache_autorun
@@ -427,7 +442,7 @@ bundle agent sara_mustache_copy(bundle_name, files)
 }
 
 @if minimum_version(99.9)
-### bundle sara_mustache_expand(bundle_name)
+## sara_mustache_expand(bundle_name)
 
 This bundle is used internally and will expand the mustache template file(s) with the json data. The
 bundle is called by:
@@ -451,7 +466,8 @@ bundle agent sara_mustache_expand(bundle_name)
 }
 
 @if minimum_version(99.9)
-### bundle sara_mustache_cf_data_2_file(bundle_name, template_file, destination , data_section)
+## sara_mustache_cf_data_2_file(bundle_name, template_file, destination , data_section)
+
 With this bundle you can generate a file from a template with cfengine internal json data. There are 2
 options:
  1. json data section variable passed as argument. Then the section will be merged from the
@@ -462,9 +478,12 @@ options:
 The template is fetch from the local node direcrory:
  * `$(def.node_template_dir)/$(bundle_name)/$(template_file)`
 
-When json data section variable is specified. You must specify which date section you want to use. The json files must be merged
-via sara_data, as we only can merge data from this bundle, eg `sara_data.<bundle_name>[$(data_section)]` This
-data will then be used as toplevel for the mustache template. You can just use the variables name withour `variable_name>`
+When json data section variable is specified. You must specify which date section you want to use. The json
+files must be merged via sara_data, as we only can merge data from this bundle, eg:
+ * `sara_data.<bundle_name>[$(data_section)]`
+
+This data will then be used as toplevel for the mustache template. You can just use the variables
+name(s): `<variable_name>`
 @endif
 bundle agent sara_mustache_cf_data_2_file(bundle_name, template_file, destination, data_section)
 {

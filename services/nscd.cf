@@ -104,8 +104,9 @@ bundle agent nscd_surfsara_config()
 
 }
 @if minimum_version(99.9)
-= NSCD =
-[source:trunk/cfengine3/config/bundles/nscd.cf source nscd.cf]
+# nscd
+
+Source: [nscd.cf](/services/nscd.cf)
 
 This bundle will generate these files from mustache templates:
  * /etc/nscd.conf
@@ -118,104 +119,69 @@ the templates are located in:
  * templates/nscd/
  * templates/nscd/json
 
-== Usage ==
+## Usage
 
-The bundle is called with:
- * `"" usebundle => nscd_autorun()`
+The bundle can be run via:
+ *  `"" usebundle => nscd_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "nscd",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will aways read the [default.json](/templates/nscd/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
-    debian::
+```
+vars:
+    any::
         "nscd_json_files" slist => { "disable_cache.json" };
-}}}
+```
 
-The variable must be ''nscd_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be `nscd_json_files` and with this setup 1 extra json file will be  merged.
 
-=== Debug ===
+### DEBUG
 
 If you want to debug these bundle set the `DEBUG_nscd` class, eg:
  * `-DDEBUG_nscd`
 
 
-=== Setup ===
-The variables that are set in default.json and can be overwritten.
-{{{
-#!json
-{
-    "cache_group": {
-        "check-files " : "yes",
-        "negative-time-to-live" : "60",
-        "persistent": "yes",
-        "positive-time-to-live" : "3600",
-        "shared": "yes",
-        "suggested-size" : "211"
-    },
-    "cache_hosts": {
-        "check-files " : "yes",
-        "negative-time-to-live" : "20",
-        "persistent": "yes",
-        "positive-time-to-live" : "3600",
-        "shared": "yes",
-        "suggested-size" : "211"
-    },
-    "cache_passwd": {
-        "check-files " : "yes",
-        "negative-time-to-live" : "20",
-        "persistent": "yes",
-        "positive-time-to-live" : "600",
-        "shared": "yes",
-        "suggested-size" : "211"
-    },
-    "debug-level" : "0",
-    "enable-cache-group" : "yes",
-    "enable-cache-hosts" : "yes",
-    "enable-cache-passwd" : "yes",
-    "max_threads" : "5",
-    "paranoia" : "no",
-    "reload-count" : "5",
-    "restart-internal" : "3600",
-    "threads" : "3"
-}
-}}}
+## def.cf/json
 
-=== Def usage  ===
+See [default.json](/templates/nscd/json/default.json) what the default values are and
+which variables can be overriden
 
-The following must be set in the specific ''def.json'' hostfile
-{{{
-#!json
-    "vars": {
+The following must be set in the specific `def.json` hostfile
+```json
+"vars": {
+    "nscd": {
         ...
-        "sara_services_enabled": [ "nscd" ],
-        ...,
-        "nscd": {
-            ...
-            "json_files": [ "disable_cache.json" ],
-            ...
-        }
-    },
-}}}
+        "json_files": [ "disable_cache.json" ],
+        ...
+    }
+}
+```
 
 Here are some examples how to use it:
  * specify nscd configuration in def.cf:
-{{{
-#!cf3
+```
 vars:
     "nscd_json_files" slist => { "disable_cache.json" };
-}}}
+```
  * Set/Override the daemon options variable in ''def.json'':
-{{{
-#!json
-        "nscd" : {
-            "debug-level": "1"
-        },
-}}}
+```json
+"nscd" : {
+    "debug-level": "1"
+}
+```
  * override server setting in def.cf
-{{{
-#!cf3
+```
 vars:
     "nscd" data => parsejson( '{ "max-threads" :  "7" }' );
-}}}
+```
 @endif

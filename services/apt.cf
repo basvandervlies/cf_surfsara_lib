@@ -462,11 +462,13 @@ bundle agent apt_install()
 @if minimum_version(99.9)
 # apt.cf
 
+Source: [apt.cf](/services/apt.cf)
+
 This bundle will be used to:
  * generate repository files in /etc/apt/sources.list.d
  * install apt packages
 
-The following actions are proctected by an class:
+The following actions are proctected by a class:
  * automatic install security uodate (AUTOMATIC_SECURITY_UPDATE)
  * automatic remove obsolete packages (AUTOREMOVE)
  * check the status of the package manager (CHECK_STATUS)
@@ -476,24 +478,35 @@ The following actions are proctected by an class:
  * disable systemctl timer services for apt, may interfere with cfengine (APT_SYSTEMD_DISABLE)
  * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
 
-The option classes can be set in def.cf/json:
-```
+The classes can be set in def.cf/json:
+```json
+{
 "apt": {
     "classes": {
         "AUTOMATIC_SECURITY_UPDATE": "any",
-        "AUTOREMOVE": "any"
-        "APT_SYSTEMD_DISABLE": "systemd"
+        "AUTOREMOVE": "any",
+        "SYSTEMD_DISABLE": "systemd"
     }
 }
 ```
 
 ## Usage
 
-he bundle is called with:
+The bundle can be run via:
  *  `"" usebundle => apt_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "apt",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will aways read the [default.json](/templates/apt/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
 ```
 vars:
@@ -501,45 +514,21 @@ vars:
         "apt_json_files" slist => { "debconf.json" };
 ```
 
-The variable must be ''apt_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be `apt_json_files` and with this setup 1 extra json file will be  merged.
 
 ### DEBUG
 
 if you want to debug this bundle set the `DEBUG_apt` class, eg:
  * `-DDEBUG_apt`
 
-## Setup
+## def.cf/json
 
-These variables are set in `default.json` and can be overriden:
-```
-{
-    "autoremove_schedule": [ "Day1" ],
-    "debconf": {},
-    "debconf_module": "$(sys.workdir)/modules/surfsara/debconf",
-    "import_key": "$(sys.workdir)/modules/surfsara/apt_import_key",
-    "debconf_schedule":  [ "Min00_05" ],
-    "key_check_schedule": [ "Day1" ],
-    "security_schedule": [ "Hr00", "Hr06", "Hr12", "Hr18" ],
-    "security_options": [
-            "Dir::Etc::sourceparts=/dev/null",
-            "Dir::Etc::SourceList=$(apt.repos_dir)/debian_security.list",
-            "Dpkg::Options::=--force-confdef",
-            "Dpkg::Options::=--force-confold"
-    ]
-
-}
-```
-
-### Def Usage
+See [default.json](/templates/apt/json/default.json) what the default values are and
+which variables can be overriden.
 
 The following must be set in host specific host file: `def.json`
-```
+```json
 "vars": {
-    "sara_services_enabled": [
-            ...
-            "apt",
-            ...
-    ],
     "apt": {
         "classes": {
             "AUTOMATIC_SECURITY_UPDATE": "any"
@@ -553,7 +542,7 @@ The following must be set in host specific host file: `def.json`
 
 Debconf is a configuration system for Debian packages. When `debconf` json data
 is set. The apt bundle will configure the package with these values, eg:
-```
+```json
 {
     "debconf": [
         {

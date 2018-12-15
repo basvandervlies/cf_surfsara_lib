@@ -96,29 +96,38 @@ bundle agent munge_config()
 
 # Munge
 
-This bundle generates or copies a munge key on a node.
+Source: [munge.cf](/services/munge.cf)
 
-- `/etc/munge/munge.key`
+This bundle copies a munge key to a node.
+ * `/etc/munge/munge.key`
 
 This bundle also makes sure that the proper owner (munge:munge) and permissions (400) are set.
 
 ## Usage
 
-This bundle is called with:
-
-- `"" usebundle => munge_autorun();`
-
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
-
-- `def.cf`
-
+The bundle can be run via:
+ *  `"" usebundle => munge_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "munge",
+            "..."
+    ]
+}
 ```
+
+The bundle will aways read the [default.json](/templates/munge/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
     any::
-        "munge_json_files" slist => { "policy_server.json" };
+        "munge_json_files" slist => { "lisa.json" }s
 ```
 
-Which will then merge this json with the `default.json`.
+The variable must be `cron_json_files` and with this setup 1 extra json file will be  merged.
 
 ### Debug
 
@@ -126,36 +135,16 @@ To debug this bundle set the `DEBUG_munge` class:
 
 - `-DDEBUG_munge`
 
-## Setup
+## def.cf/json
 
-The variables are set in default.json and can be overwritten.
-
-```json
-{
-    "copy_files": []
-}
-```
+See [default.json](/templates/munge/json/default.json) what the default values are and
+which variables can be overriden.
 
 ### copy_files
 
-With this variable set it will copy the specified file (usually the munge key) to the specified destination.
-`copy_files` has the following format:
-
+With this variable is set it will copy the specified file (usually the munge key) to the
+specified destination, example:
 ```json
-"": [
-{
-    "dest": "Destination path with filename",
-    "source": "The filename path on the policy server/cf-hub",
-    "mog": [ "mode", "owner", "group" ],
-    "run_bundle": "This bundle will run if the file gets copied"
-}
-]
-```
-
-example:
-
-```json
-{
 "copy_files": [
     {
         "dest": "$(munge.munge_key_file)",
@@ -163,24 +152,7 @@ example:
         "mog": [ "0400", "munge", "munge" ],
         "run_bundle": "munge_daemons_restart"
     }
-}
+]
 ```
-Where `cf_bundles_dir` is a ''cf-serverd shortcut''.
-
-## Def usage
-
-The following must be set in the specific ''def.json'' hostfile:
-
-```json
-    "vars": {
-        "sara_services_enabled": {
-            ...
-            "munge",
-            ...
-        },
-        "munge": {
-        }
-    },
-```
-
-@endif
+Where `cf_bundles_dir` is a **cf-serverd shortcut**.
+endif

@@ -1,12 +1,6 @@
-#################################################
 #
-# SVN info:
-#       $Id$
-#       $URL$
+## rootfiles.cf @SURFsara
 #
-#####
-#####
-
 bundle common rootfiles(params)
 {
     vars:
@@ -73,65 +67,66 @@ bundle agent rootfiles_surfsara_config()
                 ifvarclass => "DEBUG|DEBUG_rootfiles";
 }
 @if minimum_version(99.9)
-= rootfiles =
+# rootfiles
 
-This bundle will copy some important files to root environment
+Source: [rootfiles.cf](/services/rootfiles.cf)
 
-== Usage ==
-
-The bundle is called with:
- * `"" usebundle => rootfiles_autorun();`
-
-The default rootfiles setup directory to be copied is "surfsara" and is controlled via: `$(sara_data.rootfiles[setup_dur])`
-
-Only the files are copied from the source directory: (Must be rewritten to default,jsob)
-    * files:  "/root/.ssh/authorized_keys", "/root/.vimrc", "/root/.bashrc", "/root/sara_rootadminenv.sh, /root/.profile"
-    * directories: "/root/.subversion"
+This bundle will copy important file(s) or/and dirs  to `/root` directory. It
+will generate when json data is set:
+ *  /root/.ssh/authorized_keys
 
 You can control some behaviours of the ROOTFILES bundle via classes:
-{{{
-#!json
+```json
 "rootfiles": {
     "classes": {
         "NO_MODULE_LOAD": "any"
     }
 }
-}}}
+```
+Prevent loading of standard modules:
+  * ROOTFILES_NO_MODULE_LOAD : Will create `/root/.no_module_load` file
 
-explanation:
-  * ROOTFILES_NO_MODULE_LOAD : Will create ''/root/.no_module_load'' file. Prevent loading of standard modules.
+## Usage
 
-=== DEBUG ===
+The bundle can be run via:
+ *  `"" usebundle => rootfiles_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "rootfiles",
+            "..."
+    ]
+}
+```
+
+The bundle will always read the [default.json](/templates/rootfiles/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
+    any::
+        "rootfiles_json_files" slist => { "surfsara.json" };
+```
+
+The variable must be `root_files_json_files` and with this setup 1 extra json file will be  merged.
+
+### DEBUG
 
 If you want to debug these bundle set the `DEBUG_rootfiles` class, eg:
  * `-DDEBUG_rootfiles`
 
-== SETUP ==
-{{{
-#json
-{
-   "host_authorized_keys": [
-        { "key_type": "#",  "key": "host_authorized_keys",  "comment": "to override" }
-   ],
-   "setup_dir": "cf_bundles_dir/rootfiles/surfsara",
-   "stepping_stone": [
-        { "key_type": "#",  "key": "stepping_stone",  "comment": "to override" }
-   ]
-}
-}}}
 
-=== Def Usage ===
-The following must be set in host specific host file: `def.json`
-{{{
-#!json
-    "classes": {
-        "ROOTFILES_BUNDLE": "any",
-    },
-}}}
 
-In def.cf/def.json you can override the ``rootfiles`` default values, eg def.json:
-{{{
-#!json
+## def.cf/json
+
+See [default.json](/templates/rootfiles/json/default.json) what the default values are and
+which variables can be overriden.
+
+Some example show to us it:
+ * Generate `authorized_keys` file with stepping stone public key:
+```json
 {
     "vars": {
         "rootfiles": {
@@ -146,5 +141,38 @@ In def.cf/def.json you can override the ``rootfiles`` default values, eg def.jso
         }
     }
 }
-}}}
+```
+
+### copy_dirs
+
+When this variabele is set it will copy the directoy to the specified destination and can run a bundle
+if there are changes, eg:
+```json
+"copy_dirs": [
+    {
+        "dest": "/root/.subversion",
+        "exclude_dirs": [ ".git", ".svn" ],
+        "source": "cf_bundles_dir/rootfiles/surfsara/.subversion"
+    }
+]
+```
+
+### copy_files
+
+With this variable is set it will copy the specified file(s) to the
+specified destination, example:
+```json
+copy_files: [
+    {
+        "dest": "/root/.bashrc",
+        "source": "cf_bundles_dir/rootfiles/surfsara/root/.bashrc",
+        "mog": [ "0600", "root", "root"]
+    },
+    {
+        "dest": "/root/dynmotd.sh",
+        "source": "cf_bundles_dir/rootfiles/surfsara/root/dynmotd.sh",
+        "mog": [ "0700", "root", "root"]
+    }
+]
+```
 @endif

@@ -4,11 +4,14 @@
 @if minimum_version(99.9)
 # services.cf
 
+Source: [services.cf](/masterfiles/lib/surfsara/services.cf)
+
 You can control which services must be run by specifying the following variable in:
  * def.json
 ```json
 "sara_services_enabled": [ "ssh", "ntp" ]
 ```
+
  * def.cf
 ```
 "sara_services_enabled" slist => [ "ssh", "ntp" ];
@@ -23,8 +26,12 @@ statement, default is `any`, eg:
     "run_class": "debian|centos"
 }
 ```
-
 This will run the ssh service only for debian and centos hosts.
+
+When `def.sara_services_enabled` is defined it will execute these bundles:
+ 1. first read merge all json data for all defined services (`sara_services_data`)
+ 1. expand the CFengine variables for all service bundle data (`sara_services_data_expand`)
+ 1. run the service  with the specified json data `(sara_services_run`)
 @endif
 bundle common sara_services
 {

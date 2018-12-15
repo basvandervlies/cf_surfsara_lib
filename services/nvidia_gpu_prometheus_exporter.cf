@@ -109,8 +109,9 @@ bundle agent nvidia_gpu_prometheus_exporter_autorun()
 }
 @if minimum_version(99.9)
 
-= nvidia_gpu_prometheus_exporter =
-[source:trunk/cfengine3/config/bundles/services/surfsara/nvidia_gpu_prometheus_exporter.cf source nvidia_gpu_prometheus_exporter.cf]
+# nvidia gpu prometheus exporter
+
+Source: [nvidia_gpu_prometheus_exporter.cf](/services/nvidia_gpu_prometheus_exporter.cf)
 
 This bundle will generate these/this file(s) from mustache templates:
 
@@ -119,62 +120,61 @@ This bundle will generate these/this file(s) from mustache templates:
 If one of the files is changed then the following ""class"" will be set:
  * sara_etc_default_nvidia_gpu_prometheus_exporter
  * sara_etc_systemd_system_nvidia_gpu_prometheus_exporter_service
- * sara_etc_init_d_nvidia_gpu_prometheus_exporter 
+ * sara_etc_init_d_nvidia_gpu_prometheus_exporter
 
 These templates are located in:
  * templates/nvidia_gpu_prometheus_exporter
  * templates/nvidia_gpu_prometheus_exporter/json
 
-== Usage ==
+## Usage
 
-This is called with:
- * `"" usebundle => nvidia_gpu_prometheus_exporter_autorun();
+The bundle can be run via:
+ *  `"" usebundle => cron_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "nvidia_gpu_prometheus_exporter",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will aways read the [default.json](/templates/nvidia_gpu_prometheus_exporter/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
+```
+vars:
     any::
         "nvidia_gpu_prometheus_exporter_json_files" slist => { "sara.json" };
-}}}
+```
 
 The variable must be ''nvidia_gpu_prometheus_exporter_json_files'' and with this setup 1 extra json file will be  merged.
 
-=== DEBUG ===
+### DEBUG
 
 if you want to debug this bundle set the `DEBUG_nvidia_gpu_prometheus_exporter` class, eg:
  * `DDEBUG_nvidia_gpu_prometheus_exporter`
 
-== Setup ==
-The variables are set in default.json and can be overwritten.
-{{{
-#!json
-{
-    "args": "--collector.textfile.directory=$(sara_data.nvidia_gpu_prometheus_exporter_exporter[collector_dir])",
-    "collector_dir": "/run/prometheus/nvidia_gpu_prometheus_exporter",
-    "copy_dirs": [],
-    "cron_job": {},
-    "dir": "/opt/nvidia_gpu_prometheus_exporter"
-}
+## def.cf/json
 
-=== copy_dirs ===
+See [default.json](/templates/nvidia_gpu_prometheus_exporter/json/default.json) what the default values are and
+which variables can be overriden
+
+### copy_dirs
 
 When this variabele is set it will copy the directoy to the specified destination and can run a a bundle
 if there are changes, eg:
-{{{
-#!json
-{
-    "copy_dirs": [
-        {
-            "dest": "$(sara_data.nvidia_gpu_prometheus_exporter[dir])",
-            "exclude_dirs": [ ".git", ".svn" ],
-            "purge": "true",
-            "run_bundle": "nvidia_gpu_prometheus_exporter_restart",
-            "source": "cf_bundles_dir/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"
-        }
-    ],
-}
-}}}
-
+```json
+"copy_dirs": [
+    {
+        "dest": "$(sara_data.nvidia_gpu_prometheus_exporter[dir])",
+        "exclude_dirs": [ ".git", ".svn" ],
+        "purge": "true",
+        "run_bundle": "nvidia_gpu_prometheus_exporter_restart",
+        "source": "cf_bundles_dir/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"
+    }
+]
+```
 @endif

@@ -13,7 +13,9 @@ For all bundles the mustache/json file(s) will be copied to the local node direc
     * `$(def.node_template_dir)/$(bundle_name)`
     * The generated file(s) are specified in def.cf/json: `$(bundle_name)[local_generated_json_files]`
  * You can override values via *def.json*, Note: This one always wins.
- * CFEngine variables are expanded.
+ * CFEngine variables are expanded:
+    *  Bundle data two levels.
+    *  When all bundle data is parsed. This allows referencing a variable of another service bundle.
 
 Both senarios will be described in the subsection below. For both senarios you can specifiy multiple
 json files. The files will be merged and the last one wins if the same variable name is used,eg:
@@ -31,15 +33,14 @@ The merge strategy is::
   1. `def.<bundle_name>[local_generated_json_files]` if defined
   1. `def.<bundle_name>_local_generated_json_files` if defined
   1. `def.<bundle_name>` if defined in def.json or:
-    * lib/surfsara/def.cf MPF setup
-    * your own file with variable scope `def`
+        * lib/surfsara/def.cf MPF setup
+        * your own file with variable scope `def`
 
 ## Installation
 
 there are two options
  * Include it in the Master Policy Framework (MPF)
  * Include it in your own framework
-
 
 ### def.node\_template\_dir
 
@@ -52,7 +53,7 @@ vars:
 }
 ```
 
-default value is: `/var/cfengine/surfsara_templates`
+default value is: `/var/cfengine/node_templates`
 
 ### CF-serverd shortcut configuration for cfengine version less then 3.10.1
 
@@ -69,8 +70,8 @@ For older versions you have to manually add the `shorcut templates` to `controls
 
 1. Login on your policy server.
 1. `./mpf_installation`
-1. Enable autorun, if you have not done it, by adding this class to your ```def.json``` file
-```
+1. Enable autorun, if you have not done it. Add this line to your ```def.json``` file
+```json
 {
    "classes" :
    {
@@ -84,7 +85,7 @@ You can test your installation with
 
 #### update ####
 
-You can run the same script it will detect that its an update `mpf_installation`. This script will overwrite:
+You can run the same script it will detect its an update. This script will overwrite:
  * surfsara library files: `masterfiles/lib/surfsara`
  * surfsara services files: `masterfiles/services/surfsara`
  * mustache template files and default.json files: `/var/cfengine/templates`
@@ -92,8 +93,8 @@ You can run the same script it will detect that its an update `mpf_installation`
 ### Own framework
 
 1. Login on your policy server.
-1. cp -a masterfiles/lib/surfsara `<masterfiles>/lib/surfsara`
-1. cp -a examples/templates $(sys.workdir)/templates
+1. `cp -a masterfiles/lib/surfsara <masterfiles>/lib/surfsara`
+1. `cp -a templates/* $(sys.workdir)/templates`
 1. include `/lib/surfsara/stdlib.cf` in your inputs
 ```
 body common control
@@ -142,7 +143,7 @@ To enable the template on your system:
   1. The prefered way is to use `def.sara_services_enabled` method in def.cf/def.json.
   1. Copy a setup to the `masterfiles/services/autorun` directory
  * Own Framework:
-   * `def_sara_services_enabled` method
+   * `def.sara_services_enabled` method
    * usebundle:
      1. ntp_autorun()
      1. tcpwrappers_autorun()
@@ -150,7 +151,7 @@ To enable the template on your system:
 ###  sara\_services\_enabled method
 
 This is the prefered method for MPF and your own frameork. With this method you can contol which services are run
-and which file are included, eg: def.json
+and which files are included, eg: def.json
 ```
 "vars": {
     "sara_services_enabled": [
@@ -159,7 +160,7 @@ and which file are included, eg: def.json
     ]
 }
 ```
-This will include the surfsara services file `ntp.cf` and `resolv.cf` and run all bundles that have the meta tag
+This will include the surfsara service files for `ntp.cf` and `resolv.cf` and run all bundles that have the meta tag
 `template_ntp` and `template_resolv`. The bundle run can be protected by an class statement, default is `any`, eg:
 ```
 "ntp": {
@@ -171,20 +172,27 @@ This will only run on  debian or centos hosts.
 
 ### def.json
 
-In this file you can override settings for the templates. When the json data is merged. This one wins, eg:
-```
+In this file you can override settings for the templates.
+```json
 "vars": {
     "ntp" : {
         "server": [ "<your_ip_server1>", "<your_ip_server2>" ]
     }
 }
 ```
-
 You can also specify json setup files:
-```
+```json
 "vars": {
     "tcpwrappers": {
         "json_files": [ "allow_ssh.json", "allow_http.json" ]
+    }
+}
+```
+
+or:
+```json
+"vars": {
+    "tcpwrappers_json_files": [ "allow_ssh.json", "allow_http.json" ]
     }
 }
 ```
@@ -205,7 +213,6 @@ This will set the class `DHCLIENT_RESOLV_CONF` on host/node `r24n2`
 
 ### lib/surfsara/def.cf
 
-
 You can also override settings in this file, eg:
  * One variable:
 ```
@@ -217,7 +224,6 @@ vars:
 vars:
     "tcpwrappers" data => parsejson( '{ "json_files": [ "allow_ssh.json", "allow_http.json" ] '} );
 ```
-
 
 If you defined your own `def.cf` and do not want the one included in this framework you can set the following class:
  * `SURFSARA_SKIP_DEF_CF_INCLUDE`

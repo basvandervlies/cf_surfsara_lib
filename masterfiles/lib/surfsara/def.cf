@@ -7,7 +7,7 @@ vars:
     any::
         "node_template_dir" string => ifelse(
             isvariable( "node_template_dir"), $(node_template_dir),
-            "$(sys.workdir)/surfsara_templates");
+            "$(sys.workdir)/node_templates");
 
 # Template NTP example
     centos::

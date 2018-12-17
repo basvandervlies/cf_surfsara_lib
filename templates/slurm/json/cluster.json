@@ -1,0 +1,123 @@
+{
+    "AccountingStorageHost": "batch3.test.surfsara.nl",
+    "backup_schedule": [ "once_a_day" ],
+    "classes": {
+        "BACKUP": [ "batch3" ],
+        "CLIENT": [ "r8n1", "r8n2"],
+        "SERVER": [ "batch3" ],
+        "SUBMIT": [ "login1" ]
+    },
+    "ClusterName": "lisa",
+    "ControlMachine": "batch3.test.surfsara.nl",
+    "copy_dirs": [
+        {
+            "dest": "$(sara_data.slurm[scripts_dir])",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "mog": [ "0700", "root", "root" ],
+            "purge": "true",
+            "source": "cf_bundles_dir/slurm/scripts"
+        },
+        {
+            "dest": "$(sara_data.slurm[opt_dir])/epilog",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "mog": [ "0755", "root", "root" ],
+            "purge": "true",
+            "source": "cf_bundles_dir/slurm/test/epilog"
+        },
+        {
+            "dest": "$(sara_data.slurm[opt_dir])/prolog",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "mog": [ "0755", "root", "root" ],
+            "purge": "true",
+            "source": "cf_bundles_dir/slurm/test/prolog"
+        },
+        {
+            "dest": "$(sara_data.slurm[opt_dir])/lib",
+            "exclude_dirs": [ ".git", ".svn" ],
+            "mog": [ "0644", "root", "root" ],
+            "purge": "true",
+            "source": "cf_bundles_dir/slurm/lib"
+        }
+    ],
+    "copy_files": [
+        {
+            "dest": "$(slurm.config_dir)/job_submit.lua",
+            "source": "cf_bundles_dir/slurm/lisa/job_submit.lua",
+            "mog": ["0644", "slurm", "slurm"]
+        }
+    ],
+    "licenses_section": [
+        "matlab_MATLAB:2"
+    ],
+    "no_default_section": {
+        "JobSubmitPlugins": "lua",
+        "X11Parameters": "local_xauthority"
+    },
+    "nodes_section": {
+        {
+            "Name": "r8n1",
+            "settings": {
+                "CoresPerSocket": "8",
+                "Features": "ivybridge,avx,infiniband",
+                "MemSpecLimit": "1024",
+                "NodeHostname": "r8n1.test.surfsara.nl",
+                "RealMemory": "64000",
+                "Sockets": "2",
+                "State": "UNKNOWN",
+                "ThreadsPerCore": "1",
+                "Weight": "20"
+            }
+        },
+        {
+            "Name": "r8n2",
+            "settings": {
+                "CoresPerSocket": "8",
+                "Features": "ivybridge,avx,infiniband",
+                "MemSpecLimit": "1024",
+                "NodeHostname": "r8n2.test.surfsara.nl",
+                "RealMemory": "64000",
+                "Sockets": "2",
+                "State": "UNKNOWN",
+                "ThreadsPerCore": "1",
+                "Weight": "20"
+            }
+        }
+    },
+    "partition_section": [
+        {
+            "name": "test",
+            "settings": {
+                "Nodes": "r8n[1-2]",
+                "MaxNodes": "2",
+                "DefMemPerCPU": "3750",
+                "Default": "No",
+                "MaxTime": "0-1",
+                "DefaultTime": "5",
+                "DisableRootJobs": "Yes",
+                "State": "UP",
+                "OverSubscribe": "EXCLUSIVE",
+                "QOS": "test",
+                "Hidden": "YES"
+            }
+        }
+    ],
+    "spank_templates": {
+        "private_tmpdir.mustache" : {
+            "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
+            "data": {
+                "config": [
+                    "required /opt/slurm/lib/private-tmpdir.so base=/scratch/slurm  mount=/var/tmp mount=/tmp mount=/scratch"
+                ]
+            }
+        }
+    },
+    "topology_file": [
+        "SwitchName=H08 Nodes=r8n[1-2] LinkSpeed=52"
+    ],
+    "run_class": [
+        "SLURM_BACKUP",
+        "SLURM_CLIENT",
+        "SLURM_SERVER",
+        "SLURM_SUBMIT"
+    ]
+}

@@ -1,0 +1,494 @@
+#
+## slurm.cf  @SURFsara
+#
+bundle common slurm()
+{
+    vars:
+        any::
+            "config_file"           string => "$(config_dir)/slurm.conf";
+            "cgroup_config_file"    string => "$(config_dir)/cgroup.conf";
+            "cgroup_allowed_file"   string => "$(config_dir)/cgroup_allowed_devices_file.conf";
+            "gres_config_file"      string => "$(config_dir)/gres.conf";
+            "nodes_config_file"     string => "$(config_dir)/nodes.conf";
+            "slurmdbd_file"         string => "$(config_dir)/slurmdbd.conf";
+            "topology_config_file"  string => "$(config_dir)/topology.conf";
+
+            "scontrol_cmd"          string => "/usr/bin/scontrol";
+
+            "var_spool_dir"         string => "/var/spool/slurm-llnl";
+
+            "group"                 string => "slurm";
+            "mode"                  string => "0644";
+            "owner"                 string => "slurm";
+
+            "template_2_destination" data => parsejson('{
+                    "cgroup.mustache": "$(cgroup_config_file)",
+                    "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
+                    "gres.mustache": "$(gres_config_file)",
+                    "nodes.mustache": "$(nodes_config_file)",
+                    "slurm.mustache": "$(config_file)",
+                    "slurmdbd.mustache": "$(slurmdbd_file)",
+                    "topology.mustache": "$(topology_config_file)",
+            }');
+
+        debian::
+            "config_dir"              string => "/etc/slurm-llnl";
+            "plugstack_dir"           string => "$(config_dir)/plugstack.conf.d";
+            "log_dir"                 string => "/var/log/slurm-llnl";
+            "pid_dir"                 string => "/var/run/slurm-llnl";
+            "plugin_dir"              string => "/usr/lib/x86_64-linux-gnu/slurm-wlm/";
+            "spool_dir"               string => "/var/spool/slurm-llnl";
+
+            "client_service_name"     string => "slurmd";
+            "controller_service_name" string => "slurmctld";
+            "database_service_name"   string => "slurmdbd";
+
+        centos::
+            "config_dir" string => "/etc/slurm";
+            "log_dir"    string => "/var/log/slurm";
+            "pid_dir"    string => "/var/run/slurm";
+            "plugin_dir" string => "/usr/lib/slurm";
+            "spool_dir"  string => "/var/spool/slurm";
+
+            "client_service_name" string => "slurmd";
+
+        systemd::
+            "restart_client"     string => "$(paths.path[systemctl]) restart $(client_service_name)";
+            "restart_controller" string => "$(paths.path[systemctl]) restart $(controller_service_name)";
+            "restart_database"   string => "$(paths.path[systemctl]) restart $(database_service_name)";
+
+            "reload_client"     string => "$(paths.path[systemctl]) reload $(client_service_name)";
+            "reload_controller" string => "$(paths.path[systemctl]) reload $(controller_service_name)";
+            "reload_database"   string => "$(paths.path[systemctl]) reload $(database_service_name)";
+}
+
+bundle agent slurm_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_slurm" };
+
+    classes:
+        "spank_templates_set"  expression => isvariable("sara_data.slurm[spank_templates]"),
+            comment => "Must we generate spank plugin setup";
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("slurm");
+            "" usebundle => slurm_install();
+            "" usebundle => slurm_config();
+            "" usebundle => slurm_daemon_check();
+
+        spank_templates_set::
+           "" usebundle => slurm_spank_templates();
+
+        SLURM_BACKUP::
+            "" usebundle => slurm_db_backup(),
+                ifvarclass => or(
+                    "$(sara_data.slurm[backup_schedule])",
+                    "SLURM_BACKUP_SCHEDULE"
+                    ),
+                action => if_elapsed(50);
+}
+
+bundle agent slurm_install()
+{
+    vars:
+        "version" string => "18.08.3-13";
+        "pyslurm_version" string => "18.08.3-13";
+
+        debian.SLURM_SERVER::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "libpam-slurm-adopt" : "$(version)",
+                        "libpmi0-dev" : "$(version)",
+                        "libpmi2-0-dev" : "$(version)",
+                        "libslurm-dev" : "$(version)",
+                        "libslurm-perl" : "$(version)",
+                        "libslurmdb-dev": "$(version)",
+                        "libslurmdb-perl": "$(version)",
+                        "slurm-client": "$(version)",
+                        "slurm-wlm": "$(version)",
+                        "slurm-wlm-doc ": "$(version)",
+                        "slurmctld": "$(version)",
+                        "slurmd": "$(version)",
+                        "slurmdbd": "$(version)"
+                        "python-pyslurm" : "$(pyslurm_version)",
+                    },
+                    "purge": {
+                        "libpam-slurm" : ""
+                        "libslurm31" : "",
+                        "libslurmdb31" : "",
+                    }
+                }
+            ');
+
+        # deze toevoegen na de overgang naar slurm: "slurm-wlm-torque": "18.08.1-1"
+        debian.SLURM_CLIENT::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "libpam-slurm-adopt" : "$(version)",
+                        "libpmi0-dev" : "$(version)",
+                        "libpmi2-0-dev" : "$(version)",
+                        "libslurm-dev" : "$(version)",
+                        "libslurm-perl" : "$(version)",
+                        "libslurmdb-dev" : "$(version)",
+                        "libslurmdb-perl" : "$(version)",
+                        "slurm-client": "$(version)",
+                        "slurmd": "$(version)",
+                        "slurm-wlm-basic-plugins ": "$(version)",
+                        "python-pyslurm" : "$(pyslurm_version)",
+                    },
+                    "purge": {
+                        "libpam-slurm" : "",
+                        "libslurm30" : "",
+                        "libslurmdb30" : "",
+                        "libslurm31" : "",
+                        "libslurmdb31" : "",
+                        "slurm-wlm" : "",
+                        "slurm-wlm-doc" : ""
+                        "slurmctld" : "",
+                        "slurmdbd" : ""
+                    }
+                }
+            '),
+                comment => "Order of purge is important";
+
+        debian.SLURM_SUBMIT::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "libpmi0-dev" : "$(version)",
+                        "libpmi2-0-dev" : "$(version)",
+                        "libslurm-perl": "$(version)",
+                        "libslurmdb-perl": "$(version)",
+                        "slurm-client": "$(version)",
+                        "python-pyslurm" : "$(pyslurm_version)"
+                    }
+                }
+            '),
+                comment => "Order of purge is important";
+
+    methods:
+        any::
+            "" usebundle =>  sara_service_packages("slurm", "@(slurm_install.packages)"),
+                classes => results("bundle", "slurm_packages");
+
+        debian.SLURM_SERVER::
+            "" usebundle => systemd_disable_service("slurmd"),
+                ifvarclass => "slurm_packages_repaired";
+
+    reports:
+}
+
+bundle agent slurm_daemon_check()
+{
+    processes:
+        SLURM_CLIENT::
+             "$(slurm.client_service_name)"
+                  comment        => "Check if slurmd is running",
+                  process_count  => check_range("$(slurm.client_service_name)", "1", "1"),
+                  process_select => sara_select_parent_process("1");
+
+        SLURM_SERVER::
+             "$(slurm.controller_service_name)"
+                  comment        => "Check if slurmctld is running",
+                  process_count  => check_range("$(slurm.controller_service_name)", "1", "1"),
+                  process_select => sara_select_parent_process("1");
+
+             "$(slurm.database_service_name)"
+                  comment        => "Check if slurmdbd is running",
+                  process_count  => check_range("$(slurm.database_service_name)", "1", "1"),
+                  process_select => sara_select_parent_process("1");
+
+    commands:
+        any::
+            "$(slurm.restart_client)"
+                ifvarclass => and(canonify("$(slurm.client_service_name)_out_of_range"));
+
+            "$(slurm.restart_controller)"
+                ifvarclass => and(canonify("$(slurm.controller_service_name)_out_of_range"));
+
+            "$(slurm.restart_database)"
+                ifvarclass => and(canonify("$(slurm.database_service_name)_out_of_range"));
+}
+
+
+bundle agent slurm_config()
+{
+    vars:
+        any::
+            "cgroup_file_class"    string => canonify("sara$(slurm.cgroup_config_file)");
+            "gres_file_class"    string => canonify("sara$(slurm.gres_config_file)");
+            "nodes_file_class"    string => canonify("sara$(slurm.nodes_config_file)");
+            "slurmd_file_class"    string => canonify("sara$(slurm.config_file)");
+            "topology_file_class"    string => canonify("sara$(slurm.topology_config_file)");
+
+            "slurm_mog_list" slist => {
+                "$(slurm.config_file)",
+                "$(slurm.nodes_config_file)",
+            };
+
+    classes:
+        any::
+            "SLURM_RELOAD" or => {
+                "$(cgroup_file_class)",
+                "$(gres_file_class)",
+                "$(slurmd_file_class)",
+                "$(topology_file_class)",
+            };
+
+            "SLURM_RESTART" or => {
+                "$(nodes_file_class)",
+            };
+
+            "slurm_copy_dirs_set" expression => isvariable("sara_data.slurm[copy_dirs]"),
+                comment => "Must we copy dirs for slurm";
+            "slurm_copy_files_set" expression => isvariable("sara_data.slurm[copy_files]"),
+                comment => "Must we copy dirs for slurm";
+
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("slurm");
+
+        slurm_copy_dirs_set::
+            "" usebundle => sara_service_copy_dirs("slurm");
+
+        slurm_copy_files_set::
+            "" usebundle => sara_service_copy_files("slurm");
+
+        SLURM_RESTART::
+            "" usebundle => slurm_nodes_conf_restart();
+
+    files:
+        any::
+            "$(slurm_mog_list)"
+                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+            "$(slurm.var_spool_dir)"
+                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+            "$(slurm.config_dir)"
+                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+
+            "$(slurm.var_spool_dir)/."
+                comment => "This should be fixed in the package of Slurm",
+                perms => mog("0755", "$(slurm.owner)", "$(slurm.group)"),
+                create => "true";
+
+    commands:
+        SLURM_CLIENT.SLURM_RELOAD::
+            "$(slurm.reload_client)";
+
+        SLURM_SERVER.SLURM_RELOAD::
+            "$(slurm.reload_controller)";
+
+        SLURM_SERVER::
+            "$(sara_data.slurm[scripts_dir])/cua2slurm"
+                contain => in_shell,
+                action => if_elapsed(10);
+
+            "$(sara_data.slurm[scripts_dir])/slurm_check_licenses"
+                contain => in_shell,
+                action => if_elapsed(10);
+
+            "$(sara_data.slurm[scripts_dir])/slurm_update_qos"
+                contain => in_shell,
+                action => if_elapsed(10);
+
+        SLURM_SERVER.once_a_day::
+            "$(sara_data.slurm[scripts_dir])/cua2slurm -m"
+                contain => in_shell,
+                action => bg(60,12);
+
+    reports:
+        SLURM_CLIENT.SLURM_RELOAD::
+            "$(this.bundle): $(slurm.reload_client)";
+        SLURM_SERVER.SLURM_RELOAD::
+            "$(this.bundle): $(slurm.reload_controller)";
+}
+
+bundle agent slurm_nodes_conf_restart()
+{
+    commands:
+        SLURM_CLIENT::
+            "$(slurm.restart_client)";
+
+        SLURM_SERVER::
+            "$(slurm.restart_controller)";
+
+    reports:
+        any::
+            "$(this.bundle): Restart 'nodes.conf' has changed";
+}
+
+bundle agent slurm_db_backup()
+{
+    vars:
+        "cmd" string => format("%s --host=%s --user=%s --password=%s %s",
+            $(sara_data.slurm[backup_config][cmd]),
+            $(sara_data.slurm[backup_config][host]),
+            $(sara_data.slurm[backup_config][user]),
+            $(sara_data.slurm[backup_config][password]),
+            $(sara_data.slurm[backup_config][options])
+            );
+
+    files:
+        "$(sara_data.slurm[backup_dir])/."
+            perms => mog("700", "root", "root"),
+            create => "true";
+
+        "$(sara_data.slurm[backup_dir])/db.sql"
+            rename  => rotate("$(sara_data.slurm[backup_config][copies])");
+
+    commands:
+        "$(cmd)"
+            comment => "Redirect must be in the args section",
+            contain => in_shell,
+            args => "> $(sara_data.slurm[backup_dir])/db.sql";
+
+    reports:
+        DEBUG_slurm|DEBUG::
+            "$(this.bundle): $(cmd) > $(sara_data.slurm[backup_dir])/db.sql";
+}
+
+bundle agent slurm_spank_templates()
+{
+    vars:
+        "files" slist => getindices("sara_data.slurm[spank_templates]");
+
+    methods:
+        "" usebundle => sara_mustache_copy("slurm", "@(slurm_spank_templates.files)");
+
+    files:
+        "$(sara_data.slurm[spank_templates][$(files)][dest])"
+            create => "true",
+            edit_template => "$(def.node_template_dir)/slurm/$(files)",
+            template_method => "mustache",
+            template_data => "@(sara_data.slurm[spank_templates][$(files)][data])",
+            classes => results("namespace", "SLURM_$(sara_data.slurm[spank_templates][$(files)][dest])");
+
+        "$(sara_data.slurm[spank_templates][$(files)][dest])"
+            perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+
+    reports:
+        "$(this.bundle) $(files) : $(sara_data.slurm[spank_templates][$(files)][dest])"
+             ifvarclass => "DEBUG|DEBUG_slurm|DEBUG_$(this.bundle)";
+}
+
+@if minimum_version(99.9)
+
+# SLURM
+
+This bundle will generate these/this file(s) from mustache templates:
+ * debian in `/etc/slurm-llnl`
+ * centos in `/etc/slurm`
+    * cgroup.conf
+    * cgroup_allowed_devices_file.conf
+    * gres.conf
+    * nodes.conf
+    * slurm.conf
+    * slurmdb.conf
+    * topology.conf
+
+If one of the files is changed then the following ""class"" will be set:
+ * sara_etc_slurm_llnl_slurm_conf (debian)
+ * sara_etc_slurm_slurm_conf (centos)
+
+The class name for the other files has the same format.
+
+These templates are located in:
+ * templates/slurm
+ * templates/slurm/json
+
+## Usage
+
+The bundle is called with:
+ * `"" usebundle => slurm_autorun();`
+
+When we do not specifiy any json data files then only `default.json` will be
+read. You can specify extra json data file via:
+ * def.cf
+```
+    any::
+        "slurm_json_files" slist => { "debian.json" };
+```
+
+The variable must be ""slurm_json_files"" and with this setup 1 extra json file will be merged.
+
+### DEBUG
+
+if you want to debug this bundle set the `DEBUG_slurm` class, eg:
+ * `DDEBUG_slurm`
+
+## Setup
+The variables are set in default.json and can be overwritten.
+ * URL to default.json
+
+### spank plugins
+
+Slurm Plug-in architecture for Node and job Kontrol (SPANK)
+plugins are configured via the `plugstack.conf` file.
+
+This generations of the spank plugin configuration file(s) can be
+done dynamically,eg:
+```json
+ "spank_templates": {
+        "private_tmpdir.mustache" : {
+            "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
+            "data": {
+                "config": [
+                    "required /opt/slurm/lib/private-tmpdir.so base=/scratch/slurm  mount=/var/tmp mount=/tmp mount=/scratch"
+                ]
+            }
+        }
+    },
+```
+
+This will generate the `private-tmpdir.conf` file with the aid of the specified mustache file and
+json data.
+
+## Def usage
+
+The following must be set in the specific ''def.json'' hostfile
+```json
+    "vars": {
+        "sara_services_enabled": [
+            ...
+            "slurm",
+            ...
+        ],
+        "slurm": {
+        }
+    },
+```
+
+Here are some examples how to use it:
+ * specify resolv configuration in def.cf:
+```
+vars:
+    "slurm_json_files" slist => { "debian.json" };
+```
+
+ * override config settings in def.cf
+```
+vars:
+    "slurm" data => parsejson( '{ "PrologFlags": "contains" }' );
+```
+
+ * override config settings in ''def.json'':
+```json
+    "vars": {
+        "slurm": {
+            "json_files": [ "mona.json" ]
+        },
+    }
+```
+
+ * override variable config setting in ''def.json''
+```json
+    "slurm": {
+        "PrologFlags": "contains"
+    }
+```
+@endif

@@ -72,12 +72,13 @@ bundle agent singularity_config()
 }
 
 @if minimum_version(99.9)
+# Singularity
 
-= Singularity =
+Source: [singularity.cf](/services/singularity.cf)
 
-This bundle install singularity software on a node. For now only ''Debian wheezy'' is supported.
+This bundle install singularity software on a node.
 
-This bundle will generate these files from mustache templates:
+This bundle will generate this file from the mustache template:
  * /etc/singularity/singularity.conf
 
 f one of the files is changed then the followong ''class'' will be set:
@@ -88,88 +89,60 @@ the templates are located in:
  * templates/singularity/
  * templates/singularity/json
 
-== Usage ==
+## Usage
 
-This is called with:
- * `"" usebundle => singularity_autorun();
+The bundle can be run via:
+ *  `"" usebundle => singularity_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "singularity",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will always read the [default.json](/templates/singularity/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
+```
+vars:
     any::
         "singularity_json_files" slist => { "disable_overlay.json" };
-}}}
+```
 
 The variable must be ''singularity_json_files'' and with this setup 1 extra json file will be  merged.
 
-=== DEBUG ===
+### DEBUG
 
 if you want to debug this bundle set the `DEBUG_singularity` class, eg:
  * `-DDEBUG_singularity`
 
-=== Setup ===
-The variables that are set in default.json and can be overwritten.
-{{{
-#!json
-{
-    "allow_pid_ns": "yes",
-    "allow_setuid": "yes",
-    "bind_path": [],
-    "config_group": "yes",
-    "config_passwd": "yes",
-    "config_resolv_conf": "yes",
-    "container_dir ": "/var/singularity/mnt",
-    "enable_overlay": "yes",
-    "mount_dev": "yes",
-    "mount_home": "yes",
-    "mount_hostfs": "no",
-    "mount_proc": "yes",
-    "mount_slave": "yes",
-    "mount_sys": "yes",
-    "mount_tmp": "yes",
-    "sessiondir_prefix": "/tmp/.singularity-session-",
-    "user_bind_control": "yes"
-}
-}}}
+## def.cf/json
 
-=== Def usage  ===
-
-The following must be set in the specific ''def.json'' hostfile
-{{{
-#!json
-    "vars": {
-        "sara_services_enabled": [
-            ...
-            "singularity",
-            ...
-            ],
-            "singularity": {
-            }
-    },
-}}}
+See [default.json](/templates/singularity/json/default.json) what the default values are and
+which variables can be overriden.
 
 Here are some examples how to use it:
- * specify ntp configuration in def.cf:
-{{{
-#!cf3
+ * specify singularity configuration in def.cf:
+```
 vars:
     "singularity_json_files" slist => { "disable_overlay.json" };
-}}}
- * Set/Override the daemon options variable in ''def.json'':
-{{{
-#!json
-        "singularity" : {
-            "json_files": [ "test_server.json" ],
-            "enable_overlay": "no"
-        },
-}}}
- * override server setting in def.cf
-{{{
-#!cf3
+```
+
+ * Set/Override variables in *def.json*:
+```json
+"singularity" : {
+    "json_files": [ "test_server.json" ],
+    "enable_overlay": "no"
+}
+```
+
+ * override setting in def.cf
+```
 vars:
     "singularity" data => parsejson( '{ "enable_overlay":  "no"  }' );
-}}}
-
+```
 @endif

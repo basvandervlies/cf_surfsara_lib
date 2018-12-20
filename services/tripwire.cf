@@ -52,8 +52,9 @@ bundle agent tripwire_surfsara_config()
 
 
 @if minimum_version(99.9)
-= TRIPWIRE =
-[source:trunk/cfengine3/config/bundles/tripwire.cf source tripwire.cf]
+# tripwire
+
+Source: [tripwire.cf](/services/tripwire.cf)
 
 This bundle checks the given file(s) if they have changed (md5). It will report the changes
 and update the database with the new checksum value.
@@ -62,67 +63,62 @@ No template file are generated, we only need josn file(s) as input. The location
 file(s) are:
  * templates/tripwire/json
 
-== Usage ==
+## Usage
 
-This is called with:
- * `"" usebundle => tripwire_autorun();
+The bundle can be run via:
+ *  `"" usebundle => tripwire_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "tripwire",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will always read the [default.json](/templates/tripwire/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
+```
+vars:
     any::
         "tripwire_json_files" slist => { "tomcat.json" };
-}}}
+```
 
 The variable must be ''tripwire_json_files'' and with this setup 1 extra json file will be  merged.
 
-=== Debug ===
+### DEBUG
 
 If you want to debug this bundle set the `DEBUG_tripwire` class, eg:
- * `-DDEBUG_tripwire,RUN`
+ * `-DDEBUG_tripwire`
 
-=== Setup ===
+## def.cf/json
 
-The variables are set in default.json and can be overwritten.
-{{{
-#!json
-{
-    "standard": [ "/bin/bash", "/bin/last", "/bin/ls", "/usr/bin/openssl", "/bin/ps",  "/usr/bin/ssh", "/usr/sbin/sshd" ]
-}
-}}}
-
-=== Def usage  ===
-The following must be set in the specific ''def.json'' hostfile
-{{{
-#!json
-    "vars": {
-        "sara_services_enabled": [
-            ...
-            "tripwire",
-            ...
-        ],
-        "tripwire": {
-        }
-    },
-}}}
+See [default.json](/templates/tripwire/json/default.json) what the default values are and
+which variables can be overriden.
 
 Here is an example to check also the apache binary (def.cf):
-{{{
-#!cf3
+```
 vars:
     "tripwire_json_files" slist => { "apache.json" ];
-
-}}}
+```
 
 Same can also be set in `def.json`
-{{{
-#!json
-    "vars": {
-        "tripwire": {
-            "json_files": [ "apache.json" ]
-        }
-    },
-}}}
+```json
+"vars": {
+    "tripwire": {
+        "json_files": [ "apache.json" ]
+    }
+}
+```
+
+Added some extra binaries to the *standard* ones:
+```json
+{
+"apache":  "/usr/sbin/httpd",
+"sshd": "/usr/sbin/sshd"
+}
+```
 @endif

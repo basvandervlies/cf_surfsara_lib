@@ -1,0 +1,81 @@
+# NHC
+
+Source: [nhc.cf](/services/nhc.cf)
+
+The service file installs nhc software on a node and generates the following files:
+ * /etc/nhc/nhc.conf
+ * /etc/default/nhc (Debian)
+ * /etc/sysconfig/nhc (centos/redhat)
+
+If one of the files is changed then the following ''class'' will be set:
+ * sara_etc_nhc_conf
+ * sara_etc_default_nhc_conf or sara_etc_sysconfig_nhc
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/nhc/
+ * templates/nhc/json
+
+## Usage
+
+The bundle can be run via:
+ *  `"" usebundle => nhc_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "nhc",
+            "..."
+    ]
+}
+```
+
+The bundle will aways read the [default.json](/templates/nhc/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
+    any::
+        "nhc_json_files" slist => { "lisa.json" };
+```
+
+The variable must be `lisa_json_files` and with this setup 1 extra json file will be  merged.
+
+### DEBUG
+
+if you want to debug this bundle set the `DEBUG_nhc` class, eg:
+ * `-DDEBUG_nhc`
+
+
+## def.cf/json
+
+See [default.json](/templates/nhc/json/default.json) what the default values are and
+which variables can be overriden.
+
+Here are some examples how to use it:
+ * specify nhc configuration in def.cf:
+```
+vars:
+    "nhc_json_files" slist => { "lisa.json" };
+```
+ * Copy extra files and override debug:
+```
+    "nhc" : {
+        "copy_files": {
+            "dest": "$(nhc.scripts_dir)/sara_health_checks.nhc",
+            "src": "cf_bundles_dir/nhc/scripts/sara_health_checks.nhc",
+            "mode": "0644", "owner": "root", "group": "root"
+        },
+        "debug": "1",
+    },
+```
+
+ * override server setting in def.json
+```json
+"vars": {
+    "nhc": {
+         "debug":  "1"
+   }
+}
+```

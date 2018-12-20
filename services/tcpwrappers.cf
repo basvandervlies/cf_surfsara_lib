@@ -82,13 +82,15 @@ bundle agent tcpwrappers_surfsara_config()
 }
 
 @if minimum_version(99.9)
-= tcpwrappers =
+# tcpwrappers
+
+Source: [tcpwrappers.cf](/services/tcpwrappers.cf)
 
 This bundle will generate these files from mustache templates:
  * /etc/hosts.allow
  * /etc/hosts.deny
 
-If one of the files is changed then the followong ''class'' will be set:
+If one of the files is changed then the followong *class* will be set:
  *  sara_tcpwrappers_etc_hosts_allow
  *  sara_tcpwrappers_etc_hosts_deny
 
@@ -97,143 +99,75 @@ the templates are located in:
  * templates/tcpwrappers/
  * templates/tcpwrappers/json
 
-== Usage ==
 
-The bundle is called with:
- * `"" usebundle => tcpwrappers_autorun();`
+## Usage
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle can be run via:
+ *  `"" usebundle => tcpwrappers_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "tcpwrappers",
+            "..."
+    ]
+}
+```
+
+The bundle will always read the [default.json](/templates/tcpwrappers/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
-    LOGIN_HOSTS::
+```
+vars:
+    any::
         "tcpwrappers_json_files" slist => {
             "allow_ssh.json" ,
             "allow_http.json" ,
         };
-}}}
+```
 
-The variable must be ''tcpwrappers_json_files'' and with this setup 2 extra json files are being merged.
+The variable must be `tcpwrappers_json_files` and with this setup 2 extra json files are being merged.
 
-=== DEBUG ===
+### DEBUG
 
 If you want to debug these bundle set the `DEBUG_tcpwrappers` class, eg:
  * `-DDEBUG_tcpwrappers
 
-== Mustache setup ==
+## def.cf/json
 
-These variables can be used in the json files:
- * ''allow_all'' :  This host/network may use all services, eg:
-{{{
-#!json
-    "allow_all": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW  admin lan" },
-        { "allow": "10.102.19.0/255.255.255.0", "desc": "ALLOW prod lan" }, ....
-    ]
-}}}
-
- * ''allow_extra'' : This host/network may use this non standard service
- {{{
-#!json
-    "allow_extra": [
-        { 'service': "pxeconfigd", "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }, ....
-    ]
- }}}
-
- * ''allow_http'' : This host/network may use http/https service
- {{{
-#!json
-    "allow_http": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }, ....
-    ]
- }}}
- * ''allow_kerberos'' : This host/network may use kerberos service
- {{{
-#!json
-    "allow_kerberos": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW dmin lan" }, ....
-    ]
- }}}
- * ''allow_ldap'' : This host/network may use ldap service
- {{{
-#!json
-    "allow_ldap": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }, ....
-    ]
- }}}
- * ''allow_nfs3'' : This host/network may use nfs service
- {{{
-#!json
-    "allow_nfs3": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }, ....
-    ]
- }}}
-
- * ''allow_ssh'' : This host/network may use ssh service
- {{{
-#!json
-    "allow_ssh": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }, ....
-    ]
- }}}
-
-
-== Json files ==
-
-We have define these default json files:
- * default.json : Is always included and 'localhost' is allowed.
- * allow.json : Everything is allowed
- * allow_ssh.json: SSH is allowed from everywhere
- * allow_http.json: HTTP/HTTPS is allowed from everywhere
-
-== Def usage ==
-
-The following must be set in the specific ''def.json'' hostfile
-{{{
-#!json
-    "vars": {
-        "sara_services_enabled": {
-            ...
-            "tcpwrappers",
-            ...
-        },
-        "tcpwrappers": {
-        }
-    },
-}}}
+See [default.json](/templates/tcpwrappers/json/default.json) what the default values are and
+which variables can be overriden
 
 Here are some examples how to use it
  * specify tcpwrappers configuration in def.cf:
-{{{
-#!cf3
+```
 vars:
     "tcpwrappers_json_files" slist => { "allow_ssh.json", "allow_http.json" };
-}}}
+```
+
  * specify tcpwrappers configuration in def.json:
-{{{
-#!json
+```json
 "vars": {
     "tcpwrappers": {
         "json_files": [ "allow_ssh.json", "allow_http.json" ]
     }
 }
-}}}
+```
+
  * override allow_ssh setting in def.cf:
-{{{
-#!cf3
+```
 vars:
     "tcpwrappers" data => parsejson( '{ "allow_ssh" : [ {"allow": ... } ] }');
-}}}
+```
+
  * override allow_ssh setting in def.json:
-{{{
-#!json
-    "tcpwrappers" : {
-        "json_files" : [ "allow_http.json" ],
-        "allow_ssh": [
-            { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" },
-        ]
-        ....
-    }
-}}}
+```json
+"tcpwrappers" : {
+    "json_files" : [ "allow_http.json" ],
+    "allow_ssh": [
+        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }
+    ]
+}
+```
 @endif

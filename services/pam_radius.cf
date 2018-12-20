@@ -81,89 +81,83 @@ bundle agent pam_radius_surfsara_config()
 }
 
 @if minimum_version(99.9)
-= PAM_RADIUS =
-[source:trunk/cfengine3/config/bundles/pam_radius.cf source pam_radius.cf]
+# pam_radius
 
-PAM Radius Module allows any PAM-capable machine to become a RADIUS client for authentication and accounting requests. The actual authentication will be performed by a RADIUS server.
+Source: [pam_radius.cf](/services/pam_radius.cf)
+
+PAM Radius Module allows any PAM-capable machine to become a RADIUS client for authentication and accounting requests. The actual
+authentication will be performed by a RADIUS server.
 
 This bundle install the software on a node and generete the file from mustache templates:
- * /etc/pam_radius_auth.conf (debian) or  /etc/pam_radius.conf (centos), cfengine variable : $(pam_radius.config_file)
+ * /etc/pam_radius_auth.conf (debian)
+ * /etc/pam_radius.conf (centos)
+ * cfengine variable : `$(pam_radius.config_file)`
 
 When the configuration flle has been changed the following class will be set:
- * canonify("sara$(pam_radius.config_file)");
+ * `canonify("sara$(pam_radius.config_file)")`
 
 These files wille be generated  with the aid of mustache templates with json data.
 The templates are located in:
  * templates/pam_radius
  * templates/pam_radius/json
 
-== Usage ==
-The bundle is called with:
- * `"" usebundle => pam_radius_autorun;`
+## Usage
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle can be run via:
+ *  `"" usebundle => pam_radius_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "pam_radius",
+            "..."
+    ]
+}
+```
+
+The bundle will aways read the [default.json](/templates/pam_radius/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
+```
+vars:
     any::
         "pam_radius_json_files" slist => { "surfsara.json" };
-}}}
+```
 
 The variable must be ''pam_radius_json_files'' and with this setup 1 extra json file will be  merged.
 
-=== DEBUG ===
+### DEBUG
 
 if you want to debug this bundle set the `DEBUG_pam_radius` class, eg:
- * `DDEBUG_pam_radius`
+ * `-DDEBUG_pam_radius`
 
-=== SETUP ===
-The variables are set in default.json and can be overwritten.
-{{{
-#!json
-{
-    "servers": [
-        { "server" : "127.0.0.1", "secret" : "changme", "timeout" : "3" }
-    ]
-}
-}}}
+## def.cf/json
 
-=== Def Usage ===
-
-To activate the bundle in our environment, set the following class in `def.json` host file:
-{{{
-#!json
-    "vars": {
-        "sara_services_enabled": [
-            ....
-            "pam_radius",
-            ....
-        ],
-        "pam": {
-            "json_files": [ "policy_server.json" ]
-        }
-    },
-}}}
+See [default.json](/templates/pam_radius/json/default.json) what the default values are and
+which variables can be overriden.
 
 Here are some examples how to use it:
  * specify pam_radius configuration in def.cf:
-{{{
-#!cf3
+```
 vars:
     "pam_radius_json_files" slist => { "policy_server.json" };
-}}}
- * Set/Override the servers option in ''def.json'':
-{{{
-#!json
-        "pam_radius" : {
-            "servers": [ { "server" : "192.168.0.1", "secret" : "geheim", "timeout" : "5" } ]
-        },
-}}}
+```
+ * Set/Override the servers option in *def.json*:
+```json
+"pam_radius" : {
+    "servers": [
+        {
+            "server" : "192.168.0.1",
+            "secret" : "geheim",
+            "timeout" : "5"
+        }
+    ]
+}
+```
  * override servers setting in def.cf
-{{{
-#!cf3
+```
 vars:
     "pam_radius" data => parsejson( '{ "servers": [{ "server" : "192.168.0.1", "secret" : "geheim", "timeout" : "5" }]  }' );
-}}}
-
+```
 @endif

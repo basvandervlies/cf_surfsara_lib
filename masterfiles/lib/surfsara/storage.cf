@@ -1,6 +1,11 @@
 #
 ##  SURFsara storage.cf
 #
+@if minimum_version(99.9)
+# storage.cf
+
+Source: [storage.cf](/masterfiles/lib/surfsara/storage.cf)
+@endif
 body volume sara_min_free_space(free)
 {
     check_foreign  => "true";

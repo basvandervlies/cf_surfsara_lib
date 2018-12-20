@@ -58,102 +58,89 @@ bundle agent check_space_run_bundle_test()
 
 @if minimum_version(99.9)
 
-= check_space  =
-[source:trunk/cfengine3/config/bundles/check_space.cf source check_space.cf]
+# check_space 
+
+Source: [check_space.cf](/services/check_space.cf)
 
 This bundles check the given filesystems if there is enought freespace. When there is
-not enough freespace is will:
+not enough freespace will:
  * report it
  * run an specified command, if set
  * run an specified bundles, if set
  * set a class bases on the directories: `canonify("check_space_$(path))")`
 
-== Usage ==
+## Usage
 
-The bundle is called with:
-{{{
-#!cf3
-methods:
- "" usebundle => check_space_autorun(),`
-        classes => results("namespace", "check_space");
-}}}
+The bundle can be run via:
+ *  `"" usebundle => check_space_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "check_space",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be read. We use the `xlasses` to determine if the oromise is keot or failed. So we can eg clean 'tmp':
- * check_space_failed
- * check_space_kept
-
-You can specify extra json data file via:
+The bundle will aways read the [default.json](/templates/check_space/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
+```
+vars:
     any::
         "check_space_json_files" slist => { "tmp.json" };
-}}}
- * def.json
-{{{
-#!json
-"vars": {
-    "tripwire": {
-        "json_files": [ "tmp.json" ]
-    }
-}
-}}}
+```
 
+The variable must be `check_space_json_files` and with this setup 1 extra json file will be  merged.
 
-The variable must be ''check_space_json_files'' and with this setup 1 extra json file will be  merged.
+### Debug
 
-=== Debug ===
-
-If you want to debug this bundle set the `DEBUG_tripwire` class, eg:
+If you want to debug this bundle set the `DEBUG_check_space` class, eg:
     * `-DDEBUG_check_space`
 
-=== Setup ===
+## def.cf/json
 
 The `default.json` is an empty file. The structure is as follows:
-{{{
-#!json
+```json
 "path": {
-    "freespace": Absolute or percentage minimum disk space that should be available before.
-    "command": If specified then run this command if condition is met.
-    "run_bundle": If specified then run this bundle if condition is met.
+    "freespace": "Absolute or percentage minimum disk space that should be available before",
+    "command": "If specified then run this command if condition is met",
+    "run_bundle": "If specified then run this bundle if condition is met"
 }
-}}}
+```
 
-You can specfy more then one path,
-
-
-The example below will:check:
+You can specfy more then one path, The example below will
+check:
   1.  `/tnp` and run a command if it is low on space:
   1.  `/boot` and run a bundle if it is low on space:
-{{{
-!#json
+```json
 {
     "/tmp": { "freespace": "99%", "command": "/bin/echo hello check_space"  },
     "/boot": { "freespace": "98%", "run_bundle": "check_space_run_bundle_test" }
 }
-}}}
+```
 
-=== Def usage ===
+### Some examples
 
 Here is an example how to use it in:
  * def.cf
-{{{
-#!cf3
+```
 vars:
     "check_space" data => parsejson('{
         "json_files": [ "tmp.json" ],
         "/scratch": { "freespace": "10%" }
     }');
-}}}
+```
 
  * def.json
-{{{
-#!json
+```json
 "vars": {
     "check_space": {
         "json_fles": [ "tmp.json" ],
         "/scratch": { "freespace": "5%" }
     }
 }
-}}}
+```
 @endif

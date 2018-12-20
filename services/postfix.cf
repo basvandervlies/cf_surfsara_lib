@@ -176,8 +176,9 @@ bundle agent postfix_virtual_alias_maps()
 }
 
 @if minimum_version(99.9)
-= POSTFIX =
-[source:trunk/cfengine3/config/bundles/postfix.cf source postfix.cf]
+# postfix
+
+Source: [postfix.cf](/services/postfix.cf)
 
 This bundle will check and configure postfix for Debian and CentOS. The following
 files will be generated from mustache templates:
@@ -190,202 +191,124 @@ files will be generated from mustache templates:
  * /etc/postfix/transport
 
 Created by the bundle postfix_virtual_alias_map()
-
  * /etc/postfix/virtual_alias_maps.cf
 
 If one of the files is changed then the following ''class'' will be set:
- * _etc_aliases
- * _etc_postfix_main_cf
- * _etc_postfix_master_cf
- * _etc_postfix_dynamicmaps_cf
- * _etc_postfix_recipient_canonical
- * _etc_postfix_header_checks
- * _etc_postfix_transport
+ * sara_etc_aliases
+ * sara_etc_postfix_main_cf
+ * sara_etc_postfix_master_cf
+ * sara_etc_postfix_dynamicmaps_cf
+ * sara_etc_postfix_recipient_canonical
+ * sara_etc_postfix_header_checks
+ * sara_etc_postfix_transport
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:
  * templates/postfix/
  * templates/postfix/json
 
-== Usage ==
 
-The usage of the bundle is:
-{{{
-#!cf3
-    "" usebundle => postfix_autorun();
-}}}
+## Usage
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle can be run via:
+ *  `"" usebundle => postfix_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "postfix",
+            "..."
+    ]
+}
+```
+
+The bundle will aways read the [default.json](/templates/postfix/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
-{{{
-#!cf3
+```
+vars:
     any::
         "postfix_json_files" slist => { "zimbra.json" };
-}}}
+```
 
 The variable must be ''postfix_json_files'' and with this setup 1 extra json file will be  merged.
 
-=== DEBUG ===
+### DEBUG
 
 if you want to debug this bundle set the `DEBUG_postfix` class, eg:
  * `-DDEBUG_postfix`
 
-=== Setup ===
-The variables that are set in default.json and can be overwritten. SURFSARA use other defaults.
-{{{
-#!json
-{
-    "alias_root_email_address": ""example@$(sys.domain)"",
-    "alias_database": [
-        "hash:/etc/aliases"
-    ],
-    "alias_maps": [
-        "hash:/etc/aliases"
-    ],
-    "append_dot_mydomain": "no",
-    "biff": "no",
-    "debugger_command": "",
-    "empty_address_recipient": "devnull",
-    "file_aliases_lines": [
-    ],
-    "file_header_checks_lines": [
-    ],
-    "file_transport_lines": [
-    ],
-    "header_checks": [
-        "regexp:/etc/postfix/header_checks"
-    ],
-    "inet_interfaces": "loopback-only",
-    "inet_protocols": "ipv4",
-    "mailman_destination_recipient_limit": false,
-    "master_cf_extra_interfaces": [
-    ],
-    "message_size_limit": 10240000,
-    "mydestination": [
-        "$myhostname",  "localhost.$mydomain", "localhost", ".$mydomain"
-    ],
-    "mydomain": "$(sys.domain)",
-    "mynetworks": [
-        "127.0.0.0/8"
-    ],
-    "myorigin": "$myhostname",
-    "myhostname": "$(sys.fqhost)",
-    "recipient_delimiter": "+",
-    "recipient_canonical_maps": [
-        "hash:/etc/postfix/recipient_canonical"
-    ],
-    "relay_domains": [
-        "$mydestination"
-    ],
-    "relayhost": "[mta.surfsara.nl]",
-    "smtpd_banner": "SURFsara ESMTP host",
-    "smtpd_port": "smtp",
-    "transport_maps": [
-        "hash:/etc/postfix/transport"
-    ],
-    "unknown_local_recipient_reject_code": 550,
-    "virtual_alias_maps": [
-        {
-            "protocol" : "",
-            "delimiter" : "",
-            "dest" : ""
-        }
-    ],
-    "virtual_mailbox_limit": 0
-}
-}}}
+## def.cf/json
 
-=== Usage  ===
-
-The following must be set in the specific ''def.json'' hostfile
-{{{
-#!json
-    "vars": {
-        "sara_services_enabled": [
-            ...
-            "postfix"
-            ...
-        ],
-        "postfix": {
-        }
-    },
-}}}
+See [default.json](/templates/postfix/json/default.json) what the default values are and
+which variables can be overriden
 
 Here are some examples how to use it:
  * specify postfix configuration in def.cf:
-{{{
-#!cf3
+```
 vars:
     "postfix_json_files" slist => { "zimbra.json" };
-}}}
- * Set/Override options variable in ''def.json'':
-{{{
-#!json
-        "postfix" : {
-            "alias_root_email_address": "noreply@surfsara.nl",
-            "json_files": [ "zimbra.json" ],
-            "file_aliases_lines": [ {"name": "beowulf", "value": "|\"/usr/bin/run_email2trac --project beowulf\""} ]
-        },
-}}}
+```
+ * Set/Override options variable in a *def.json* file:
+```json
+"vars": {
+    "postfix" : {
+        "alias_root_email_address": "noreply@surfsara.nl",
+        "json_files": [ "zimbra.json" ],
+        "file_aliases_lines": [ {"name": "beowulf", "value": "|\"/usr/bin/run_email2trac --project beowulf\""} ]
+    }
+}
+```
+
  * override server setting in def.cf
-{{{
-#!cf3
+```
 vars:
     "postfix" data => parsejson( '{ "alias_root_email_address":  "file_aliases_lines"  }' );
-}}}
+```
 
- * to use `virtual_alias_map`s override following and define your own mustache file
-{{{
-#!json
-    "virtual_alias_maps": [
-        {
-            "protocol" : "",
-            "delimiter" : "",
-            "dest" : ""
-        }
-    ],
-}}}
 
- * enable VIRTUAL_MAPS class and describe your json file, for example:
-  * VIRTUAL_MAPS will enable virtual_alias_maps in main.cf of postfix
-{{{
-{{#classes.POSTFIX_VIRTUAL_MAPS}}
-{{#vars.sara_data.postfix.virtual_alias_maps}}virtual_alias_maps = {{{protocol}}}{{{delimiter}}}{{{dest}}}, {{/vars.sara_data.postfix.virtual_alias_map}}
-{{/classes.POSTFIX_VIRTUAL_MAPS}}
-}}}
+### virtual_alias_maps
 
- * Json data file. Postfix bundle will copy the `ldap_aliases_map.mustache` template file and expand it with teh defined data.
-{{{
-#!json
+with this bundle you can define youw own mustache template with json data for creating
+the virtual alias map file(s). The format of the `virtual_alias_maps` is:
+```json
+"virtual_alias_maps": {
+    "mustache_file": {
+        "data": {},
+        "delimiter": "",
+        "dest": "",
+        "protocol": ""
+    }
+}
+```
+j
+An example for defining an LDAP alias map for mustache (.forward is fetch from LDAP). This will copy the template
+`ldap_aliases_map.mustache` and expand it with the give json data.
+```json
+"postfix": {
     "classes" : {
         "VIRTUAL_MAPS": [ "mta.example.com" ],:
     },
     "virtual_alias_maps": {
-        "ldap_aliases_map.mustache" : {
+        "ldap_aliases_map.mustache": {
             "delimiter": ":",
             "dest": "/etc/postfix/virtual_alias_maps.cf",
             "protocol": "ldap",
             "data": {
-                "bind" : true,
-                "bind_options" : {
-                    "dn" : "<your_dn>",
-                    "pw" : "<your_bind_password>"
+                "bind": true,
+                "bind_options": {
+                    "dn": "<your_dn>",
+                    "pw": "<your_bind_password>"
                 },
                 "port": "636",
-                "query_filter" : "(uid=%s)",
-                "result_attribute" : "mail",
-                "search_base" : "ou=Users,dc=example,dc=com",
+                "query_filter": "(uid=%s)",
+                "result_attribute": "mail",
+                "search_base": "ou=Users,dc=example,dc=com",
                 "server": "ldaps://ldap.example.com"
             }
         }
     }
-}}}
-
-{{{
-#!cf3
-vars:
-    "postfix" data => parsejson( '{ "alias_root_email_address":  "file_aliases_lines"  }' );
-}}}
-
+}
+```
 @endif

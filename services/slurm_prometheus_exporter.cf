@@ -84,13 +84,17 @@ bundle agent slurm_prometheus_exporter_autorun()
         "" usebundle => slurm_prometheus_exporter_daemon_check();
 }
 @if minimum_version(99.9)
+# slurm_prometheus_exporter
 
-= slurm_prometheus_exporter =
-[source:trunk/cfengine3/config/bundles/services/surfsara/slurm_prometheus_exporter.cf source slurm_prometheus_exporter.cf]
+**This bundle must be rewritten to the new standard**
+
+Source: [slurm_prometheus_exporter.cf](/services/slurm_prometheus_exporter.cf)
 
 This bundle will generate these/this file(s) from mustache templates:
+ * /etc/default/slurm_prometheus_exporter
 
 If one of the files is changed then the following ""class"" will be set:
+ * sara_etc_default_slurm_prometheus_exporter
 
 These templates are located in:
  * templates/slurm_prometheus_exporter

@@ -1,6 +1,14 @@
 #
-#  SURFsara common.cf
+##  SURFsara common.cf
 #
+
+@if minimum_version(99.9)
+# common.cf
+
+Source: [common.cf](/masterfiles/lib/surfsara/common.cf)
+
+Some body defininitions that are used in other bundles.
+@endif
 
 ## cmd_repair in cfengine stdlib does not define # kept_return code :-(
 # see: https://github.com/cfengine/masterfiles/pull/290

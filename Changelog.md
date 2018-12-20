@@ -2,6 +2,7 @@
 
 * [Version: 0.9.20 (2018-12-20)](#version-0920-2018-12-20)
     * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
+    * [SLURM](#slurm)
     * [NHC (Node Health Check)](#nhc-node-health-check)
     * [Bundle services data](#bundle-services-data)
 * [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
@@ -15,6 +16,8 @@
 
  * Services added:  nsswitch, nhc, slurm
  * All service/library documentation is now online
+    * https://github.com/basvandervlies/cf_surfsara_lib/blob/master/doc/library.md
+    * https://github.com/basvandervlies/cf_surfsara_lib/blob/master/doc/services.md
  * apt service enhancements:
    * autoremove added option `-y` to skip questions
  * Munge service enhancements:
@@ -52,6 +55,18 @@ It can now handle 2 level expansion, eg:
 ```
 
 this will resolve `source` to : `cf_bundles_dir/nvidia/NVIDIA-Linux-x86_64-410.57.run`.
+
+## SLURM
+
+SchedMD® is the core company behind the Slurm workload manager software, a free
+open-source workload manager designed specifically to satisfy the demanding needs
+of high performance computing. Slurm is in widespread use at government laboratories,
+universities and companies world wide. As of the June 2017 Top 500 computer list,
+Slurm was performing workload management on six of the ten most powerful computers in
+the world including the number 1 system, Sunway TaihuLight with 10,649,600 computing
+cores, making it the preferred choice for workload management on the top ten computers
+in the world.
+ * https://www.schedmd.com/
                                                         },
 ## NHC (Node Health Check)
 

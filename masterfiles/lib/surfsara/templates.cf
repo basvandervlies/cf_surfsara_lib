@@ -1,10 +1,10 @@
 #
-#  SURFsara bundles.cf
+#  SURFsara templates.cf
 #
 @if minimum_version(99.9)
 # template.cf
 
-Source: [templates.cf](/masterfiles/lib/surfsara/bundles.cf)
+Source: [templates.cf](/masterfiles/lib/surfsara/templates.cf)
 
 Here all bundles are listed that are involved in parsing json data and
 generating the templates files.
@@ -273,7 +273,6 @@ bundle agent sara_json_copy(bundle_name, files)
 
     reports:
         any::
-            "$(sys.policy_entry_dirname)/../$(bundle_json_dir)/$(files)";
             "$(this.bundle): $(bundle_name) json file(s) : $(files_str)"
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
 

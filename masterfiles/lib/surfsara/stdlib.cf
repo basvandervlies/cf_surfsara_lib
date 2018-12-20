@@ -23,7 +23,7 @@ bundle common surfsara_stdlib_common
     vars:
         any::
             "standard" slist => {
-                "$(this.promise_dirname)/bundles.cf",
+                "$(this.promise_dirname)/templates.cf",
                 "$(this.promise_dirname)/common.cf",
                 "$(this.promise_dirname)/files.cf",
                 "$(this.promise_dirname)/packages.cf",
@@ -32,7 +32,7 @@ bundle common surfsara_stdlib_common
                 "$(this.promise_dirname)/storage.cf",
             };
 
-            "version" string => "SURFSARA Library 0.9.8";
+            "version" string => "SURFSARA Library 0.9.20";
 
         SURFSARA_SKIP_DEF_CF_INCLUDE::
             "def" slist => { };

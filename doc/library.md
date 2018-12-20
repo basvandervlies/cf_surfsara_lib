@@ -1,7 +1,6 @@
 
 # The library documentattion
 
- * [bundles](library/bundles.md)
  * [common](library/common.md)
  * [def](library/def.md)
  * [files](library/files.md)
@@ -10,3 +9,4 @@
  * [services](library/services.md)
  * [stdlib](library/stdlib.md)
  * [storage](library/storage.md)
+ * [templates](library/templates.md)

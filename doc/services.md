@@ -19,6 +19,7 @@
  * [rootfiles](services/rootfiles.md)
  * [sara_user_consume_resources](services/sara_user_consume_resources.md)
  * [singularity](services/singularity.md)
+ * [slurm](services/slurm.md)
  * [slurm_prometheus_exporter](services/slurm_prometheus_exporter.md)
  * [ssh](services/ssh.md)
  * [sudo](services/sudo.md)

@@ -378,7 +378,9 @@ bundle agent slurm_spank_templates()
 
 @if minimum_version(99.9)
 
-# SLURM
+# slurm
+
+Source: [slurm.cf](/services/slurm.cf)
 
 This bundle will generate these/this file(s) from mustache templates:
  * debian in `/etc/slurm-llnl`
@@ -403,15 +405,26 @@ These templates are located in:
 
 ## Usage
 
-The bundle is called with:
- * `"" usebundle => slurm_autorun();`
+The bundle can be run via:
+ *  `"" usebundle => slurm_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "slurm",
+            "..."
+    ]
+}
+```
 
-When we do not specifiy any json data files then only `default.json` will be
-read. You can specify extra json data file via:
+The bundle will always read the [default.json](/templates/slurm/json/default.json) file
+and extra json file(s) can be specified via:
  * def.cf
 ```
+vars:
     any::
-        "slurm_json_files" slist => { "debian.json" };
+        "slurm_json_files" slist => { "cluster.json" };
 ```
 
 The variable must be ""slurm_json_files"" and with this setup 1 extra json file will be merged.
@@ -419,11 +432,41 @@ The variable must be ""slurm_json_files"" and with this setup 1 extra json file 
 ### DEBUG
 
 if you want to debug this bundle set the `DEBUG_slurm` class, eg:
- * `DDEBUG_slurm`
+ * `-DDEBUG_slurm`
 
-## Setup
-The variables are set in default.json and can be overwritten.
- * URL to default.json
+## def.cf/json
+
+See [default.json](/templates/slurm/json/default.json) what the default values are and
+which variables can be overriden.
+
+Here are some examples how to use it:
+ * specify resolv configuration in def.cf:
+```
+vars:
+    "slurm_json_files" slist => { "cluster.json" };
+```
+
+ * override config settings in def.cf
+```
+vars:
+    "slurm" data => parsejson( '{ "PrologFlags": "contains" }' );
+```
+
+ * override config settings in ''def.json'':
+```json
+"vars": {
+    "slurm": {
+            "json_files": [ "mona.json" ]
+        },
+}
+```
+
+ * override variable config setting in ''def.json''
+```json
+"slurm": {
+    "PrologFlags": "contains"
+}
+```
 
 ### spank plugins
 
@@ -447,48 +490,4 @@ done dynamically,eg:
 
 This will generate the `private-tmpdir.conf` file with the aid of the specified mustache file and
 json data.
-
-## Def usage
-
-The following must be set in the specific ''def.json'' hostfile
-```json
-    "vars": {
-        "sara_services_enabled": [
-            ...
-            "slurm",
-            ...
-        ],
-        "slurm": {
-        }
-    },
-```
-
-Here are some examples how to use it:
- * specify resolv configuration in def.cf:
-```
-vars:
-    "slurm_json_files" slist => { "debian.json" };
-```
-
- * override config settings in def.cf
-```
-vars:
-    "slurm" data => parsejson( '{ "PrologFlags": "contains" }' );
-```
-
- * override config settings in ''def.json'':
-```json
-    "vars": {
-        "slurm": {
-            "json_files": [ "mona.json" ]
-        },
-    }
-```
-
- * override variable config setting in ''def.json''
-```json
-    "slurm": {
-        "PrologFlags": "contains"
-    }
-```
 @endif

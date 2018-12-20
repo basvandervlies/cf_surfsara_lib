@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.15 (2018-12-03)](#version-0915-2018-12-03)
+* [Version: 0.9.20 (2018-12-20)](#version-0920-2018-12-20)
     * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
     * [NHC (Node Health Check)](#nhc-node-health-check)
     * [Bundle services data](#bundle-services-data)
@@ -11,9 +11,10 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 0.9.15 (2018-12-03)
+# Version: 0.9.20 (2018-12-20)
 
  * Services added:  nsswitch, nhc, slurm
+ * All service/library documentation is now online
  * apt service enhancements:
    * autoremove added option `-y` to skip questions
  * Munge service enhancements:

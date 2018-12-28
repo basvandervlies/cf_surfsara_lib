@@ -287,11 +287,11 @@ bundle agent apt_repository()
         !apt_repository_json_files_set::
             "repo_files" slist => { getvalues("sara_data.apt[repo_files]") };
         apt_repository_json_files_set::
-            "repo_files" slist => { getvalues("sara_data.apt[repo_files]"), "@(def.apt_repository_json_files)" },
+            "repo_files" slist => { getvalues("sara_data.apt[repo_files]"), "@(def.apt_repo_files)" },
                 comment => "Support old behaviour till we converted everything to new apt setup";
 
     classes:
-        "apt_repository_json_files_set" expression => isvariable("def.apt_repository_json_files"),
+        "apt_repository_json_files_set" expression => isvariable("def.apt_repo_files"),
                 comment => "Support old behaviour till we converted everything to new apt setup";
 
     methods:

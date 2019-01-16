@@ -60,4 +60,3 @@ specified destination, example:
 ]
 ```
 Where `cf_bundles_dir` is a **cf-serverd shortcut**.
-endif

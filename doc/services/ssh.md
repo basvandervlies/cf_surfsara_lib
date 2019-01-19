@@ -26,7 +26,7 @@ The following clases can be set via def.cf/json:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => apt_autorun();`
+ *  `"" usebundle => ssh_autorun();`
  * `def.sara_services_enabled` (prefered)
 ```json
 "vars": {

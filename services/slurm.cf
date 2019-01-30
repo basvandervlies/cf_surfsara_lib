@@ -114,11 +114,6 @@ bundle agent slurm_install()
                         "slurmd": "$(version)",
                         "slurmdbd": "$(version)"
                         "python-pyslurm" : "$(pyslurm_version)",
-                    },
-                    "purge": {
-                        "libpam-slurm" : ""
-                        "libslurm31" : "",
-                        "libslurmdb31" : "",
                     }
                 }
             ');
@@ -139,17 +134,6 @@ bundle agent slurm_install()
                         "slurmd": "$(version)",
                         "slurm-wlm-basic-plugins ": "$(version)",
                         "python-pyslurm" : "$(pyslurm_version)",
-                    },
-                    "purge": {
-                        "libpam-slurm" : "",
-                        "libslurm30" : "",
-                        "libslurmdb30" : "",
-                        "libslurm31" : "",
-                        "libslurmdb31" : "",
-                        "slurm-wlm" : "",
-                        "slurm-wlm-doc" : ""
-                        "slurmctld" : "",
-                        "slurmdbd" : ""
                     }
                 }
             '),
@@ -175,7 +159,7 @@ bundle agent slurm_install()
             "" usebundle =>  sara_service_packages("slurm", "@(slurm_install.packages)"),
                 classes => results("bundle", "slurm_packages");
 
-        debian.SLURM_SERVER::
+        SLURM_SLURMD_DISABLE::
             "" usebundle => systemd_disable_service("slurmd"),
                 ifvarclass => "slurm_packages_repaired";
 
@@ -283,24 +267,6 @@ bundle agent slurm_config()
         SLURM_SERVER.SLURM_RELOAD::
             "$(slurm.reload_controller)";
 
-        SLURM_SERVER::
-            "$(sara_data.slurm[scripts_dir])/cua2slurm"
-                contain => in_shell,
-                action => if_elapsed(10);
-
-            "$(sara_data.slurm[scripts_dir])/slurm_check_licenses"
-                contain => in_shell,
-                action => if_elapsed(10);
-
-            "$(sara_data.slurm[scripts_dir])/slurm_update_qos"
-                contain => in_shell,
-                action => if_elapsed(10);
-
-        SLURM_SERVER.once_a_day::
-            "$(sara_data.slurm[scripts_dir])/cua2slurm -m"
-                contain => in_shell,
-                action => bg(60,12);
-
     reports:
         SLURM_CLIENT.SLURM_RELOAD::
             "$(this.bundle): $(slurm.reload_client)";
@@ -402,6 +368,13 @@ The class name for the other files has the same format.
 These templates are located in:
  * templates/slurm
  * templates/slurm/json
+
+The following clases can be set via def.cf/json:
+ * backup: When set make a backup of the SQL sever
+ * client: Configure the machine as client
+ * slurmd_disable: Disable the slurmd systemd service
+ * server: Configure the machine as server
+ * submit: Configure the machine as submit host
 
 ## Usage
 

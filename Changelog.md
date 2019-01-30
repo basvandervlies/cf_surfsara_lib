@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 0.9.20 (2019-??-??)](#version-0920-2019--)
 * [Version: 0.9.20 (2018-12-20)](#version-0920-2018-12-20)
     * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
     * [SLURM](#slurm)
@@ -12,6 +13,12 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 0.9.20 (2019-??-??)
+ * slurm services changes:
+  * removed surfsara specific settings
+  * add new class `SLURMD_DISABLE`
+  * debian disable purging of packages
+
 # Version: 0.9.20 (2018-12-20)
 
  * Services added:  nsswitch, nhc, slurm

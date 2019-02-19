@@ -93,8 +93,8 @@ bundle agent slurm_autorun()
 bundle agent slurm_install()
 {
     vars:
-        "version" string => "18.08.3-13";
-        "pyslurm_version" string => "18.08.3-13";
+        "version" string => "18.08.5-2";
+        "pyslurm_version" string => "18.08.5-2";
 
         debian.SLURM_SERVER::
             "packages" data => parsejson('
@@ -105,6 +105,7 @@ bundle agent slurm_install()
                         "libpmi2-0-dev" : "$(version)",
                         "libslurm-dev" : "$(version)",
                         "libslurm-perl" : "$(version)",
+                        "libslurmdb33": "$(version)",
                         "libslurmdb-dev": "$(version)",
                         "libslurmdb-perl": "$(version)",
                         "slurm-client": "$(version)",
@@ -128,6 +129,7 @@ bundle agent slurm_install()
                         "libpmi2-0-dev" : "$(version)",
                         "libslurm-dev" : "$(version)",
                         "libslurm-perl" : "$(version)",
+                        "libslurmdb33": "$(version)",
                         "libslurmdb-dev" : "$(version)",
                         "libslurmdb-perl" : "$(version)",
                         "slurm-client": "$(version)",
@@ -146,6 +148,7 @@ bundle agent slurm_install()
                         "libpmi0-dev" : "$(version)",
                         "libpmi2-0-dev" : "$(version)",
                         "libslurm-perl": "$(version)",
+                        "libslurmdb33": "$(version)",
                         "libslurmdb-perl": "$(version)",
                         "slurm-client": "$(version)",
                         "python-pyslurm" : "$(pyslurm_version)"

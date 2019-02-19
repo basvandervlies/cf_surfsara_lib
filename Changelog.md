@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.20 (2019-??-??)](#version-0920-2019--)
+* [Version: 0.9.?? (2019-??-??)](#version-09-2019--)
 * [Version: 0.9.20 (2018-12-20)](#version-0920-2018-12-20)
     * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
     * [SLURM](#slurm)
@@ -13,8 +13,11 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 0.9.20 (2019-??-??)
- * slurm services changes:
+# Version: 0.9.?? (2019-??-??)
+ * apt service changes:
+  * Added meta tags , now we can start the service with  `def.sara_services_enabled` and autorun method
+  * rewrote apt\_check\_status bundle.  Check the package manager status and try to fix it if not healty
+ * slurm service changes:
   * removed surfsara specific settings
   * add new class `SLURMD_DISABLE`
   * debian disable purging of packages

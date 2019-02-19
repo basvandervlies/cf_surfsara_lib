@@ -15,12 +15,12 @@
 <!-- vim-markdown-toc -->
 # Version: 0.9.?? (2019-??-??)
  * apt service changes:
-  * Added meta tags , now we can start the service with  `def.sara_services_enabled` and autorun method
-  * rewrote apt\_check\_status bundle.  Check the package manager status and try to fix it if not healty
+   * Added meta tags , now we can start the service with  `def.sara_services_enabled` and autorun method
+   * rewrote apt\_check\_status bundle.  Check the package manager status and try to fix it if not healty
  * slurm service changes:
-  * removed surfsara specific settings
-  * add new class `SLURMD_DISABLE`
-  * debian disable purging of packages
+   * removed surfsara specific settings
+   * add new class `SLURMD_DISABLE`
+   * debian disable purging of packages
 
 # Version: 0.9.20 (2018-12-20)
 

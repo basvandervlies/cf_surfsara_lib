@@ -43,6 +43,9 @@ bundle common apt
 
 bundle agent apt_autorun()
 {
+    meta:
+        "tags"  slist => { "autorun", "template_apt" };
+
     vars:
         APT_OS_VERSION_CHECK::
             "os_updates" string => "on";
@@ -250,17 +253,27 @@ bundle agent apt_security_update(options)
 
 bundle agent apt_check_status()
 {
-    classes:
-        !apt_ok.debian::
-           "apt_ok"    expression => returnszero("/bin/ps -ef | grep apt | grep -v grep >/dev/null 2>&1 || $(apt.check_command) >/dev/null 2>&1 && true","useshell");
+    vars:
+        "bad_state" slist => { "100" };
 
     commands:
-        !apt_ok::
+        debian::
             "$(apt.check_command)"
-                comment => "Check how APT/DPKG is doing";
+                comment => "Check status of the APT package manager",
+                contain => in_shell_and_silent,
+                classes => sara_cmd_repair("@(bad_state)", "apt_check_status");
+
+        apt_check_status_failed::
+            "$(apt.dpkg_command)"
+                args => "--configure -a",
+                comment => "Try to fix the bad apt status";
 
     reports:
-        !apt_ok::
+        any::
+            "$(this.bundle): Checking package manager status (apt)"
+                ifvarclass => "DEBUG|DEBUG_apt|DEBUG_$(this.bundle)";
+
+        apt_check_status_failed::
             "$(this.bundle): ERROR! Package manager returned an error!";
 }
 

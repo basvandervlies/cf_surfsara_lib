@@ -38,7 +38,7 @@ bundle common postfix() {
             "service_name"      string => "postfix";
             "daemon_name"       string => "/usr/libexec/postfix/master";
 
-        SLES::
+        sles::
             "packages"  data  => parsejson('
                     {
                         "install": {

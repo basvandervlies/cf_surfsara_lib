@@ -1,0 +1,115 @@
+#
+## rsync.cf @SURFsara
+#
+bundle common rsyslog()
+{
+    vars:
+        "exclude_list" slist => { ".svn", ".git" };
+
+        "service_name" string => "rsyslog";
+        "daemon_name" string => "rsyslogd";
+        "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+
+        "template_2_destination" data => parsejson('
+                {
+                    "z-surfsara.conf.mustache": "/etc/rsyslog.d/z-surfsara.conf"
+                }
+        ');
+
+        "packages"  data  => parsejson('
+                {
+                    "install": {
+                        "rsyslog" : ""
+                    }
+                }
+            ');
+
+}
+
+bundle agent rsyslog_install()
+{
+    methods:
+        "" usebundle => sara_service_packages("rsyslog", "@(rsyslog.packages)"); 
+}
+
+bundle agent rsyslog_config()
+{
+    classes:
+        "rsyslog_restart" or => {
+            "sara_etc_rsyslog_d_z_surfsara_conf"
+        };
+
+    methods:
+        "" usebundle => sara_mustache_autorun("rsyslog");
+
+    services:
+        "$(rsyslog.service_name)"
+            service_policy => "start";
+
+    commands:
+        "$(rsyslog.restart)"
+            ifvarclass => "rsyslog_restart";
+        
+}
+
+bundle agent rsyslog_daemon_check()
+{
+    processes:
+        "$(rsyslog.daemon_name)"
+            comment => "Check if rsyslog is running",
+            process_count => check_range("$(rsyslog.daemon_name)", "1", "1"),
+            process_select => sara_select_parent_process("1");
+
+    commands:
+        "$(rsyslog.restart)"
+            ifvarclass => canonify("$(rsyslog.daemon_name)_out_of_range");
+}
+
+bundle agent rsyslog_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_rsyslog" };
+
+    methods:
+        "" usebundle => rsyslog_install();
+        "" usebundle => rsyslog_config();
+        "" usebundle => rsyslog_daemon_check();
+}
+
+@if minimum_version(99.9)
+# rsync.cf
+
+Source: [rsync.cf](/services/rsyslog.cf)
+
+This bundle is used to configure the rsyslog daemon. The following actions are protected by a class:
+ * Accept external log from other hosts (RSYSLOG_ACCEPT_REMOTE_LOG)
+
+The class can be set in the def.cf/json:
+```json
+{
+"rsyslog": {
+    "classes": {
+        "ACCEPT_REMOTE_LOG": "any",
+    }
+}
+```
+
+## Usage
+
+The bundle can be run via:
+ * `"" usebundle => rsyslog_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+        "...",
+        "rsyslog",
+        "..."
+    ]
+}
+```
+
+## def.cf/son
+
+See [default.json](/templates/rsyslog/json/default.json) what the default values are and which variables can be overriden.
+@endif

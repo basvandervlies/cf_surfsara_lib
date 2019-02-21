@@ -69,6 +69,19 @@ bundle common ssh()
             "sftp_server_path"  string => "/usr/libexec/openssh/sftp-server",
                 comment => "Used in ssh default.json";
 
+        sles::
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "libssh2-1" : "",
+                            "openssh" : "",
+                        }
+                    }
+                ');
+            "service_name"      string => "sshd";
+            "sftp_server_path"  string => "/usr/lib/ssh/sftp-server",
+                comment => "Used in ssh default.json";
+
         systemd::
             "restart"          string => "$(paths.path[systemctl]) restart $(service_name)";
         !systemd::

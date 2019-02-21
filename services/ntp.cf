@@ -46,6 +46,21 @@ bundle common ntp {
                     }
                 ');
             "service_name"      string => "ntp";
+
+        sles::
+            "group"             string => "ntp";
+            "daemon_name"       string => "ntpd";
+            "config_file"       string => "/etc/ntp.conf";
+            "ntp_default"       string => "/etc/sysconfig/ntp";
+            "ntpdate_default"   string => "/etc/sysconfig/ntpdate";
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "ntp" : "",
+                        }
+                    }
+                ');
+            "service_name"      string => "ntpd";
 }
 
 bundle agent ntp_autorun()

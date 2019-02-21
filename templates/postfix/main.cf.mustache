@@ -44,3 +44,15 @@ smtpd_banner = {{{vars.sara_data.postfix.smtpd_banner}}}
 transport_maps = {{#vars.sara_data.postfix.transport_maps}}{{{.}}},{{/vars.sara_data.postfix.transport_maps}}
 
 unknown_local_recipient_reject_code = {{{vars.sara_data.postfix.unknown_local_recipient_reject_code}}}
+
+{{#classes.sles}}
+setgid_group = {{{vars.sara_data.postfix.setgid_group}}}
+{{/classes.sles}}
+
+{{#classes.sles_12}}
+daemon_directory = /usr/lib/postfix
+{{/classes.sles_12}}
+
+{{#classes.sles_15}}
+daemon_directory = /usr/lib/postfix/bin
+{{/classes.sles_12}}

@@ -17,6 +17,7 @@
  * apt service changes:
    * Added meta tags , now we can start the service with  `def.sara_services_enabled` and autorun method
    * rewrote apt\_check\_status bundle.  Check the package manager status and try to fix it if not healty
+ * added  SuSe (sles) support for : ntp, postfix, ssh
  * slurm service changes:
    * removed surfsara specific settings
    * add new class `SLURMD_DISABLE`

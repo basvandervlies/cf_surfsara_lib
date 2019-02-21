@@ -1,0 +1,6 @@
+{
+    "extra_lines": [],
+    "udp_enabled": false,
+    "forward_auth_log": "@$(sys.policy_hub):514",
+    "hostname": "$(sys.fqhost)"
+}

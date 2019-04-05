@@ -18,7 +18,7 @@ This bundle will read the json attribute `copy_dirs` from the specified `bundle_
 attribute can be specified:
  * compare: which mode must we use to check the difference, default: digest
  * dest: destination directory
- * exclude_dirs:  exclude this dires from copying, default not set
+ * exclude_dirs:  exclude this dirs from copying, default: [ ".git", ".svn" ]
  * mog: mode/owner/group  of all files/directories, default not set
  * preserve: preserve same mode as source directory, default: false
  * purge: exact copy of the source directory, default: false
@@ -167,6 +167,18 @@ vars:
         "cp_attr_$(index)" data => mergedata("sara_cp_dir_default.attributes", "sara_data.$(bundle_name)[copy_dirs][$(index)]"),
             comment => "Merge each definition the copy default attributes";
 
+        "exclude_dir_$(index)" slist => { ".git", ".svn" },
+            comment => "Default exclude directories settings for copy_dirs",
+            ifvarclass => and(
+                not(isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"))
+            );
+
+        "exclude_dir_$(index)" data => mergedata("sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"),
+            comment => "Exclude directory settings from json data",
+            ifvarclass => and(
+                isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]")
+            );
+
     cfengine_3_7|cfengine_3_10::
         "debug_str" string => format("%S", "sara_data.$(bundle_name)[copy_dirs]"),
             comment => "Old debug method",
@@ -186,9 +198,11 @@ files:
         "$(sara_data.$(bundle_name)[copy_dirs][$(index)][dest])"
             comment => "Copy bundle dirs and set class if there is a change",
             copy_from => sara_cp_dir("sara_service_copy_dirs", "cp_attr_$(index)", "$(sys.policy_hub)"),
-            depth_search => recurse_ignore("inf", "$(sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs])" ),
+            depth_search => recurse_ignore("inf", "@(exclude_dir_$(index))" ),
             classes => results("namespace", "$(bundle_name)_copy_dirs_$(index)"),
-            ifvarclass => "!$(bundle_name)_copy_dirs_$(index)_kept";
+            ifvarclass => and(
+                not(canonify("$(bundle_name)_copy_dirs_$(index)_kept"))
+            );
 
         "$(sara_data.$(bundle_name)[copy_dirs][$(index)][dest])"
             comment => "Set permission on all files/dirs if requested",
@@ -198,8 +212,9 @@ files:
                 "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][2])"
             ),
             depth_search => recurse_ignore("inf", "$(sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs])" ),
-            ifvarclass => "$(bundle_name)_copy_dirs_$(index)_mog_class";
-
+            ifvarclass => and(
+                canonify("$(bundle_name)_copy_dirs_$(index)_mog_class")
+            );
 
 methods:
     any::
@@ -211,6 +226,8 @@ methods:
 
 @if minimum_version(3.11)
         "" usebundle => sara_show_data("sara_data", "$(bundle_name)[copy_dirs][$(index)]"),
+            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+        "" usebundle => sara_show_data("$(this.bundle)", "exclude_dir_$(index)"),
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
         "" usebundle => sara_show_data("$(this.bundle)", "cp_attr_$(index)"),
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";

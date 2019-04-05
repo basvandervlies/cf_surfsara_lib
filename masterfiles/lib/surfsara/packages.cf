@@ -41,6 +41,7 @@ Another example is to install and remove ssh packages in 'def.json':
 
 The following package actions are implemented:
  * install : install the package
+ * install_backports : install the package from backports (Debian)
  * purge: delete the package and all it configuration files
  * remove: delete the package and preserve the configuration files
 @endif
@@ -118,7 +119,39 @@ bundle agent sara_service_packages_install(bundle_name, pkg_data)
 
     reports:
         any::
-            "$(this.bundle) has beeen called"
+            "$(this.bundle) has been called"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+bundle agent sara_service_packages_install_backports(bundle_name, pkg_data)
+{
+    vars:
+        any::
+            "packages" slist => getindices("pkg_data[install_backports]");
+
+@if minimum_version(3.12)
+        debian::
+            "release" string => regex_replace("$(sys.os_release[VERSION])", ".*\((\w+).*", "\1", "");
+            "pkg_options" string => "--target-release=$(release)-backports";
+@endif
+
+        (!debian|cfengine_3_7|cfengine_3_10)::
+            "pkg_options" string => "";
+
+    methods:
+        any::
+            "" usebundle => sara_service_package("$(bundle_name)",
+                "$(packages)", "$(pkg_data[install_backports][$(packages)])", "present", "$(pkg_options)");
+
+    reports:
+        any::
+            "$(this.bundle) has been called"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+        (cfengine_3_7|cfengine_3_10)::
+            "$(this.bundle) is not supported on versions lower than CFEngine 3.12, falling back to normal install"
+                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+        !debian::
+            "$(this.bundle) is only supported on Debian, falling back to normal install"
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
@@ -157,7 +190,7 @@ bundle agent sara_service_packages_purge(bundle_name, pkg_data)
 
     reports:
         any::
-            "$(this.bundle) has beeen called"
+            "$(this.bundle) has been called"
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 

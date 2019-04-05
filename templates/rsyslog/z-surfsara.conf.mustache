@@ -25,6 +25,6 @@ if ( $fromhost != "{{{ vars.sara_data.rsyslog.hostname }}}" ) then {
 auth,authpriv.* {{{ vars.sara_data.rsyslog.forward_auth_log }}}
 
 ## Custom configuration
-{{{#vars.sara_data.rsyslog.extra_lines}}}
+{{#vars.sara_data.rsyslog.extra_lines}}
 {{{.}}}
-{{{/vars.sara_data.rsyslog.extra_lines}}}
+{{/vars.sara_data.rsyslog.extra_lines}}

@@ -211,7 +211,7 @@ files:
                 "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][1])",
                 "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][2])"
             ),
-            depth_search => recurse_ignore("inf", "$(sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs])" ),
+            depth_search => recurse("inf"),
             ifvarclass => and(
                 canonify("$(bundle_name)_copy_dirs_$(index)_mog_class")
             );

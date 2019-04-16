@@ -15,7 +15,15 @@ bundle common ntp {
             "mode"              string => "0644";
             "group"             string => "root";
             "owner"             string => "root";
+
+            "file_localtime"     string => "/etc/localtime";
+            "dir_zoneinfo"      string => "/usr/share/zoneinfo";
+
+        !systemd::
             "restart"           string => "$(paths.path[service]) $(service_name) restart";
+
+        systemd::
+            "restart"           string => "$(paths.path[systemctl]) restart $(service_name)";
 
         centos::
             "daemon_name"       string => "ntpd";
@@ -84,6 +92,11 @@ bundle agent ntp_install()
 {
     methods:
         "" usebundle => sara_service_packages("ntp", "@(ntp.packages)");
+
+    services:
+        "$(ntp.service_name)"
+            service_policy => "enable",
+            ifvarclass => "systemd";
 }
 
 bundle agent ntp_surfsara_config()
@@ -98,6 +111,9 @@ bundle agent ntp_surfsara_config()
             "$(ntp_default_file_class)",
             "$(ntp_config_file_class)",
         };
+        "time_zone_isdir" expression => isdir("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])");
+        "time_zone_exists" expression => fileexists("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])"),
+            ifvarclass => not("time_zone_isdir");
 
     files:
         any::
@@ -107,6 +123,11 @@ bundle agent ntp_surfsara_config()
                 perms => mog("$(ntp.mode)", "$(ntp.owner)", "$(ntp.group)");
             "$(ntp.ntpdate_default)"
                 perms => mog("$(ntp.mode)", "$(ntp.owner)", "$(ntp.group)");
+
+        time_zone_exists::
+            "$(ntp.file_localtime)"
+                link_from => ln_s("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])"),
+                move_obstructions => "true";
 
     methods:
         any::
@@ -135,8 +156,7 @@ bundle agent ntp_daemons_check()
 bundle agent ntp_daemons_restart()
 {
     commands:
-        debian|centos::
-            "$(ntp.restart)";
+        "$(ntp.restart)";
 
     reports:
         any::

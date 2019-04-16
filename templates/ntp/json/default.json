@@ -1,5 +1,7 @@
 {
     "daemon_options": "", 
+    "driftfile": "/var/lib/ntp/ntp.drift",
+    "logfile": "/var/log/ntpd",
     "restrict": [
         { "rule" : "127.0.0.1 nomodify", "desc" : "Local users may interrogate the ntp server more closely" },
         { "rule" : "-6 ::1 nomodify", "desc" : "Local users may interrogate the ntp server more closely" }
@@ -7,5 +9,6 @@
     "server": [ 
         "0.nl.pool.ntp.org",
         "1.de.pool.ntp.org"
-    ]
+    ],
+    "timezone": "Europe/Amsterdam"
 }

@@ -1,10 +1,6 @@
 ### 
-#
-# Managed by: CFengine, 
-# SURFsara Bas van der Vlies
-#
-# servers to check
-#
+# Managed by: CFengine
+
 {{#classes.debian}}
 NTPSERVERS="{{#vars.sara_data.ntp.server}} {{{.}}} {{/vars.sara_data.ntp.server}}"
 #
@@ -21,3 +17,7 @@ OPTIONS="-U ntp -s -b {{#vars.sara_data.ntp.server}} {{{.}}} {{/vars.sara_data.n
 # Set to 'yes' to sync hw clock after successful ntpdate
 SYNC_HWCLOCK=no
 {{/classes.centos}}
+
+{{#classes.SLES}}
+# SUSE does not have a seperate ntpdate sysconfig file
+{{/classes.SLES}}

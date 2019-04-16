@@ -14,8 +14,9 @@ bundle common apt
 
             "packages"  data => parsejson('{
                 "install": {
-                    "debconf-utils": ""
-                    "apt-transport-https": ""
+                    "debconf-utils": "",
+                    "apt-transport-https": "",
+                    "dirmngr": ""
                 }
             }');
 

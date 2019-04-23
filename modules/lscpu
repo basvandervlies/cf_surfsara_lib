@@ -1,0 +1,40 @@
+#!/bin/sh
+JQ=$(which jq)
+LSCPU=$(which lscpu)
+NAME=lscpu.json
+
+## generate json output from lscpu command
+#
+generate_lscpu_json_file()
+{
+    $LSCPU | jq --raw-input --slurp \
+'
+    split("\n")[:-1] |
+    map(split(":")) |
+    map({ "id": (.[0] | gsub(" "; "_") | gsub("[\\(\\)]";""))  , "value": (.[1] | gsub("^ ";""))  }) |
+    map({ (.id): .value}) | add
+'
+}
+
+if [ -z "$LSCPU" ]
+then
+    echo "lscpu not found"
+    exit 1
+fi
+
+if [ $# -lt 1 ]
+then
+    FILE=/tmp/$NAME
+else
+    FILE=$1/$NAME
+fi
+
+if [ ! -f $FILE ]
+then
+    generate_lscpu_json_file > $FILE
+fi
+
+## module output in a single line
+echo "%data=$(jq --compact-output --monochrome-output --ascii-output --unbuffered --sort-keys '.' $FILE)"
+
+

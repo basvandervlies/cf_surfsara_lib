@@ -11,8 +11,22 @@ generate_lscpu_json_file()
 '
     split("\n")[:-1] |
     map(split(":")) |
-    map({ "id": (.[0] | gsub(" "; "_") | gsub("[\\(\\)]";""))  , "value": (.[1] | gsub("^ ";""))  }) |
-    map({ (.id): .value}) | add
+    map({
+        "id": (.[0] | gsub(" "; "_") | gsub("[\\(\\)]";"")),
+        "value": (.[1] | gsub("^ ";""))
+    })|
+    map(
+        { (.id): .value }
+    )|
+    map(
+        if has("Flags")
+        then
+            { "Flags" : (.[] | split(" ")) }
+        else
+            .
+        end
+    )|
+    add
 '
 }
 

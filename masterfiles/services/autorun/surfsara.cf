@@ -16,6 +16,8 @@ bundle agent surfsara_autorun {
         "tags" slist => { "autorun" };
 
     methods:
+        "" usebundle => sara_inventory_modules(),
+            comment => "Which inventory module must be run, controlled via 'sara_inventory_modules'";
         "" usebundle => sara_services_autorun(),
             comment => "Which service bundle(s) must be run, controlled via 'def.sara_services_enabled'";
 

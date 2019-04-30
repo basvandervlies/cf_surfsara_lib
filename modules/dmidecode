@@ -1,0 +1,111 @@
+#!/bin/sh
+''':'
+# First try to run this script with python3, else run with python
+command -v python3 >/dev/null 2>/dev/null  \
+            && exec python3 "$0" "$@" \
+                || exec python  "$0" "$@"
+'''
+###
+# Orignal by: https://github.com/aakarshg/dmidecode_json
+# Some small changes by: Bas van der Vlies
+
+import re as _re
+from subprocess import call,Popen,PIPE, check_output
+import json
+import argparse
+import os
+import sys
+
+def _parse(dmide_fullinput):
+    output_data = {}
+    #  Each record is separated by double newlines
+    dmide_fullinput = dmide_fullinput.replace('\n\t\t',' ')
+    split_output = dmide_fullinput.replace('\t','').split('\n\n')
+    for record in split_output:
+        #print record
+        #print "/////"
+        #split_lines = record.replace(':','\":\"').split('\n')
+        split_lines = record.split('\n')
+        for x in range(len(split_lines)):
+            #split_lines[x] = split_lines[x].encode('ascii', 'ignore')
+            split_lines[x] = _re.sub(r":\s\s+",": ", split_lines[x])
+            split_lines[x] = _re.sub(r"\s\s+","", split_lines[x])
+        if split_lines[0]!="" and len(split_lines)>=2:
+            split_lines[0] = split_lines[0].replace(' ','_')
+            if split_lines[0] not in output_data:
+                output_data[split_lines[0]] = []
+            current_dict = {}
+            # splitting only on first occurence as some fields can have multiple
+            # example
+            # OEM Strings
+        	# String 1: PSF:
+        	# String 2: Product ID: 670635-S01
+            for s in split_lines[1:]:
+                if ': ' in s:
+                    key_val = s.split(': ',1)
+                else:
+                    continue
+                if len(key_val) <= 1:
+                    key_val.append("None")
+                current_dict[key_val[0].replace(' ','_')]=key_val[1]
+            #current_dict = dict(s.split(': ') for s in split_lines[1:])
+            output_data[split_lines[0]].append(current_dict)
+    return output_data
+
+def parse(input_args):
+    args = ["dmidecode"]
+    if input_args:
+        args.append("--type")
+        args.append(",".join(input_args))
+    args.append("--quiet")
+    args = " ".join(args)
+    data_output = _execute_cmd(args)
+    _data = _parse(data_output)
+    return _data
+
+def _execute_cmd(args):
+    p1 = check_output(args, shell=True).decode("utf-8")
+    return p1
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Dmidecode output in json")
+    parser.add_argument(
+        '-t', '--type', dest="types", nargs='+'
+    )
+    parser.add_argument(
+        '-f', '--force', action='store_true', dest="FORCE"
+    )
+    parser.add_argument(
+        '-o', '--output', dest="output"
+    )
+    parser.add_argument(
+        '-C', '--cf', action='store_true', dest="cfengine"
+    )
+    args = parser.parse_args()
+
+    FILE = False
+    if args.output and os.path.exists(args.output):
+        FILE = True
+
+    if FILE and not args.FORCE:
+        with open(args.output) as json_data:
+            data = json.load(json_data)
+    else:
+        if args.types:
+            data = parse(args.types)
+        else:
+            data = parse('')
+
+        if args.output:
+            with open(args.output, 'w') as fp:
+                json.dump(data, fp)
+
+    if args.cfengine:
+        print('%data=' + json.dumps(data))
+    else:
+         print(json.dumps(data, indent=1))
+
+if __name__ == '__main__':
+    main()
+    sys.exit(0)

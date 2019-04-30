@@ -23,6 +23,7 @@ bundle common surfsara_stdlib_common
     vars:
         any::
             "standard" slist => {
+                "$(this.promise_dirname)/inventory.cf",
                 "$(this.promise_dirname)/templates.cf",
                 "$(this.promise_dirname)/common.cf",
                 "$(this.promise_dirname)/files.cf",

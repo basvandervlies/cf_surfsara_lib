@@ -15,7 +15,8 @@
     "HostbasedAuthentication": "yes",
     "HostKey": [
         { "key" : "/etc/ssh/ssh_host_rsa_key" },
-        { "key" : "/etc/ssh/ssh_host_dsa_key" }
+        { "key" : "/etc/ssh/ssh_host_ecdsa_key" },
+        { "key" : "/etc/ssh/ssh_host_ed25519_key" }
     ],
     "IgnoreRhosts": "yes",
     "IgnoreUserKnownHosts": "no",

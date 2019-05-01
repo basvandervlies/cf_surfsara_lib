@@ -13,7 +13,6 @@ Protocol {{{vars.sara_data.ssh.Protocol}}}
 ListenAddress {{address}}
 {{/vars.sara_data.ssh.ListenAddress}}
 
-
 # HostKeys for protocol version 2
 {{#vars.sara_data.ssh.HostKey}}
 HostKey {{key}}
@@ -84,15 +83,27 @@ Subsystem {{service}} {{path}}
 {{/vars.sara_data.ssh.HostKey}}
 
 {{#classes.SSH_LDAP_PUBKEY_BUNDLE}}
-    {{#classes.debian}}
 AuthorizedKeysCommand {{vars.sara_data.ssh.authorized_keys_command}}
+    {{#classes.debian}}
 AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
     {{/classes.debian}}
     {{#classes.centos}}
-AuthorizedKeysCommand {{vars.sara_data.ssh.authorized_keys_command}}
 AuthorizedKeysCommandRunAs {{vars.sara_data.ssh.authorized_keys_commanduser}}
     {{/classes.centos}}
 {{/classes.SSH_LDAP_PUBKEY_BUNDLE}}
+
+{{#classes.SSSD_SSH_PUBKEY}}
+AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
+    {{#classes.SLES}}
+AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
+    {{/classes.SLES}}
+    {{#classes.debian}}
+AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
+    {{/classes.debian}}
+    {{#classes.centos}}
+AuthorizedKeysCommandRunAs {{vars.sara_data.ssh.authorized_keys_commanduser}}
+    {{/classes.centos}}
+{{/classes.SSSD_SSH_PUBKEY}}
 
 ##@ Must be the last section
 #
@@ -101,7 +112,4 @@ AuthorizedKeysCommandRunAs {{vars.sara_data.ssh.authorized_keys_commanduser}}
    {{#settings}}
    {{{.}}}
    {{/settings}}
-
 {{/vars.sara_data.ssh.matches}}
-
-

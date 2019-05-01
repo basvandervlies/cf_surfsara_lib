@@ -29,8 +29,7 @@ bundle common ssh()
                     {
                         "install": {
                             "openssh-client" : "",
-                            "openssh-server" : "",
-                            "openssh-blacklist" : ""
+                            "openssh-server" : ""
                         }
                     }
                 ');

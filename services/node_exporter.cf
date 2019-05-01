@@ -101,6 +101,14 @@ bundle agent node_exporter_daemon_check()
            ifvarclass => "DEBUG|DEBUG_node_exporter|DEBUG_$(this.bundle)";
 }
 
+bundle agent node_exporter_service_status(service, status)
+{
+    commands:
+        "/usr/bin/echo"
+            args => "-e 'surfsara_service{name=\"$(service)\"} $(status)\n' > $(sara_data.node_exporter[collector_dir])/surfsara_service_$(service).prom",
+            contain => in_shell_and_silent;
+}
+
 bundle agent node_exporter_autorun()
 {
     meta:

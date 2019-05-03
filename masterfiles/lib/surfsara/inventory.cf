@@ -7,23 +7,28 @@
 
 Source: [inventory.cf](/masterfiles/lib/surfsara/inventory.cf)
 
-You can control which inventory modules must be run and with which arguments by specifying the following
+You can control which inventory modules must be run and with optional arguments by specifying the following
 variable in:
  * def.json
 ```json
-"sara_inventory_modules": {
-    "surfsara/lscpu": "$(sara_inventory.cache_dir)",
-    "surfsara/dmidecode": "--output $(sara_inventory.cache_dir)/dmidecode.json --cf"
+"sara_inventory_modules": [
+        "surfsara/lscpu",
+        "surfsara/dmidecode"
+],
+"surfsara/lscpu": {
+        "args": "$(sara_inventory.cache_dir)"
+},
+"surfsara/dmidecode": {
+    "args": "--output $(sara_inventory.cache_dir)/dmidecode.json --cf",
+    "run_class": "debian"
 }
 ```
 
- * def.cf
-```
-"sara_inventory_modules" data => parsejson('{  "surfsara/lscpu": "$(sara_inventory.cache_dir)" }')
-```
+This statement determines which modules has to be run with optional arguments:
+ * `args`: Arguments supplied to the module command (Optional)
+ * `run_class`: Only run module if this class condition is met (Optional)
 
-This statement determines which modules has to be run with optional arguments. The inventory
-bundle define a directory variable for storing module data `sara_inventory.cache_dir`:
+The inventory bundle define a directory variable for storing module data `sara_inventory.cache_dir`:
  * `/run/cf_inventory_cache`
  * can be overriden by `def.sara_inventory_cache_dir`
 
@@ -40,6 +45,8 @@ data can be accessed in cfengine:
  * `$(lscpu.data[Model_name])`
  * '' usebundle => sara_show_data("lscpu", "data")`
 
+Required argument: `"$(sara_inventory.cache_dir)"`
+
 ## dmidecode
 
 Is a wrapper script around the `dmidecode` command. It converts the output to json and stores it in a json
@@ -47,11 +54,14 @@ file. If the file exists it will load the data and convert it to the json module
 data can be accessed in cfengine:
  * `$(dmidecode.data[Base_Board_Information][0][Manufacturer])`
  * `"" usebundle => sara_show_data("dmidecode", "data")`
+
+Required arguments: `"--output $(sara_inventory.cache_dir)/dmidecode.json --cf"`
 @endif
+
 bundle common sara_inventory
 {
     vars:
-        "modules" slist => getindices("def.sara_inventory_modules"),
+        "modules" slist => { @(def.sara_inventory_modules) },
             ifvarclass => and(
                     isvariable("def.sara_inventory_modules")
                 );
@@ -74,10 +84,6 @@ bundle common sara_inventory
 
 bundle agent sara_inventory_modules
 {
-    vars:
-        "args" data => data_expand("def.sara_inventory_modules"),
-            comment => "Some variables still are not resolved, eg: sara_inventory.cache_dir)";
-
     classes:
         any::
             "cache_dir_exists" expression => isdir("$(sara_inventory.cache_dir)");
@@ -90,27 +96,87 @@ bundle agent sara_inventory_modules
 
     methods:
         sara_inventory_modules_set::
-            "" usebundle => sara_show_data("def", "sara_inventory_modules"),
-                ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+             "" usebundle => sara_inventory_module_run("$(sara_inventory.modules)"),
+                comment => "Run module with arg specified in entry";
+
+             "" usebundle => sara_show_data("def", "sara_inventory_modules"),
+                 ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
 
 #        cache_dir_exists::
 #            "" usebundle => sara_data_autorun("inventory"),
 #                comment => "Maybe needed";
 
-    commands:
-        cache_dir_exists::
-            "$(sara_inventory.dir)/$(sara_inventory.modules)"
-                comment => "Run module with first argument cache dir and specified module args",
-                args => "$(args[$(sara_inventory.modules)])",
-                classes => results("namespace", "sara_inventory_modules_$(sara_inventory.modules)"),
-                module => "true";
-
     reports:
-        any::
-            "$(this.bundle) '$(sara_inventory.modules)' failed to run"
-                ifvarclass => canonify("sara_inventory_modules_$(sara_inventory.modules)_failed");
-
         !sara_inventory_modules_set::
             "$(this.bundle) no inventory modules enabled, set 'def.sara_inventory_modules'"
                 ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+}
+
+bundle agent sara_inventory_module_run(module)
+{
+    vars:
+        any::
+            "args" data => data_expand("def.$(module)[args]"),
+                comment => "Try to Expand all CFengine variables",
+                ifvarclass => and(
+                        isvariable("def.$(module)[args]")
+                    );
+
+            "args" string => "",
+                comment => "No arguments specified",
+                ifvarclass => and(
+                        not(isvariable("def.$(module)[args]"))
+                    );
+
+            "run_class_var" slist => getvalues("def.$(module)[run_class]"),
+                comment => "Only run service when the specified classes are set";
+
+            "run_class_var_str" string => format("%S", "run_class_var"),
+                ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+
+    classes:
+        any::
+            "args_class" expression => isvariable("def.$(module)[args]"),
+                comment => "Run inventory module if run_class definitions are met",
+                ifvarclass => "run_class_set";
+
+            "run_class_set" expression => reglist("@(run_class_var)", ".+"),
+                comment => "Inventory module  has specified classes. so check if there are met, if not set assume 'any' class";
+
+            "run_class" expression => "$(run_class_var)",
+                comment => "Run inventory module if run_class definitions are met",
+                ifvarclass => "run_class_set";
+
+    methods:
+             "" usebundle => sara_show_data("def", "$(module)"),
+                 ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+
+    commands:
+        any::
+            "$(sara_inventory.dir)/$(module)"
+                comment => "Run module with first argument cache dir and specified module args",
+                args => "$(args)",
+                classes => results("namespace", "sara_inventory_modules_$(module)"),
+                module => "true",
+                ifvarclass => or(
+                    "run_class",
+                    "!run_class_set"
+                    );
+
+    reports:
+        any::
+            "$(this.bundle) '$(module)' failed to run"
+                ifvarclass => canonify("sara_inventory_modules_$(module)_failed");
+
+            "$(this.bundle): '$(module)' is enabled for `any' class"
+                ifvarclass => and(
+                    "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)",
+                    "!run_class_set"
+                    );
+
+            "$(this.bundle): '$(module)' is only enabled for class: `$(run_class_var_str)`"
+                ifvarclass => and(
+                        "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)",
+                        "run_class_set"
+                        );
 }

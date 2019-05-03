@@ -90,13 +90,16 @@ bundle agent ntp_autorun()
 
 bundle agent ntp_install()
 {
+    classes:
+        "initd_script" expression => fileexists("/etc/init.d/ntp");
+
     methods:
         "" usebundle => sara_service_packages("ntp", "@(ntp.packages)");
 
     services:
         "$(ntp.service_name)"
             service_policy => "enable",
-            ifvarclass => "systemd";
+            ifvarclass => "systemd.!initd_script";
 }
 
 bundle agent ntp_surfsara_config()

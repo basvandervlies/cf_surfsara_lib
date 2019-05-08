@@ -93,7 +93,7 @@ bundle agent slurm_autorun()
 bundle agent slurm_install()
 {
     vars:
-        "version" string => "18.08.5-2";
+        "version" string => "18.08.7-1";
         "pyslurm_version" string => "18.08.5-2";
 
         debian.SLURM_SERVER::

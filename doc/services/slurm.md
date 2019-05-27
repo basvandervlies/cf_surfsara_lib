@@ -24,6 +24,13 @@ These templates are located in:
  * templates/slurm
  * templates/slurm/json
 
+The following clases can be set via def.cf/json:
+ * backup: When set make a backup of the SQL sever
+ * client: Configure the machine as client
+ * slurmd_disable: Disable the slurmd systemd service
+ * server: Configure the machine as server
+ * submit: Configure the machine as submit host
+
 ## Usage
 
 The bundle can be run via:

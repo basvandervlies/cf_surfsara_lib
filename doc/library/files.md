@@ -12,7 +12,7 @@ This bundle will read the json attribute `copy_dirs` from the specified `bundle_
 attribute can be specified:
  * compare: which mode must we use to check the difference, default: digest
  * dest: destination directory
- * exclude_dirs:  exclude this dires from copying, default not set
+ * exclude_dirs:  exclude this dirs from copying, default: [ ".git", ".svn" ]
  * mog: mode/owner/group  of all files/directories, default not set
  * preserve: preserve same mode as source directory, default: false
  * purge: exact copy of the source directory, default: false

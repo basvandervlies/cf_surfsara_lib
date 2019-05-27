@@ -44,7 +44,7 @@ Is a wrapper script around the `lscpu` command. It converts the output to json a
 file. If the file exists it will load the data and convert it to the json module data protocol. The
 data can be accessed in cfengine:
  * `$(lscpu.data[Model_name])`
- * '' usebundle => sara_show_data("lscpu", "data")`
+ * `"" usebundle => sara_show_data("lscpu", "data")`
 
 Required argument: `"$(sara_inventory.cache_dir)"`
 

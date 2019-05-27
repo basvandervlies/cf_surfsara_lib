@@ -202,8 +202,9 @@ the templates are located in:
  * templates/ssh/json
 
 The following clases can be set via def.cf/json:
- *  use_depricated_options:  These options are not used anymore , default true  on centos and debian_7
- *  keygen: Must we generate host keys, command line options can bet set via json
+ *  `use_depricated_options`:  These options are not used anymore , default true  on centos and debian_7
+ *  `keygen`: Must we generate host keys, command line options can bet set via json
+ *  `pubkey_authentication`: Enable ssh public keys via `AuthorizedKeysCommand`
 
 ## Usage
 

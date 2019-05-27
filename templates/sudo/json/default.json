@@ -3,8 +3,8 @@
         "ONLY_ONE_CONFIG_FILE": [ "any" ]
     },
     "cmnd_alias": [
-        { "alias" : "SU_USER", "args" : "/bin/su - [[\:alpha\:]]*, !/bin/su - root, !/bin/su - root *" },
-        { "alias" : "SUX_USER", "args" : "/usr/bin/sux - [[\:alpha\:]]*, !/usr/bin/sux - root, !/usr/bin/sux - root *" }
+        { "alias" : "SU_USER", "args" : "/bin/su - [[\\:alpha\\:]]*, !/bin/su - root, !/bin/su - root *" },
+        { "alias" : "SUX_USER", "args" : "/usr/bin/sux - [[\\:alpha\\:]]*, !/usr/bin/sux - root, !/usr/bin/sux - root *" }
     ],
     "defaults": [
         { "defaults" : "Defaults", "args" : "fqdn" },

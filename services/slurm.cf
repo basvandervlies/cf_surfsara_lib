@@ -93,8 +93,9 @@ bundle agent slurm_autorun()
 bundle agent slurm_install()
 {
     vars:
-        "version" string => "18.08.5-2";
-        "pyslurm_version" string => "18.08.5-2";
+        any::
+            "version" string => ifelse( isvariable("$(sara_data.slurm[version])"), "$(sara_data.slurm[version])", "");
+            "pyslurm_version" string => ifelse( isvariable("$(sara_data.slurm[pyslurm_version])"), "$(sara_data.slurm[pyslurm_version])", "");
 
         debian.SLURM_SERVER::
             "packages" data => parsejson('

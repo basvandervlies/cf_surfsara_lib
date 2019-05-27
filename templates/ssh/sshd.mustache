@@ -82,18 +82,8 @@ AcceptEnv {{{vars.sara_data.ssh.AcceptEnv}}}
 Subsystem {{service}} {{path}}
 {{/vars.sara_data.ssh.HostKey}}
 
-{{#classes.SSH_LDAP_PUBKEY_BUNDLE}}
+{{#classes.SSH_PUBKEY_AUTHENTICATION}}
 AuthorizedKeysCommand {{vars.sara_data.ssh.authorized_keys_command}}
-    {{#classes.debian}}
-AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
-    {{/classes.debian}}
-    {{#classes.centos}}
-AuthorizedKeysCommandRunAs {{vars.sara_data.ssh.authorized_keys_commanduser}}
-    {{/classes.centos}}
-{{/classes.SSH_LDAP_PUBKEY_BUNDLE}}
-
-{{#classes.SSSD_SSH_PUBKEY}}
-AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
     {{#classes.SLES}}
 AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
     {{/classes.SLES}}
@@ -103,7 +93,7 @@ AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
     {{#classes.centos}}
 AuthorizedKeysCommandRunAs {{vars.sara_data.ssh.authorized_keys_commanduser}}
     {{/classes.centos}}
-{{/classes.SSSD_SSH_PUBKEY}}
+{{/classes.SSH_PUBKEY_AUTHENTICATION}}
 
 ##@ Must be the last section
 #

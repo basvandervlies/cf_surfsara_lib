@@ -7,8 +7,8 @@
 
 Source: [inventory.cf](/masterfiles/lib/surfsara/inventory.cf)
 
-You can control which inventory modules must be run and with optional arguments by specifying the following
-variable in:
+You can control which inventory modules must be run and with optional arguments by
+specifying the following variable in:
  * def.json
 ```json
 "sara_inventory_modules": [
@@ -20,22 +20,23 @@ variable in:
 },
 "surfsara/dmidecode": {
     "args": "--output $(sara_inventory.cache_dir)/dmidecode.json --cf",
-    "run_class": "debian"
+    "run_class": "debian",
+    "run_bundle": "sara_dmidecode"
 }
 ```
 
 This statement determines which modules has to be run with optional arguments:
  * `args`: Arguments supplied to the module command (Optional)
  * `run_class`: Only run module if this class condition is met (Optional)
+ * `run_bundle`: Run this bundle after a successful module execution (Optional)
 
-The inventory bundle define a directory variable for storing module data `sara_inventory.cache_dir`:
+The inventory bundle defines a directory variable for storing module data `sara_inventory.cache_dir`:
  * `/run/cf_inventory_cache`
  * can be overriden by `def.sara_inventory_cache_dir`
 
 The module scripts must be located under `$(sys.workdir)/modules`. Only exit code '0' is considered
-as promise kept all other exit code are promise failed. The class name is:
+as promise kept all other exit codes are considered as promise failed. The class name is:
  * `canonify("sara_inventory_modules_<module_name>_failed")`
- * `canonify("sara_inventory_modules_<module_name>_kept")`
 
 ## lscpu
 
@@ -62,12 +63,12 @@ bundle common sara_inventory
 {
     vars:
         "modules" slist => { @(def.sara_inventory_modules) },
-            ifvarclass => and(
+            if => and(
                     isvariable("def.sara_inventory_modules")
                 );
 
         "modules" slist => {},
-            ifvarclass => and(
+            if => and(
                     not(isvariable("def.sara_inventory_modules"))
                 );
 
@@ -96,11 +97,11 @@ bundle agent sara_inventory_modules
 
     methods:
         sara_inventory_modules_set::
-             "" usebundle => sara_inventory_module_run("$(sara_inventory.modules)"),
+             "" usebundle => sara_inventory_class_run("$(sara_inventory.modules)"),
                 comment => "Run module with arg specified in entry";
 
              "" usebundle => sara_show_data("def", "sara_inventory_modules"),
-                 ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+                 if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
 
 #        cache_dir_exists::
 #            "" usebundle => sara_data_autorun("inventory"),
@@ -109,7 +110,54 @@ bundle agent sara_inventory_modules
     reports:
         !sara_inventory_modules_set::
             "$(this.bundle) no inventory modules enabled, set 'def.sara_inventory_modules'"
-                ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+}
+
+bundle agent sara_inventory_class_run(module)
+{
+    vars:
+        any::
+            "run_class_var" slist => getvalues("def.$(module)[run_class]"),
+                comment => "Only run service when the specified classes are set";
+
+            "run_class_var_str" string => format("%S", "run_class_var"),
+                if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+
+    classes:
+        any::
+            "run_class_set" expression => reglist("@(run_class_var)", ".+"),
+                comment => "Inventory module  has specified classes. so check if there are met, if not set assume 'any' class";
+
+            "run_class" expression => "$(run_class_var)",
+                comment => "Run inventory module if run_class definitions are met",
+                if => "run_class_set";
+
+    methods:
+        any::
+            "" usebundle => sara_inventory_module_run("$(module)"),
+                comment => "Run inventory module if class condition is met",
+                if => or(
+                    "run_class",
+                    "!run_class_set"
+                    );
+
+
+             "" usebundle => sara_show_data("def", "$(module)"),
+                 if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+
+    reports:
+        any::
+            "$(this.bundle): '$(module)' is enabled for `any' class"
+                if => and(
+                    "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)",
+                    "!run_class_set"
+                    );
+
+            "$(this.bundle): '$(module)' is only enabled for class: `$(run_class_var_str)`"
+                if => and(
+                        "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)",
+                        "run_class_set"
+                        );
 }
 
 bundle agent sara_inventory_module_run(module)
@@ -118,38 +166,28 @@ bundle agent sara_inventory_module_run(module)
         any::
             "args" data => data_expand("def.$(module)[args]"),
                 comment => "Try to Expand all CFengine variables",
-                ifvarclass => and(
+                if => and(
                         isvariable("def.$(module)[args]")
                     );
 
             "args" string => "",
                 comment => "No arguments specified",
-                ifvarclass => and(
+                if => and(
                         not(isvariable("def.$(module)[args]"))
                     );
-
-            "run_class_var" slist => getvalues("def.$(module)[run_class]"),
-                comment => "Only run service when the specified classes are set";
-
-            "run_class_var_str" string => format("%S", "run_class_var"),
-                ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
 
     classes:
         any::
             "args_class" expression => isvariable("def.$(module)[args]"),
-                comment => "Run inventory module if run_class definitions are met",
-                ifvarclass => "run_class_set";
-
-            "run_class_set" expression => reglist("@(run_class_var)", ".+"),
-                comment => "Inventory module  has specified classes. so check if there are met, if not set assume 'any' class";
-
-            "run_class" expression => "$(run_class_var)",
-                comment => "Run inventory module if run_class definitions are met",
-                ifvarclass => "run_class_set";
+                comment => "Run inventory module if run_class definitions are met";
 
     methods:
-             "" usebundle => sara_show_data("def", "$(module)"),
-                 ifvarclass => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+             "" usebundle => sara_inventory_run_bundle("$(module)"),
+                comment => "Must we run a bundle after succesful module run",
+                if => or(
+                        canonify("sara_inventory_modules_$(module)_repaired"),
+                        canonify("sara_inventory_modules_$(module)_kept")
+                    );
 
     commands:
         any::
@@ -157,26 +195,39 @@ bundle agent sara_inventory_module_run(module)
                 comment => "Run module with first argument cache dir and specified module args",
                 args => "$(args)",
                 classes => results("namespace", "sara_inventory_modules_$(module)"),
-                module => "true",
-                ifvarclass => or(
-                    "run_class",
-                    "!run_class_set"
-                    );
+                module => "true";
 
     reports:
         any::
             "$(this.bundle) '$(module)' failed to run"
-                ifvarclass => canonify("sara_inventory_modules_$(module)_failed");
+                if => canonify("sara_inventory_modules_$(module)_failed");
+}
 
-            "$(this.bundle): '$(module)' is enabled for `any' class"
-                ifvarclass => and(
-                    "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)",
-                    "!run_class_set"
-                    );
+bundle agent sara_inventory_run_bundle(module)
+{
+    classes:
+        any::
+            "run_bundle" expression => isvariable("def.$(module)[run_bundle]"),
+                comment => "Run bundle after module data is gathered";
 
-            "$(this.bundle): '$(module)' is only enabled for class: `$(run_class_var_str)`"
-                ifvarclass => and(
-                        "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)",
-                        "run_class_set"
-                        );
+    methods:
+        run_bundle::
+            "" usebundle => "$(def.$(module)[run_bundle])",
+                comment => "run the bundle";
+}
+
+bundle agent sara_dmidecode_example()
+{
+    vars:
+        "product_name" string => string_upcase("DMIDECOE_$(dmidecode.data[System_Information][0][Product_Name])");
+
+    classes:
+        "$(product_name)"
+            scope => "namespace";
+
+    reports:
+        any::
+            "$(this.bundle) Product_Name: '$(product_name)'"
+                 if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
+
 }

@@ -1,9 +1,3 @@
 {
-    "resolv_conf": 
-"
-make_resolv_conf()
-{
-    echo 'Disabled make_resolv_conf, maintained by CFengine (dhclient.cf)' 
-}
-"
+    "resolv_conf": "make_resolv_conf() { echo 'Disabled make_resolv_conf, maintained by CFengine (dhclient.cf)'; }"
 }

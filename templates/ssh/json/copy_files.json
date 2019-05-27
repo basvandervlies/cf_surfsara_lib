@@ -24,5 +24,5 @@
             "mog": [ "0644", "root", "root" ],
             "run_bundle": "ssh_daemons_restart"
         }
-    }
+    ]
 }

@@ -53,7 +53,7 @@
         "JobSubmitPlugins": "lua",
         "X11Parameters": "local_xauthority"
     },
-    "nodes_section": {
+    "nodes_section": [
         {
             "Name": "r8n1",
             "settings": {
@@ -82,7 +82,7 @@
                 "Weight": "20"
             }
         }
-    },
+    ],
     "partition_section": [
         {
             "name": "test",

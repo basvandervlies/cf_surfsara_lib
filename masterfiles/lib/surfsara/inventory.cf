@@ -216,15 +216,18 @@ bundle agent sara_inventory_run_bundle(module)
                 comment => "run the bundle";
 }
 
-bundle agent sara_dmidecode()
+bundle agent sara_dmidecode_example()
 {
+    vars:
+        "product_name" string => string_upcase("DMIDECOE_$(dmidecode.data[System_Information][0][Product_Name])");
+
     classes:
-        "$(dmidecode.data[System_Information][0][Product_Name])"
+        "$(product_name)"
             scope => "namespace";
 
     reports:
         any::
-            "$(this.bundle) ProductName: '$(dmidecode.data[System_Information][0][Product_Name])'"
+            "$(this.bundle) Product_Name: '$(product_name)'"
                  if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
 
 }

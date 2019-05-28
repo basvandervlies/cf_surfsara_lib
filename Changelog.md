@@ -1,27 +1,83 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.?? (2019-??-??)](#version-09-2019--)
-* [Version: 0.9.20 (2018-12-20)](#version-0920-2018-12-20)
-    * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
+* [Version: 0.9.50 (2019-05-28)](#version:-0.9.50-(2019-05-28))
+    * [INVENTORY modules](#inventory-modules)
+* [Version: 0.9.20 (2018-12-20)](#version:-0.9.20-(2018-12-20))
+    * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-(2-levels))
     * [SLURM](#slurm)
-    * [NHC (Node Health Check)](#nhc-node-health-check)
+    * [NHC (Node Health Check)](#nhc-(node-health-check))
     * [Bundle services data](#bundle-services-data)
-* [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
+* [Version: 0.9.8 (2018-09-25)](#version:-0.9.8-(2018-09-25))
     * [apt](#apt)
     * [munge](#munge)
-* [Version: 0.9.4 (2018-09-07)](#version-094-2018-09-07)
-* [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
+* [Version: 0.9.4 (2018-09-07)](#version:-0.9.4-(2018-09-07))
+* [Version: 0.9.0 (2018-08-24)](#version:-0.9.0-(2018-08-24))
 
 <!-- vim-markdown-toc -->
-# Version: 0.9.?? (2019-??-??)
+# Version: 0.9.50 (2019-05-28)
+ * Services added: rsyslog
+ * added SuSe (sles) support for: ntp, postfix, ssh
  * apt service changes:
    * Added meta tags , now we can start the service with  `def.sara_services_enabled` and autorun method
-   * rewrote apt\_check\_status bundle.  Check the package manager status and try to fix it if not healty
- * added  SuSe (sles) support for : ntp, postfix, ssh
+   * Rewrote apt\_check\_status bundle.  Check the package manager status and try to fix it if not healty
+   * rename `apt_repository_json_files` to `apt_repo_json_files`
+   * packge `dirmngr` is required
+ * `sara_service_copy_dirs` default exclude dirs are `.git` and `.svn`. Can be overriden by json data.
+ * `sara_service_packages` can now handle debian backports packages, eg:
+```#json
+{
+"ssh": {
+    "packages": {
+        "install_backports": {
+            "openssh-server': ""
+        }
+    }
+}
+```
+ * ssh service changes:
+   * Added a new option: `Banner_system_warning`
+   * Added a new class `SSH_PUBKEY_AUTHENTICATION` for public key authemtication via `sss_ssh_authorizedkeys` command
  * slurm service changes:
    * removed surfsara specific settings
    * add new class `SLURMD_DISABLE`
    * debian disable purging of packages
+ * inventory module support added to the library. The modules are run before the services
+ * Fixed some json format errors in `default.json` for services sudo and  dhclient
+
+## INVENTORY modules
+
+You can determine which cfengine modules to run. For the module protocol see:
+ * https://docs.cfengine.com/docs/master/reference-promise-types-commands.html#module
+```
+CFEngine modules are commands that support a simple protocol in order to set additional variables
+and classes on execution from user defined code. Modules are intended for use as system probes
+rather than additional configuration promises. Such a module may be written in any language
+```
+
+Modulea included are:
+ * surfsara/dmidecode
+ * surfsara/lscpu
+
+In `def.json` you can determine which modules to run with optional arguments:
+ * `args`: Arguments supplied to the module command (Optional)
+ * `run_class`: Only run module if this class condition is met (Optional)
+ * `run_bundle`: Run CFengine bundle when module command has been run succesful.
+
+A  `def.json` example:
+```json
+"sara_inventory_modules": [
+        "surfsara/lscpu",
+        "surfsara/dmidecode"
+],
+"surfsara/lscpu": {
+        "args": "$(sara_inventory.cache_dir)"
+},
+"surfsara/dmidecode": {
+    "args": "--output $(sara_inventory.cache_dir)/dmidecode.json --cf",
+    "run_class": "debian|centos",
+    "run_bundle": "sara_dmidecode_example"
+}
+```
 
 # Version: 0.9.20 (2018-12-20)
 

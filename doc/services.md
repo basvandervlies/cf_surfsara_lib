@@ -17,6 +17,7 @@
  * [postfix](services/postfix.md)
  * [resolv](services/resolv.md)
  * [rootfiles](services/rootfiles.md)
+ * [rsyslog](services/rsyslog.md)
  * [sara_user_consume_resources](services/sara_user_consume_resources.md)
  * [singularity](services/singularity.md)
  * [slurm](services/slurm.md)

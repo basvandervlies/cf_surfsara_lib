@@ -4,6 +4,7 @@
  * [common](library/common.md)
  * [def](library/def.md)
  * [files](library/files.md)
+ * [inventory](library/inventory.md)
  * [packages](library/packages.md)
  * [processes](library/processes.md)
  * [services](library/services.md)

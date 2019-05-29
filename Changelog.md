@@ -36,7 +36,7 @@
 ```
  * ssh service changes:
    * Added a new option: `Banner_system_warning`
-   * Added a new class `SSH_PUBKEY_AUTHENTICATION` for public key authemtication via `sss_ssh_authorizedkeys` command
+   * Added a new class `SSH_PUBKEY_AUTHENTICATION` for public key authentication via `authorized_keys_command` command
  * slurm service changes:
    * removed surfsara specific settings
    * add new class `SLURMD_DISABLE`

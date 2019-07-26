@@ -20,7 +20,7 @@ bundle common postfix() {
 
         debian_6|debian_7|debian_8::
             "daemon_name"       string => "/usr/lib/postfix/master";
-        debian_9::
+        debian_9|debian_10::
             "daemon_name"       string => "/usr/lib/postfix/sbin/master";
 
         centos::
@@ -48,7 +48,7 @@ bundle common postfix() {
                     }
                 ');
             "service_name"      string => "postfix";
-            "daemon_name"       string => "/usr/lib/postfix/master";
+            "daemon_name"       string => "/usr/lib/postfix/bin/master";
 
         any::
             "newaliases"        string => "/usr/bin/newaliases";
@@ -154,24 +154,38 @@ bundle agent postfix_surfsara_config
                 comment => "This is a hashed file, so we need to use postmap after a change";
 }
 
+bundle agent postfix_virtual_alias_maps_expand(virtual_map_id)
+{
+    classes:
+        "needs_postmap" expression => strcmp("$(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][protocol])", "hash");
+
+    files:
+        "$(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"
+            create => "true",
+            edit_template => "$(def.node_template_dir)/postfix/$(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][template])",
+            template_method => "mustache",
+            template_data => "@(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][data])",
+            classes => results("namespace", "postfix_virtual_alias_maps_expand_$(virtual_map_id)");
+
+    commands:
+        "$(postfix.postmap_cmd) $(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"
+            ifvarclass => and(
+                "needs_postmap",
+                "postfix_virtual_alias_maps_expand_$(virtual_map_id)_repaired"
+            );
+}
+
 bundle agent postfix_virtual_alias_maps()
 {
     vars:
-        "templates" slist => getindices("sara_data.postfix[virtual_alias_maps]");
+        "template_maps" slist => getindices("sara_data.postfix[virtual_alias_maps]");
 
     methods:
-        "" usebundle => sara_mustache_copy("postfix", "@(postfix_virtual_alias_maps.templates)");
-
-    files:
-        "$(sara_data.postfix[virtual_alias_maps][$(templates)][dest])"
-            create => "true",
-            edit_template => "$(def.node_template_dir)/postfix/$(templates)",
-            template_method => "mustache",
-            template_data => "@(sara_data.postfix[virtual_alias_maps][$(templates)][data])",
-            classes => results("namespace", "POSTFIX_$(sara_data.postfix[virtual_alias_maps][$(templates)][dest])");
+        "" usebundle => sara_mustache_copy("postfix", "$(sara_data.postfix[virtual_alias_maps][$(template_maps)][template])");
+        "" usebundle => postfix_virtual_alias_maps_expand("$(template_maps)");
 
     reports:
-        "$(this.bundle) Template $(templates) : $(sara_data.postfix[virtual_alias_maps][$(templates)][dest])"
+        "$(this.bundle) Template $(template_maps) : $(sara_data.postfix[virtual_alias_maps][$(template_maps)][template])"
              ifvarclass => "DEBUG|DEBUG_postfix|DEBUG_$(this.bundle)";
 }
 

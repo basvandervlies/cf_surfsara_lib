@@ -243,6 +243,11 @@ bundle agent sara_json_copy(bundle_name, files)
             #"local_dir" string => "$(sys.policy_entry_dirname)/../$(bundle_json_dir)",
             #    comment => "Can be replaced by $(sys.policy_entry_dirname)/../";
 
+    classes:
+        cfengine_3_12_0|cfengine_3_12_1::
+            "CF_COPY_BUG" expression => "any",
+                comment =>  "https://github.com/cfengine/core/pull/3468";
+
     files:
         any::
             "$(def.node_template_dir)/$(bundle_name)/."
@@ -258,17 +263,20 @@ bundle agent sara_json_copy(bundle_name, files)
                 copy_from   => remote_dcp("$(bundle_json_dir)/$(files)", "$(sys.policy_hub)"),
                 classes     => results("bundle","$(bundle_name)$(files)");
 
-        TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
+        !CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
+            "$(def.node_template_dir)/$(bundle_name)/$(files)"
+                comment     => "Let's copy the json files",
+                move_obstructions => "true",
+                perms       => mog("0600", "root", "root"),
+                copy_from   => sara_template_local_dcp("$(local_dir)/$(files)"),
+                classes     => results("bundle","$(bundle_name)$(files)");
+
+        CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
             "$(def.node_template_dir)/$(bundle_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
                 copy_from   => local_dcp("$(local_dir)/$(files)"),
-                # must be done when https://github.com/cfengine/core/pull/3468
-                # is merged
-                #copy_from   => sara_template_local_dcp("$(local_dir)/$(files)"),
-                # version 3.12/3,13
-                #copy_from   => sara_template_local_dcp("$(sys.policy_entry_dirname)/../$(bundle_json_dir)/$(files)"),
                 classes     => results("bundle","$(bundle_name)$(files)");
 
     reports:
@@ -403,6 +411,11 @@ bundle agent sara_mustache_copy(bundle_name, files)
             #"local_dir" string => "$(sys.policy_entry_dirname)/../$(bundle_template_dir)",
             #    comment => "Can be replaced by $(sys.policy_entry_dirname)/../";
 
+    classes:
+        cfengine_3_12_0|cfengine_3_12_1::
+            "CF_COPY_BUG" expression => "any",
+                comment =>  "https://github.com/cfengine/core/pull/3468";
+
     files:
         any::
             "$(def.node_template_dir)/$(bundle_name)/."
@@ -418,15 +431,21 @@ bundle agent sara_mustache_copy(bundle_name, files)
                 classes     => if_repaired("$(bundle_name)_mustache_copied"),
                 copy_from   => remote_dcp("$(bundle_template_dir)/$(files)", "$(sys.policy_hub)");
 
-       TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
+       !CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
             "$(def.node_template_dir)/$(bundle_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
-                classes     => if_repaired("$(bundle_name)_mustache_copied"),
-                copy_from   => local_dcp("$(local_dir)/$(files)");
-                # version 3.12/3,13
-                #copy_from   => sara_local_template_copy("$(sys.policy_entry_dirname)/../$(bundle_template_dir)/$(files)");
+                copy_from   => sara_template_local_dcp("$(local_dir)/$(files)"),
+                classes     => if_repaired("$(bundle_name)_mustache_copied");
+
+       CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
+            "$(def.node_template_dir)/$(bundle_name)/$(files)"
+                comment     => "Let's copy the json files",
+                move_obstructions => "true",
+                perms       => mog("0600", "root", "root"),
+                copy_from   => local_dcp("$(local_dir)/$(files)"),
+                classes     => if_repaired("$(bundle_name)_mustache_copied");
 
     reports:
         any::

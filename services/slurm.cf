@@ -88,6 +88,17 @@ bundle agent slurm_autorun()
                     "SLURM_BACKUP_SCHEDULE"
                     ),
                 action => if_elapsed(50);
+
+        SLURM_LOGROTATE::
+            "" usebundle => slurm_logrotate(),
+                comment => "slurm service bundle handles logrotate",
+                ifvarclass => or(
+                    "$(sara_data.slurm[logrotate_schedule])",
+                    "SLURM_LOGROTATE_SCHEDULE"
+                    ),
+                action => if_elapsed(50);
+
+    reports:
 }
 
 bundle agent slurm_install()
@@ -322,6 +333,38 @@ bundle agent slurm_db_backup()
             "$(this.bundle): $(cmd) > $(sara_data.slurm[backup_dir])/db.sql";
 }
 
+bundle agent slurm_logrotate()
+{
+    vars:
+        any::
+            "logrotate_files" slist => { "slurmd", "slurmdbd", "slurmctld" };
+
+        SLURM_CLIENT::
+            "log_files" slist => { "slurmd.log" };
+        SLURM_SERVER::
+            "log_files" slist => { "slurmdbd.log ", "slurmctld.log" };
+
+    classes:
+        "logrotate" or => {
+            SLURM_CLIENT,
+            SLURM_SERVER,
+          };
+
+    files:
+        any::
+            "/etc/logrotate.d/$(logrotate_files)"
+                comment => "remove files causes unnecessary restart of daemon",
+                delete => tidy;
+
+        logrotate::
+            "$(slurm.log_dir)/$(log_files)"
+                rename  => rotate("7");
+
+    reports:
+        DEBUG_slurm|DEBUG::
+            "$(this.bundle): has been called";
+}
+
 bundle agent slurm_spank_templates()
 {
     vars:
@@ -376,6 +419,7 @@ These templates are located in:
 The following clases can be set via def.cf/json:
  * backup: When set make a backup of the SQL sever
  * client: Configure the machine as client
+ * logrotate: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
  * slurmd_disable: Disable the slurmd systemd service
  * server: Configure the machine as server
  * submit: Configure the machine as submit host

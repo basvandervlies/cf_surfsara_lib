@@ -46,6 +46,7 @@
     "include_files": [],
     "KillWait": "30",
     "licenses_section": [],
+    "logrotate_schedule": [ "Hr00.Min00_05" ],
     "MessageTimeout": "10",
     "MinJobAge": "300",
     "MpiDefault": "none",

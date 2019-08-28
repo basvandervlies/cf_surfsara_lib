@@ -1,0 +1,15 @@
+#####
+# This file is maintained by CFEngine
+
+DocumentRoot "{{{vars.sara_data.apache.document_root}}}"
+<Directory "{{{vars.sara_data.apache.document_root}}}">
+    Options None
+    AllowOverride None
+    Require all granted
+</Directory>
+
+<VirtualHost *:80>
+    RewriteEngine On 
+    RewriteCond %{HTTPS}  !=on 
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L] 
+</VirtualHost>

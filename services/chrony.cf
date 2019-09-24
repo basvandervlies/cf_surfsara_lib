@@ -1,0 +1,120 @@
+bundle common chrony {
+    vars:
+        any::
+            "template_2_destination" data => parsejson('
+                    {
+                        "surfsara.conf.mustache" : "$(config_file)", 
+                    }
+                ');
+
+            "mode"              string => "0644";
+            "owner"             string => "root";
+            "group"             string => "root";
+            "daemon_name"       string => "chronyd";
+
+            "file_localtime"    string => "/etc/localtime";
+            "dir_zoneinfo"      string => "/usr/share/zoneinfo";
+
+            "packages"  data  => parsejson('
+                    {
+                        "install": {
+                            "chrony" : ""
+                        },
+                        "remove": {
+                            "ntp": ""
+                        }
+                    }
+                ');
+
+        systemd::
+            "restart"           string => "$(paths.path[systemctl]) restart $(service_name)";
+
+        debian::
+            "config_file"       string => "/etc/chrony/chrony.conf";
+            "service_name"      string => "chrony";
+
+        sles::
+            "config_file"       string => "/etc/chrony.conf";
+            "service_name"      string => "chronyd";
+            "group"             string => "chrony";
+}
+
+bundle agent chrony_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_chrony" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("chrony");
+            "" usebundle => chrony_install();
+            "" usebundle => chrony_surfsara_config();
+            "" usebundle => chrony_daemons_check();
+
+    reports:
+        DEBUG_chrony|verbose_mode::
+            "$(this.bundle): surfsara chrony template run";
+}
+
+bundle agent chrony_install()
+{           
+    methods:
+        "" usebundle => sara_service_packages("chrony", "@(chrony.packages)");
+}
+
+bundle agent chrony_surfsara_config()
+{
+    vars: 
+        "chrony_config_file_class" string => canonify("sara$(chrony.config_file)");
+
+    classes:
+        "CHRONY_RESTART" or => { 
+            "$(chrony_config_file_class)",
+        };
+        "time_zone_isdir" expression => isdir("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])");
+        "time_zone_exists" expression => fileexists("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])"),
+            ifvarclass => not("time_zone_isdir");
+
+    files:
+        any::
+            "$(chrony.config_file)"
+                perms => mog("$(chrony.mode)", "$(chrony.owner)", "$(chrony.group)");
+
+        time_zone_exists::
+            "$(chrony.file_localtime)"
+                link_from => ln_s("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])"),
+                move_obstructions => "true";
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("chrony");
+        CHRONY_RESTART::
+            "" usebundle => chrony_daemons_restart();
+}
+
+bundle agent chrony_daemons_check()
+{
+    processes:
+       any::
+            "$(chrony.daemon_name)"
+                comment         => "Check if chronyd is running",
+                process_count   => check_range("$(chrony.daemon_name)", "1", "1"),
+                process_select  => sara_select_parent_process("1");
+                
+    methods:    
+        any::   
+            "chrony" usebundle => chrony_daemons_restart(),
+                ifvarclass => canonify("$(chrony.daemon_name)_out_of_range");
+} 
+
+bundle agent chrony_daemons_restart()
+{
+    commands:
+        debian|centos|sles::
+            "$(chrony.restart)";
+            
+    reports:
+        any::
+            "chrony daemons has been restarted $(chrony.restart)";
+}
+

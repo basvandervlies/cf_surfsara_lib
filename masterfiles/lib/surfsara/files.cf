@@ -82,6 +82,13 @@ body copy_from sara_template_local_dcp(from)
     copylink_patterns => { ".*" };
 }
 
+body link_from sara_relative_ln_s(x)
+{
+    link_type => "relative";
+    source => "$(x)";
+}
+
+
 bundle agent sara_cp_dir_default
 {
     vars:

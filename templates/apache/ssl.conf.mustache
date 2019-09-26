@@ -1,0 +1,39 @@
+#####
+# This file is maintained by CFEngine
+
+<IfModule mod_ssl.c>
+    SSLRandomSeed startup builtin
+    SSLRandomSeed startup file:/dev/urandom 512
+    SSLRandomSeed connect builtin
+    SSLRandomSeed connect file:/dev/urandom 512
+
+    AddType application/x-x509-ca-cert .crt
+    AddType application/x-pkcs7-crl .crl
+
+    SSLPassPhraseDialog  exec:/usr/share/apache2/ask-for-passphrase
+
+    SSLSessionCache     shmcb:${APACHE_RUN_DIR}/ssl_scache(512000)
+    SSLSessionCacheTimeout  300
+
+    SSLCompression off
+
+    SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+
+    ## TLSv1.1 and TLSv1.2
+    SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA
+
+    ## TLSv1.2 only!!
+    #SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-GCM-SHA384
+
+    SSLHonorCipherOrder on
+
+
+    SSLUseStapling on
+    SSLStaplingCache shmcb:${APACHE_RUN_DIR}/ssl_staple_cache(512000)
+
+    Header always set Strict-Transport-Security "max-age=31556952"
+    Header always setifempty Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline' *.bootstrapcdn.com *.cloudflare.com fonts.googleapis.com estudybooks.surf.nl; script-src 'self' 'unsafe-inline' 'unsafe-eval' webstats.surf.nl code.jquery.com *.bootstrapcdn.com *.cloudflare.com; img-src 'self' 'unsafe-inline' https: data: webstats.surf.nl; font-src 'self' data: *.bootstrapcdn.com fonts.gstatic.com"
+    Header always setifempty X-Frame-Options "SAMEORIGIN"
+    Header always setifempty X-Xss-Protection "1; mode=block"
+    Header always setifempty X-Content-Type-Options "nosniff"
+</IfModule>

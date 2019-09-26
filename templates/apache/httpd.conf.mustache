@@ -1,0 +1,86 @@
+#####
+# This file is maintained by CFEngine
+
+# Overview of the used configuration files and layout
+
+# httpd.conf
+#  |  (uid, server-tuning, loadmodules, listen)
+#  |-- ssl.conf
+#  |  (global ssl settings, not confugureable with json!)
+#  |-- modules.d/*.conf
+#  |  (module specific configs)
+#  |-- server.conf
+#  |  (default_server, errors)
+#  |-- vhost.d/*.conf
+#     (the sites config)
+
+## We are not using the default location
+ServerRoot "{{{vars.sara_data.apache.configdir}}}"
+
+## Uid
+User {{{vars.sara_data.apache.user}}}
+Group {{{vars.sara_data.apache.user}}}
+
+## Server-tuning
+# We only configure the MPM Event engine
+<IfModule mpm_event_module>
+    ServerLimit                 {{{vars.sara_data.apache.tuning_servers_limit}}}            
+    MaxRequestWorkers           {{{vars.sara_data.apache.tuning_max_workers}}}
+    StartServers                {{{vars.sara_data.apache.tuning_start_servers}}}
+    ThreadsPerChild             {{{vars.sara_data.apache.tuning_threads_p_child}}}
+    ThreadLimit                 {{{vars.sara_data.apache.tuning_threads_limit}}}
+</IfModule>
+
+## Loadmodule
+{{#vars.sara_data.apache.modules}}
+LoadModule {{{name}}}_module /usr/lib/apache2/modules/mod_{{{name}}}.so
+{{/vars.sara_data.apache.modules}}
+IncludeOptional {{{vars.sara_data.apache.configdir}}}/modules.d/*.conf
+
+## Listen
+Listen 80
+Listen 443
+
+## Mod_log config
+#         Format string:                        Nickname:
+LogFormat "%h %l %u %t \"%r\" %>s %b"           common
+LogFormat "%v %h %l %u %t \"%r\" %>s %b"        vhost_common
+LogFormat "%{Referer}i -> %U"                   referer
+LogFormat "%{User-agent}i"                      agent
+LogFormat "%h %l %u %t \"%r\" %>s %b \
+\"%{Referer}i\" \"%{User-Agent}i\""             combined
+LogFormat "%v %h %l %u %t \"%r\" %>s %b \
+\"%{Referer}i\" \"%{User-Agent}i\""             vhost_combined
+Logformat "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \
+\"%r\" %b"                                      ssl_common
+Logformat "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \
+\"%r\" %b \"%{Referer}i\" \"%{User-Agent}i\""   ssl_combined
+
+# To use %I and %O, you need to enable mod_logio
+<IfModule mod_logio.c>
+LogFormat "%h %l %u %t \"%r\" %>s %b \
+\"%{Referer}i\" \"%{User-Agent}i\" %I %O"       combinedio
+</IfModule>
+
+<FilesMatch "^\.ht">
+    Require all denied
+</FilesMatch>
+
+# Use one of these when you want a compact non-error SSL logfile on a virtual
+# host basis:
+
+## Global
+ServerSignature off
+UseCanonicalName off
+ServerTokens ProductOnly
+LogLevel warn
+
+ErrorLog ${APACHE_LOG_DIR}/error.log
+CustomLog ${APACHE_LOG_DIR}/access_log combined
+
+## For better oveview the following stuff has configured in it's own file
+Include {{{vars.sara_data.apache.configdir}}}/ssl.conf
+Include {{{vars.sara_data.apache.configdir}}}/server.conf
+
+## Finally include the sites.d
+IncludeOptional {{{vars.sara_data.apache.configdir}}}/sites.d/*.conf

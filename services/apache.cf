@@ -1,0 +1,175 @@
+
+bundle common apache
+{
+    vars:
+        "configdir" string => "/opt/apache";
+
+        "performance_profile" string => "l_4c8m";
+
+        "service_name" string => "apache2";
+        "daemon_name" string => "apache2";
+
+        "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+
+        "packages"  data => parsejson('
+            {
+                "install": {
+                    "apache2": "",
+                }
+            }
+        ');
+
+        "template_2_destination" data => parsejson('
+            {   
+                "envvars.mustache": "/etc/apache2/envvars",
+                "httpd.conf.mustache": "$(configdir)/httpd.conf"
+                "ssl.conf.mustache": "$(configdir)/ssl.conf"
+                "server.conf.mustache": "$(configdir)/server.conf"
+            }   
+        '); 
+
+}
+
+bundle agent apache_install()
+{
+    methods:
+        "" usebundle => sara_service_packages("apache", "@(apache.packages)");
+}
+
+bundle agent apache_config()
+{
+    classes:
+        "apache_config_dir_exists" expression => isdir("$(sara_data.apache[configdir])");
+        "apache_restart" or => {
+            "APACHE_MODULES_repaired",
+            "APACHE_SITES_repaired",
+            "sara_opt_apache_httpd_conf",
+            "sara_opt_apache_server_conf",
+            "sara_opt_apache_ssl_conf",
+            "sara_opt_apache_envvars"
+        };
+
+    vars:
+        "apache_modules_index" slist => getindices("sara_data.apache[modules]");
+        "apache_modules" data => parsejson('[]');
+        "apache_modules" data => mergedata("apache_modules", parsejson('["$(sara_data.apache[modules][$(apache_modules_index)][config_file])"]'));
+
+        "apache_dirs_needed" slist => { 
+            "$(sara_data.apache[configdir])/modules.d", 
+            "$(sara_data.apache[configdir])/sites.d",
+            "$(sara_data.apache[document_root])",
+            "$(sara_data.apache[sites_root])"
+        };
+
+    files:
+        "$(sara_data.apache[configdir])/."
+            perms => mog("755", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+            create => "true",
+            move_obstructions => "true",
+            classes => results("namespace", "APACHE_CONFIGDIR"),
+            ifvarclass => not("apache_config_dir_exists");
+
+        "$(apache_dirs_needed)/."
+            perms => mog("755", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+            create => "true",
+            move_obstructions => "true",
+            classes => results("namespace", "$(apache_dirs_needed)"),
+            ifvarclass => "apache_config_dir_exists";
+
+        "$(sara_data.apache[configdir])/modules.d/$(apache_modules)"
+            perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+            copy_from => sara_sync_cp("cf_bundles_dir/apache/modules_config/$(apache_modules)", "hash"),
+            move_obstructions => "true",
+            classes => results("namespace", "APACHE_MODULES"),
+            ifvarclass => "apache_config_dir_exists";
+
+        "$(sara_data.apache[configdir])/sites.d/$(sara_data.apache[sites])"
+            perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+            copy_from => sara_sync_cp("cf_bundles_dir/apache/sites/$(sara_data.apache[sites])", "hash"),
+            move_obstructions => "true",
+            classes => results("namespace", "APACHE_SITES"),
+            ifvarclass => "apache_config_dir_exists";
+
+        ## TODO delete sites.d and modules.d files when not needed
+
+    methods:
+        "" usebundle => sara_mustache_autorun("apache"),
+            ifvarclass => or(
+                "apache_config_dir_exists",
+                "APACHE_CONFIGDIR_repaired"
+            );
+
+    commands:
+        "$(apache.restart)"
+            ifvarclass => "apache_restart";
+}
+
+bundle agent apache_daemon_check()
+{
+    processes:
+        "$(apache.daemon_name)"
+            comment => "Check if Grafana is running",
+            process_count   => check_range("$(apache.daemon_name)", "1", "1"),
+            process_select  => sara_select_parent_process("1");
+
+    commands:
+        "$(apache.restart)"
+            ifvarclass => canonify("$(apache.daemon_name)_out_of_range");
+}
+
+bundle agent apache_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_apache" };
+
+    methods:
+        debian::
+            "" usebundle => sara_data_autorun("apache");
+            "" usebundle => apache_install();
+            "" usebundle => apache_config();
+            "" usebundle => apache_daemon_check();
+}
+
+@if minimum_version(99.9)
+# apache.cf
+
+Source[apache.cf](/services/apache.cf)
+
+This bundle will be used to:
+ * Configure Apache in /opt/apache so when updating/upgrading Apache you won't conflict with the distribution setup
+ * Simplified setup so it's easier to use with CFEngine
+ * Still free formatting of Apache code for modules and sites
+ * Only configures Apache, for Python wsgi and/or PHP a separate service needs to be created
+
+Please note that this bundle has only been tested/designed for Debian Stretch or Buster. And therefor a specific 
+Debian Apache file envvars wil be written to `/etc/apache2/envvars`. This is needed to make sure Apache daemon
+uses the `/opt/apache/httpd.conf` instead of the default configuration file.
+
+TODO:
+ - Desining separate services for Python wsgi and PHP
+ - A construction need to be design for easy switching between "Performance" profiles based on a value of the machine
+
+## Usage
+
+The bundle can be run via:
+ *  `"" usebundle => apache_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "apache",
+            "..."
+    ]   
+}
+```
+
+The bundle will aways read the [default.json](/templates/apache/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
+    any::
+        "apt_json_files" slist => { "debconf.json" };
+```
+@endif

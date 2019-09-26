@@ -1,0 +1,108 @@
+{
+    "configdir": "/opt/apache",
+    "user": "www-data",
+    "group": "www-data",
+    "document_root": "/srv/www/htdocs",
+    "sites_root": "/srv/sites",
+    "tuning_servers_limit": "8",
+    "tuning_max_workers": "200",
+    "tuning_start_servers": "3",
+    "tuning_threads_p_child": "25",
+    "tuning_threads_limit": "64",
+    "logdir": "/var/log",
+    "modules": [
+        {
+            "name": "access_compat", "config_file": ""
+        },
+        {
+            "name": "alias", "config_file": "alias.conf"
+        },
+        {
+            "name": "auth_basic", "config_file": ""
+        },
+        {
+            "name": "authn_core", "config_file": ""
+        },
+        {
+            "name": "authn_file", "config_file": ""
+        },
+        {
+            "name": "authz_core", "config_file": ""
+        },
+        {
+            "name": "authz_host", "config_file": ""
+        },
+        {
+            "name": "authz_user", "config_file": ""
+        },
+        {
+            "name": "autoindex", "config_file": "autoindex.conf"
+        },
+        {
+            "name": "deflate", "config_file": "deflate.conf"
+        },
+        {
+            "name": "dir", "config_file": "dir.conf"
+        },
+        {
+            "name": "env", "config_file": ""
+        },
+        {
+            "name": "headers", "config_file": ""
+        },
+        {
+            "name": "http2", "config_file": "http2.conf"
+        },
+        {
+            "name": "filter", "config_file": ""
+        },
+        {
+            "name": "mime", "config_file": "mime.conf"
+        },
+        {
+            "name": "mime_magic", "config_file": "mime_magic.conf"
+        },
+        {
+            "name": "mpm_event", "config_file": ""
+        },
+        {
+            "name": "negotiation", "config_file": "negotiation.conf"
+        },
+        {
+            "name": "proxy", "config_file": ""
+        },
+        {
+            "name": "proxy_fcgi", "config_file": "proxy_fcgi.conf"
+        },
+        {
+            "name": "proxy_http", "config_file": ""
+        },
+        {
+            "name": "proxy_wstunnel", "config_file": ""
+        },
+        {
+            "name": "reqtimeout", "config_file": "reqtimeout.conf"
+        },
+        {
+            "name": "rewrite", "config_file": "reqtimeout.conf"
+        },
+        {
+            "name": "setenvif", "config_file": ""
+        },
+        {
+            "name": "ssl", "config_file": ""
+        },
+        {
+            "name": "socache_shmcb", "config_file": ""
+        },
+        {
+            "name": "status", "config_file": ""
+        },
+        {
+            "name": "wsgi", "config_file": ""
+        }
+    ],
+    "args_arguments": "-f $(sara_data.apache[configdir])/httpd.conf",
+    "sites": []
+}
+

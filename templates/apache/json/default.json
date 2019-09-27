@@ -48,6 +48,9 @@
             "name": "env", "config_file": ""
         },
         {
+            "name": "expires", "config_file": ""
+        },
+        {
             "name": "headers", "config_file": ""
         },
         {

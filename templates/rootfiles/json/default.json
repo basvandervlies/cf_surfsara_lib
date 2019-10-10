@@ -6,6 +6,8 @@
     "host_authorized_keys": [
         { "key_type": "#",  "key": "host_authorized_keys",  "comment": "to override" }
     ],
+    "ssh_keys": {
+    },
     "stepping_stone": [
         { "key_type": "#",  "key": "stepping_stone",  "comment": "to override" }
     ]

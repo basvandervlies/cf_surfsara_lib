@@ -36,7 +36,7 @@ bundle agent rootfiles_surfsara_config()
     classes:
         "copy_dirs_set" expression => isvariable("sara_data.rootfiles[copy_dirs]");
         "copy_files_set" expression => isvariable("sara_data.rootfiles[copy_files]");
-        "ssh_keys_set" expression => isvariable("sara_data.rootfiles[ssh_keys]");
+        "ssh_keys_set" expression => reglist("@(sara_data.rootfiles[ssh_keys])", ".+");
 
     files:
         any::
@@ -63,7 +63,7 @@ bundle agent rootfiles_surfsara_config()
    reports:
         ROOTFILES_NO_MODULE_LOAD::
             "$(this.bundle): Prevent default module loading $(no_module_load)"
-                ifvarclass => "DEBUG|DEBUG_rootfiles";
+                if => "DEBUG|DEBUG_rootfiles";
 }
 
 bundle agent rootfiles_ssh_keys()
@@ -81,6 +81,11 @@ bundle agent rootfiles_ssh_keys()
                 perms => mog("644", "root", "root"),
                 copy_from => secure_cp("$(sara_data.rootfiles[ssh_keys][source])/$(sara_data.rootfiles[ssh_keys][keys]).pub",
                     "$(sys.policy_hub)");
+
+    reports:
+        any::
+            "$(this.bundle) has ben called"
+                if => "DEBUG|DEBUG_rootfiles";
 }
 @if minimum_version(99.9)
 # rootfiles

@@ -40,6 +40,9 @@ bundle agent rootfiles_surfsara_config()
 
     files:
         any::
+            "/root/."
+                perms       => mog("0700", "root", "root");
+
             "/root/.ssh/authorized_keys"
                 perms       => mog("0400", "root", "root");
 

@@ -127,6 +127,7 @@ bundle agent slurm_install()
                         "slurmd": "$(version)",
                         "slurmdbd": "$(version)"
                         "python-pyslurm" : "$(pyslurm_version)",
+                        "python3-pyslurm" : "$(pyslurm_version)",
                     }
                 }
             ');
@@ -148,6 +149,7 @@ bundle agent slurm_install()
                         "slurmd": "$(version)",
                         "slurm-wlm-basic-plugins ": "$(version)",
                         "python-pyslurm" : "$(pyslurm_version)",
+                        "python3-pyslurm" : "$(pyslurm_version)",
                     }
                 }
             '),
@@ -164,6 +166,7 @@ bundle agent slurm_install()
                         "libslurmdb-perl": "$(version)",
                         "slurm-client": "$(version)",
                         "python-pyslurm" : "$(pyslurm_version)"
+                        "python3-pyslurm" : "$(pyslurm_version)",
                     }
                 }
             '),

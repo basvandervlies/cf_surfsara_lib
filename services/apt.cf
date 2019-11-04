@@ -11,6 +11,7 @@ bundle common apt
             "dpkg_reconfigure"string => "/usr/sbin/dpkg-reconfigure";
             "command" string => "/usr/bin/apt";
             "repos_dir" string => "$(config_dir)/sources.list.d";
+            "trusted_dir" string => "$(config_dir)/trusted.gpg.d";
 
             "packages"  data => parsejson('{
                 "install": {
@@ -334,11 +335,11 @@ bundle agent apt_repository_generate(template_file, repo_files)
             "repo_data_str" string => format("%S", "repo_data"),
                 ifvarclass => "DEBUG|DEBUG_apt|DEBUG_apt_repository";
 
-            "repository_names" slist => getindices("repo_data");
-            "repository_exclude_files" slist => maplist("$(this).list", @(repository_names));
+            "repo_names" slist => getindices("repo_data");
+            "repo_exclude_files" slist => maplist("$(this).list", @(repo_names));
 
         DEBUG|DEBUG_apt|DEBUG_apt_repository::
-            "repository_exclude_files_str" string => format("%S", repository_exclude_files);
+            "repo_exclude_files_str" string => format("%S", repo_exclude_files);
 
     classes:
         any::
@@ -346,17 +347,23 @@ bundle agent apt_repository_generate(template_file, repo_files)
 
     files:
         any::
-            "$(apt.repos_dir)/$(repository_names).list"
+            "$(apt.repos_dir)/$(repo_names).list"
                 create          => "true",
                 edit_template   => "/etc/node_status/templates/apt/$(template_file)",
                 template_method => "mustache",
-                template_data   => mergedata("repo_data[$(repository_names)]");
+                template_data   => mergedata("repo_data[$(repo_names)]");
 
             "$(apt.repos_dir)"
                 comment         => "Remove apt repository files that are not maintained by CFEngine",
                 delete          => sara_tidyfiles,
-                file_select     => sara_exclude_files("@(repository_exclude_files)"),
+                file_select     => sara_exclude_files("@(repo_exclude_files)"),
                 depth_search    => recurse("inf");
+
+            "$(apt.trusted_dir)/$(repo_data[$(repo_names)][key_file])"
+                comment => "Must we copy repo key file",
+                move_obstructions => "true",
+                perms => mog("0644", "root", "root"),
+                copy_from   => remote_dcp("$(sara_data.apt[key_dir])/$(repo_data[$(repo_names)][key_file])", "$(sys.policy_hub)");
 
         APT_SOURCES_FILE_REMOVE::
             "/etc/apt/sources.list"
@@ -365,12 +372,12 @@ bundle agent apt_repository_generate(template_file, repo_files)
 
     methods:
         apt_import_key_cmd_exists::
-            "" usebundle => apt_repository_key("$(repository_names)", "$(repo_data[$(repository_names)][repo_key])"),
+            "" usebundle => apt_repository_key("$(repo_names)", "$(repo_data[$(repo_names)][repo_key])"),
                 comment => "Check if the repo key is known";
 
     reports:
         DEBUG|DEBUG_apt|DEBUG_apt_repository::
-            "$(this.bundle): repository_file excluded from deletion: $(repository_exclude_files_str)";
+            "$(this.bundle): repository_file excluded from deletion: $(repo_exclude_files_str)";
             "$(this.bundle): Merged data repository files: $(repo_data_str)";
 
         !apt_import_key_cmd_exists::
@@ -495,6 +502,8 @@ Source: [apt.cf](/services/apt.cf)
 This bundle will be used to:
  * generate repository files in /etc/apt/sources.list.d
  * install apt packages
+ * Copy the gpg key files if `key_file` is set for repository
+ * Fetch the gpg key via `apt_import_key` command if `repo_key` is set for repository
 
 The following actions are proctected by a class:
  * automatic install security uodate (AUTOMATIC_SECURITY_UPDATE)

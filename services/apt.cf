@@ -303,7 +303,7 @@ bundle agent apt_repository()
         !apt_repository_json_files_set::
             "repo_files" slist => { getvalues("sara_data.apt[repo_files]") };
         apt_repository_json_files_set::
-            "repo_files" slist => { getvalues("sara_data.apt[repo_files]"), "@(def.apt_repo_files)" },
+            "repo_files" slist => { @(def.apt_repo_files), getvalues("sara_data.apt[repo_files]") },
                 comment => "Support old behaviour till we converted everything to new apt setup";
 
     classes:

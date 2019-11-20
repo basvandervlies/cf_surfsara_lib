@@ -35,7 +35,6 @@ bundle common slurm()
             "config_dir"              string => "/etc/slurm-llnl";
             "plugstack_dir"           string => "$(config_dir)/plugstack.conf.d";
             "log_dir"                 string => "/var/log/slurm-llnl";
-            "pid_dir"                 string => "/var/run/slurm-llnl";
             "plugin_dir"              string => "/usr/lib/x86_64-linux-gnu/slurm-wlm/";
             "spool_dir"               string => "/var/spool/slurm-llnl";
 
@@ -46,7 +45,6 @@ bundle common slurm()
         centos::
             "config_dir" string => "/etc/slurm";
             "log_dir"    string => "/var/log/slurm";
-            "pid_dir"    string => "/var/run/slurm";
             "plugin_dir" string => "/usr/lib/slurm";
             "spool_dir"  string => "/var/spool/slurm";
 
@@ -107,70 +105,19 @@ bundle agent slurm_install()
         any::
             "version" string => ifelse( isvariable("sara_data.slurm[version]"), "$(sara_data.slurm[version])", "");
             "pyslurm_version" string => ifelse( isvariable("sara_data.slurm[pyslurm_version]"), "$(sara_data.slurm[pyslurm_version])", "");
+            "packages" data => parsejson('{}');
 
-        debian.SLURM_SERVER::
-            "packages" data => parsejson('
-                {
-                    "install": {
-                        "libpam-slurm-adopt" : "$(version)",
-                        "libpmi0-dev" : "$(version)",
-                        "libpmi2-0-dev" : "$(version)",
-                        "libslurm-dev" : "$(version)",
-                        "libslurm-perl" : "$(version)",
-                        "libslurmdb33": "$(version)",
-                        "libslurmdb-dev": "$(version)",
-                        "libslurmdb-perl": "$(version)",
-                        "slurm-client": "$(version)",
-                        "slurm-wlm": "$(version)",
-                        "slurm-wlm-doc ": "$(version)",
-                        "slurmctld": "$(version)",
-                        "slurmd": "$(version)",
-                        "slurmdbd": "$(version)"
-                        "python-pyslurm" : "$(pyslurm_version)",
-                        "python3-pyslurm" : "$(pyslurm_version)",
-                    }
-                }
-            ');
+        SLURM_SERVER::
+            "packages" data => mergedata( "packages", "sara_data.slurm[packages_server]"),
+                comment => 'List of slurm packages';
 
-        # deze toevoegen na de overgang naar slurm: "slurm-wlm-torque": "18.08.1-1"
-        debian.SLURM_CLIENT::
-            "packages" data => parsejson('
-                {
-                    "install": {
-                        "libpam-slurm-adopt" : "$(version)",
-                        "libpmi0-dev" : "$(version)",
-                        "libpmi2-0-dev" : "$(version)",
-                        "libslurm-dev" : "$(version)",
-                        "libslurm-perl" : "$(version)",
-                        "libslurmdb33": "$(version)",
-                        "libslurmdb-dev" : "$(version)",
-                        "libslurmdb-perl" : "$(version)",
-                        "slurm-client": "$(version)",
-                        "slurmd": "$(version)",
-                        "slurm-wlm-basic-plugins ": "$(version)",
-                        "python-pyslurm" : "$(pyslurm_version)",
-                        "python3-pyslurm" : "$(pyslurm_version)",
-                    }
-                }
-            '),
-                comment => "Order of purge is important";
+        SLURM_CLIENT::
+            "packages" data => mergedata( "packages", "sara_data.slurm[packages_client]"),
+                comment => 'List of slurm packages';
 
-        debian.SLURM_SUBMIT::
-            "packages" data => parsejson('
-                {
-                    "install": {
-                        "libpmi0-dev" : "$(version)",
-                        "libpmi2-0-dev" : "$(version)",
-                        "libslurm-perl": "$(version)",
-                        "libslurmdb33": "$(version)",
-                        "libslurmdb-perl": "$(version)",
-                        "slurm-client": "$(version)",
-                        "python-pyslurm" : "$(pyslurm_version)"
-                        "python3-pyslurm" : "$(pyslurm_version)",
-                    }
-                }
-            '),
-                comment => "Order of purge is important";
+        SLURM_SUBMIT::
+            "packages" data => mergedata( "packages", "sara_data.slurm.[packages_submit]"),
+                comment => 'List of slurm packages';
 
     methods:
         any::

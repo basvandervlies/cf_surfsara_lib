@@ -116,7 +116,7 @@ bundle agent slurm_install()
                 comment => 'List of slurm packages';
 
         SLURM_SUBMIT::
-            "packages" data => mergedata( "packages", "sara_data.slurm.[packages_submit]"),
+            "packages" data => mergedata( "packages", "sara_data.slurm[packages_submit]"),
                 comment => 'List of slurm packages';
 
     methods:

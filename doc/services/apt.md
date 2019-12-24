@@ -5,6 +5,8 @@ Source: [apt.cf](/services/apt.cf)
 This bundle will be used to:
  * generate repository files in /etc/apt/sources.list.d
  * install apt packages
+ * Copy the gpg key files if `key_file` is set for repository
+ * Fetch the gpg key via `apt_import_key` command if `repo_key` is set for repository
 
 The following actions are proctected by a class:
  * automatic install security uodate (AUTOMATIC_SECURITY_UPDATE)

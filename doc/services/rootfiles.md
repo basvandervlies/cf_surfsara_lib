@@ -61,7 +61,6 @@ Some example show to us it:
 {
     "vars": {
         "rootfiles": {
-            "setup_dir": "cf_bundles_dir/rootfiles/mona",
             "stepping_stone_authorized_keys": [
                 {
                 "key_type": "ssh-rsa",
@@ -105,4 +104,15 @@ copy_files: [
         "mog": [ "0700", "root", "root"]
     }
 ]
+```
+
+### ssh_keys
+
+With this variable is set it will copy the specified ssh keys to `/root/.ssh`,
+example:
+```json
+ssh_keys: {
+    "source": "cf_bundles_dir/rootfiles/ssh_keys/2fa_web",
+    "keys": [ "id_ed25519", "id_rsa" ]
+}
 ```

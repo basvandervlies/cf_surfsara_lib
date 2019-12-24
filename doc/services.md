@@ -1,8 +1,10 @@
 
 # An index of all the services that have inline documentation
 
+ * [apache](services/apache.md)
  * [apt](services/apt.md)
  * [check_space](services/check_space.md)
+ * [chrony](services/chrony.md)
  * [cron](services/cron.md)
  * [dhclient](services/dhclient.md)
  * [munge](services/munge.md)
@@ -14,6 +16,7 @@
  * [nvidia_gpu_prometheus_exporter](services/nvidia_gpu_prometheus_exporter.md)
  * [pam](services/pam.md)
  * [pam_radius](services/pam_radius.md)
+ * [pkg_management](services/pkg_management.md)
  * [postfix](services/postfix.md)
  * [resolv](services/resolv.md)
  * [rootfiles](services/rootfiles.md)

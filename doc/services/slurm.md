@@ -27,6 +27,7 @@ These templates are located in:
 The following clases can be set via def.cf/json:
  * backup: When set make a backup of the SQL sever
  * client: Configure the machine as client
+ * logrotate: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
  * slurmd_disable: Disable the slurmd systemd service
  * server: Configure the machine as server
  * submit: Configure the machine as submit host

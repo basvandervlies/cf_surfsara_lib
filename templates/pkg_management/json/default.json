@@ -1,0 +1,7 @@
+{
+    "apt_preference_file": "/etc/apt/preferences.d/99-surfsara",
+    "pin_priority": "900",
+    "classes": {
+        "PRIO_BACKPORTS": "debian"
+    }
+}

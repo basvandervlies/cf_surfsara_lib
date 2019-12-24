@@ -75,12 +75,35 @@ body copy_from sara_cp_dir(bundle_name, var, server)
     type_check  => "$($(bundle_name).$(var)[type_check])";
 }
 
+body copy_from sara_sync_no_perms_cp(from,compare)
+{
+    servers  => { $(sys.policy_hub) };
+    source      => "$(from)";
+    purge       => "true";
+    preserve    => "false";
+
+!windows::
+    compare     => "$(compare)";
+
+windows::
+    ## digest/hash is not working, bug? BvdV 6 Aug 2014
+    #
+    compare => "mtime";
+}
+
 body copy_from sara_template_local_dcp(from)
 {
     compare => "digest";
     source => "$(from)";
     copylink_patterns => { ".*" };
 }
+
+body link_from sara_relative_ln_s(x)
+{
+    link_type => "relative";
+    source => "$(x)";
+}
+
 
 bundle agent sara_cp_dir_default
 {

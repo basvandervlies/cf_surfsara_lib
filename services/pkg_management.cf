@@ -1,0 +1,198 @@
+#
+## package_management.cf @SURFsara
+#
+bundle agent pkg_management_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_pkg_management" };
+
+    methods:
+        "" usebundle => sara_data_autorun("pkg_management");
+        "" usebundle => pkg_management();
+}
+
+bundle agent pkg_management()
+{
+    vars:
+        any::
+            "names" slist => getindices("sara_data.pkg_management"),
+                comment => "Get all package names";
+
+    methods:
+        PKG_MANAGEMENT_PRIO_BACKPORTS::
+            "" usebundle => pkg_management_prio_backport_packages("@(pkg_management.names)"),
+                comment => "Priorize backports packages";
+
+        any::
+            "" usebundle => pkg_management_action(
+                "$(names)",
+                "$(sara_data.pkg_management[$(names)][action])",
+                "$(sara_data.pkg_management[$(names)][version])"
+            );
+
+   reports:
+        any::
+            "$(this.bundle): has been called"
+                if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+bundle agent pkg_management_prio_backport_packages(names)
+{
+    vars:
+        any::
+            "packages" data => parsejson(' [] ');
+            "packages" data => mergedata("packages", parsejson(' [ "$(names)" ] ')),
+                if => and( strcmp("$(sara_data.pkg_management[$(names)][action])", "install_backports") );
+
+            "release" string => regex_replace("$(sys.os_release[VERSION])", ".*\((\w+).*", "\1", "");
+            "header" string => "## Maintained by CFengine$(const.n)#";
+            "template" string => "$(header)
+{{#packages}}
+Package: {{.}}
+Pin: release a=$(release)-backports
+Pin-Priority: $(sara_data.pkg_management[pin_priority])
+
+{{/packages}}
+";
+
+    files:
+        any::
+            "$(sara_data.pkg_management[apt_preference_file])"
+                comment => "",
+                create => "true",
+                edit_defaults => no_backup,
+                edit_template_string => "$(template)",
+                template_method => "inline_mustache",
+                template_data => bundlestate("pkg_management_prio_backport_packages");
+
+    methods:
+        any::
+            "" usebundle => sara_show_data("$(this.bundle)", "packages"),
+                if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+bundle agent pkg_management_action(name, action, version)
+{
+    vars:
+        "pkg_data" data => parsejson('
+            {
+                "$(action)": { "$(name)" : "$(version)" }
+            }
+        '),
+            comment => "Convert to format that sara_service_packages_<action> can handle";
+
+        "pkg_bundle" string => "sara_service_packages_$(action)",
+            comment => "Which package bundle to run";
+
+    methods:
+        "" usebundle => sara_show_data("$(this.bundle)", "pkg_data"),
+            comment => "Must create dynamic handle, else CF won't run a second time",
+            handle => "$(this.bundle)_$(name)",
+            if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+
+        "" usebundle => $(pkg_bundle)("pkg_management", "@(pkg_data)"),
+            comment => "Must create dynamic handle, else CF won't run a second time",
+            handle => "$(this.bundle)_$(name)";
+
+    reports:
+        "$(this.bundle): $(pkg_bundle) '$(name)':'$(version)'"
+               if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+}
+
+@if minimum_version(99.9)
+# PKG_MANAGEMENT
+
+Source: [pkg_management.cf](/services/pkg_management.cf)
+
+
+This will install/delete packages that are not installed via other services files. You just want to make sure that some handy
+utitlities are installed or some anonying utilities are removed, eg:
+```json
+{
+    "jq": {
+        "action": "install",
+        "version": ""
+    },
+    "pip": {
+        "action": "remove"
+        "version": ""
+    }
+}
+```
+
+This will:
+  * install the package `jq` and does not care about which `version` is installed
+  * remove the package `pip` and does not care about which `version` must be removed
+
+The following actions are supported:
+ * install
+ * remove
+ * purge is only supported on Debian like systems on other systems it will be `remove`
+ * install_backports is only supported Debian like systems on other systems it will be `install`
+
+
+The following classes can be se via def.cf/json:
+ * `PRIO_BACKPORTS`: This will priorize the `backports` packages above the `stable` ones
+
+When `PRIO_BACKPORTS` class is set the following file will be created with the aid of
+`inline_mustache`:
+  * `/etc/apt/preferences.d/99-surfsara` (overridable via json file)
+
+The `backports` package will now be considers as `stable` package. The upgrade of `backport`
+package is the same as `stable` package:
+ * `apt  --simulate --ignore-hold upgrade`
+
+## Usage
+
+The bundle can be run via:
+ *  `"" usebundle => pkg_management_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "pkg_management",
+            "..."
+    ]
+}
+```
+
+The bundle will always read the [default.json](/templates/pkg_management/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
+    any::
+        "pkg_management_json_files" slist => { "lisa.json" };
+```
+
+The variable must be ''pkg_management_json_files'' and with this setup 1 extra json file will be  merged.
+
+### DEBUG
+
+If you want to debug these bundle set the `DEBUG_pkg_management` class, eg:
+ * `-DDEBUG_pkg_management`
+
+##  def.cf/json
+
+See [default.json](/templates/pkg_management/json/default.json) what the default values are and
+which variables can be overridden.
+
+Here are some examples how to use it:
+ * specify pkg_management configuration in def.cf:
+```
+vars:
+    "pkg_management_json_files" slist => { "lisa.json" };
+```
+
+ * Set/Override variables in *def.json*:
+```json
+"pkg_management": {
+    "json_files": [ "lisa.json" ],
+    "jq": {
+        "action": "install",
+        "version": ""
+    }
+}
+```
+@endif

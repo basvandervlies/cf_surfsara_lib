@@ -1,0 +1,9 @@
+{
+    "allow": [
+    ],
+    "timezone": "Europe/Amsterdam",
+    "server": [
+        "145.100.29.131",
+        "145.100.29.146"
+    ]
+}

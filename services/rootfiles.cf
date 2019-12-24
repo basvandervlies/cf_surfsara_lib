@@ -31,15 +31,18 @@ bundle agent rootfiles_surfsara_config()
 {
     vars:
         any::
-            "source_dir" string => "$(sara_data.rootfiles[setup_dir])";
             "no_module_load" string => "/root/.no_module_load";
 
     classes:
-        "rootfiles_copy_dirs_set" expression => isvariable("sara_data.rootfiles[copy_dirs]");
-        "rootfiles_copy_files_set" expression => isvariable("sara_data.rootfiles[copy_files]");
+        "copy_dirs_set" expression => isvariable("sara_data.rootfiles[copy_dirs]");
+        "copy_files_set" expression => isvariable("sara_data.rootfiles[copy_files]");
+        "ssh_keys_set" expression => reglist("@(sara_data.rootfiles[ssh_keys])", ".+");
 
     files:
         any::
+            "/root/."
+                perms       => mog("0700", "root", "root");
+
             "/root/.ssh/authorized_keys"
                 perms       => mog("0400", "root", "root");
 
@@ -51,20 +54,41 @@ bundle agent rootfiles_surfsara_config()
         any::
             "" usebundle => sara_mustache_autorun("rootfiles");
 
-        rootfiles_copy_dirs_set::
+        copy_dirs_set::
             "" usebundle => sara_service_copy_dirs("rootfiles");
 
-        rootfiles_copy_files_set::
+        copy_files_set::
             "" usebundle => sara_service_copy_files("rootfiles");
 
-   reports:
-        rootfiles_source_dir_set::
-            "$(this.bundle): copied files $(rootfiles.files) from $(source_dir)"
-                ifvarclass => "DEBUG|DEBUG_rootfiles";
+        ssh_keys_set::
+            "" usebundle => rootfiles_ssh_keys();
 
+   reports:
         ROOTFILES_NO_MODULE_LOAD::
             "$(this.bundle): Prevent default module loading $(no_module_load)"
-                ifvarclass => "DEBUG|DEBUG_rootfiles";
+                if => "DEBUG|DEBUG_rootfiles";
+}
+
+bundle agent rootfiles_ssh_keys()
+{
+    files:
+        any::
+            "/root/.ssh/$(sara_data.rootfiles[ssh_keys][keys])"
+                comment => "Copy private keys",
+                perms => mog("600", "root", "root"),
+                copy_from => secure_cp("$(sara_data.rootfiles[ssh_keys][source])/$(sara_data.rootfiles[ssh_keys][keys])",
+                "$(sys.policy_hub)");
+
+            "/root/.ssh/$(sara_data.rootfiles[ssh_keys][keys]).pub"
+                comment => "Copy private keys",
+                perms => mog("644", "root", "root"),
+                copy_from => secure_cp("$(sara_data.rootfiles[ssh_keys][source])/$(sara_data.rootfiles[ssh_keys][keys]).pub",
+                    "$(sys.policy_hub)");
+
+    reports:
+        any::
+            "$(this.bundle) has ben called"
+                if => "DEBUG|DEBUG_rootfiles";
 }
 @if minimum_version(99.9)
 # rootfiles
@@ -130,7 +154,6 @@ Some example show to us it:
 {
     "vars": {
         "rootfiles": {
-            "setup_dir": "cf_bundles_dir/rootfiles/mona",
             "stepping_stone_authorized_keys": [
                 {
                 "key_type": "ssh-rsa",
@@ -174,5 +197,16 @@ copy_files: [
         "mog": [ "0700", "root", "root"]
     }
 ]
+```
+
+### ssh_keys
+
+With this variable is set it will copy the specified ssh keys to `/root/.ssh`,
+example:
+```json
+ssh_keys: {
+    "source": "cf_bundles_dir/rootfiles/ssh_keys/2fa_web",
+    "keys": [ "id_ed25519", "id_rsa" ]
+}
 ```
 @endif

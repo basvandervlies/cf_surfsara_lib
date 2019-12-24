@@ -11,6 +11,17 @@ bundle common pam()
             "mode"   string => "0644";
             "owner"  string => "root";
             "group"  string => "root";
+
+        debian::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "libpam-python" :   "",
+                        "python-pyqrcode" : "",
+                        "python3-pyqrcode" : ""
+                        }
+                }
+            ');
 }
 
 bundle agent pam_autorun()
@@ -21,6 +32,7 @@ bundle agent pam_autorun()
     methods:
         any::
             "" usebundle => sara_data_autorun("pam");
+            "" usebundle => pam_install();
             "" usebundle => pam_surfsara_config();
 
     reports:
@@ -28,11 +40,18 @@ bundle agent pam_autorun()
             "$(this.bundle): surfsara template run";
 }
 
+bundle agent pam_install()
+{
+    methods:
+        "" usebundle => sara_service_packages("pam", "@(pam.packages)");
+}
+
 bundle agent pam_surfsara_config()
 {
     classes:
         "pam_listfile_set" expression => isvariable("sara_data.pam[pam_listfile]");
         "pam_cp_files_set" expression => isvariable("sara_data.pam[copy_files]");
+        "pam_cp_dirs_set" expression => isvariable("sara_data.pam[copy_dirs]");
 
     methods:
         any::
@@ -43,6 +62,8 @@ bundle agent pam_surfsara_config()
 
         pam_cp_files_set::
             "" usebundle => sara_service_copy_files("pam");
+        pam_cp_dirs_set::
+            "" usebundle => sara_service_copy_dirs("pam");
 }
 
 bundle agent pam_generate_files()

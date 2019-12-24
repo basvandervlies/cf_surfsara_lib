@@ -1,0 +1,10 @@
+{
+    "grep": {
+        "action": "install_backports",
+        "version": "latest"
+    },
+    "git": {
+        "action": "install_backports",
+        "version": "latest"
+    }
+}

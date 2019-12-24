@@ -20,13 +20,13 @@ bundle common apache
         ');
 
         "template_2_destination" data => parsejson('
-            {   
+            {
                 "envvars.mustache": "/etc/apache2/envvars",
                 "httpd.conf.mustache": "$(configdir)/httpd.conf"
                 "ssl.conf.mustache": "$(configdir)/ssl.conf"
                 "server.conf.mustache": "$(configdir)/server.conf"
-            }   
-        '); 
+            }
+        ');
 
 }
 
@@ -54,8 +54,8 @@ bundle agent apache_config()
         "apache_modules" data => parsejson('[]');
         "apache_modules" data => mergedata("apache_modules", parsejson('["$(sara_data.apache[modules][$(apache_modules_index)][config_file])"]'));
 
-        "apache_dirs_needed" slist => { 
-            "$(sara_data.apache[configdir])/modules.d", 
+        "apache_dirs_needed" slist => {
+            "$(sara_data.apache[configdir])/modules.d",
             "$(sara_data.apache[configdir])/sites.d",
             "$(sara_data.apache[document_root])",
             "$(sara_data.apache[sites_root])"
@@ -78,14 +78,14 @@ bundle agent apache_config()
 
         "$(sara_data.apache[configdir])/modules.d/$(apache_modules)"
             perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            copy_from => sara_sync_cp("cf_bundles_dir/apache/modules_config/$(apache_modules)", "hash"),
+            copy_from => sara_sync_no_perms_cp("cf_bundles_dir/apache/modules_config/$(apache_modules)", "hash"),
             move_obstructions => "true",
             classes => results("namespace", "APACHE_MODULES"),
             ifvarclass => "apache_config_dir_exists";
 
         "$(sara_data.apache[configdir])/sites.d/$(sara_data.apache[sites])"
             perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            copy_from => sara_sync_cp("cf_bundles_dir/apache/sites/$(sara_data.apache[sites])", "hash"),
+            copy_from => sara_sync_no_perms_cp("cf_bundles_dir/apache/sites/$(sara_data.apache[sites])", "hash"),
             move_obstructions => "true",
             classes => results("namespace", "APACHE_SITES"),
             ifvarclass => "apache_config_dir_exists";
@@ -141,7 +141,7 @@ This bundle will be used to:
  * Still free formatting of Apache code for modules and sites
  * Only configures Apache, for Python wsgi and/or PHP a separate service needs to be created
 
-Please note that this bundle has only been tested/designed for Debian Stretch or Buster. And therefor a specific 
+Please note that this bundle has only been tested/designed for Debian Stretch or Buster. And therefor a specific
 Debian Apache file envvars wil be written to `/etc/apache2/envvars`. This is needed to make sure Apache daemon
 uses the `/opt/apache/httpd.conf` instead of the default configuration file.
 
@@ -160,7 +160,7 @@ The bundle can be run via:
             "...",
             "apache",
             "..."
-    ]   
+    ]
 }
 ```
 

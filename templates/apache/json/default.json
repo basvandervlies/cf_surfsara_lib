@@ -3,6 +3,10 @@
     "user": "www-data",
     "group": "www-data",
     "document_root": "/srv/www/htdocs",
+    "ports": [
+        "80",
+        "443"
+    ],
     "sites_root": "/srv/sites",
     "tuning_servers_limit": "8",
     "tuning_max_workers": "200",
@@ -46,6 +50,9 @@
         },
         {
             "name": "env", "config_file": ""
+        },
+        {
+            "name": "expires", "config_file": ""
         },
         {
             "name": "headers", "config_file": ""

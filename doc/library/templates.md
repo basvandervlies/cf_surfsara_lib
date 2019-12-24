@@ -63,10 +63,10 @@ on the policy hub to a the local node directory.
 ## sara_json_copy_and_merge(bundle_name)
 
 It use the same setup as above. So the variables must be defined in:
- * `def.$(bundle_name)[json_files]`
- * `def.$(bundle_name)_json_files` (easy cfengine syntax)
- * `def.$(bundle_name)[local_generated_json_files]`
- * `def.$(bundle_name)_local_generated_json_files` (easy cfengine syntax)
+ * `def.$(bundle_name)_json_files` (for global definitions)
+ * `def.$(bundle_name)[json_files]`(used to override/extend the global ones)
+ * `def.$(bundle_name)_local_generated_json_files` (for global definitions)
+ * `def.$(bundle_name)[local_generated_json_files]` (used to override/extend the global ones)
 
 This bundle will copy `def.$(bundle_name)_json_files` data files to `$(def.node_template_dir)/$(bundle_name)` directory.
 It uses the following bundles:

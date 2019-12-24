@@ -83,6 +83,29 @@
             }
         }
     ],
+    "packages_server": {
+        "install": {
+            "libpam-slurm-adopt" : "$(sara_data.slurm[version])",
+            "libpmi0-dev" : "$(sara_data.slurm[version])",
+            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
+            "libslurm-dev" : "$(sara_data.slurm[version])",
+            "libslurm-perl" : "$(sara_data.slurm[version])",
+            "libslurmdb-perl": "$(sara_data.slurm[version])",
+            "slurm-client": "$(sara_data.slurm[version])",
+            "slurm-wlm": "$(sara_data.slurm[version])",
+            "slurm-wlm-doc ": "$(sara_data.slurm[version])",
+            "slurmctld": "$(sara_data.slurm[version])",
+            "slurmd": "$(sara_data.slurm[version])",
+            "slurmdbd": "$(sara_data.slurm[version])",
+            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+        },
+        "purge": {
+            "libpam-slurm" : "",
+            "libslurmdb-dev": "",
+            "libslurmdb33": "",
+            "libslurmdb33": ""
+        }
+    },
     "partition_section": [
         {
             "name": "test",
@@ -101,6 +124,7 @@
             }
         }
     ],
+    "pyslurm_version": "19.05.0-2",
     "spank_templates": {
         "private_tmpdir.mustache" : {
             "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
@@ -119,5 +143,6 @@
         "SLURM_CLIENT",
         "SLURM_SERVER",
         "SLURM_SUBMIT"
-    ]
+    ],
+    "version": "19.05.3.2-3"
 }

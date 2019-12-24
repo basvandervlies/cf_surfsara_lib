@@ -28,10 +28,10 @@ If the order is `{ "b.json", "a.json" }` the value of *a* would be *1*
 
 The merge strategy is::
   1. `default.json`
-  1. `def.<bundle_name>[json_files]` if defined
   1. `def.<bundle_name>_json_files` if defined
-  1. `def.<bundle_name>[local_generated_json_files]` if defined
+  1. `def.<bundle_name>[json_files]` if defined
   1. `def.<bundle_name>_local_generated_json_files` if defined
+  1. `def.<bundle_name>[local_generated_json_files]` if defined
   1. `def.<bundle_name>` if defined in def.json or:
         * lib/surfsara/def.cf MPF setup
         * your own file with variable scope `def`

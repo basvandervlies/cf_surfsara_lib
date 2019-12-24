@@ -1,19 +1,90 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.50 (2019-05-28)](#version:-0.9.50-(2019-05-28))
+* [Version: 0.9.66 (2019-12-24)](#version-0966-2019-12-24)
+    * [pkg\_management service](#pkg_management-service)
+* [Version: 0.9.50 (2019-05-28)](#version-0950-2019-05-28)
     * [INVENTORY modules](#inventory-modules)
-* [Version: 0.9.20 (2018-12-20)](#version:-0.9.20-(2018-12-20))
-    * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-(2-levels))
+* [Version: 0.9.20 (2018-12-20)](#version-0920-2018-12-20)
+    * [Expand CFengine variables found in countainer (2 levels)](#expand-cfengine-variables-found-in-countainer-2-levels)
     * [SLURM](#slurm)
-    * [NHC (Node Health Check)](#nhc-(node-health-check))
+    * [NHC (Node Health Check)](#nhc-node-health-check)
     * [Bundle services data](#bundle-services-data)
-* [Version: 0.9.8 (2018-09-25)](#version:-0.9.8-(2018-09-25))
+* [Version: 0.9.8 (2018-09-25)](#version-098-2018-09-25)
     * [apt](#apt)
     * [munge](#munge)
-* [Version: 0.9.4 (2018-09-07)](#version:-0.9.4-(2018-09-07))
-* [Version: 0.9.0 (2018-08-24)](#version:-0.9.0-(2018-08-24))
+* [Version: 0.9.4 (2018-09-07)](#version-094-2018-09-07)
+* [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 0.9.66 (2019-12-24)
+ * Services added: apache2, chrony, pkg\_management
+ * apt service changes:
+    * merging order is `apt_repo_files` and then `apt[repo_files]`
+    * Can handle gpg key files copy via json variable:
+```#json
+{
+   "openldap_ltb": {
+        "key_file": "openldap-ltb.asc",
+        "repo": [
+            {
+                "name": "Openldap_ltb_repo",
+                "desc": "openldap LTB packages project",
+                "url": "deb https://ltb-project.org/debian/$(apt.os_name) $(apt.os_name) main"
+            }
+        ]
+    }
+```
+ * pam service changes:
+    * Added `copy_dirs` functionality
+    * Added `install_packages` functionality
+ * rootfiles service changes:
+    * make sure /root has restricted permisions (0700)
+    * Can now handle the root ssh keys:
+```#json
+"ssh_keys": {
+    "source": "<dir>"
+    "keys": [
+        "id_rsa"
+    ]
+```
+ * slurm service changes:
+    * install packages based on roles roles packages\_server, packages\_client,  packages\_submit
+    * `pid_dir` is now configurable
+    * added class `SLURM_LOGROTATE` class. Use cfengine logrotate functionality
+ * added some new bodies:
+    * `body copy_from sara_sync_no_perms_cp`
+    * `body link_from sara_relative_ln_s`
+
+## pkg\_management service
+
+With this service you can install/remove packages that are not handled by other services. Debian
+alike systens have 2 more options:
+ * purge: Purge the package + configuration files from the system
+ * install-backports: Install package from debian backports repository.
+
+
+You can priorize backports package above the stable one via the class `PRIO_BACKPORTS`. If this class
+is set then the following file will be created with the aid of inline mustache:
+  * `/etc/apt/preferences.d/99-surfsara` (overridable via json file)
+
+The `backports` package will now be considered as `stable` package. The upgrade of a `backport`
+package is the same as a `stable` package:
+ * `apt  --simulate --ignore-hold upgrade`
+
+example:
+```#json
+{
+    "grep": {
+        "action": "install_backports",
+        "version": "latest"
+    },
+    "git": {
+        "action": "install_backports",
+        "version": "latest"
+    }
+}
+```
+
 # Version: 0.9.50 (2019-05-28)
  * Services added: rsyslog
  * added SuSe (sles) support for: ntp, postfix, ssh

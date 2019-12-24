@@ -38,8 +38,9 @@ LoadModule {{{name}}}_module /usr/lib/apache2/modules/mod_{{{name}}}.so
 IncludeOptional {{{vars.sara_data.apache.configdir}}}/modules.d/*.conf
 
 ## Listen
-Listen 80
-Listen 443
+{{#vars.sara_data.apache.ports}}
+Listen {{{.}}}
+{{/vars.sara_data.apache.ports}}
 
 ## Mod_log config
 #         Format string:                        Nickname:

@@ -110,15 +110,19 @@ bundle agent systemd_install_and_check_service(service_file)
                 ifvarclass => canonify("systemd_service_$(service_name)_repaired");
 }
 
-bundle agent systemd_disable_service(service_name)
+bundle agent systemd_stop_service(service_name)
 {
-    services:
-        "$(service_name)" service_policy => "stop", # uses `standard_services`
-            comment => "Must use 'stop' wil stop and disable teh service",
-            classes => results("namespace","systemd_service_$(service_name)");
+    methods:
+         "" usebundle => standard_services("$(service_name)", "stop"),
+            comment => "Must use 'stop' and deactivate the service";
 }
 
-
+bundle agent systemd_disable_service(service_name)
+{
+    methods:
+         "" usebundle => standard_services("$(service_name)", "disable"),
+            comment => "Must we 'disable' the service, symlinks are removed ";
+}
 @if minimum_version(99.9)
 # systemd
 

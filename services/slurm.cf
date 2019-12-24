@@ -125,7 +125,7 @@ bundle agent slurm_install()
                 classes => results("bundle", "slurm_packages");
 
         SLURM_SLURMD_DISABLE::
-            "" usebundle => systemd_disable_service("slurmd"),
+            "" usebundle => systemd_stop_service("slurmd"),
                 ifvarclass => "slurm_packages_repaired";
 
     reports:

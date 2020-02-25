@@ -55,6 +55,7 @@ bundle agent apache_config()
         "apache_modules" data => mergedata("apache_modules", parsejson('["$(sara_data.apache[modules][$(apache_modules_index)][config_file])"]'));
 
         "apache_dirs_needed" slist => {
+            "$(sara_data.apache[configdir])/local.d",
             "$(sara_data.apache[configdir])/modules.d",
             "$(sara_data.apache[configdir])/sites.d",
             "$(sara_data.apache[document_root])",

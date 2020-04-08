@@ -74,29 +74,49 @@ Pin-Priority: $(sara_data.pkg_management[pin_priority])
 bundle agent pkg_management_action(name, action, version)
 {
     vars:
-        "pkg_data" data => parsejson('
-            {
-                "$(action)": { "$(name)" : "$(version)" }
-            }
-        '),
-            comment => "Convert to format that sara_service_packages_<action> can handle";
+        any::
+            "pkg_data" data => parsejson('
+                {
+                    "$(action)": { "$(name)" : "$(version)" }
+                }
+            '),
+                comment => "Convert to format that sara_service_packages_<action> can handle";
 
-        "pkg_bundle" string => "sara_service_packages_$(action)",
-            comment => "Which package bundle to run";
+            "pkg_bundle" string => "sara_service_packages_$(action)",
+                comment => "Which package bundle to run";
+
+            "run_class_var" slist => getvalues("sara_data.pkg_management[$(name)][run_class]"),
+                comment => "Only run package action if this class is true";
+
+            "run_class_var_str" string => ifelse(
+                    "run_class_set", format("%S", "run_class_var"),
+                    "any"
+                ),
+                if => "DEBUG|DEBUG_pkg_management|DEBUG_$(this.bundle)";
+
+    classes:
+        any::
+            "run_class_set" expression => reglist("@(run_class_var)", ".+"),
+                comment => "if not set assume 'any' class";
+
+            "run_class" expression => "$(run_class_var)",
+                comment => "Run pkg_management action if run_class definitions are met",
+                if => "run_class_set";
 
     methods:
-        "" usebundle => sara_show_data("$(this.bundle)", "pkg_data"),
-            comment => "Must create dynamic handle, else CF won't run a second time",
-            handle => "$(this.bundle)_$(name)",
-            if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
-
-        "" usebundle => $(pkg_bundle)("pkg_management", "@(pkg_data)"),
-            comment => "Must create dynamic handle, else CF won't run a second time",
-            handle => "$(this.bundle)_$(name)";
+        any::
+            "" usebundle => $(pkg_bundle)("pkg_management", "@(pkg_data)"),
+                comment => "Must create dynamic handle, else CF won't run a second time",
+                handle => "$(this.bundle)_$(name)",
+                if => or(
+                        "!run_class_set",
+                        "run_class"
+                    );
 
     reports:
-        "$(this.bundle): $(pkg_bundle) '$(name)':'$(version)'"
-               if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+        any::
+            "$(this.bundle): run_class = $(run_class_var_str): $(pkg_bundle) '$(name)':'$(version)'"
+                   if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
 @if minimum_version(99.9)

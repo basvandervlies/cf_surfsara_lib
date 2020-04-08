@@ -187,7 +187,7 @@ bundle agent apt_systemd_disable()
 
     methods:
         debian_9::
-            "" usebundle => systemd_disable_service("$(systemd_services_timers)");
+            "" usebundle => systemd_stop_service("$(systemd_services_timers)");
 
     commands:
         "$(paths.path[systemctl]) stop $(systemd_services_timers)"

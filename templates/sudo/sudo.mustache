@@ -20,6 +20,12 @@ User_Alias {{@}} =  {{.}}
 Cmnd_Alias {{{alias}}} = {{{args}}}
 {{/vars.sara_data.sudo.cmnd_alias}}
 
+# Runas alias specification
+
+{{#vars.sara_data.sudo.runas_alias}}
+Runas_Alias {{{alias}}} = {{{args}}}
+{{/vars.sara_data.sudo.runas_alias}}
+
 # Group Permissions
 
 {{#vars.sara_data.sudo.group_permissions}}

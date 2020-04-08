@@ -262,52 +262,56 @@ reports:
             ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }
 
+
 bundle agent sara_service_copy_files(bundle_name)
+{
+    methods:
+        any::
+            "" usebundle => sara_service_copy_base("$(bundle_name)", "copy_files");
+}
+
+
+bundle agent sara_service_copy_base(bundle_name, section)
 {
 vars:
     any::
-        "index" slist => getindices("sara_data.$(bundle_name)[copy_files]");
-
-    cfengine_3_7|cfengine_3_10::
-        "debug_str" string => format("%S", "sara_data.$(bundle_name)[copy_files]"),
-            comment => "Old debug method",
-            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+        "index" slist => getindices("sara_data.$(bundle_name)[$(section)]");
 
 classes:
     any::
-        "$(bundle_name)_copy_files_$(index)_run_bundle" expression => isvariable("sara_data.$(bundle_name)[copy_files][$(index)][run_bundle]"),
+        "$(bundle_name)_$(section)_$(index)_run_bundle" expression => isvariable("sara_data.$(bundle_name)[$(section)][$(index)][run_bundle]"),
             comment => "Must we run a bundle when a file is copied";
 
 files:
     any::
-        "$(sara_data.$(bundle_name)[copy_files][$(index)][dest])"
+        "$(sara_data.$(bundle_name)[$(section)][$(index)][dest])"
             comment => "Copy bundle files and set class if its get copied",
-            copy_from => secure_cp("$(sara_data.$(bundle_name)[copy_files][$(index)][source])", "$(sys.policy_hub)"),
-            classes => results("namespace", "$(bundle_name)_copy_files_$(index)");
+            copy_from => secure_cp("$(sara_data.$(bundle_name)[$(section)][$(index)][source])", "$(sys.policy_hub)"),
+            classes => results("namespace", "$(bundle_name)_$(section)_$(index)");
 
-        "$(sara_data.$(bundle_name)[copy_files][$(index)][dest])"
+        "$(sara_data.$(bundle_name)[$(section)][$(index)][dest])"
             comment => "Check permission",
             perms => mog(
-                "$(sara_data.$(bundle_name)[copy_files][$(index)][mog][0])",
-                "$(sara_data.$(bundle_name)[copy_files][$(index)][mog][1])",
-                "$(sara_data.$(bundle_name)[copy_files][$(index)][mog][2])"
+                "$(sara_data.$(bundle_name)[$(section)][$(index)][mog][0])",
+                "$(sara_data.$(bundle_name)[$(section)][$(index)][mog][1])",
+                "$(sara_data.$(bundle_name)[$(section)][$(index)][mog][2])"
             );
 
 methods:
     any::
-        "" usebundle => "$(sara_data.$(bundle_name)[copy_files][$(index)][run_bundle])",
+        "" usebundle => "$(sara_data.$(bundle_name)[$(section)][$(index)][run_bundle])",
             ifvarclass => and(
-                canonify("$(bundle_name)_copy_files_$(index)_repaired"),
-                canonify("$(bundle_name)_copy_files_$(index)_run_bundle")
+                canonify("$(bundle_name)_$(section)_$(index)_repaired"),
+                canonify("$(bundle_name)_$(section)_$(index)_run_bundle")
                 );
 
 @if minimum_version(3.11)
-        "" usebundle => sara_show_data("sara_data", "$(bundle_name)[copy_files][$(index)]"),
+        "" usebundle => sara_show_data("sara_data", "$(bundle_name)[$(section)][$(index)]"),
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 @endif
 
 reports:
-    cfengine_3_7|cfengine_3_10::
-        "$(this.bundle):$(bundle_name):$(debug_str)"
-            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+    any::
+        "$(this.bundle): has been called to use json data: 'sara_data.$(bundle_name)[$(section)]'"
+            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }

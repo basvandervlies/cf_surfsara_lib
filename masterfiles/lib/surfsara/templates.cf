@@ -509,7 +509,7 @@ bundle agent sara_mustache_cf_data_2_file(bundle_name, template_file, destinatio
         any::
             "template_dir"     string => "$(def.node_template_dir)/$(bundle_name)";
 
-            "data_section_str" string => format("%S", "sara_data.$(bundle_name)[$(data_section)]"),
+            "data_section_str" string => format("%S", "$(data_section)"),
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 
     classes:
@@ -528,9 +528,8 @@ bundle agent sara_mustache_cf_data_2_file(bundle_name, template_file, destinatio
                     create          => "true",
                     edit_template   => "$(template_dir)/$(template_file)",
                     template_method => "mustache",
-                    #template_data   => mergedata("cfengine_data", "template_data"),
-                    #template_data   => @(template_data),
-                    template_data   => mergedata("sara_data.$(bundle_name)[$(data_section)]"),
+                    #template_data   => mergedata("sara_data.$(bundle_name)[$(data_section)]"),
+                    template_data   => mergedata("$(data_section)"),
                     classes         => if_repaired("sara$(destination)");
 
        !data_section.destination_set::

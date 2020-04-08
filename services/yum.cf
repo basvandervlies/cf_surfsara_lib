@@ -118,7 +118,8 @@ bundle agent yum_repository()
             "" usebundle => sara_mustache_copy("$(this.bundle)", "repository.mustache");
 
         YUM_REPOS_FILE_LIST_POPULATED::
-            "" usebundle => sara_mustache_cf_data_2_file("$(this.bundle)", "$(template_file)", "$(yum.repos_dir)/$(repository_names).repo", "$(repository_names)" );
+            "" usebundle => sara_mustache_cf_data_2_file("$(this.bundle)",
+                "$(template_file)", "$(yum.repos_dir)/$(repository_names).repo", "sara_data.yum_repository[$(repository_names)]" );
 
     reports:
         DEBUG_yum|DEBUG_yum_repository::

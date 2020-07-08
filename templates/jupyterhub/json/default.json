@@ -1,0 +1,74 @@
+{
+    "bin_dir": "$(sara_data.jupyterhub[dir])/bin" ,
+    "classes": {
+        "SERVER": [
+            "r12n30",
+            "services1"
+        ]
+    },
+    "config_default": {
+        "admin_groups": [
+            "'admin_team'"
+        ],
+        "admin_users": [ ],
+        "batch_lines": [
+            "export LMOD_CMD=/hpc/eb/modules-4.0.0/libexec/modulecmd.tcl"
+        ],
+        "dir": "$(sara_data.jupyterhub[dir])",
+        "jupyter_config_dir": "$HOME/.jupyter",
+        "load_modules": [
+            "2019",
+            "jupyterhub/1.0.0-foss-2019b-Python-3.6.6",
+            "IRkernel/1.0.2-foss-2019b-R-3.5.1-Python-3.6.6",
+            "jupyterlmod/1.7.5-foss-2019b-Python-3.6.6",
+            "cuDNN/7.6.5.32-CUDA-10.1.243"
+        ],
+        "nbextensions": [
+            "enable --py jupyterlmod --user"
+        ],
+        "serverextensions": [
+            "enable --py jupyterlmod --user"
+        ],
+        "pam_service_file": "jupyterhub",
+        "start_timeout": "3600"
+    },
+    "configs": [
+        {
+            "api_url": "http://127.0.0.1:8101",
+            "batch_lines": [
+                "export LMOD_CMD=/hpc/eb/modules-4.0.0/libexec/modulecmd.tcl",
+                "pip install tensorflow --user"
+            ],
+            "bind_url": "http://127.0.0.1:8001",
+            "hub_bind_url": "http://:8201",
+            "load_modules": [
+                "2019",
+                "jupyterhub/1.0.0-foss-2019b-Python-3.6.6",
+                "IRkernel/1.0.2-foss-2019b-R-3.5.1-Python-3.6.6",
+                "jupyterlmod/1.7.5-foss-2019b-Python-3.6.6",
+                "ErasmusCourse/1.0-foss-2019b-R-3.5.1",
+                "cuDNN/7.6.3-CUDA-10.0.130"
+            ],
+            "name": "example",
+            "template_file": "jupyterhub_example.mustache",
+            "ws_url": "ws://127.0.0.1:8001"
+        }
+    ],
+    "current": "1.0.0",
+    "install_tarballs": [
+        {
+            "check_dir": "$(sara_data.jupyterhub[dir])/1.0.0",
+            "dest": "$(sara_data.jupyterhub[dir])/jupyterhub-1.0.0.tar.gz",
+            "extract": {
+                "cmd": "$(paths.path[tar]) --extract --gzip --file",
+                "in_dir": "$(sara_data.jupyterhub[dir])"
+            },
+            "mog": [ "0644", "root", "root"],
+            "source": "data/jupyterhub/tarballs/$(sys.flavor)/jupyterhub-1.0.0.tar.gz"
+        }
+    ],
+    "etc_dir": "$(sara_data.jupyterhub[dir])/etc" ,
+    "dir": "/opt/jupyterhub",
+    "server_name": "jupyter.lisa.surfsara.nl",
+    "state_dir": "$(sara_data.jupyterhub[dir])/state"
+}

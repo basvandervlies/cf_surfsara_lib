@@ -202,15 +202,18 @@ the templates are located in:
  * templates/ssh/json
 
 The following clases can be set via def.cf/json:
- *  `use_depricated_options`:  These options are not used anymore , default true  on centos and debian_7
- *  `keygen`: Must we generate host keys, command line options can bet set via json
- *  `pubkey_authentication`: Enable ssh public keys via `AuthorizedKeysCommand`
+ *  `USE_DEPRICATED_OPTIONS`:  These options are not used anymore
+ *  `KEYGEN`: Must we generate host keys, command line options can bet set via json
+ *  `PUBKEY_AUTHENTICATION`: Enable ssh public keys via `AuthorizedKeysCommand`
+
+The following json variables can be set in def.cf/json to  invoke files bundles:
+ * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => ssh_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

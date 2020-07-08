@@ -29,8 +29,7 @@ sudo json data secton, eg:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => sudo_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

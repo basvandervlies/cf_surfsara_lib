@@ -1,0 +1,28 @@
+<VirtualHost {{{server_name}}}:443>
+
+    ServerName {{{server_name}}}
+
+    # configure SSL
+    SSLEngine on
+    SSLCertificateFile /etc/certificate/fullchain.pem
+    SSLCertificateKeyFile /etc/certificate/private_key.pem
+
+    ### Loop over the jupyterhub configs
+    #
+    {{#configs}}
+    <Location "/{{name}}">
+        RewriteEngine On
+        RewriteCond %{HTTP:Connection} Upgrade [NC]
+        RewriteCond %{HTTP:Upgrade} websocket [NC]
+        RewriteRule /{{name}}/(.*) {{ws_url}}/{{name}}/$1 [P,L]
+        RewriteRule /{{name}}/(.*) {{bind_url}}/{{name}}/$1 [P,L]
+
+        # preserve Host header to avoid cross-origin problems
+        ProxyPreserveHost on
+        # proxy to JupyterHub
+        ProxyPass         {{bind_url}}/{{name}}
+        ProxyPassReverse  {{bind_url}}/{{name}}
+
+    </Location>
+    {{/configs}}
+</VirtualHost>

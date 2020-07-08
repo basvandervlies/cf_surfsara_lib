@@ -16,8 +16,7 @@ the templates are located in:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => nscd_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

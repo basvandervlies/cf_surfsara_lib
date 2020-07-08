@@ -16,8 +16,7 @@ file(s) are:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => sara_user_consume_resources_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

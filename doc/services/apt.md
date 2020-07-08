@@ -33,9 +33,7 @@ The classes can be set in def.cf/json:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => apt_autorun();`
- * `def.sara_services_enabled` (prefered)
-```json
+ * `def.sara_services_enabled`
 "vars": {
     "sara_services_enabled": [
             "...",

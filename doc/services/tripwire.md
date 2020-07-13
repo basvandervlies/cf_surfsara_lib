@@ -12,8 +12,7 @@ file(s) are:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => tripwire_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

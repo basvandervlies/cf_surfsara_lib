@@ -17,8 +17,7 @@ The class can be set in the def.cf/json:
 ## Usage
 
 The bundle can be run via:
- * `"" usebundle => rsyslog_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```
 "vars": {
     "sara_services_enabled": [

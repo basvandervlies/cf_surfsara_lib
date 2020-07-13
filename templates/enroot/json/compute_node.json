@@ -1,0 +1,9 @@
+{
+    "cache_path": "/scratch/enroot/cache",
+    "config_path": "${HOME}/enroot",
+    "data_path": "/scratch/enroot/data",
+    "library_path": "/usr/lib/enroot",
+    "runtime_path": "/scratch/enroot/runtime",
+    "sysconf_path": "/etc/enroot",
+    "temp_path": "/scratch"
+}

@@ -1,8 +1,13 @@
 {
+    "AssocBackup": {
+        "cmd": "/usr/bin/sacctmgr dump",
+        "copies" : "7"
+    },
     "AccountingStorageHost": "",
     "AccountingStorageTRES": "gres/gpu",
     "AuthType": "auth/munge",
-    "backup_dir": "$(sara_data.slurm[opt_dir])/backup",
+    "backup_db_dir": "/var/backups",
+    "backup_dir": "$(sara_data.slurm[backup_db_dir])/slurm",
     "backup_schedule": [ "Hr00.Min00_05" ],
     "backup_config": {
         "cmd": "/usr/bin/mysqldump",
@@ -28,9 +33,11 @@
         "ConstrainDevices=yes",
         "## This set the memory hardlimt of a job to % of node memory",
         "ConstrainRAMSpace=yes",
-        "MaxRAMPercent=98.0",
+        "ConstrainSwapSpace=yes",
+        "AllowedRAMSpace=100.0",
+        "AllowedSwapSpace=0.0",
         "## We have to decide if we need TaskAffinity",
-        "TaskAffinity=no"
+        "TaskAffinity=yes"
     ],
     "copy_dirs": [],
     "DebugFlags": [
@@ -38,7 +45,12 @@
         "switch",
         "backfill"
     ],
-    "Epilog": "$(sara_data.slurm[opt_dir])/epilog/slurmd/*",
+    "disable_services": [
+        "slurmd",
+        "slurmdbd",
+        "slurmctld"
+    ],
+    "Epilog": "$(slurm.opt_dir)/epilog/slurmd/*",
     "gres_file": [],
     "GresTypes": "gpu",
     "health_section": {},
@@ -52,25 +64,29 @@
     "MpiDefault": "none",
     "no_default_section": {},
     "nodes_section": [],
-    "opt_dir": "/opt/slurm",
     "packages_client": { },
     "packages_server": { },
     "packages_submit": { },
     "partition_section": [],
-    "pid_dir": "/run",
+    "pid_dir": "/var/run/slurm-llnl",
     "private_tmpdir_section": [],
     "priority_section": {
         "PriorityDecayHalfLife": "7-00",
-        "PriorityFlags": "FAIR_TREE",
+        "PriorityFlags": "FAIR_TREE,MAX_TRES",
         "PriorityWeightAge": "100000",
         "PriorityWeightFairshare": "1000000",
+        "PriorityWeightPartition": "1000000",
         "PriorityMaxAge": "7-00",
         "PriorityType": "priority/multifactor"
     },
-    "Prolog": "$(sara_data.slurm[opt_dir])/prolog/slurmd/*",
+    "Prolog": "$(slurm.opt_dir)/prolog/slurmd/*",
     "PrologEpilogTimeout": "3600",
     "PrologFlags": "x11",
-    "PrologSlurmctld":"$(sara_data.slurm[opt_dir])/prolog/slurmctld/check",
+    "PrologSlurmctld":"$(slurm.opt_dir)/prolog/slurmctld/check",
+    "purge_section": {
+        "PurgeJobAfter": "12month",
+        "PurgeStepAfter": "1month"
+    },
     "ResumeTimeout": "600",
     "scheduling_section": {
         "comment": [
@@ -97,21 +113,40 @@
         ],
         "settings": {
             "SchedulerType": "sched/backfill",
-            "SelectType": "select/cons_res",
-            "SelectTypeParameters": "CR_Core_Memory",
-            "FastSchedule": "1"
+            "SelectType": "select/cons_tres",
+            "SelectTypeParameters": "CR_Core_Memory"
         }
     },
-    "scripts_dir": "$(sara_data.slurm[opt_dir])/scripts",
-    "SlurmctldDebug": "debug3",
+    "SlurmctldDebug": "info",
     "SlurmctldPort": "6817",
     "SlurmctldTimeout": "120",
-    "SlurmdDebug": "debug3",
+    "SlurmdDebug": "info",
     "SlurmdPort": "6818",
     "SlurmdTimeout": "300",
     "SlurmUser": "slurm",
-    "spank_templates": {},
+    "spank_templates": {
+        "private_tmpdir.mustache" : {
+            "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
+            "data": {
+                "config": [
+                    "required /opt/slurm/lib/private-tmpdir.so base=/scratch/slurm mount=/tmp mount=/var/tmp mount=/scratch base=/dev/shm/slurm mount=/dev/shm"
+                ]
+            }
+        },
+        "pyxis.mustache" : {
+            "dest": "$(slurm.plugstack_dir)/pyxis.conf",
+            "data": {
+                "config": [
+                    "required /opt/slurm/lib/spank_pyxis.so"
+                ]
+            },
+            "run_bundle": "slurmd_restart"
+        }
+    },
     "StoragePass": "not_set",
+    "taskplugin_section": {
+        "TaskPlugin": "task/cgroup"
+    },
     "tmpfs": "/scratch",
     "topology_file": [],
     "UnkillableStepTimeout": "60",

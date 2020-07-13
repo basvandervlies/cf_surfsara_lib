@@ -98,8 +98,11 @@ MailProg=/usr/bin/mail
 {{{@}}}={{{.}}}
 {{/vars.sara_data.slurm.priority_section}}
 #
-# Cgroups
-TaskPlugin=task/affinity,task/cgroup
+# Task plugin
+{{#vars.sara_data.slurm.taskplugin_section}}
+{{{@}}}={{{.}}}
+{{/vars.sara_data.slurm.taskplugin_section}}
+
 
 # Prolog and Epilog scripts
 Epilog={{{vars.sara_data.slurm.Epilog}}}

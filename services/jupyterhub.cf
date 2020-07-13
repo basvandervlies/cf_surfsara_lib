@@ -1,0 +1,291 @@
+#
+## jupyterhub.cf @SURFsara
+#
+bundle agent jupyterhub
+{
+    vars:
+        any::
+            "template_2_destination" data => parsejson('
+                    {
+                        "apache.mustache"  : "no_destination_defined_is_generated",
+                        "script.mustache"  : "no_destination_defined_is_generated",
+                        "systemd.mustache"  : "no_destination_defined_is_generated"
+                    }
+            ');
+}
+
+bundle agent jupyterhub_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_jupyterhub" };
+
+    methods:
+        any::
+            "" usebundle => sara_data_autorun("jupyterhub");
+            "" usebundle => jupyterhub_install();
+
+        JUPYTERHUB_SERVER::
+            "" usebundle => jupyterhub_config();
+            "" usebundle => jupyterhub_daemons_check();
+}
+
+bundle agent jupyterhub_install()
+{
+    classes:
+        any::
+            "tarball_set" expression => isvariable("sara_data.jupyterhub[install_tarballs]");
+
+    files:
+        "$(sara_data.jupyterhub[dir])/."
+            perms => mog("0755", "root", "root"),
+            create=> "true";
+
+    methods:
+        tarball_set::
+            "" usebundle => sara_service_install_tarballs("jupyterhub");
+
+}
+
+bundle agent jupyterhub_daemons_check()
+{
+    vars:
+            "indices" slist => getindices("sara_data.jupyterhub[configs]");
+            "daemon_$(indices)" string =>
+                "^$(sara_data.jupyterhub[dir]).*$(sara_data.jupyterhub[configs][$(indices)][name]).py";
+
+    processes:
+        any::
+            "$(daemon_$(indices))"
+                comment => "Check if the jupyterhub config is runnig",
+                process_count => check_range("$(sara_data.jupyterhub[configs][$(indices)][name])", "1", "1"),
+                process_select => sara_select_parent_process("1");
+
+    commands:
+        any::
+            "$(paths.path[systemctl])  restart jupyterhub-$(sara_data.jupyterhub[configs][$(indices)][name])"
+                if => or(
+                    canonify("$(sara_data.jupyterhub[configs][$(indices)][name])_out_of_range")
+                    );
+
+    reports:
+        any::
+            "$(this.bundle): $(daemon_$(indices))"
+                if => "DEBUG|DEBUG_jupyterhub|DEBUG_$(this.bundle)";
+}
+
+bundle agent jupyterhub_config()
+{
+    vars:
+        any::
+            "current" string => "$(sara_data.jupyterhub[current])";
+            "template_files" slist => getindices("jupyterhub.template_2_destination");
+
+            "indices" slist => getindices("sara_data.jupyterhub[configs]");
+            "data_$(indices)" data => mergedata(
+                "sara_data.jupyterhub[config_default]", "sara_data.jupyterhub[configs][$(indices)]" ),
+                comment => "Merge the default hub settings with the one defined in the config";
+
+    files:
+        any::
+            "$(sara_data.jupyterhub[bin_dir])/."
+                create => "true",
+                perms => mog("0700", "root", "root"),
+                move_obstructions => "true";
+
+            "$(sara_data.jupyterhub[dir])/current"
+                link_from => ln_s("$(sara_data.jupyterhub[dir])/$(sara_data.jupyterhub[current])"),
+                move_obstructions => "true";
+
+            "$(sara_data.jupyterhub[etc_dir])/."
+                create => "true",
+                perms => mog("0700", "root", "root"),
+                move_obstructions => "true";
+
+            "$(sara_data.jupyterhub[state_dir])/$(sara_data.jupyterhub[configs][$(indices)][name])/."
+                comment => "Create jupyterhub state dir for this config",
+                create => "true",
+                perms => mog("0700", "root", "root"),
+                move_obstructions => "true";
+
+            "$(sara_data.jupyterhub[bin_dir])/$(sara_data.jupyterhub[configs][$(indices)][name]).sh"
+                perms => mog("0700", "root", "root");
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_copy("jupyterhub", "@(template_files)"),
+                comment => "Copt the jupyterub static templates";
+
+            "" usebundle => sara_mustache_copy("jupyterhub", "$(sara_data.jupyterhub[configs][$(indices)][template_file])" ),
+                comment => "Copy the jupyterhub template config file so we can fill in the ports";
+
+            "" usebundle => sara_mustache_cf_data_2_file("jupyterhub",
+                    "systemd.mustache",
+                    "$(systemd.dir)/jupyterhub-$(sara_data.jupyterhub[configs][$(indices)][name]).service",
+                    "jupyterhub_config.data_$(indices)"
+                    ),
+                comment => "generate per config a systemd unit file loop over $(indices)";
+
+            "" usebundle => sara_mustache_cf_data_2_file("jupyterhub",
+                    "apache.mustache",
+                    "$(sara_data.apache[configdir])/local.d/jupyterhub_generated.conf",
+                    "sara_data.jupyterhub"
+                    ),
+                comment => "generate jupyterhub apache config file";
+
+            "" usebundle => sara_mustache_cf_data_2_file("jupyterhub",
+                    "script.mustache",
+                    "$(sara_data.jupyterhub[bin_dir])/$(sara_data.jupyterhub[configs][$(indices)][name]).sh",
+                    "jupyterhub_config.data_$(indices)"
+                    ),
+                comment => "generate start script for hubm used by systemd unit file";
+
+            "" usebundle => sara_mustache_cf_data_2_file("jupyterhub",
+                    "$(sara_data.jupyterhub[configs][$(indices)][template_file])",
+                    "$(sara_data.jupyterhub[etc_dir])/$(sara_data.jupyterhub[configs][$(indices)][name]).py",
+                    "jupyterhub_config.data_$(indices)"
+                    ),
+                comment => "generate start script for hubm used by systemd unit file";
+
+            "" usebundle => jupyterhub_restart("$(sara_data.jupyterhub[configs][$(indices)][name])"),
+                comment => "restart jupyterhub service if config file has been changed",
+                if => or(
+                    canonify("sara$(sara_data.jupyterhub[etc_dir])/$(sara_data.jupyterhub[configs][$(indices)][name]).py")
+                    );
+
+    services:
+        any::
+            "jupyterhub-$(sara_data.jupyterhub[configs][$(indices)][name])"
+                comment => "enable and start the jupyterhub service if systemd unit has been changed",
+                service_policy => "start",
+                if => canonify("sara$(systemd.dir)/jupyterhub-$(sara_data.jupyterhub[configs][$(indices)][name]).service");
+
+    commands:
+        any::
+            "$(apache.restart)"
+                comment => "Restart apache if we generate a new jupyterhub apache file",
+                if => canonify("sara$(sara_data.apache[configdir])/local.d/jupyterhub_generated.conf");
+
+            "$(paths.path[systemctl]) daemon-reload"
+                comment => "If service file has been changed reload systemd daemon",
+                if => canonify("sara$(systemd.dir)/jupyterhub-$(sara_data.jupyterhub[configs][$(indices)][name]).service");
+}
+
+bundle agent jupyterhub_restart(name)
+{
+    commands:
+        any::
+            "$(paths.path[systemctl]) restart jupyterhub-$(name)";
+}
+@if minimum_version(99.9)
+# jupyterhub
+
+Source: [jupyterhub.cf](/services/jupyterhub.cf)
+
+
+This will install the jupyterhub software on a node, and we can generate multiple jupyterhub setups on
+one node. We mostly use jupyterhub to submit jobs to the batch system and start the notebook on a compute
+node. Each jupyterhub has its own parameters for submitting jobs. Apache is used as frontend web server,
+see [apache.cf](/services/apache.cf). This service bundle will also generate the apache configuration
+file for you.
+
+The following json variables can be set in def.cf/json to  invoke files bundles:
+ * install_tarballs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+
+The definition of jupyterhub configuration is illustrated via an example:
+```
+    "config_default": {
+        "admin_groups": [
+            "'lisa_surfsara'"
+        ],
+        "dir": "$(sara_data.jupyterhub[dir])",
+        "pam_service_file": "jupyterhub",
+        "start_timeout": "3600"
+    },
+    "configs": [
+        {
+            "api_url": "http://127.0.0.1:8100",
+            "bind_url": "http://127.0.0.1:8000",
+            "hub_bind_url": "http://:8200",
+            "name": "course",
+            "template_file": "jupyterhub_course.mustache",
+            "ws_url": "ws://127.0.0.1:8000"
+        },
+        {
+            "api_url": "http://127.0.0.1:8101",
+            "bind_url": "http://127.0.0.1:8001",
+            "hub_bind_url": "http://:8201",
+            "name": "prod",
+            "pam_service_file": "jupyterhub-prod",
+            "template_file": "jupyterhub_prod.mustache",
+            "ws_url": "ws://127.0.0.1:8001"
+        }
+    ],
+```
+
+The `config_default` section are variables used in all jupyterhub configuration files but you can
+override them in the `configs` section. In the `configs` section there are 2 jupyterhub
+configurations defined:
+ * course
+ * prod
+
+Each configuration must use a unique port number. For the jupyterhub `course` it will generate:
+ * /etc/systemd/system/jupyterhub-course unit file
+ * /opt/jupyterhub/bin/course.sh (used in the systemd unit file)
+ * /opt/jupyterhub/etc/course.py (with the aid of `jupyterhub-course.mustache`)
+ * start the jupyterhub server
+ * This is also done for the other configurarions.
+
+The apache configurarion is also generated with the right port numbers and apache will be restarted. Now
+the jupyterhubs are accessible with:
+ * https://<name>/course
+ * https://<name>/prod
+
+## Usage
+
+The bundle can be run via:
+ * `def.sara_services_enabled`
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "jupyterhub",
+            "..."
+    ]
+}
+```
+
+The bundle will always read the [default.json](/templates/jupyterhub/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
+    any::
+        "jupyterhub_json_files" slist => { "lisa.json" };
+```
+
+The variable must be ''jupyterhub_json_files'' and with this setup 1 extra json file will be merged.
+
+### DEBUG
+
+If you want to debug this bundle set the `DEBUG_jupyterhub` class, eg:
+ * `-DDEBUG_jupyterhub`
+
+## def.cf/json
+
+See [default.json](/templates/jupyterhub/json/default.json) what the default values are and
+which variables can be overriden.
+
+Here is an example to check also the apache binary (def.cf):
+```
+vars:
+    "jupyterhub_json_files" slist => { "lisa.json" ];
+```
+
+Same can also be set in `def.json`
+```json
+"vars": {
+    "jupyterhub": {
+        "dir": "/sw/jupyterhub"
+    }
+}
+@endif

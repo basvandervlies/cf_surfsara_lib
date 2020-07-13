@@ -13,8 +13,7 @@ not enough freespace will:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => check_space_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

@@ -1,16 +1,15 @@
 
-# XALT
+# ENROOT
 
-Source: [sudo.cf](/services/enroot.cf)
+Source: [enroot.cf](/services/enroot.cf)
 
 This bundle will generate this file from mustache template:
- * /opt/enroot/etc/enroot_$(enroot.cluster)_db.conf
+ * /etc/enroot/enroot.conf
 
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => enroot_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [
@@ -58,11 +57,3 @@ vars:
     "json_files": [ "lisa.json" ]
 }
 ```
-
- * override variable in *def.cf*:
-```
-vars:
-    "enroot" data => parsejson( '{ "SERVER":  "software1" }' );
-
-```
-

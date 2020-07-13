@@ -38,3 +38,8 @@ StorageType=accounting_storage/mysql
 StoragePass={{{vars.sara_data.slurm.StoragePass}}}
 StorageUser=slurm
 StorageLoc=slurm_acct_db
+
+# Purge settings
+{{#vars.sara_data.slurm.purge_section}}
+{{{@}}}={{{.}}}
+{{/vars.sara_data.slurm.purge_section}}

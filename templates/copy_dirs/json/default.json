@@ -1,0 +1,16 @@
+{
+    "copy_dirs": [
+        {
+            "dest": "/usr/sara",
+            "source": "data/copy_dirs/usr_sara",
+            "purge": "true",
+            "preserve": "true"
+        },
+        {
+            "dest": "/opt/sara-intel",
+            "source": "data/copy_dirs/opt_sara_intel",
+            "purge": "true",
+            "preserve": "true"
+        }
+    ]
+}

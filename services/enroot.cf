@@ -1,0 +1,144 @@
+#
+## enroot.cf @SURFsara
+#
+bundle agent enroot()
+{
+    vars:
+        any::
+            "template_2_destination" data => parsejson ('{
+                "enroot.conf.mustache": "$(sara_data.enroot[sysconf_path])/enroot.conf"
+            }');
+}
+
+bundle agent enroot_autorun()
+{
+    meta:
+        "tags" slist => { "autorun", "template_enroot" };
+
+    methods:
+        "" usebundle => enroot();
+        "" usebundle => sara_data_autorun("enroot");
+        "" usebundle => enroot_install();
+        "" usebundle => enroot_config();
+}
+bundle agent enroot_config()
+{
+    classes:
+        any::
+            "copy_dirs_set" expression => isvariable("sara_data.enroot[copy_dirs]"),
+                comment => "Check if we need to copy directories for enroot";
+            "copy_files_set" expression => isvariable("sara_data.enroot[copy_files]"),
+                comment => "Check if we need to copy files for enroot";
+
+    files:
+        any::
+            "/run/enroot/."
+                create => "true",
+                perms => mog("0755", "root", "root");
+
+    methods:
+        any::
+            "" usebundle => sara_mustache_autorun("enroot");
+
+        copy_dirs_set::
+            "" usebundle => sara_service_copy_dirs("enroot");
+
+        copy_files_set::
+            "" usebundle => sara_service_copy_files("enroot");
+}
+
+bundle agent enroot_install()
+{
+    vars:
+        any::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "enroot-hardened": ""
+                    },
+                }
+            ');
+
+    methods:
+        any::
+            "" usebundle => sara_service_packages("enroot", "@(enroot_install.packages)"),
+                classes => results("bundle", "enroot_packages");
+
+    commands:
+        any::
+            #kernel.unprivileged_userns_clone = 0
+            #"/bin/echo  1 > /proc/sys/kernel/unprivileged_userns_clone"
+            #    contain => in_shell;
+
+    reports:
+}
+@if minimum_version(99.9)
+
+# XALT
+
+Source: [sudo.cf](/services/enroot.cf)
+
+This bundle will generate this file from mustache template:
+ * /opt/enroot/etc/enroot_$(enroot.cluster)_db.conf
+
+## Usage
+
+The bundle can be run via:
+ *  `"" usebundle => enroot_autorun();`
+ * `def.sara_services_enabled` (prefered)
+```json
+"vars": {
+    "sara_services_enabled": [
+            "...",
+            "enroot",
+            "..."
+    ]
+}
+```
+
+The bundle will always read the [default.json](/templates/enroot/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+```
+vars:
+    any::
+        "enroot_json_files" slist => { "lisa.json" };
+```
+
+The variable must be ''enroot_json_files'' and with this setup 1 extra json file will be  merged.
+
+### DEBUG
+
+If you want to debug these bundle set the `DEBUG_enroot` class, eg:
+ * `-DDEBUG_enroot`
+
+##  def.cf/json
+
+See [default.json](/templates/enroot/json/default.json) what the default values are and
+which variables can be overridden.
+
+Here are some examples how to use it:
+ * specify enroot configuration in def.cf:
+```
+vars:
+    "enroot_json_files" slist => { "lisa.json" };
+```
+
+ * Set/Override variables in *def.json*:
+```json
+"enroot": {
+    "classes": {
+        "SERVER" : [ "software1" ]
+    },
+    "json_files": [ "lisa.json" ]
+}
+```
+
+ * override variable in *def.cf*:
+```
+vars:
+    "enroot" data => parsejson( '{ "SERVER":  "software1" }' );
+
+```
+
+@endif

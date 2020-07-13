@@ -1,0 +1,189 @@
+# These file is maintained by CFengine
+
+## Change mustache templates tags
+#
+{{=<% %>=}}
+
+#------------------------------------------------------------------------------
+# Application(SingletonConfigurable) configuration
+#------------------------------------------------------------------------------
+
+## This is an application.
+
+## The date format used by logging formatters for %(asctime)s
+c.Application.log_datefmt = '%Y-%m-%d %H:%M:%S'
+
+## The Logging format template
+#c.Application.log_format = '[%(name)s]%(highlevel)s %(message)s'
+c.Application.log_format = '[%(name)s] %(message)s'
+
+## Set the log level by value or name.
+#c.Application.log_level = 30
+c.Application.log_level = 'DEBUG'
+
+#------------------------------------------------------------------------------
+# JupyterHub(Application) configuration
+#------------------------------------------------------------------------------
+
+#  Users should be properly informed if this is enabled.
+c.JupyterHub.admin_access = False
+
+c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+c.PAMAuthenticator.admin_groups = { <%#admin_groups%> <%.%> <%/admin_groups%> }
+c.PAMAuthenticator.service = "<%pam_service_file%>"
+
+## The public facing URL of the whole JupyterHub application.
+
+#  This is the address on which the proxy will bind. Sets protocol, ip, base_url
+#c.JupyterHub.bind_url = 'http://localhost:8000/<%name%>/'
+c.JupyterHub.bind_url = '<%bind_url%>/<%name%>/'
+
+#  The Hub should be able to resume from database state.
+c.JupyterHub.cleanup_proxy = False
+
+#  The Hub should be able to resume from database state.
+c.JupyterHub.cleanup_servers = False
+
+## File in which to store the cookie secret.
+c.JupyterHub.cookie_secret_file = '<%dir%>/state/<%name%>/cookie_secret'
+
+## url for the database. e.g. `sqlite:///jupyterhub.sqlite`
+c.JupyterHub.db_url = 'sqlite:////<%dir%>/state/<%name%>/db.sqlite'
+
+# The URL for connecting to the Hub. Spawners, services, and the proxy will use
+# this URL to talk to the Hub.
+c.JupyterHub.hub_bind_url = '<%hub_bind_url%>'
+
+## File to write PID Useful for daemonizing JupyterHub.
+c.JupyterHub.pid_file = '/run/jupyterhub-<%name%>/hub.pid'
+
+## The public facing port of the proxy.
+
+## The class to use for configuring the JupyterHub proxy.
+#
+#  Currently installed:
+#    - configurable-http-proxy: jupyterhub.proxy.ConfigurableHTTPProxy
+#    - default: jupyterhub.proxy.ConfigurableHTTPProxy
+#
+c.JupyterHub.proxy_class = 'jupyterhub.proxy.ConfigurableHTTPProxy'
+c.configurableHTTPProxy.debug = True
+c.ConfigurableHTTPProxy.auth_token = "34dcd3fe49846e645d37be4c0f57ee4436a367bcdbffb348c6979a07a63da22a"
+c.ConfigurableHTTPProxy.should_start = True
+c.ConfigurableHTTPProxy.api_url = '<%api_url%>'
+c.ConfigurableHTTPProxy.pid_file = '/run/jupyterhub-<%name%>/proxy.pid'
+
+## The class to use for spawning single-user servers.
+#
+#          Should be a subclass of :class:`jupyterhub.spawner.Spawner`.
+#
+c = get_config()
+import batchspawner
+c.JupyterHub.spawner_class = 'wrapspawner.ProfilesSpawner'
+
+# Timeout (in seconds) before giving up on starting of single-user server.
+#
+#  This is the timeout for start to return, not the timeout for the server to
+#  respond. Callers of spawner.start will assume that startup has failed if it
+#  takes longer than this. start should return when the server process is started
+#  and its location is known.
+c.Spawner.start_timeout = <%start_timeout%>
+
+# Configure job parameters
+c.BatchSpawnerBase.batch_query_cmd = "/usr/bin/squeue -h -j {job_id} -o '%T %B'"
+c.BatchSpawnerBase.batch_submit_cmd = "/usr/bin/sbatch --parsable"
+c.BatchSpawnerBase.batch_cancel_cmd = "/usr/bin/scancel {job_id}"
+
+# Provide defaults for spawners derived from BatchSpawnerBase
+#c.BatchSpawnerBase.req_nprocs = '3'
+#c.BatchSpawnerBase.req_memory = '32G'
+#c.BatchSpawnerBase.req_partition = 'cpu_shared'
+c.BatchSpawnerBase.req_runtime = '2:00:00'
+
+c.BatchSpawnerBase.req_prologue = """
+<%#load_modules%>
+module load <%.%>
+<%/load_modules%>
+"""
+
+# Provide various profiles using the ProfilesSpawner
+c.ProfilesSpawner.profiles = [
+  ( "Quantum SURFsara 20 cores)", 'jupyterhub_quantum_cpu', 'batchspawner.SlurmSpawner',
+      dict(req_partition="fat_soil_shared", req_nprocs="20")
+  ),
+  ( "Quantum SURFara 1 GPU/20 cores ", 'jupyterhub_quantum_gpu', 'batchspawner.SlurmSpawner',
+      dict(req_partition='fat_soil_shared', req_options="--gres=gpu:1")
+  ),
+]
+
+# Create batch script. Note that all template variables (the ones in {}) have to be defined through req_xyz config options above
+c.SlurmSpawner.batch_script = '''#!/bin/bash
+#SBATCH -o "jupyterhub-<%name%>-%j.out"
+#SBATCH -e "jupyterhub-<%name%>-%j.error"
+#SBATCH --job-name=jupyterhub-<%name%>-singleuser
+#SBATCH -D {{homedir}}
+#SBATCH --get-user-env=L
+{% if partition  %}#SBATCH --partition={{partition}}
+{% endif %}{% if runtime    %}#SBATCH --time={{runtime}}
+{% endif %}{% if memory     %}#SBATCH --mem={{memory}}
+{% endif %}{% if nprocs     %}#SBATCH --cpus-per-task={{nprocs}}
+{% endif %}{% if reservation%}#SBATCH --reservation={{reservation}}
+{% endif %}{% if options    %}#SBATCH {{options}}{% endif %}
+
+trap 'echo SIGTERM received' TERM
+
+
+## Always clean the module environment
+#
+module purge
+if [[ -f ${HOME}/jupyterhub-<%name%>/env ]]
+then
+    source ${HOME}/jupyterhub-<%name%>/env
+    module load jupyterhub/1.0.0-foss-2019b-Python-3.6.6
+else
+    {{prologue}}
+fi
+
+## Some batch settings before starting the notebook
+#
+<%#batch_lines%>
+<%.%>
+<%/batch_lines%>
+
+
+if [[ -f ${HOME}/jupyterhub-<%name%>/script ]]
+then
+    ${HOME}/jupyterhub-<%name%>/script
+fi
+
+## Set the User writeable jupyter notebook config directory
+#
+export JUPYTER_CONFIG_DIR=<%jupyter_config_dir%>
+
+## jupyter notebook extensions enable/disable/remove
+<%#nbextensions%>
+jupyter nbextension <%.%>
+<%/nbextensions%>
+
+## jupyter server extensions enable/disable
+#
+<%#serverextensions%>
+jupyter serverextension <%.%>
+<%/serverextensions%>
+
+which batchspawner-singleuser
+which jupyterhub-singleuser
+#{% if srun %}{{srun}} {% endif %} {{cmd}}
+# {{cmd}}
+{{cmd}}
+
+echo "jupyterhub-singleuser ended gracefully"
+{{epilogue}}
+'''
+
+## Upgrade the database automatically on start.
+#
+#  Only safe if database is regularly backed up. Only SQLite databases will be
+#  backed up to a local file automatically.
+#
+c.JupyterHub.upgrade_db = True
+

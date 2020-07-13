@@ -1,0 +1,9 @@
+{
+    "cache_path": "${HOME}/enroot/cache",
+    "config_path": "${HOME}/enroot",
+    "data_path": "${HOME}/enroot/data",
+    "library_path": "/usr/lib/enroot",
+    "runtime_path": "${HOME}/enroot/runtime",
+    "sysconf_path": "/etc/enroot",
+    "temp_path": "${TMPDIR:-/tmp}"
+}

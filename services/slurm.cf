@@ -179,7 +179,8 @@ $(slurm.software_dir)/current/lib/slurm
                 create => "true";
 
             "$(slurm.software_dir)/current"
-                link_from => ln_s("$(slurm.software_dir)/$(slurm.current_version)");
+                link_from => ln_s("$(slurm.software_dir)/$(slurm.current_version)"),
+                move_obstructions => "true";
 
             "$(slurm.spool_dir)/."
                 create => "true",

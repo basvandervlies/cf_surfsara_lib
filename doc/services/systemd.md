@@ -16,8 +16,7 @@ files are installed for:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => systemd_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

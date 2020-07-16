@@ -207,7 +207,7 @@ bundle agent apt_package_update(update_option)
     commands:
         debian::
             "$(apt.dpkg_command)"   args => "--configure -a";
-            "$(apt.pkg_command)"    args => "update";
+            "$(apt.pkg_command)"    args => "--quiet update";
             "$(apt.pkg_command)"    args => "$(update_option)";
             "$(apt.pkg_command)"    args => "clean";
 
@@ -237,7 +237,7 @@ bundle agent apt_security_update(options)
 
     commands:
         debian::
-            "$(apt.pkg_command) update"
+            "$(apt.pkg_command) --quiet update"
                 comment => "Update the repository indexes else we get out of sync",
                 contain => in_shell_and_silent,
                 classes => sara_cmd_repair( "@(apt_return_codes)",  "apt_update");
@@ -530,9 +530,7 @@ The classes can be set in def.cf/json:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => apt_autorun();`
- * `def.sara_services_enabled` (prefered)
-```json
+ * `def.sara_services_enabled`
 "vars": {
     "sara_services_enabled": [
             "...",

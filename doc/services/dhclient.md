@@ -19,8 +19,7 @@ You can control what will be in in the hooks file by setting classes:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => dhclient_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

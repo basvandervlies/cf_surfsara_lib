@@ -8,11 +8,12 @@ This bundle copies a munge key to a node.
 
 This bundle also makes sure that the proper owner (munge:munge) and permissions (400) are set.
 
+The following json variables can be set in def.cf/json to invoke files bundles:                                                                                                                           
+ * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => munge_autorun();`
- * `def.sara_services_enabled` (prefered)
 ```json
 "vars": {
     "sara_services_enabled": [

@@ -10,6 +10,7 @@ This bundle will generate these/this file(s) from mustache templates:
     * cgroup_allowed_devices_file.conf
     * gres.conf
     * nodes.conf
+    * plugstack.conf
     * slurm.conf
     * slurmdb.conf
     * topology.conf
@@ -24,19 +25,25 @@ These templates are located in:
  * templates/slurm
  * templates/slurm/json
 
-The following clases can be set via def.cf/json:
- * backup: When set make a backup of the SQL sever
- * client: Configure the machine as client
- * logrotate: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
- * slurmd_disable: Disable the slurmd systemd service
- * server: Configure the machine as server
- * submit: Configure the machine as submit host
+The following `classes` can be set via def.cf/json:
+ * BACKUP: When set make a backup of the SQL sever
+ * CLIENT: Configure the machine as client
+ * LOGROTATE: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
+ * SLURMD_DISABLE: Disable the slurmd systemd service
+ * SERVER: Configure the machine as server
+ * SUBMIT: Configure the machine as submit host
+ * SYSTEMD_SERVICES: generate the slurm systemd unit files.
+ * TARBALL: Slurm software will be installed as tarball instead of system packages + generate slurm systemd unit files
+
+The following json variables can be set in def.cf/json to  invoke files bundles:
+ * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * install_tarballs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => slurm_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [
@@ -104,7 +111,7 @@ plugins are configured via the `plugstack.conf` file.
 
 This generations of the spank plugin configuration file(s) can be
 done dynamically,eg:
-```json
+```#json
  "spank_templates": {
         "private_tmpdir.mustache" : {
             "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
@@ -113,6 +120,7 @@ done dynamically,eg:
                     "required /opt/slurm/lib/private-tmpdir.so base=/scratch/slurm  mount=/var/tmp mount=/tmp mount=/scratch"
                 ]
             }
+            "run_bundle': <not_required> when set run the specified bundle"
         }
     },
 ```

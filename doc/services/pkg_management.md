@@ -43,8 +43,7 @@ package is the same as `stable` package:
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => pkg_management_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

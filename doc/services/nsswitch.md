@@ -16,11 +16,13 @@ the templates are located in:
  * templates/nsswitch/
  * templates/nsswitch/json
 
+The following json variables can be set in def.cf/json to invoke files bundles:                                                                                                                           
+ * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+
 ## Usage
 
 The bundle can be run via:
- *  `"" usebundle => nsswitch_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.sara_services_enabled`
 ```json
 "vars": {
     "sara_services_enabled": [

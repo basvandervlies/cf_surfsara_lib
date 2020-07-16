@@ -1,0 +1,71 @@
+{
+    "config_dir": "/etc/slurm-llnl",
+    "log_dir": "/var/log/slurm-llnl",
+    "opt_dir": "/opt/slurm",
+    "plugin_dir": "/usr/lib/x86_64-linux-gnu/slurm-wlm/",
+    "plugstack_dir": "$(sara_data.slurm[config_dir])/plugstack.conf.d",
+    "scripts_dir": "$(sara_data.slurm[opt_dir])/scripts",
+    "spool_dir": "/var/spool/slurm-llnl",
+    "packages_client": {
+        "install": {
+            "libpam-slurm-adopt" : "$(sara_data.slurm[version])",
+            "libpmi0-dev" : "$(sara_data.slurm[version])",
+            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
+            "libslurm-dev" : "$(sara_data.slurm[version])",
+            "libslurm-perl" : "$(sara_data.slurm[version])",
+            "libslurmdb-perl": "$(sara_data.slurm[version])",
+            "slurm-client": "$(sara_data.slurm[version])",
+            "slurmd": "$(sara_data.slurm[version])",
+            "slurm-wlm-basic-plugins ": "$(sara_data.slurm[version])",
+            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+        },
+        "purge": {
+            "libpam-slurm" : "",
+            "libslurmdb-dev": "",
+            "libslurm33": "",
+            "libslurmdb33": ""
+        }
+    },
+    "packages_server": {
+        "install": {
+            "libpam-slurm-adopt" : "$(sara_data.slurm[version])",
+            "libpmi0-dev" : "$(sara_data.slurm[version])",
+            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
+            "libslurm-dev" : "$(sara_data.slurm[version])",
+            "libslurm-perl" : "$(sara_data.slurm[version])",
+            "libslurmdb-perl": "$(sara_data.slurm[version])",
+            "slurm-client": "$(sara_data.slurm[version])",
+            "slurm-wlm": "$(sara_data.slurm[version])",
+            "slurm-wlm-doc ": "$(sara_data.slurm[version])",
+            "slurmctld": "$(sara_data.slurm[version])",
+            "slurmd": "$(sara_data.slurm[version])",
+            "slurmdbd": "$(sara_data.slurm[version])",
+            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+        },
+        "purge": {
+            "libpam-slurm" : "",
+            "libslurmdb-dev": "",
+            "libslurmdb33": "",
+            "libslurmdb33": ""
+        }
+    },
+    "packages_submit": {
+        "install": {
+            "libpmi0-dev" : "$(sara_data.slurm[version])",
+            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
+            "libslurm-perl" : "$(sara_data.slurm[version])",
+            "libslurmdb-perl": "$(sara_data.slurm[version])",
+            "slurm-client": "$(sara_data.slurm[version])",
+            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+        },
+        "purge": {
+            "libpam-slurm" : "",
+            "libslurmdb-dev": "",
+            "libslurm33": "",
+            "libslurmdb33": "",
+            "slurmd": ""
+        }
+    },
+    "pyslurm_version": "19.05.0-2",
+    "version": "19.05.3.2-3"
+}

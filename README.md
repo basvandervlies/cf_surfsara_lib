@@ -24,6 +24,10 @@ json files. The files will be merged and the last one wins if the same variable 
 
 If the order is `{ "b.json", "a.json" }` the value of *a* would be *1*
 
+This framework depends on the augemnts file `def.json`, we have developed a multiple augments strategy:
+ * https://docs.cfengine.com/docs/3.15/reference-language-concepts-augments.html
+ * https://basvandervlies.blogspot.com/2018/09/cfengine-312-new-features-missingok-and.html
+
 ## Merge strategy
 
 The merge strategy is::

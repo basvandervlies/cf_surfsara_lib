@@ -169,6 +169,19 @@ $(slurm.software_dir)/current/lib/slurm
             "slurm_grp" expression => groupexists("$(slurm.group)");
 
     files:
+        any::
+            "$(slurm.software_dir)/current"
+                link_from => ln_s("$(slurm.software_dir)/$(slurm.current_version)"),
+                move_obstructions => "true",
+                classes => results("bundle", "current_version");
+
+            "/etc/ld.so.conf.d/slurm.conf"
+                create => "true",
+                edit_defaults => no_backup,
+                edit_template_string => "$(template)",
+                template_method => "inline_mustache",
+                classes => results("bundle", "ld_config_slurm");
+
         tarballs_set::
             "$(slurm.log_dir)/."
                 create => "true",
@@ -178,22 +191,13 @@ $(slurm.software_dir)/current/lib/slurm
                 perms => mog("0755", "root", "root"),
                 create => "true";
 
-            "$(slurm.software_dir)/current"
-                link_from => ln_s("$(slurm.software_dir)/$(slurm.current_version)"),
-                move_obstructions => "true";
 
             "$(slurm.spool_dir)/."
                 create => "true",
                 perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
 
-            "/etc/ld.so.conf.d/slurm.conf"
-                create => "true",
-                edit_defaults => no_backup,
-                edit_template_string => "$(template)",
-                template_method => "inline_mustache",
-                classes => results("bundle", "ld_config_slurm");
 
-        slurm_tarball_repaired::
+        slurm_tarball_repaired|SLURM_FORCE_LINKS::
              "/usr/bin"
                 comment => "slurm client program link them in /usr/bin",
                 link_from => linkchildren("$(slurm.software_dir)/current/bin");
@@ -207,10 +211,11 @@ $(slurm.software_dir)/current/lib/slurm
                 perms => mog("0755", "root", "root");
 
     methods:
-        tarballs_set::
+        SLURM_CLIENT|SLURM_SUBMIT::
             "" usebundle =>  sara_service_packages("slurm", "@(slurm.packages)"),
                 classes => results("bundle", "slurm_packages");
 
+        tarballs_set::
             "" usebundle => sara_service_install_tarballs("slurm"),
                 classes => results("bundle", "slurm_tarball");
 
@@ -230,6 +235,9 @@ $(slurm.software_dir)/current/lib/slurm
 
             "$(paths.path[groupadd]) --gid $(slurm.gid) $(slurm.group)"
                 if => "!slurm_grp";
+
+        SLURM_CLIENT.current_version_repaired::
+            "$(slurm.restart_client)";
 }
 
 bundle agent slurm_daemon_check()
@@ -278,8 +286,11 @@ bundle agent slurm_config()
 
             "slurm_mog_list" slist => {
                 "$(slurm.config_file)",
+                "$(slurm.cgroup_config_file)",
+                "$(slurm.cgroup_allowed_file)",
                 "$(slurm.nodes_config_file)",
                 "$(slurm.plugstack_config_file)",
+                "$(slurm.topology_config_file)",
             };
 
     classes:

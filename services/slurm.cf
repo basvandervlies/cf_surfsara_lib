@@ -198,12 +198,19 @@ $(slurm.software_dir)/current/lib/slurm
                 comment => "slurm client program link them in /usr/bin",
                 link_from => linkchildren("$(slurm.software_dir)/current/bin");
 
+             "/usr/sbin"
+                comment => "slurm client program link them in /usr/sbin",
+                link_from => linkchildren("$(slurm.software_dir)/current/sbin");
+
              "$(pam.lib_dir)/pam_slurm_adopt.so"
                 copy_from   => local_dcp("$(slurm.software_dir)/current/pam/pam_slurm_adopt.so"),
                 perms => mog("0755", "root", "root");
 
     methods:
         tarballs_set::
+            "" usebundle =>  sara_service_packages("slurm", "@(slurm.packages)"),
+                classes => results("bundle", "slurm_packages");
+
             "" usebundle => sara_service_install_tarballs("slurm"),
                 classes => results("bundle", "slurm_tarball");
 
@@ -211,21 +218,18 @@ $(slurm.software_dir)/current/lib/slurm
         slurm_grp::
             "slurm"
                 policy => "present",
-                description => "slurm system user",
                 home_dir => "/nonexistent",
                 group_primary => "$(slurm.group)",
                 uid => "$(slurm.uid)",
                 shell => "/bin/false";
 
     commands:
-        "/sbin/ldconfig"
-            if => "ld_config_slurm_repaired";
-
-        "$(paths.path[groupadd]) --gid $(slurm.gid) $(slurm.group)"
-            if => "!slurm_grp";
-
-    reports:
         any::
+            "/sbin/ldconfig"
+                if => "ld_config_slurm_repaired";
+
+            "$(paths.path[groupadd]) --gid $(slurm.gid) $(slurm.group)"
+                if => "!slurm_grp";
 }
 
 bundle agent slurm_daemon_check()
@@ -275,6 +279,7 @@ bundle agent slurm_config()
             "slurm_mog_list" slist => {
                 "$(slurm.config_file)",
                 "$(slurm.nodes_config_file)",
+                "$(slurm.plugstack_config_file)",
             };
 
     classes:
@@ -496,15 +501,21 @@ bundle agent slurm_generate_systemd_services()
             "$(paths.path[systemctl]) daemon-reload"
                 comment => "If service file has been changed reload systemd daemon",
                 if => or(
-                        canonify("sara$(systemd.dir)/$(template_2_destination[$(template_files)])")
+                        canonify("sara$(template_2_destination[$(template_files)])")
+                    );
+
+            "$(slurm.restart_client)"
+                comment => "If service file has been changed restart slurmd",
+                if => or(
+                        canonify("sara$(template_2_destination[$(template_files)])")
                     );
 
     reports:
         any::
-            "$(this.bundle): $(systemd.dir) $(slurm.software_dir)";
+            #"$(this.bundle): $(systemd.dir) $(slurm.software_dir)";
             "$(this.bundle): $(systemd.dir)/$(template_2_destination[$(template_files)]) this has been changed"
                 if => or(
-                        canonify("sara$(systemd.dir)/$(template_2_destination[$(template_files)])")
+                        canonify("sara$(template_2_destination[$(template_files)])")
                     );
 }
 @if minimum_version(99.9)

@@ -16,8 +16,6 @@ bundle agent slurm()
 
             "scontrol_cmd"          string => "/usr/bin/scontrol";
 
-            "var_spool_dir"         string => "/var/spool/slurm-llnl";
-
             "gid"                   string => "555";
             "group"                 string => "slurm";
             "mode"                  string => "0644";
@@ -169,22 +167,11 @@ $(slurm.software_dir)/current/lib/slurm
             "slurm_grp" expression => groupexists("$(slurm.group)");
 
     files:
-        tarballs_set::
-            "$(slurm.log_dir)/."
-                create => "true",
-                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
-
-            "$(slurm.software_dir)/."
-                perms => mog("0755", "root", "root"),
-                create => "true";
-
+        any::
             "$(slurm.software_dir)/current"
                 link_from => ln_s("$(slurm.software_dir)/$(slurm.current_version)"),
-                move_obstructions => "true";
-
-            "$(slurm.spool_dir)/."
-                create => "true",
-                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+                move_obstructions => "true",
+                classes => results("bundle", "current_version");
 
             "/etc/ld.so.conf.d/slurm.conf"
                 create => "true",
@@ -193,17 +180,30 @@ $(slurm.software_dir)/current/lib/slurm
                 template_method => "inline_mustache",
                 classes => results("bundle", "ld_config_slurm");
 
-        slurm_tarball_repaired::
+            "$(slurm.log_dir)/."
+                create => "true",
+                perms => mog("0700", "root", "root");
+
+            "$(slurm.software_dir)/."
+                perms => mog("0755", "root", "root"),
+                create => "true";
+
+
+        slurm_tarball_repaired|current_version_repaired|SLURM_FORCE_LINKS::
              "/usr/bin"
                 comment => "slurm client program link them in /usr/bin",
                 link_from => linkchildren("$(slurm.software_dir)/current/bin");
+
+             "/usr/sbin"
+                comment => "slurm client program link them in /usr/sbin",
+                link_from => linkchildren("$(slurm.software_dir)/current/sbin");
 
              "$(pam.lib_dir)/pam_slurm_adopt.so"
                 copy_from   => local_dcp("$(slurm.software_dir)/current/pam/pam_slurm_adopt.so"),
                 perms => mog("0755", "root", "root");
 
     methods:
-        tarballs_set::
+        any::
             "" usebundle => sara_service_install_tarballs("slurm"),
                 classes => results("bundle", "slurm_tarball");
 
@@ -211,21 +211,21 @@ $(slurm.software_dir)/current/lib/slurm
         slurm_grp::
             "slurm"
                 policy => "present",
-                description => "slurm system user",
                 home_dir => "/nonexistent",
                 group_primary => "$(slurm.group)",
                 uid => "$(slurm.uid)",
                 shell => "/bin/false";
 
     commands:
-        "/sbin/ldconfig"
-            if => "ld_config_slurm_repaired";
-
-        "$(paths.path[groupadd]) --gid $(slurm.gid) $(slurm.group)"
-            if => "!slurm_grp";
-
-    reports:
         any::
+            "/sbin/ldconfig"
+                if => "ld_config_slurm_repaired";
+
+            "$(paths.path[groupadd]) --gid $(slurm.gid) $(slurm.group)"
+                if => "!slurm_grp";
+
+        SLURM_CLIENT.current_version_repaired::
+            "$(slurm.restart_client)";
 }
 
 bundle agent slurm_daemon_check()
@@ -274,12 +274,17 @@ bundle agent slurm_config()
 
             "slurm_mog_list" slist => {
                 "$(slurm.config_file)",
+                "$(slurm.cgroup_config_file)",
+                "$(slurm.cgroup_allowed_file)",
                 "$(slurm.nodes_config_file)",
-            };
+                "$(slurm.plugstack_config_file)",
+                "$(slurm.topology_config_file)",
+            },
+                comment => "These files must be owned by slurm user";
 
     classes:
         any::
-            "SLURM_RELOAD" or => {
+            "slurm_reload" or => {
                 "$(cgroup_file_class)",
                 "$(gres_file_class)",
                 "$(plugstack_file_class)",
@@ -287,7 +292,7 @@ bundle agent slurm_config()
                 "$(topology_file_class)",
             };
 
-            "SLURM_RESTART" or => {
+            "slurm_restart" or => {
                 "$(nodes_file_class)",
             };
 
@@ -295,7 +300,6 @@ bundle agent slurm_config()
                 comment => "Must we copy dirs for slurm";
             "slurm_copy_files_set" expression => isvariable("sara_data.slurm[copy_files]"),
                 comment => "Must we copy dirs for slurm";
-
 
     methods:
         any::
@@ -307,38 +311,25 @@ bundle agent slurm_config()
         slurm_copy_files_set::
             "" usebundle => sara_service_copy_files("slurm");
 
-        SLURM_RESTART::
-            "" usebundle => slurm_nodes_conf_restart();
+        slurm_restart::
+            "" usebundle => slurm_service_restart();
+        slurm_reload.!slurm_restart::
+            "" usebundle => slurm_service_reload();
 
     files:
         any::
             "$(slurm_mog_list)"
                 perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
-            "$(slurm.var_spool_dir)"
-                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+
             "$(slurm.config_dir)"
                 perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
 
-            "$(slurm.var_spool_dir)/."
-                comment => "This should be fixed in the package of Slurm",
-                perms => mog("0755", "$(slurm.owner)", "$(slurm.group)"),
+            "$(slurm.spool_dir)/."
+                perms => mog("${slurm.mode}", "$(slurm.owner)", "$(slurm.group)"),
                 create => "true";
-
-    commands:
-        SLURM_CLIENT.SLURM_RELOAD.!SLURM_RESTART::
-            "$(slurm.reload_client)";
-
-        SLURM_SERVER.SLURM_RELOAD.!SLURM_RESTART::
-            "$(slurm.reload_controller)";
-
-    reports:
-        SLURM_CLIENT.SLURM_RELOAD.!SLURM_RESTART::
-            "$(this.bundle): $(slurm.reload_client)";
-        SLURM_SERVER.SLURM_RELOAD.!SLURM_RESTART::
-            "$(this.bundle): $(slurm.reload_controller)";
 }
 
-bundle agent slurm_nodes_conf_restart()
+bundle agent slurm_service_restart()
 {
     commands:
         SLURM_CLIENT::
@@ -349,7 +340,21 @@ bundle agent slurm_nodes_conf_restart()
 
     reports:
         any::
-            "$(this.bundle): Restart 'nodes.conf' has changed";
+            "$(this.bundle): Restart slurm service a config file has been changed that require this";
+}
+
+bundle agent slurm_service_reload()
+{
+    commands:
+        SLURM_CLIENT::
+            "$(slurm.reload_client)";
+
+        SLURM_SERVER::
+            "$(slurm.reload_controller)";
+
+    reports:
+        any::
+            "$(this.bundle): Reload slurm service a config file has been changed that require this";
 }
 
 bundle agent slurm_db_backup()
@@ -425,21 +430,24 @@ bundle agent slurm_logrotate()
             "$(this.bundle): has been called";
 }
 
-bundle agent slurmd_restart()
-{
-    commands:
-        SLURM_CLIENT::
-            "$(slurm.restart_client)";
-}
-
 bundle agent slurm_spank_templates()
 {
     vars:
-        "files" slist => getindices("sara_data.slurm[spank_templates]");
+        any::
+            "files" slist => getindices("sara_data.slurm[spank_templates]");
 
     classes:
-        "run_bundle_${files}" expression => isvariable("sara_data.slurm[spank_templates][$(files)][run_bundle]"),
-            comment => "Must we run a bundle when a directory is changed";
+        any::
+            "run_bundle_$(files)" expression => isvariable("sara_data.slurm[spank_templates][$(files)][run_bundle]"),
+                comment => "Must we run a bundle when a file has been changed";
+
+            "run_class_any_$(files)" expression => not(
+                isvariable("sara_data.slurm[spank_templates][$(files)][run_class]")
+                ),
+                comment => "No run_class is set for file, so always run_bundle if defined";
+
+            "run_class_expr_$(files)" expression => "$(sara_data.slurm[spank_templates][$(files)][run_class])",
+                comment => "This class will be set if the expression(s) in the variable are true";
 
     methods:
         "" usebundle => sara_mustache_copy("slurm", "@(slurm_spank_templates.files)");
@@ -459,9 +467,12 @@ bundle agent slurm_spank_templates()
         "" usebundle => "$(sara_data.slurm[spank_templates][$(files)][run_bundle])",
             ifvarclass => and(
                 canonify("SLURM_$(sara_data.slurm[spank_templates][$(files)][dest])_repaired"),
-                canonify("run_bundle_$(files)")
+                canonify("run_bundle_$(files)"),
+                or(
+                    canonify("run_class_any_$(files)"),
+                    canonify("run_class_expr_$(files)")
+                  )
                 );
-
 
     reports:
         "$(this.bundle) $(files) : $(sara_data.slurm[spank_templates][$(files)][dest])"
@@ -496,15 +507,20 @@ bundle agent slurm_generate_systemd_services()
             "$(paths.path[systemctl]) daemon-reload"
                 comment => "If service file has been changed reload systemd daemon",
                 if => or(
-                        canonify("sara$(systemd.dir)/$(template_2_destination[$(template_files)])")
+                        canonify("sara$(template_2_destination[$(template_files)])")
+                    );
+
+            "$(slurm.restart_client)"
+                comment => "If service file has been changed restart slurmd",
+                if => or(
+                        canonify("sara$(template_2_destination[$(template_files)])")
                     );
 
     reports:
         any::
-            "$(this.bundle): $(systemd.dir) $(slurm.software_dir)";
             "$(this.bundle): $(systemd.dir)/$(template_2_destination[$(template_files)]) this has been changed"
                 if => or(
-                        canonify("sara$(systemd.dir)/$(template_2_destination[$(template_files)])")
+                        canonify("sara$(template_2_destination[$(template_files)])")
                     );
 }
 @if minimum_version(99.9)
@@ -631,6 +647,7 @@ done dynamically,eg:
                 ]
             }
             "run_bundle': <not_required> when set run the specified bundle"
+            "run_class': <not_required> when set run the specified bundle only for the specified classses (string or list)"
         }
     },
 ```

@@ -39,6 +39,8 @@ recipient_delimiter = {{{vars.sara_data.postfix.recipient_delimiter}}}
 relay_domains = {{#vars.sara_data.postfix.relay_domains}}{{{.}}},{{/vars.sara_data.postfix.relay_domains}}
 relayhost = {{{vars.sara_data.postfix.relayhost}}}
 
+smtp_tls_security_level = may
+
 smtpd_banner = {{{vars.sara_data.postfix.smtpd_banner}}}
 
 transport_maps = {{#vars.sara_data.postfix.transport_maps}}{{{.}}},{{/vars.sara_data.postfix.transport_maps}}

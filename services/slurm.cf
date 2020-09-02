@@ -376,8 +376,9 @@ bundle agent slurm_db_backup()
         "$(sara_data.slurm[backup_dir])/db.sql"
             rename => rotate("$(sara_data.slurm[backup_config][copies])");
 
-        "$(sara_data.slurm[backup_dir])/$(sara_data.slurm[ClusterName]).cfg"
-            rename => rotate("$(sara_data.slurm[AssocBackup][copies])");
+        # Can be removed 2/sep/2020
+        #"$(sara_data.slurm[backup_dir])/$(sara_data.slurm[ClusterName]).cfg"
+            #rename => rotate("$(sara_data.slurm[AssocBackup][copies])");
 
     commands:
         "$(cmd)"
@@ -385,17 +386,19 @@ bundle agent slurm_db_backup()
             contain => in_shell,
             args => "> $(sara_data.slurm[backup_dir])/db.sql";
 
-        "$(sara_data.slurm[AssocBackup][cmd])"
-            contain => in_shell_and_silent,
-            args => "$(sara_data.slurm[ClusterName]) file=$(sara_data.slurm[backup_dir])/$(sara_data.slurm[ClusterName]).cfg";
+        # Can be removed 2/sep/2020
+        #"$(sara_data.slurm[AssocBackup][cmd])"
+        #    contain => in_shell_and_silent,
+        #    args => "$(sara_data.slurm[ClusterName]) file=$(sara_data.slurm[backup_dir])/$(sara_data.slurm[ClusterName]).cfg";
 
     reports:
         any::
             "$(this.bundle): $(cmd) > $(sara_data.slurm[backup_dir])/db.sql"
                  if => "DEBUG|DEBUG_slurm|DEBUG_$(this.bundle)";
 
-            "$(this.bundle): $(sara_data.slurm[AssocBackup][cmd])  $(sara_data.slurm[backup_dir])/$(sara_data.slurm[ClusterName]).cfg"
-                 if => "DEBUG|DEBUG_slurm|DEBUG_$(this.bundle)";
+        # Can be removed 2/sep/2020
+        #    "$(this.bundle): $(sara_data.slurm[AssocBackup][cmd])  $(sara_data.slurm[backup_dir])/$(sara_data.slurm[ClusterName]).cfg"
+        #         if => "DEBUG|DEBUG_slurm|DEBUG_$(this.bundle)";
 }
 
 bundle agent slurm_logrotate()

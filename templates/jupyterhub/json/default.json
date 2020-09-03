@@ -69,6 +69,8 @@
     ],
     "etc_dir": "$(sara_data.jupyterhub[dir])/etc" ,
     "dir": "/opt/jupyterhub",
+    "mog_dirs": [ "0750", "root", "root"],
+    "mog_config_files": [ "0640", "root", "root"],
     "server_name": "jupyter.lisa.surfsara.nl",
     "state_dir": "$(sara_data.jupyterhub[dir])/state"
 }

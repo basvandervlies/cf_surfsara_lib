@@ -99,7 +99,11 @@ bundle agent jupyterhub_config()
 
             "$(sara_data.jupyterhub[etc_dir])/."
                 create => "true",
-                perms => mog("0700", "root", "root"),
+                perms => mog(
+                    "$(sara_data.jupyterhub[mog_dirs][0])",
+                    "$(sara_data.jupyterhub[mog_dirs][1])",
+                    "$(sara_data.jupyterhub[mog_dirs][2])"
+                ),
                 move_obstructions => "true";
 
             "$(sara_data.jupyterhub[state_dir])/$(sara_data.jupyterhub[configs][$(indices)][name])/."
@@ -110,6 +114,13 @@ bundle agent jupyterhub_config()
 
             "$(sara_data.jupyterhub[bin_dir])/$(sara_data.jupyterhub[configs][$(indices)][name]).sh"
                 perms => mog("0700", "root", "root");
+
+            "$(sara_data.jupyterhub[etc_dir])/$(sara_data.jupyterhub[configs][$(indices)][name]).py"
+                perms => mog(
+                    "$(sara_data.jupyterhub[mog_config_files][0])",
+                    "$(sara_data.jupyterhub[mog_config_files][1])",
+                    "$(sara_data.jupyterhub[mog_config_files][2])"
+                );
 
     methods:
         any::

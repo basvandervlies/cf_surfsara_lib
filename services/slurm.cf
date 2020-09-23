@@ -154,6 +154,7 @@ bundle agent slurm_install_tarball()
     vars:
         any::
             "header" string => "## Maintained by CFengine$(const.n)#";
+            "packages" data => parsejson('{}');
             "template" string => "$(header)
 $(slurm.software_dir)/current/lib
 $(slurm.software_dir)/current/lib/slurm
@@ -206,6 +207,8 @@ $(slurm.software_dir)/current/lib/slurm
         any::
             "" usebundle => sara_service_install_tarballs("slurm"),
                 classes => results("bundle", "slurm_tarball");
+
+            "" usebundle => sara_service_packages("slurm", "@(slurm_install_tarball.packages)");
 
     users:
         slurm_grp::

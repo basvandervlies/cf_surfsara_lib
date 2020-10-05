@@ -1,0 +1,100 @@
+{
+    "user": "wwwrun",
+    "group": "www",
+    "modules": [
+        {
+            "name": "actions", "config_file": ""
+        },
+        {
+            "name": "alias", "config_file": ""
+        },
+        {
+            "name": "auth_basic", "config_file": ""
+        },
+        {
+            "name": "authn_file", "config_file": ""
+        },
+        {
+            "name": "authz_host", "config_file": ""
+        },
+        {
+            "name": "authz_groupfile", "config_file": ""
+        },
+        {
+            "name": "authz_core", "config_file": ""
+        },
+        {
+            "name": "authz_user", "config_file": ""
+        },
+        {
+            "name": "autoindex", "config_file": ""
+        },
+        {
+            "name": "cgid", "config_file": ""
+        },
+        {
+            "name": "dir", "config_file": ""
+        },
+        {
+            "name": "env", "config_file": ""
+        },
+        {
+            "name": "expires", "config_file": ""
+        },
+        {
+            "name": "headers", "config_file": ""
+        },
+        {
+            "name": "http2", "config_file": "http2.conf"
+        },
+        {
+            "name": "include", "config_file": ""
+        },
+        {
+            "name": "log_config", "config_file": ""
+        },
+        {
+            "name": "mime", "config_file": ""
+        },
+        {
+            "name": "negotiation", "config_file": ""
+        },
+        {
+            "name": "setenvif", "config_file": ""
+        },
+        {
+            "name": "ssl", "config_file": ""
+        },
+        {
+            "name": "socache_shmcb", "config_file": ""
+        },
+        {
+            "name": "userdir", "config_file": ""
+        },
+        {
+            "name": "reqtimeout", "config_file": ""
+        },
+        {
+            "name": "authn_core", "config_file": ""
+        },
+        {
+            "name": "rewrite", "config_file": ""
+        },
+        {
+            "name": "proxy", "config_file": ""
+        },
+        {
+            "name": "proxy_balancer", "config_file": ""
+        },
+        {
+            "name": "slotmem_shm", "config_file": ""
+        },
+        {
+            "name": "proxy_fcgi", "config_file": ""
+        },
+        {
+            "name": "proxy_http", "config_file": ""
+        }
+    ]
+}
+

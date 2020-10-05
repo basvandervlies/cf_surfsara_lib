@@ -2,31 +2,62 @@
 bundle common apache
 {
     vars:
-        "configdir" string => "/opt/apache";
 
-        "performance_profile" string => "l_4c8m";
+        any::
+            "configdir" string => "/opt/apache";
 
-        "service_name" string => "apache2";
-        "daemon_name" string => "apache2";
+            "performance_profile" string => "l_4c8m";
 
-        "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+            "service_name" string => "apache2";
+            "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
 
-        "packages"  data => parsejson('
-            {
-                "install": {
-                    "apache2": "",
+        sles::
+            "daemon_name" string => "httpd-worker";
+
+            "packages"  data => parsejson('
+                {
+                    "install": {
+                        "apache2": "",
+                        "apache2-worker": "",
+                        "apache2-utils": ""
+                    },
+                    "remove": {
+                        "apache2-prefork": ""
+                    }
                 }
-            }
-        ');
+            ');
 
-        "template_2_destination" data => parsejson('
-            {
-                "envvars.mustache": "/etc/apache2/envvars",
-                "httpd.conf.mustache": "$(configdir)/httpd.conf"
-                "ssl.conf.mustache": "$(configdir)/ssl.conf"
-                "server.conf.mustache": "$(configdir)/server.conf"
-            }
-        ');
+            "template_2_destination" data => parsejson('
+                {
+                    "suse_apache_sysconfig.mustache": "/etc/sysconfig/apache2",
+                    "start_apache2.mustache": "/usr/sbin/start_apache2",
+                    "httpd.conf.mustache": "$(configdir)/httpd.conf",
+                    "ssl.conf.mustache": "$(configdir)/ssl.conf",
+                    "server.conf.mustache": "$(configdir)/server.conf"
+                }
+            ');
+
+        debian::
+            "daemon_name" string => "apache2";
+
+            "packages"  data => parsejson('
+                {
+                    "install": {
+                        "apache2": ""
+                    }
+                }
+            ');
+
+
+            "template_2_destination" data => parsejson('
+                {   
+                    "envvars.mustache": "/etc/apache2/envvars",
+                    "httpd.conf.mustache": "$(configdir)/httpd.conf",
+                    "ssl.conf.mustache": "$(configdir)/ssl.conf",
+                    "server.conf.mustache": "$(configdir)/server.conf"
+                }   
+            '); 
+
 
 }
 
@@ -46,7 +77,8 @@ bundle agent apache_config()
             "sara_opt_apache_httpd_conf",
             "sara_opt_apache_server_conf",
             "sara_opt_apache_ssl_conf",
-            "sara_opt_apache_envvars"
+            "sara_opt_apache_envvars",
+            "sara_etc_sysconfig_apache2"
         };
 
     vars:
@@ -124,7 +156,7 @@ bundle agent apache_autorun()
         "tags" slist => { "autorun", "template_apache" };
 
     methods:
-        debian::
+        debian|sles::
             "" usebundle => sara_data_autorun("apache");
             "" usebundle => apache_install();
             "" usebundle => apache_config();

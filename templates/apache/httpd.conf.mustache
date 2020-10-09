@@ -19,7 +19,7 @@ ServerRoot "{{{vars.sara_data.apache.configdir}}}"
 
 ## Uid
 User {{{vars.sara_data.apache.user}}}
-Group {{{vars.sara_data.apache.user}}}
+Group {{{vars.sara_data.apache.group}}}
 
 ## Server-tuning
 # We only configure the MPM Event engine
@@ -33,7 +33,12 @@ Group {{{vars.sara_data.apache.user}}}
 
 ## Loadmodule
 {{#vars.sara_data.apache.modules}}
+{{#classes.debian}}
 LoadModule {{{name}}}_module /usr/lib/apache2/modules/mod_{{{name}}}.so
+{{/classes.debian}}
+{{#classes.sles}}
+LoadModule {{{name}}}_module /usr/lib64/apache2-worker/mod_{{{name}}}.so
+{{/classes.sles}}
 {{/vars.sara_data.apache.modules}}
 IncludeOptional {{{vars.sara_data.apache.configdir}}}/modules.d/*.conf
 
@@ -75,10 +80,9 @@ ServerSignature off
 UseCanonicalName off
 ServerTokens ProductOnly
 LogLevel warn
-TraceEnable off
 
-ErrorLog ${APACHE_LOG_DIR}/error.log
-CustomLog ${APACHE_LOG_DIR}/access_log combined
+ErrorLog {{{vars.sara_data.apache.logdir}}}/error.log
+CustomLog {{{vars.sara_data.apache.logdir}}}/access_log combined
 
 ## For better oveview the following stuff has configured in it's own file
 Include {{{vars.sara_data.apache.configdir}}}/ssl.conf

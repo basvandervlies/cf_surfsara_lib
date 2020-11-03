@@ -1,6 +1,5 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.XX (2020-XX--XX)](#version-09xx-2020-xx--xx)
 * [Version: 0.9.77 (2020-07-14 tommie)](#version-0977-2020-07-14-tommie)
     * [Tarball installation](#tarball-installation)
     * [Templates generation enhanceent](#templates-generation-enhanceent)
@@ -20,9 +19,6 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 0.9.XX (2020-XX--XX)
- * Slurm service improvements for tarball installations.
-
 # Version: 0.9.77 (2020-07-14 tommie)
  * Services added: jupyterhub, configurable\_http\_proxy.cf, enroot (nvidia container software), copy\_dirs
  * apache service changes:

@@ -18,9 +18,6 @@ ListenAddress {{address}}
 HostKey {{key}}
 {{/vars.sara_data.ssh.HostKey}}
 
-#Privilege Separation is turned on for security
-UsePrivilegeSeparation {{{vars.sara_data.ssh.UsePrivilegeSeparation}}}
-
 # For some hosts this is NOT allowed
 AllowTcpForwarding {{{vars.sara_data.ssh.AllowTcpForwarding}}}
 
@@ -70,10 +67,11 @@ MaxSessions {{{vars.sara_data.ssh.MaxSessions}}}
 
 {{#classes.SSH_USE_DEPRICATED_OPTIONS}}
 KeyRegenerationInterval {{{vars.sara_data.ssh.KeyRegenerationInterval}}}
-ServerKeyBits {{{vars.sara_data.ssh.ServerKeyBits}}}
 RSAAuthentication {{{vars.sara_data.ssh.RSAAuthentication}}}
 RhostsRSAAuthentication {{{vars.sara_data.ssh.RhostsRSAAuthentication}}}
+ServerKeyBits {{{vars.sara_data.ssh.ServerKeyBits}}}
 UseLogin {{{vars.sara_data.ssh.UseLogin}}}
+UsePrivilegeSeparation {{{vars.sara_data.ssh.UsePrivilegeSeparation}}}
 {{/classes.SSH_USE_DEPRICATED_OPTIONS}}
 
 # Allow client to pass locale environment variables

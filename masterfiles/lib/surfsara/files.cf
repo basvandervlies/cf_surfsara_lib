@@ -339,6 +339,12 @@ bundle agent sara_service_install_tarballs(bundle_name)
                 if => or(
                     "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)"
                     );
+
+            "$(this.bundle): Software directory does not exists: $(sara_data.$(bundle_name)[install_tarballs][$(index)][check_dir]) force reinstall"
+                if => and(
+                    "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)",
+                    "!check_dir_$(index)"
+                    );
 }
 
 bundle agent sara_service_copy_base(bundle_name, section)

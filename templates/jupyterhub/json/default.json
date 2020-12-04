@@ -11,6 +11,9 @@
             "'admin_team'"
         ],
         "admin_users": [ ],
+        "announcements_disabled": {
+            "announcement" : "JupyterHub planned maintenance: Tue 1st Dec 07:00-17:00"
+        },
         "batch_lines": [
             "export LMOD_CMD=/hpc/eb/modules-4.0.0/libexec/modulecmd.tcl"
         ],

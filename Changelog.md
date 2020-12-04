@@ -32,10 +32,10 @@
     * Tarball installations now support additional package installations
     * Added linkchilderen to create links `/usr/[s]bin` other programs expect this
     * Added some more config files to `slurm_mog_list`
-    * Added `SLURM_FORCE_LINKS` class to  recreate  links in `/usr/[s]bin`
+    * Added `SLURM_FORCE_LINKS` class to recreate  links in `/usr/[s]bin`
     * spank\_plugins now supports `run_class` option.  It will only be installed if satisfied
     * tarball json file simplified
-    * removed obsolete option: CacheGroups
+    * removed obsolete option: `CacheGroups`
     * symplified current version check for tarball installations
     * No sacctmgr dump file any more
     * copy `pam_slurm_adopt.so` if we install a new tarball

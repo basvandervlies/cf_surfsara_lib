@@ -115,6 +115,7 @@ bundle agent slurm_install()
 
         SLURM_TARBALL::
             "" usebundle => slurm_install_tarball();
+            "" usebundle => slurm_current_version();
 
         SLURM_SYSTEMD_SERVICES|SLURM_TARBALL::
             "" usebundle => slurm_generate_systemd_services();
@@ -169,11 +170,6 @@ $(slurm.software_dir)/current/lib/slurm
 
     files:
         any::
-            "$(slurm.software_dir)/current"
-                link_from => ln_s("$(slurm.software_dir)/$(slurm.current_version)"),
-                move_obstructions => "true",
-                classes => results("bundle", "current_version");
-
             "/etc/ld.so.conf.d/slurm.conf"
                 create => "true",
                 edit_defaults => no_backup,
@@ -188,20 +184,6 @@ $(slurm.software_dir)/current/lib/slurm
             "$(slurm.software_dir)/."
                 perms => mog("0755", "root", "root"),
                 create => "true";
-
-
-        slurm_tarball_repaired|current_version_repaired|SLURM_FORCE_LINKS::
-             "/usr/bin"
-                comment => "slurm client program link them in /usr/bin",
-                link_from => linkchildren("$(slurm.software_dir)/current/bin");
-
-             "/usr/sbin"
-                comment => "slurm client program link them in /usr/sbin",
-                link_from => linkchildren("$(slurm.software_dir)/current/sbin");
-
-             "$(pam.lib_dir)/pam_slurm_adopt.so"
-                copy_from   => local_dcp("$(slurm.software_dir)/current/pam/pam_slurm_adopt.so"),
-                perms => mog("0755", "root", "root");
 
     methods:
         any::
@@ -226,7 +208,31 @@ $(slurm.software_dir)/current/lib/slurm
 
             "$(paths.path[groupadd]) --gid $(slurm.gid) $(slurm.group)"
                 if => "!slurm_grp";
+}
 
+bundle agent slurm_current_version()
+{
+    files:
+        any::
+            "$(slurm.software_dir)/current"
+                link_from => ln_s("$(slurm.software_dir)/$(slurm.current_version)"),
+                move_obstructions => "true",
+                classes => results("bundle", "current_version");
+
+        current_version_repaired|SLURM_FORCE_LINKS::
+             "/usr/bin"
+                comment => "slurm client program link them in /usr/bin",
+                link_from => linkchildren("$(slurm.software_dir)/current/bin");
+
+             "/usr/sbin"
+                comment => "slurm client program link them in /usr/sbin",
+                link_from => linkchildren("$(slurm.software_dir)/current/sbin");
+
+             "$(pam.lib_dir)/pam_slurm_adopt.so"
+                copy_from   => local_dcp("$(slurm.software_dir)/current/pam/pam_slurm_adopt.so"),
+                perms => mog("0755", "root", "root");
+
+    commands:
         SLURM_CLIENT.current_version_repaired::
             "$(slurm.restart_client)";
 }

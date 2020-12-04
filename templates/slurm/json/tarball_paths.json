@@ -1,19 +1,29 @@
 {
     "install_tarballs": [
         {
-            "check_dir": "$(slurm.software_dir)/19.05.5",
-            "dest": "$(slurm.tarball_dir)/slurm-19.05.5.tar.gz",
+            "check_dir": "$(slurm.software_dir)/$(sara_data.slurm[current_version])",
+            "dest": "$(slurm.tarball_dir)/slurm-$(sara_data.slurm[current_version]).tar.gz",
             "extract": {
                 "cmd": "$(paths.path[tar]) --extract --gzip --file",
                 "in_dir": "$(slurm.software_dir)"
             },
             "mog": [ "0644", "root", "root"],
-            "source": "data/slurm/tarballs/$(sys.flavor)/slurm-19.05.5.tar.gz"
+            "source": "data/slurm/tarballs/$(sys.flavor)/slurm-$(sara_data.slurm[current_version]).tar.gz"
+        },
+        {
+            "check_dir": "$(slurm.software_dir)/19.05.7",
+            "dest": "$(slurm.tarball_dir)/slurm-19.05.7.tar.gz",
+            "extract": {
+                "cmd": "$(paths.path[tar]) --extract --gzip --file",
+                "in_dir": "$(slurm.software_dir)"
+            },
+            "mog": [ "0644", "root", "root"],
+            "source": "data/slurm/tarballs/$(sys.flavor)/slurm-19.05.7.tar.gz"
         }
     ],
     "dir": "/opt/slurm",
     "config_dir": "$(sara_data.slurm[dir])/etc",
-    "current_version" : "19.05.5",
+    "current_version" : "20.02.6",
     "log_dir": "/var/log/slurm",
     "opt_dir": "/opt/slurm",
     "plugin_dir": "$(sara_data.slurm[dir])/sw/current/lib/slurm",

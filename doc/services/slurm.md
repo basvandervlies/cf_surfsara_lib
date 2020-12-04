@@ -121,6 +121,7 @@ done dynamically,eg:
                 ]
             }
             "run_bundle': <not_required> when set run the specified bundle"
+            "run_class': <not_required> when set run the specified bundle only for the specified classses (string or list)"
         }
     },
 ```

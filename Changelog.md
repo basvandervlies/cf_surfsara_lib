@@ -38,8 +38,9 @@
     * removed obsolete option: CacheGroups
     * symplified current version check for tarball installations
     * No sacctmgr dump file any more
+    * copy `pam_slurm_adopt.so` if we install a new tarball
     * restart code for daemons is better
- * ssh service chnages:
+ * ssh service changes:
     * Moved `UsePrivilegeSeparation` to the DEPRICATED SECTION
 
 # Version: 0.9.77 (2020-07-14 tommie)

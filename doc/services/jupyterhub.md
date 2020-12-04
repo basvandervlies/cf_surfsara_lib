@@ -12,6 +12,14 @@ file for you.
 The following json variables can be set in def.cf/json to  invoke files bundles:
  * install_tarballs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
 
+The following clases can be set via def.cf/json:
+ *  `RESTART_SCHEDULE`:  Restart the jupyterhub services on specified time(s), eg:
+```
+"RESTART_SCHEDULE": [
+    "Hr00.Min00_05"
+]
+```
+
 The definition of jupyterhub configuration is illustrated via an example:
 ```
     "config_default": {

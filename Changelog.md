@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 0.9.82 (2020-12-05 sint)](#version-0982-2020-12-05-sint)
 * [Version: 0.9.77 (2020-07-14 tommie)](#version-0977-2020-07-14-tommie)
     * [Tarball installation](#tarball-installation)
     * [Templates generation enhanceent](#templates-generation-enhanceent)
@@ -19,6 +20,28 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 0.9.82 (2020-12-05 sint)
+ * jupyterhub service chnages:
+    * apache reverse proxy  bug fix do not double escape special chars
+    * added announcement option, eg: maintenance announcement
+    * perms can be set for etc\_dir and configuration files
+    * added a restart schedule: `JUPYTERHUB_RESTART_SCHEDULE`
+ * postfix service chnages:
+    * Enable TLS when possible for postfix
+ * slurm service chnages:
+    * Tarball installations now support additional package installations
+    * Added linkchilderen to create links `/usr/[s]bin` other programs expect this
+    * Added some more config files to `slurm_mog_list`
+    * Added `SLURM_FORCE_LINKS` class to  recreate  links in `/usr/[s]bin`
+    * spank\_plugins now supports `run_class` option.  It will only be installed if satisfied
+    * tarball json file simplified
+    * removed obsolete option: CacheGroups
+    * symplified current version check for tarball installations
+    * No sacctmgr dump file any more
+    * restart code for daemons is better
+ * ssh service chnages:
+    * Moved `UsePrivilegeSeparation` to the DEPRICATED SECTION
+
 # Version: 0.9.77 (2020-07-14 tommie)
  * Services added: jupyterhub, configurable\_http\_proxy.cf, enroot (nvidia container software), copy\_dirs
  * apache service changes:

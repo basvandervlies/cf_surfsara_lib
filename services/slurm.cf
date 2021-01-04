@@ -5,6 +5,7 @@ bundle agent slurm()
 {
     vars:
         any::
+            "acct_gather_file"      string => "$(config_dir)/acct_gather.conf";
             "config_file"           string => "$(config_dir)/slurm.conf";
             "cgroup_config_file"    string => "$(config_dir)/cgroup.conf";
             "cgroup_allowed_file"   string => "$(config_dir)/cgroup_allowed_devices_file.conf";
@@ -23,6 +24,7 @@ bundle agent slurm()
             "uid"                   string => "555";
 
             "template_2_destination" data => parsejson('{
+                    "acct_gather.mustache": "$(acct_gather_file)",
                     "cgroup.mustache": "$(cgroup_config_file)",
                     "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
                     "gres.mustache": "$(gres_config_file)",

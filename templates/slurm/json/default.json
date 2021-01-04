@@ -1,10 +1,17 @@
 {
+    "acct_gather_file": {},
+    "acct_gather_section": {},
+    "accounting_storage_section": {
+        "AccountingStorageEnforce": "limits,associations,qos",
+        "AccountingStorageHost": "",
+        "AccountingStorageTRES": "gres/gpu",
+        "AccountingStorageType": "accounting_storage/slurmdbd",
+        "AccountingStorageUser": "slurm"
+    },
     "AssocBackup": {
         "cmd": "/usr/bin/sacctmgr dump",
         "copies" : "7"
     },
-    "AccountingStorageHost": "",
-    "AccountingStorageTRES": "gres/gpu",
     "AuthType": "auth/munge",
     "backup_db_dir": "/var/backups",
     "backup_dir": "$(sara_data.slurm[backup_db_dir])/slurm",
@@ -98,18 +105,19 @@
             "kill_invalid_depend: cancel jobs that can never be satisfied"
         ],
         "parameters": [
-            "nohold_on_prolog_fail",
-            "max_switch_wait=7200",
-            "bf_max_job_start=10",
-            "sched_max_job_start=20",
             "bf_continue",
-            "bf_interval=60",
-            "bf_max_job_test=500",
+            "bf_interval=30",
+            "bf_max_job_start=10",
+            "bf_max_job_test=100",
             "bf_max_job_user=10",
             "bf_resolution=300",
             "bf_window=1440",
+            "bf_yield_interval=1000000",
             "kill_invalid_depend",
-            "max_rpc_cnt=150"
+            "nohold_on_prolog_fail",
+            "max_rpc_cnt=150",
+            "max_switch_wait=7200",
+            "sched_max_job_start=20"
         ],
         "settings": {
             "SchedulerType": "sched/backfill",
@@ -140,7 +148,8 @@
                     "required /opt/slurm/lib/spank_pyxis.so"
                 ]
             },
-            "run_bundle": "slurmd_restart"
+            "run_bundle": "slurm_service_restart",
+            "run_class": "SLURM_CLIENT"
         }
     },
     "StoragePass": "not_set",

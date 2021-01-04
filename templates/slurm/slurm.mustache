@@ -73,14 +73,13 @@ JobCompLoc=/tmp/slurm_job_completion.txt
 JobAcctGatherType=jobacct_gather/linux
 JobAcctGatherFrequency=30
 JobAcctGatherParams=UsePss
+{{#vars.sara_data.slurm.acct_gather_section}}
+{{{@}}}={{{.}}}
+{{/vars.sara_data.slurm.acct_gather_section}}
 #
-AccountingStorageEnforce=limits,associations,qos
-AccountingStorageType=accounting_storage/slurmdbd
-AccountingStorageTRES={{{vars.sara_data.slurm.AccountingStorageTRES}}}
-AccountingStorageHost={{{vars.sara_data.slurm.AccountingStorageHost}}}
-AccountingStorageLoc=slurm_acct_db
-#AccountingStoragePass=slurmtestdb
-AccountingStorageUser=slurm
+{{#vars.sara_data.slurm.accounting_storage_section}}
+{{{@}}}={{{.}}}
+{{/vars.sara_data.slurm.accounting_storage_section}}
 GresTypes={{{vars.sara_data.slurm.GresTypes}}}
 #
 # COMPUTE NODES

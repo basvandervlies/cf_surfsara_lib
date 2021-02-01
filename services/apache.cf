@@ -50,13 +50,13 @@ bundle common apache
 
 
             "template_2_destination" data => parsejson('
-                {   
+                {
                     "envvars.mustache": "/etc/apache2/envvars",
                     "httpd.conf.mustache": "$(configdir)/httpd.conf",
                     "ssl.conf.mustache": "$(configdir)/ssl.conf",
                     "server.conf.mustache": "$(configdir)/server.conf"
-                }   
-            '); 
+                }
+            ');
 
 
 }
@@ -111,14 +111,14 @@ bundle agent apache_config()
 
         "$(sara_data.apache[configdir])/modules.d/$(apache_modules)"
             perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            copy_from => sara_sync_no_perms_cp("cf_bundles_dir/apache/modules_config/$(apache_modules)", "hash"),
+            copy_from => sara_sync_no_perms_cp("data/apache/modules_config/$(apache_modules)", "hash"),
             move_obstructions => "true",
             classes => results("namespace", "APACHE_MODULES"),
             ifvarclass => "apache_config_dir_exists";
 
         "$(sara_data.apache[configdir])/sites.d/$(sara_data.apache[sites])"
             perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            copy_from => sara_sync_no_perms_cp("cf_bundles_dir/apache/sites/$(sara_data.apache[sites])", "hash"),
+            copy_from => sara_sync_no_perms_cp("data/apache/sites/$(sara_data.apache[sites])", "hash"),
             move_obstructions => "true",
             classes => results("namespace", "APACHE_SITES"),
             ifvarclass => "apache_config_dir_exists";

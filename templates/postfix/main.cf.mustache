@@ -47,6 +47,8 @@ transport_maps = {{#vars.sara_data.postfix.transport_maps}}{{{.}}},{{/vars.sara_
 
 unknown_local_recipient_reject_code = {{{vars.sara_data.postfix.unknown_local_recipient_reject_code}}}
 
+smtpd_relay_restrictions = {{#vars.sara_data.postfix.smtpd_relay_restrictions}}{{{.}}} {{/vars.sara_data.postfix.smtpd_relay_restrictions}}
+
 {{#classes.sles}}
 setgid_group = {{{vars.sara_data.postfix.setgid_group}}}
 {{/classes.sles}}

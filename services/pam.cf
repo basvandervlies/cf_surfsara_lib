@@ -8,6 +8,7 @@ bundle common pam()
         any::
             "dir"         string => "/etc/pam.d";
             "lib_dir"     string => "/lib/security";
+            "limits_conf_file" string => "/etc/security/limits.d/scl.conf";
 
             "mode"   string => "0644";
             "owner"  string => "root";
@@ -51,6 +52,7 @@ bundle agent pam_surfsara_config()
 {
     classes:
         "pam_listfile_set" expression => isvariable("sara_data.pam[pam_listfile]");
+        "pam_limits_set" expression => isvariable("sara_data.pam[pam_limits]");
         "pam_cp_files_set" expression => isvariable("sara_data.pam[copy_files]");
         "pam_cp_dirs_set" expression => isvariable("sara_data.pam[copy_dirs]");
 
@@ -58,8 +60,11 @@ bundle agent pam_surfsara_config()
         any::
             "" usebundle => pam_generate_files();
 
+        pam_limits_set::
+            "" usebundle => pam_conffile_generate($(pam.limits_conf_file), "pam_limits");
+
         pam_listfile_set::
-            "" usebundle => pam_listfiles_generate();
+            "" usebundle => pam_listfile_conf_generate();
 
         pam_cp_files_set::
             "" usebundle => sara_service_copy_files("pam");
@@ -93,7 +98,7 @@ bundle agent pam_generate_files()
         any::
             "$(this.bundle): $(os):'$(found))'  $(files): $(sara_data.pam[$(os)][$(files)])"
                 comment => "Show which files are generated",
-                ifvarclass => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
 
         !(pam_generate_files_os_set|centos)::
             "$(this.bundle): No pam file(s) are generated , missing variable: 'pam[$(sys.os_release[ID])]'";
@@ -119,7 +124,6 @@ bundle agent pam_generate_file(file, data_section)
 @if minimum_version(3.12)
         data_section_exists::
                 "$(file)"
-                     comment => "Vixie cron: one command per file",
                      create => "true",
                      edit_template_string   => "$(pam_mustache)",
                      template_method => "inline_mustache",
@@ -140,32 +144,33 @@ bundle agent pam_generate_file(file, data_section)
                 comment => "Display the pam file data",
                 #with => string_mustache("{{$-top-}}", data_expand("sara_data.pam[$(data_section)]")),
                 with => string_mustache("$(const.n)$(pam_mustache)", "sara_data.pam"),
-                ifvarclass => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
 @endif
         !data_section_exists::
             "error:PAM json data section '$(data_section)' does not exits";
 }
 
-bundle agent pam_listfiles_generate()
+bundle agent pam_listfile_conf_generate()
 {
     vars:
         any::
-            "items" slist => getindices("sara_data.pam[pam_listfile]");
+            "items" slist => getindices("sara_data.pam[pam_listfile]"),
+                comment => "pam_listfile can have multiple allow/deny per item, eg: group/user";
 
     methods:
         any::
-            "" usebundle => pam_listfile_generate("/etc/security/$(items).allow", "group.allow");
-            "" usebundle => pam_listfile_generate("/etc/security/$(items).deny", "group.deny");
+            "" usebundle => pam_conffile_generate("/etc/security/$(items).allow", "pam_listfile.group.allow");
+            "" usebundle => pam_conffile_generate("/etc/security/$(items).deny", "pam_listfile.group.deny");
 }
 
-bundle agent pam_listfile_generate(file, data_section)
+bundle agent pam_conffile_generate(file, data_section)
 {
     vars:
         any::
-            "listfile_mustache" string => "
-{{#pam_listfile.$(data_section)}}
+            "simple_list_mustache" string => "
+{{#$(data_section)}}
 {{{.}}}
-{{/pam_listfile.$(data_section)}}
+{{/$(data_section)}}
 ";
 
     files:
@@ -174,9 +179,10 @@ bundle agent pam_listfile_generate(file, data_section)
                 "$(file)"
                      comment => "Vixie cron: one command per file",
                      create => "true",
-                     edit_template_string   => "$(listfile_mustache)",
+                     edit_template_string   => "$(simple_list_mustache)",
                      template_method => "inline_mustache",
-                     template_data => "@(sara_data.pam)";
+                     template_data => "@(sara_data.pam)",
+                     classes => if_repaired("sara$(file)");
 @endif
 
     reports:
@@ -186,8 +192,8 @@ bundle agent pam_listfile_generate(file, data_section)
                 comment => "Display the pam file data",
                 #with => string_mustache("{{$-top-}}", data_expand("sara_data.pam.$(data_section)")),
                 #with => string_mustache("{{#pam_listfile.$(data_section)}} {{{.}}} {{/pam_listfile.$(data_section)}}", "sara_data.pam"),
-                with => string_mustache("$(const.n)$(listfile_mustache)", "sara_data.pam"),
-                ifvarclass => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
+                with => string_mustache("$(const.n)$(simple_list_mustache)", "sara_data.pam"),
+                if => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
 @endif
 
 }
@@ -203,14 +209,18 @@ inline mustache template. Only work for cfengine => 3.12.
 if one of the files is changed then the following **class** will be set:
  * `sara_etc_pam_d_<filename>`
 
+The bundle can also generate configuration files for, class are set with `if_repaired("sara$(file)")`:
+ * pam_limits --> /etc/security/limits.d/scl.conf
+ * pam_listfiles --> /etc/security/<section>.<allow|deny>, section can be `group|user`
+
 These files will be generated with the  json data specified
 the templates are located in:
  * templates/pam/
  * templates/pam/json
 
-The following json variables can be set in def.cf/json to invoke files bundles:                                                                                                                           
+The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
-  * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
 
 ## Usage
 
@@ -246,15 +256,68 @@ If you want to debug these bundle set the `DEBUG_pam` class, eg:
 ## Def.cf/json
 
 See [default.json](/templates/pam/json/default.json) what the default values are and
-which variables can be overriden.
+which variables can be overriden. This are all data section definitions.  To couple a data
+section to a pam file, see [default_pam.json](/templates/pam/json/default_pam.json) for debian|centos.
 
+### pam configuration files
+
+To generate the configuration files for the pam module. We use inline json to trigger the generation:
+
+#### pam_listfile
+
+For we can generate the `group.allow|deny` in /etc/security with the following json file:
+```json
+    pam_listfile: {
+        group: {
+            allow: [
+                lisa_surfsara,
+                surftraining_student_jupyter_ssh,
+                surftraining_teacher
+            ],
+            deny:  [
+                sw_lisa
+           ]
+        }
+    }
+}
+```
+
+The pam module configuration line:
+ * `account required pam_listfile.so onerr=fail item=group sense=allow file=/etc/security/group.allow`
+
+
+#### pam_limits
+
+If data section is defined we generate the following file `/etc/security/limit.d/scl.conf`, eg:
+```json
+
+    "pam_limits": [
+        "# Managed by CFEngine",
+        "#",
+        "*       soft    nofile      4096",
+        "*       hard    nofile      8192",
+        "*       soft    memlock     unlimited",
+        "*       hard    memlock     unlimited",
+        "*       soft    stack       unlimited",
+        "*       hard    stack       unlimited",
+        "root       soft    nofile      4096",
+        "root       hard    nofile      8192",
+        "root       soft    memlock     unlimited",
+        "root       hard    memlock     unlimited",
+        "root       soft    stack       unlimited",
+        "root       hard    stack       unlimited"
+    ]
+}
+```
+
+### Examples
 Here are some examples how to use it:
  * specify pam configuration in def.cf:
 ```
 vars:
     "pam_json_files" slist => { "default_pam.json" };
 ```
- * Define pam stack in *pam/templates/json/sara.json*:
+ * Define pam data stack in *pam/templates/json/scl.json*:
 ```json
 "common-account": {
     "comment": "only local logins",
@@ -331,7 +394,7 @@ vars:
 ]
 ```
 
- * create the pam files with the above  data definitions
+ * create the pam files with the above  pam data definitions
 ```
 vars:
     "pam" data => parsejson('{
@@ -364,4 +427,5 @@ vars:
     }
 }
 ```
+
 @endif

@@ -1,0 +1,18 @@
+{
+    "pam_limits": [
+        "# Managed by CFEngine",
+        "#",
+        "*       soft    nofile      4096",
+        "*       hard    nofile      8192",
+        "*       soft    memlock     unlimited",
+        "*       hard    memlock     unlimited",
+        "*       soft    stack       unlimited",
+        "*       hard    stack       unlimited",
+        "root       soft    nofile      4096",
+        "root       hard    nofile      8192",
+        "root       soft    memlock     unlimited",
+        "root       hard    memlock     unlimited",
+        "root       soft    stack       unlimited",
+        "root       hard    stack       unlimited"
+    ]
+}

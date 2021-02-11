@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 0.9.82 (2021-02-?? Jeanne)](#version-0982-2021-02--jeanne)
 * [Version: 0.9.82 (2020-12-05 sint)](#version-0982-2020-12-05-sint)
 * [Version: 0.9.77 (2020-07-14 tommie)](#version-0977-2020-07-14-tommie)
     * [Tarball installation](#tarball-installation)
@@ -20,6 +21,12 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 0.9.82 (2021-02-?? Jeanne)
+ * apache service changes:
+    *  Use `data` shortcut for copying files (is cfengine standard)
+ * pam service changes:
+    *  Added genertation of /etc/security/limits.d/scl.conf when specified in json file (limits\_compute.json)
+
 # Version: 0.9.82 (2020-12-05 sint)
  * jupyterhub service chnages:
     * apache reverse proxy  bug fix do not double escape special chars

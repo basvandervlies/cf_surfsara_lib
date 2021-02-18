@@ -15,7 +15,7 @@
 #     (the sites config)
 
 ## We are not using the default location
-ServerRoot "{{{vars.sara_data.apache.configdir}}}"
+ServerRoot "{{{vars.apache.configdir}}}"
 
 ## Uid
 User {{{vars.sara_data.apache.user}}}
@@ -24,7 +24,7 @@ Group {{{vars.sara_data.apache.group}}}
 ## Server-tuning
 # We only configure the MPM Event engine
 <IfModule mpm_event_module>
-    ServerLimit                 {{{vars.sara_data.apache.tuning_servers_limit}}}            
+    ServerLimit                 {{{vars.sara_data.apache.tuning_servers_limit}}}
     MaxRequestWorkers           {{{vars.sara_data.apache.tuning_max_workers}}}
     StartServers                {{{vars.sara_data.apache.tuning_start_servers}}}
     ThreadsPerChild             {{{vars.sara_data.apache.tuning_threads_p_child}}}
@@ -32,15 +32,20 @@ Group {{{vars.sara_data.apache.group}}}
 </IfModule>
 
 ## Loadmodule
-{{#vars.sara_data.apache.modules}}
+
 {{#classes.debian}}
-LoadModule {{{name}}}_module /usr/lib/apache2/modules/mod_{{{name}}}.so
+{{#vars.apache_config.modules}}
+LoadModule {{@}}_module /usr/lib/apache2/modules/mod_{{@}}.so
+{{/vars.apache_config.modules}}
 {{/classes.debian}}
+
 {{#classes.sles}}
-LoadModule {{{name}}}_module /usr/lib64/apache2-worker/mod_{{{name}}}.so
-{{/classes.sles}}
+{{#vars.sara_data.apache.modules}}
+LoadModule {{@}}_module /usr/lib64/apache2-worker/mod_{{@}}.so
 {{/vars.sara_data.apache.modules}}
-IncludeOptional {{{vars.sara_data.apache.configdir}}}/modules.d/*.conf
+{{/classes.sles}}
+
+IncludeOptional {{{vars.apache.modules_conf_dir}}}/*.conf
 
 ## Listen
 {{#vars.sara_data.apache.ports}}
@@ -81,12 +86,12 @@ UseCanonicalName off
 ServerTokens ProductOnly
 LogLevel warn
 
-ErrorLog {{{vars.sara_data.apache.logdir}}}/error.log
-CustomLog {{{vars.sara_data.apache.logdir}}}/access_log combined
+ErrorLog {{{vars.apache.logdir}}}/error.log
+CustomLog {{{vars.apache.logdir}}}/access_log combined
 
 ## For better oveview the following stuff has configured in it's own file
-Include {{{vars.sara_data.apache.configdir}}}/ssl.conf
-Include {{{vars.sara_data.apache.configdir}}}/server.conf
+Include {{{vars.apache.configdir}}}/ssl.conf
+Include {{{vars.apache.configdir}}}/server.conf
 
 ## Finally include the sites.d
-IncludeOptional {{{vars.sara_data.apache.configdir}}}/sites.d/*.conf
+IncludeOptional {{{vars.apache.sites_dir}}}/*.conf

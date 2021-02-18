@@ -1,116 +1,56 @@
 {
+    "args_arguments": "-f $(sara_data.apache[configdir])/httpd.conf",
     "configdir": "/opt/apache",
-    "user": "www-data",
-    "group": "www-data",
+    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline' *.bootstrapcdn.com *.cloudflare.com fonts.googleapis.com estudybooks.surf.nl; script-src 'self' 'unsafe-inline' 'unsafe-eval' webstats.surf.nl code.jquery.com *.bootstrapcdn.com *.cloudflare.com *.aspnetcdn.com; img-src 'self' 'unsafe-inline' https: data: webstats.surf.nl; font-src 'self' data: *.bootstrapcdn.com fonts.gstatic.com; connect-src 'self'",
     "csp_enabled": true,
+    "group": "www-data",
     "document_root": "/srv/www/htdocs",
+    "logdir": "/var/log/apache2",
+    "modules_extra": {},
+    "modules_standard": {
+        "access_compat": "",
+        "alias": "data/apache/modules_config/alias.conf",
+        "auth_basic": "",
+        "authn_core":  "",
+        "authn_file": "",
+        "authz_core": "",
+        "authz_host": "",
+        "authz_user": "",
+        "autoindex":  "data/apache/modules_config/autoindex.conf",
+        "deflate":  "data/apache/modules_config/deflate.conf",
+        "dir":  "data/apache/modules_config/dir.conf",
+        "env":  "",
+        "expires":  "",
+        "headers":  "",
+        "http2":  "data/apache/modules_config/http2.conf",
+        "filter": "",
+        "mime":  "data/apache/modules_config/mime.conf",
+        "mime_magic":  "data/apache/modules_config/mime_magic.conf",
+        "mpm_event":  "",
+        "negotiation":  "data/apache/modules_config/negotiation.conf",
+        "proxy":  "",
+        "proxy_fcgi":  "data/apache/modules_config/proxy_fcgi.conf",
+        "proxy_http":  "",
+        "proxy_wstunnel":  "",
+        "reqtimeout":  "data/apache/modules_config/reqtimeout.conf",
+        "rewrite":  "",
+        "setenvif":  "",
+        "ssl":  "",
+        "socache_shmcb":  "",
+        "status":  "",
+        "wsgi":  ""
+    },
     "ports": [
         "80",
         "443"
     ],
+    "sites": [],
+    "sites_generated": [],
     "sites_root": "/srv/sites",
-    "tuning_servers_limit": "8",
     "tuning_max_workers": "200",
+    "tuning_servers_limit": "8",
     "tuning_start_servers": "3",
     "tuning_threads_p_child": "25",
     "tuning_threads_limit": "64",
-    "logdir": "/var/log/apache2",
-    "modules": [
-        {
-            "name": "access_compat", "config_file": ""
-        },
-        {
-            "name": "alias", "config_file": "alias.conf"
-        },
-        {
-            "name": "auth_basic", "config_file": ""
-        },
-        {
-            "name": "authn_core", "config_file": ""
-        },
-        {
-            "name": "authn_file", "config_file": ""
-        },
-        {
-            "name": "authz_core", "config_file": ""
-        },
-        {
-            "name": "authz_host", "config_file": ""
-        },
-        {
-            "name": "authz_user", "config_file": ""
-        },
-        {
-            "name": "autoindex", "config_file": "autoindex.conf"
-        },
-        {
-            "name": "deflate", "config_file": "deflate.conf"
-        },
-        {
-            "name": "dir", "config_file": "dir.conf"
-        },
-        {
-            "name": "env", "config_file": ""
-        },
-        {
-            "name": "expires", "config_file": ""
-        },
-        {
-            "name": "headers", "config_file": ""
-        },
-        {
-            "name": "http2", "config_file": "http2.conf"
-        },
-        {
-            "name": "filter", "config_file": ""
-        },
-        {
-            "name": "mime", "config_file": "mime.conf"
-        },
-        {
-            "name": "mime_magic", "config_file": "mime_magic.conf"
-        },
-        {
-            "name": "mpm_event", "config_file": ""
-        },
-        {
-            "name": "negotiation", "config_file": "negotiation.conf"
-        },
-        {
-            "name": "proxy", "config_file": ""
-        },
-        {
-            "name": "proxy_fcgi", "config_file": "proxy_fcgi.conf"
-        },
-        {
-            "name": "proxy_http", "config_file": ""
-        },
-        {
-            "name": "proxy_wstunnel", "config_file": ""
-        },
-        {
-            "name": "reqtimeout", "config_file": "reqtimeout.conf"
-        },
-        {
-            "name": "rewrite", "config_file": "reqtimeout.conf"
-        },
-        {
-            "name": "setenvif", "config_file": ""
-        },
-        {
-            "name": "ssl", "config_file": ""
-        },
-        {
-            "name": "socache_shmcb", "config_file": ""
-        },
-        {
-            "name": "status", "config_file": ""
-        },
-        {
-            "name": "wsgi", "config_file": ""
-        }
-    ],
-    "args_arguments": "-f $(sara_data.apache[configdir])/httpd.conf",
-    "sites": [],
-    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline' *.bootstrapcdn.com *.cloudflare.com fonts.googleapis.com estudybooks.surf.nl; script-src 'self' 'unsafe-inline' 'unsafe-eval' webstats.surf.nl code.jquery.com *.bootstrapcdn.com *.cloudflare.com *.aspnetcdn.com; img-src 'self' 'unsafe-inline' https: data: webstats.surf.nl; font-src 'self' data: *.bootstrapcdn.com fonts.gstatic.com; connect-src 'self'"
+    "user": "www-data"
 }

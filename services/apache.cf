@@ -1,10 +1,15 @@
 
-bundle common apache
+bundle agent apache
 {
     vars:
 
         any::
-            "configdir" string => "/opt/apache";
+            "configdir" string => "$(sara_data.apache[configdir])";
+            "document_root" string => "$(sara_data.apache[document_root])";
+            "logdir" string => "$(sara_data.apache[logdir])";
+            "modules_conf_dir" string => "$(configdir)/modules.d";
+            "sites_dir" string => "$(configdir)/sites.d";
+            "sites_root" string => "$(sara_data.apache[sites_root])";
 
             "performance_profile" string => "l_4c8m";
 
@@ -69,8 +74,28 @@ bundle agent apache_install()
 
 bundle agent apache_config()
 {
+    vars:
+        "modules" data => mergedata("sara_data.apache[modules_standard]", "sara_data.apache[modules_extra]");
+        "names" slist => getindices("modules");
+        "module_conf_files" slist => maplist("$(this).conf", @(names));
+
+        "apache_dirs_needed" slist => {
+            "$(apache.configdir)/local.d",
+            "$(apache.modules_conf_dir)",
+            "$(apache.sites_dir)",
+            "$(apache.document_root)",
+            "$(apache.sites_root)"
+        };
+
+        "site_files" slist => getvalues(mergedata("sara_data.apache[sites]", "sara_data.apache[sites_generated]")),
+            comment => "Make a list of site files used for this apache server";
+
     classes:
         "apache_config_dir_exists" expression => isdir("$(sara_data.apache[configdir])");
+
+        "apache_copy_dirs_set" expression => isvariable("sara_data.apache[copy_dirs]"),
+            comment => "Must we copy directories";
+
         "apache_restart" or => {
             "APACHE_MODULES_repaired",
             "APACHE_SITES_repaired",
@@ -81,60 +106,72 @@ bundle agent apache_config()
             "sara_etc_sysconfig_apache2"
         };
 
-    vars:
-        "apache_modules_index" slist => getindices("sara_data.apache[modules]");
-        "apache_modules" data => parsejson('[]');
-        "apache_modules" data => mergedata("apache_modules", parsejson('["$(sara_data.apache[modules][$(apache_modules_index)][config_file])"]'));
-
-        "apache_dirs_needed" slist => {
-            "$(sara_data.apache[configdir])/local.d",
-            "$(sara_data.apache[configdir])/modules.d",
-            "$(sara_data.apache[configdir])/sites.d",
-            "$(sara_data.apache[document_root])",
-            "$(sara_data.apache[sites_root])"
-        };
-
     files:
-        "$(sara_data.apache[configdir])/."
-            perms => mog("755", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            create => "true",
-            move_obstructions => "true",
-            classes => results("namespace", "APACHE_CONFIGDIR"),
-            ifvarclass => not("apache_config_dir_exists");
+        any::
+            "$(apache.configdir)/."
+                perms => mog("755", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+                create => "true",
+                move_obstructions => "true",
+                classes => results("namespace", "APACHE_CONFIGDIR"),
+                if => not("apache_config_dir_exists");
 
-        "$(apache_dirs_needed)/."
-            perms => mog("755", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            create => "true",
-            move_obstructions => "true",
-            classes => results("namespace", "$(apache_dirs_needed)"),
-            ifvarclass => "apache_config_dir_exists";
+            "$(apache_dirs_needed)/."
+                perms => mog("755", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+                create => "true",
+                move_obstructions => "true",
+                classes => results("namespace", "$(apache_dirs_needed)"),
+                if => "apache_config_dir_exists";
 
-        "$(sara_data.apache[configdir])/modules.d/$(apache_modules)"
-            perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            copy_from => sara_sync_no_perms_cp("data/apache/modules_config/$(apache_modules)", "hash"),
-            move_obstructions => "true",
-            classes => results("namespace", "APACHE_MODULES"),
-            ifvarclass => "apache_config_dir_exists";
+            "$(apache.modules_conf_dir)/$(names).conf"
+                comment => "Only copy configuration files if defined",
+                perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+                copy_from => sara_sync_no_perms_cp("$(modules[$(names)])", "hash"),
+                move_obstructions => "true",
+                classes => results("namespace", "APACHE_MODULES"),
+                if => and(
+                    "apache_config_dir_exists",
+                    not(strcmp("$(modules[$(names)])", ""))
+                    );
 
-        "$(sara_data.apache[configdir])/sites.d/$(sara_data.apache[sites])"
-            perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
-            copy_from => sara_sync_no_perms_cp("data/apache/sites/$(sara_data.apache[sites])", "hash"),
-            move_obstructions => "true",
-            classes => results("namespace", "APACHE_SITES"),
-            ifvarclass => "apache_config_dir_exists";
+            "$(apache.sites_dir)/$(sara_data.apache[sites])"
+                perms => mog("644", "$(sara_data.apache[user])", "$(sara_data.apache[group])"),
+                copy_from => sara_sync_no_perms_cp("data/apache/sites/$(sara_data.apache[sites])", "hash"),
+                move_obstructions => "true",
+                classes => results("namespace", "APACHE_SITES"),
+                if => "apache_config_dir_exists";
 
-        ## TODO delete sites.d and modules.d files when not needed
+            "$(apache.modules_conf_dir)"
+                comment => "delete module config file(s) not maintained by CFengine",
+                delete => sara_tidyfiles,
+                file_select => sara_exclude_files("@(module_conf_files)"),
+                depth_search => recurse("inf");
 
+            "$(apache.sites_dir)"
+                comment => "delete site config file(s) not maintained by CFengine",
+                delete => sara_tidyfiles,
+                file_select => sara_exclude_files("@(site_files)"),
+                depth_search => recurse("inf");
     methods:
-        "" usebundle => sara_mustache_autorun("apache"),
-            ifvarclass => or(
-                "apache_config_dir_exists",
-                "APACHE_CONFIGDIR_repaired"
-            );
+        any::
+            "" usebundle => sara_mustache_autorun("apache"),
+                if => or(
+                    "apache_config_dir_exists",
+                    "APACHE_CONFIGDIR_repaired"
+                );
+
+        apache_copy_dirs_set::
+            "" usebundle => sara_service_copy_files("apache");
 
     commands:
         "$(apache.restart)"
-            ifvarclass => "apache_restart";
+            if => "apache_restart";
+
+    reports:
+        "$(this.bundle) modules: '$(names)':'$(modules[$(names)])'"
+            if => "DEBUG|DEBUG_apache|DEBUG_$(this.bundle)";
+
+        "$(this.bundle) site: '$(site_files)'"
+            if => "DEBUG|DEBUG_apache|DEBUG_$(this.bundle)";
 }
 
 bundle agent apache_daemon_check()
@@ -147,7 +184,7 @@ bundle agent apache_daemon_check()
 
     commands:
         "$(apache.restart)"
-            ifvarclass => canonify("$(apache.daemon_name)_out_of_range");
+            if => canonify("$(apache.daemon_name)_out_of_range");
 }
 
 bundle agent apache_autorun()
@@ -157,7 +194,7 @@ bundle agent apache_autorun()
 
     methods:
         debian|sles::
-            "" usebundle => sara_data_autorun("apache");
+            "" usebundle => apache();
             "" usebundle => apache_install();
             "" usebundle => apache_config();
             "" usebundle => apache_daemon_check();
@@ -169,14 +206,33 @@ bundle agent apache_autorun()
 Source[apache.cf](/services/apache.cf)
 
 This bundle will be used to:
- * Configure Apache in /opt/apache so when updating/upgrading Apache you won't conflict with the distribution setup
- * Simplified setup so it's easier to use with CFEngine
+ * Configure Apache in /opt/apache so when updating/upgrading Apache there is no conflict with the distribution setup
+ * Simplified setup so it is easier to use with CFEngine
  * Still free formatting of Apache code for modules and sites
  * Only configures Apache, for Python wsgi and/or PHP a separate service needs to be created
+ * Clean sites.d directory if thee are files that are not specified  with `sites`or `sites_generated`
+ * Clean modules.d directory if thee are files that are not specified  with `modules_standard`or `modules_extra`
+
+Some site files may be generated om the machine like we do for JupyterHUB. We generate this file in the
+`apache.sites_dir` variable. To prevent these file from deletion we need to specify this  file(s) in the following
+json variable:
+ * `sites_generated`
+
+Some modules require configuration files. This specified per module and the default can be overriden with json
+variable `modules_extra`, eg:
+```json
+modules_extra: {
+        jk: data/apache/cua/jk.conf,
+        proxy_fcgi: data/apache/cua/proxy_fcgi.conf
+},
+```
 
 Please note that this bundle has only been tested/designed for Debian Stretch or Buster. And therefor a specific
 Debian Apache file envvars wil be written to `/etc/apache2/envvars`. This is needed to make sure Apache daemon
 uses the `/opt/apache/httpd.conf` instead of the default configuration file.
+
+The following json variables can be set in def.cf/json to  invoke files bundles:
+ * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
 
 TODO:
  - Desining separate services for Python wsgi and PHP
@@ -203,6 +259,6 @@ and extra json file(s) can be specified via:
 ```
 vars:
     any::
-        "apt_json_files" slist => { "debconf.json" };
+        "apache" slist => { "cua.json" };
 ```
 @endif

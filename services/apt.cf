@@ -46,7 +46,7 @@ bundle common apt
 bundle agent apt_autorun()
 {
     meta:
-        "tags"  slist => { "autorun", "template_apt" };
+        "tags"  slist => { "service_apt", "template_apt" };
 
     vars:
         APT_OS_VERSION_CHECK::
@@ -67,6 +67,7 @@ bundle agent apt_autorun()
             "" usebundle => sara_data_autorun("apt");
             "" usebundle => apt_install();
             "" usebundle => apt_repository();
+            "" usebundle => apt_auth_conf();
 
         APT_AUTOREMOVE::
             "" usebundle => apt_autoremove();
@@ -74,7 +75,7 @@ bundle agent apt_autorun()
         APT_AUTOMATIC_SECURITY_UPDATE::
             "" usebundle => apt_security_update_silent(),
                     comment => "Only run once a hour due to if_elapsed",
-                    ifvarclass => "$(sara_data.apt[security_schedule])",
+                    if => "$(sara_data.apt[security_schedule])",
                     action => if_elapsed(50);
 
         APT_CHECK_STATUS::
@@ -102,7 +103,7 @@ bundle agent apt_autorun()
         # Must be ported to def.json
         apt_debconf_set::
             "" usebundle => apt_debconf(),
-                ifvarclass => "$(sara_data.apt[debconf_schedule])";
+                if => "$(sara_data.apt[debconf_schedule])";
 
     reports:
         DEBUG|DEBUG_apt::
@@ -116,7 +117,7 @@ bundle agent apt_autoremove()
         any::
             "$(apt.command)"
                 args => "-y autoremove",
-                ifvarclass => "$(sara_data.apt[autoremove_schedule])";
+                if => "$(sara_data.apt[autoremove_schedule])";
 }
 
 bundle agent apt_kill_pkg_manager()
@@ -131,7 +132,7 @@ bundle agent apt_kill_pkg_manager()
 
     reports:
         "$(this.bundle): $(apt_cmds) was killed on host $(sys.host) running longer then a hour"
-            ifvarclass => or( canonify("$(this.bundle)_$(apt_cmds)_repaired") );
+            if => or( canonify("$(this.bundle)_$(apt_cmds)_repaired") );
 }
 
 bundle agent apt_os_version()
@@ -191,7 +192,7 @@ bundle agent apt_systemd_disable()
 
     commands:
         "$(paths.path[systemctl]) stop $(systemd_services_timers)"
-            ifvarclass => canonify("systemd_service_$(systemd_services_timers)_repaired");
+            if => canonify("systemd_service_$(systemd_services_timers)_repaired");
 }
 
 
@@ -287,7 +288,7 @@ bundle agent apt_check_status()
     reports:
         any::
             "$(this.bundle): Checking package manager status (apt)"
-                ifvarclass => "DEBUG|DEBUG_apt|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_apt|DEBUG_$(this.bundle)";
 
         apt_check_status_failed::
             "$(this.bundle): ERROR! Package manager returned an error!";
@@ -333,7 +334,7 @@ bundle agent apt_repository_generate(template_file, repo_files)
             "repo_data" data => data_expand("repo_data");
 
             "repo_data_str" string => format("%S", "repo_data"),
-                ifvarclass => "DEBUG|DEBUG_apt|DEBUG_apt_repository";
+                if => "DEBUG|DEBUG_apt|DEBUG_apt_repository";
 
             "repo_names" slist => getindices("repo_data");
             "repo_exclude_files" slist => maplist("$(this).list", @(repo_names));
@@ -411,7 +412,7 @@ bundle agent apt_repository_key(name, key)
                 contain => in_shell,
                 classes => sara_cmd_repair ( "@(import_key_error_codes)", "apt_repository_key_cmd" ),
                 action => if_elapsed("50"),
-                ifvarclass => or(
+                if => or(
                     canonify("apt_repository_key_$(key)_repaired"),
                     "$(sara_data.apt[key_check_schedule])",
                     "APT_FORCE_KEY_CMD"
@@ -420,13 +421,47 @@ bundle agent apt_repository_key(name, key)
     reports:
         any::
             "$(this.bundle): Generated $(filename) with $(key)"
-                ifvarclass => and(
+                if => and(
                                 canonify("apt_repository_key_$(key)_repaired"),
                                 "DEBUG_apt|DEBUG_apt_repository|DEBUG"
                                 );
 
         DEBUG_apt|DEBUG_apt_repository::
             "$(this.bundle): Checking repository:$(name) with key:$(key)";
+}
+
+
+bundle agent apt_auth_conf()
+{
+    vars:
+        any::
+            "header" string => "## Maintained by CFengine$(const.n)#$(const.n)";
+            "file" string => "$(apt.config_dir)/auth.conf";
+            "mustache" string => "$(header)
+{{#auth_conf}}
+machine {{{machine}}}
+login {{{login}}}
+password {{{password}}}
+{{/auth_conf}}
+";
+
+    files:
+@if minimum_version(3.12)
+        any::
+            "$(file)"
+                create => "true",
+                edit_template_string => "$(mustache)",
+                template_method => "inline_mustache",
+                template_data => "@(sara_data.apt)",
+                classes => if_repaired("sara$(file)");
+
+            "$(file)"
+                perms => mog("0600", "root", "root");
+@endif
+
+    reports:
+        "$(this.bundle): Has been called"
+            if => "DEBUG|DEBUG_apt|DEBUG_$(this.bundle)";
 }
 
 bundle agent apt_debconf()
@@ -447,7 +482,7 @@ bundle agent apt_debconf()
 
 @if minimum_version(3.11)
             "" usebundle => sara_show_data("sara_data", "apt[debconf][$(index)]"),
-                ifvarclass => "DEBGU|DEBUG_apt)|DEBUG_$(this.bundle)";
+                if => "DEBGU|DEBUG_apt)|DEBUG_$(this.bundle)";
 @endif
     reports:
         !debconf_module_exists::
@@ -468,20 +503,20 @@ bundle agent apt_debconf_set(package, field, type, value)
             "$(debconf_module)"
                 args   => "$(package) $(field) $(type) $(value) $(class)",
                 comment => "Run $(debconf_module) $(field) $(value)",
-                ifvarclass => "!(APT_DEBCONF_$(class)_CHANGED|APT_DEBCONF_$(class)_NOT_CHANGED)",
+                if => "!(APT_DEBCONF_$(class)_CHANGED|APT_DEBCONF_$(class)_NOT_CHANGED)",
                 module => "true";
 
         !dpkg_reconfigure_succeeded::
             "DEBIAN_FRONTEND=noninteractive $(apt.dpkg_reconfigure) $(package)"
                 comment => "Run $(apt.dpkg_reconfigure) $(package)",
                 contain => in_shell,
-                ifvarclass => "APT_DEBCONF_$(class)_CHANGED",
+                if => "APT_DEBCONF_$(class)_CHANGED",
                 classes => sara_cmd_repair("@(return_codes)",  "dpkg_reconfigure");
 
     reports:
         any::
             "$(this.bundle): $(debconf.response)"
-                ifvarclass => "APT_DEBCONF_$(class)_CHANGED|APT_DEBCONF_$(class)_ERROR|APT_DEBCONF_ERROR";
+                if => "APT_DEBCONF_$(class)_CHANGED|APT_DEBCONF_$(class)_ERROR|APT_DEBCONF_ERROR";
 
         dpkg_reconfigure_failed::
             "$(this.bundle): Failed to run '$(apt.dpkg_reconfigure)' for package '$(package)'";
@@ -501,8 +536,9 @@ Source: [apt.cf](/services/apt.cf)
 
 This bundle will be used to:
  * generate repository files in /etc/apt/sources.list.d
+ * generate /etc/apt/auth.conf, via the json variable `auth_conf`
  * install apt packages
- * Copy the gpg key files if `key_file` is set for repository
+ * Copy the gpg key files if `key_file` is set for repository (prefered method)
  * Fetch the gpg key via `apt_import_key` command if `repo_key` is set for repository
 
 The following actions are proctected by a class:
@@ -527,6 +563,17 @@ The classes can be set in def.cf/json:
 }
 ```
 
+The `/etc/apt/auth.conf` is default empty. But we can configure it for password enabled repositories via `auth.conf`:
+```
+"auth_conf": [
+    {
+        "login": "readonly",
+        "machine": "example.surfsara.nl/artifactory/CC-Debian-",
+        "password": "secret"
+    }
+]
+```
+                                                            ]
 ## Usage
 
 The bundle can be run via:

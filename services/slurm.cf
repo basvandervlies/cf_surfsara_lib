@@ -65,7 +65,7 @@ bundle agent slurm()
 bundle agent slurm_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_slurm" };
+        "tags" slist => { "service_slurm", "template_slurm" };
 
     classes:
         "spank_templates_set"  expression => isvariable("sara_data.slurm[spank_templates]"),

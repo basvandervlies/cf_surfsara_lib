@@ -46,7 +46,7 @@ bundle common apt
 bundle agent apt_autorun()
 {
     meta:
-        "tags"  slist => { "autorun", "template_apt" };
+        "tags"  slist => { "service_apt", "template_apt" };
 
     vars:
         APT_OS_VERSION_CHECK::

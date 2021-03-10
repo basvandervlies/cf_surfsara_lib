@@ -27,7 +27,7 @@ bundle common nhc
 bundle agent nhc_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_nhc" };
+        "tags" slist => { "service_nhc", "template_nhc" };
 
     methods:
         any::

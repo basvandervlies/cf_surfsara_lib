@@ -17,7 +17,7 @@ bundle agent jupyterhub
 bundle agent jupyterhub_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_jupyterhub" };
+        "tags" slist => { "service_jupyterhub", "template_jupyterhub" };
 
     methods:
         any::

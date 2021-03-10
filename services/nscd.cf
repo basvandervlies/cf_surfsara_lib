@@ -27,7 +27,7 @@ bundle common nscd
 bundle agent nscd_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_nscd" };
+        "tags" slist => { "service_nscd", "template_nscd" };
 
     methods:
         any::

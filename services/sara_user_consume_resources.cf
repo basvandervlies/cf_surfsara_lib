@@ -8,7 +8,7 @@ bundle common sara_user_consume_resources
 bundle agent sara_user_consume_resources_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_sara_user_consume_resources" };
+        "tags" slist => { "service_sara_user_consume_resources", "template_sara_user_consume_resources" };
 
     classes:
         any::

@@ -116,7 +116,7 @@ bundle agent node_exporter_service_status(service, status)
 bundle agent node_exporter_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_node_exporter" };
+        "tags" slist => { "service_node_exporter", "template_node_exporter" };
 
     methods:
         "" usebundle => sara_data_autorun("node_exporter");

@@ -4,7 +4,7 @@
 bundle agent copy_dirs()
 {
     meta:
-        "tags" slist => { "autorun", "template_copy_dirs" };
+        "tags" slist => { "service_copy_dirs", "template_copy_dirs" };
 
     methods:
         any::

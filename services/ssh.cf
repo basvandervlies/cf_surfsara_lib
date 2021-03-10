@@ -90,7 +90,7 @@ bundle common ssh()
 bundle agent ssh_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_ssh" };
+        "tags" slist => { "service_ssh", "template_ssh" };
 
     methods:
         any::

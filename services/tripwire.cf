@@ -10,7 +10,7 @@ bundle common tripwire()
 bundle agent tripwire_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_tripwire" };
+        "tags" slist => { "service_tripwire", "template_tripwire" };
 
     classes:
         any::

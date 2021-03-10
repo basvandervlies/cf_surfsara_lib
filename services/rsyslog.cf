@@ -67,7 +67,7 @@ bundle agent rsyslog_daemon_check()
 bundle agent rsyslog_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_rsyslog" };
+        "tags" slist => { "service_rsyslog", "template_rsyslog" };
 
     methods:
         "" usebundle => rsyslog_install();

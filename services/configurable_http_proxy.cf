@@ -9,7 +9,7 @@ bundle agent configurable_http_proxy
 bundle agent configurable_http_proxy_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_configurable_http_proxy" };
+        "tags" slist => { "service_configurable_http_proxy", "template_configurable_http_proxy" };
 
     methods:
         any::

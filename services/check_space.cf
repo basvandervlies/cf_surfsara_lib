@@ -4,7 +4,7 @@
 bundle agent check_space_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_check_space" };
+        "tags" slist => { "service_check_space", "template_check_space" };
 
     methods:
         any::

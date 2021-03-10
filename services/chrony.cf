@@ -42,7 +42,7 @@ bundle common chrony {
 bundle agent chrony_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_chrony" };
+        "tags" slist => { "service_chrony", "template_chrony" };
 
     methods:
         any::

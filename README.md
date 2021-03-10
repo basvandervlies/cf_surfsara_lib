@@ -20,22 +20,22 @@
 # SURF CFEngine Library (SCL) for configuring services with json/mustache
 
 In the distribute the SCL is included and services that are build with the SCL building blocks.
-Most SCL building block  can be defined or overriden with the json data.
-The SCL building block are, eg:
+SCL building blocks are json defined and can be overriden with the `def.json` data.
+The SCL building blocks are, eg:
  * easy generation of configuration files with mustache and json data (merging strategies)
- * Package installation
+ * package installation
  * tarball installation
  * copy directories
  * copy files
- * inventory framework. Which inventory programs must be run.
- * services framework. Which services must be included and run.
+ * inventory framework. Which inventory programs must be run, default any class
+ * services framework. Which services must be included and run, defauly any class
  * inline documentation
 
 
 The goal is to setup a library were we can easilly install/configure/maintain services. There are many
-services included and these are allused at SURF for our HPC clusters and Office Automation. We hope that
+services included and these are used at SURF for our HPC clusters and Office Automation. We hope that
 this is also useful for others and that will grow as the standard repo for cfengine services. In Ansible
-they call it playbooks and in Salt terms formula.
+they call it playbooks and in Salt terms formulas.
 
 ## mustache/json rules
 

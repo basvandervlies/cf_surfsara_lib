@@ -22,7 +22,7 @@ bundle common resolv
 bundle agent resolv_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_resolv" };
+        "tags" slist => { "service_resolv", "template_resolv" };
 
     methods:
         any::

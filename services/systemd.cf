@@ -29,7 +29,7 @@ bundle common systemd
 bundle agent systemd_autorun()
 {
     meta:
-        "tags"  slist => { "autorun", "template_systemd" };
+        "tags"  slist => { "service_systemd", "template_systemd" };
 
     methods:
         any::

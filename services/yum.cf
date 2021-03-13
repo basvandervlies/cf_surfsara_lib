@@ -63,7 +63,7 @@ bundle agent yum_security_update()
 bundle agent yum_autorun()
 {
     meta:
-        "tags"  slist => {"autorun", "template_yum"};
+        "tags"  slist => {"service_yum", "template_yum"};
 
     methods:
         "" usebundle => sara_data_autorun("yum");

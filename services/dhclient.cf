@@ -22,7 +22,7 @@ bundle common dhclient
 bundle agent dhclient_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_dhclient" };
+        "tags" slist => { "service_dhclient", "template_dhclient" };
 
     methods:
         any::

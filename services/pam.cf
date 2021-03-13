@@ -29,7 +29,7 @@ bundle common pam()
 bundle agent pam_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_pam" };
+        "tags" slist => { "service_pam", "template_pam" };
 
     methods:
         any::

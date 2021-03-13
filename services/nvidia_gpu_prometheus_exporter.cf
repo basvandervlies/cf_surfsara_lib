@@ -103,7 +103,7 @@ bundle agent nvidia_gpu_prometheus_exporter_daemon_check()
 bundle agent nvidia_gpu_prometheus_exporter_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_nvidia_gpu_prometheus_exporter" };
+        "tags" slist => { "service_nvidia_gpu_prometheus_exporter", "template_nvidia_gpu_prometheus_exporter" };
 
     methods:
         "" usebundle => sara_data_autorun("nvidia_gpu_prometheus_exporter");

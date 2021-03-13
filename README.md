@@ -19,9 +19,8 @@
 <!-- vim-markdown-toc -->
 # SURF CFEngine Library (SCL) for configuring services with json/mustache
 
-In the distribute the SCL is included and services that are build with the SCL building blocks.
-SCL building blocks are json defined and can be overriden with the `def.json` data.
-The SCL building blocks are, eg:
+The SCL distribution consists of a library and services part. The servicea are build with
+the SCL building blocks. The SCL building blocks are, eg:
  * easy generation of configuration files with mustache and json data (merging strategies)
  * package installation
  * tarball installation
@@ -30,7 +29,6 @@ The SCL building blocks are, eg:
  * inventory framework. Which inventory programs must be run, default any class
  * services framework. Which services must be included and run, defauly any class
  * inline documentation
-
 
 The goal is to setup a library were we can easilly install/configure/maintain services. There are many
 services included and these are used at SURF for our HPC clusters and Office Automation. We hope that

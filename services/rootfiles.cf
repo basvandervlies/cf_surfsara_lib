@@ -20,7 +20,7 @@ bundle common rootfiles(params)
 bundle agent rootfiles_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_rootfiles" };
+        "tags" slist => { "service_rootfiles", "template_rootfiles" };
 
     methods:
         "" usebundle => sara_data_autorun("rootfiles");

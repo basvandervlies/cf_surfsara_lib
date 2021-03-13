@@ -24,7 +24,7 @@ bundle common sudo
 bundle agent sudo_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_sudo" };
+        "tags" slist => { "service_sudo", "template_sudo" };
 
     methods:
         any::

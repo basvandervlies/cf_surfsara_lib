@@ -4,7 +4,7 @@
 bundle agent pkg_management_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_pkg_management" };
+        "tags" slist => { "service_pkg_management", "template_pkg_management" };
 
     methods:
         "" usebundle => sara_data_autorun("pkg_management");

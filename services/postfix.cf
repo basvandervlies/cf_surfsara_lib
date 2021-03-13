@@ -80,7 +80,7 @@ bundle common postfix() {
 bundle agent postfix_autorun()
 {
     meta:
-        "tags"  slist => { "autorun", "template_postfix" };
+        "tags"  slist => { "service_postfix", "template_postfix" };
 
     methods:
         any::

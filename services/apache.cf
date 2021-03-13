@@ -190,7 +190,7 @@ bundle agent apache_daemon_check()
 bundle agent apache_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_apache" };
+        "tags" slist => { "service_apache", "template_apache" };
 
     methods:
         debian|sles::

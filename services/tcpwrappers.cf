@@ -43,7 +43,7 @@ bundle common tcpwrappers()
 bundle agent tcpwrappers_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_tcpwrappers" };
+        "tags" slist => { "service_tcpwrappers", "template_tcpwrappers" };
 
     methods:
         any::

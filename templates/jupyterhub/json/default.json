@@ -2,8 +2,10 @@
     "bin_dir": "$(sara_data.jupyterhub[dir])/bin" ,
     "classes": {
         "SERVER": [
-            "r12n30",
             "services1"
+        ],
+        "RESTART_SCHEDULE": [
+            "once_a_day"
         ]
     },
     "config_default": {
@@ -11,11 +13,22 @@
             "'admin_team'"
         ],
         "admin_users": [ ],
+        "announcements_disabled": {
+            "announcement" : "JupyterHub planned maintenance: Tue 1st Dec 07:00-17:00"
+        },
         "batch_lines": [
             "export LMOD_CMD=/hpc/eb/modules-4.0.0/libexec/modulecmd.tcl"
         ],
         "dir": "$(sara_data.jupyterhub[dir])",
         "jupyter_config_dir": "$HOME/.jupyter",
+        "notebook_options": {
+            "NotebookApp.terminado_settings": "{'shell_command': ['bash']}"
+        },
+        "notebook_options_homework": {
+            "MappingKernelManager.cull_idle_timeout": "300",
+            "MappingKernelManager.cull_interval": "60",
+            "NotebookApp.shutdown_no_activity_timeout": "300"
+        },
         "load_modules": [
             "2019",
             "jupyterhub/1.0.0-foss-2019b-Python-3.6.6",

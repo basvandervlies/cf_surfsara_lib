@@ -5,6 +5,7 @@ bundle agent slurm()
 {
     vars:
         any::
+            "acct_gather_file"      string => "$(config_dir)/acct_gather.conf";
             "config_file"           string => "$(config_dir)/slurm.conf";
             "cgroup_config_file"    string => "$(config_dir)/cgroup.conf";
             "cgroup_allowed_file"   string => "$(config_dir)/cgroup_allowed_devices_file.conf";
@@ -23,6 +24,7 @@ bundle agent slurm()
             "uid"                   string => "555";
 
             "template_2_destination" data => parsejson('{
+                    "acct_gather.mustache": "$(acct_gather_file)",
                     "cgroup.mustache": "$(cgroup_config_file)",
                     "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
                     "gres.mustache": "$(gres_config_file)",
@@ -63,7 +65,7 @@ bundle agent slurm()
 bundle agent slurm_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_slurm" };
+        "tags" slist => { "service_slurm", "template_slurm" };
 
     classes:
         "spank_templates_set"  expression => isvariable("sara_data.slurm[spank_templates]"),
@@ -544,6 +546,8 @@ Source: [slurm.cf](/services/slurm.cf)
 This bundle will generate these/this file(s) from mustache templates:
  * debian in `/etc/slurm-llnl`
  * centos in `/etc/slurm`
+ * tarball installation uses the `config_dir` variable specified in the json file, eg `/opt/slurm/etc`
+    * acct_gather.conf
     * cgroup.conf
     * cgroup_allowed_devices_file.conf
     * gres.conf

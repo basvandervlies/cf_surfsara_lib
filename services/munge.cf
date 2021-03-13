@@ -24,7 +24,7 @@ bundle common munge()
 bundle agent munge_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_munge" };
+        "tags" slist => { "service_munge", "template_munge" };
 
     methods:
         any::

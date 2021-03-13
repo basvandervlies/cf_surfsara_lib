@@ -21,7 +21,7 @@ bundle common nsswitch(params)
 bundle agent nsswitch_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_nsswitch" };
+        "tags" slist => { "service_nsswitch", "template_nsswitch" };
 
     methods:
         "config" usebundle => sara_data_autorun("nsswitch");

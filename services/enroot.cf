@@ -13,7 +13,7 @@ bundle agent enroot()
 bundle agent enroot_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_enroot" };
+        "tags" slist => { "service_enroot", "template_enroot" };
 
     methods:
         "" usebundle => enroot();

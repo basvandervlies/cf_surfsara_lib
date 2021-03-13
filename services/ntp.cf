@@ -74,7 +74,7 @@ bundle common ntp {
 bundle agent ntp_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_ntp" };
+        "tags" slist => { "service_ntp", "template_ntp" };
 
     methods:
         any::

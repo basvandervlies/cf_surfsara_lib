@@ -26,7 +26,7 @@ bundle common pam_radius()
 bundle agent pam_radius_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_pam_radius" };
+        "tags" slist => { "service_pam_radius", "template_pam_radius" };
 
     methods:
         any::

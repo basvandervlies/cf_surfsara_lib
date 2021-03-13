@@ -75,7 +75,7 @@ bundle agent slurm_prometheus_exporter_daemon_check()
 bundle agent slurm_prometheus_exporter_autorun()
 {
     meta:
-        "tags" slist => { "autorun", "template_slurm_prometheus_exporter" };
+        "tags" slist => { "service_slurm_prometheus_exporter", "template_slurm_prometheus_exporter" };
 
     methods:
         "" usebundle => sara_data_autorun("slurm_prometheus_exporter");

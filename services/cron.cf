@@ -25,7 +25,7 @@ bundle common cron()
 bundle agent cron_autorun()
 {
     meta:
-         "tags" slist => { "autorun", "template_cron" };
+         "tags" slist => { "service_cron", "template_cron" };
 
     methods:
         "" usebundle => sara_template_autorun("cron"),

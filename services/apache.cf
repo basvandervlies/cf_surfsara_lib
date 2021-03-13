@@ -206,10 +206,26 @@ bundle agent apache_autorun()
 Source[apache.cf](/services/apache.cf)
 
 This bundle will be used to:
- * Configure Apache in /opt/apache so when updating/upgrading Apache you won't conflict with the distribution setup
- * Simplified setup so it's easier to use with CFEngine
+ * Configure Apache in /opt/apache so when updating/upgrading Apache there is no conflict with the distribution setup
+ * Simplified setup so it is easier to use with CFEngine
  * Still free formatting of Apache code for modules and sites
  * Only configures Apache, for Python wsgi and/or PHP a separate service needs to be created
+ * Clean sites.d directory if thee are files that are not specified  with `sites`or `sites_generated`
+ * Clean modules.d directory if thee are files that are not specified  with `modules_standard`or `modules_extra`
+
+Some site files may be generated om the machine like we do for JupyterHUB. We generate this file in the
+`apache.sites_dir` variable. To prevent these file from deletion we need to specify this  file(s) in the following
+json variable:
+ * `sites_generated`
+
+Some modules require configuration files. This specified per module and the default can be overriden with json
+variable `modules_extra`, eg:
+```json
+modules_extra: {
+        jk: data/apache/cua/jk.conf,
+        proxy_fcgi: data/apache/cua/proxy_fcgi.conf
+},
+```
 
 Please note that this bundle has only been tested/designed for Debian Stretch or Buster. And therefor a specific
 Debian Apache file envvars wil be written to `/etc/apache2/envvars`. This is needed to make sure Apache daemon
@@ -243,6 +259,6 @@ and extra json file(s) can be specified via:
 ```
 vars:
     any::
-        "apt_json_files" slist => { "debconf.json" };
+        "apache" slist => { "cua.json" };
 ```
 @endif

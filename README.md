@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [SURF CFEngine Library (SCL) for configuring services with json/mustache](#surf-cfengine-library-scl-for-configuring-services-with-jsonmustache)
+* [SURF CFEngine Library (SCL) for building services with json/mustache](#surf-cfengine-library-scl-for-building-services-with-jsonmustache)
     * [mustache/json rules](#mustachejson-rules)
         * [JSON Merge strategy](#json-merge-strategy)
     * [Installation](#installation)
@@ -17,9 +17,9 @@
     * [cf-agent command line options](#cf-agent-command-line-options)
 
 <!-- vim-markdown-toc -->
-# SURF CFEngine Library (SCL) for configuring services with json/mustache
+# SURF CFEngine Library (SCL) for building services with json/mustache
 
-The SCL distribution consists of a library and services part. The servicea are build with
+The SCL distribution consists of a library and services part. The services are build with
 the SCL building blocks that can be controlled/configured with json data. The SCL building blocks
 are, eg:
  * easy generation of configuration files with mustache and json data (merging strategies)

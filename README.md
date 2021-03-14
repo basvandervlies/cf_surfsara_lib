@@ -31,7 +31,7 @@ are, eg:
  * services framework. Which services must be included and run, defauly any class
  * inline documentation
 
-The goal is to setup a library were we can easilly install/configure/maintain services. There are many
+The goal is to setup a library were we can easily install/configure/maintain services. There are many
 services included and these are used at SURF for our HPC clusters and Office Automation. We hope that
 this is also useful for others and that will grow as the standard repo for cfengine services. In Ansible
 they call it playbooks and in Salt terms formulas.

@@ -111,7 +111,7 @@ You can run the same script it will detect its an update. This script will overw
 
 1. Login on your policy server.
 1. `cp -a masterfiles/lib/surfsara <masterfiles>/lib/surfsara`
-1. `cp -a templates/\* $(sys.workdir)/templates`
+1. `cp -a templates/* $(sys.workdir)/templates`
 1. include `/lib/surfsara/stdlib.cf` in your inputs
 ```
 body common control
@@ -241,7 +241,7 @@ vars:
 ```
 
 If you defined your own `def.cf` and do not want the one included in this framework you can set the following class:
- * `SURFSARA\_SKIP\_DEF\_CF\_INCLUDE`
+ * `SURFSARA_SKIP_DEF_CF_INCLUDE`
 
 
 ## cf-agent command line options

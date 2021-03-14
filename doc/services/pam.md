@@ -8,14 +8,18 @@ inline mustache template. Only work for cfengine => 3.12.
 if one of the files is changed then the following **class** will be set:
  * `sara_etc_pam_d_<filename>`
 
+The bundle can also generate configuration files for, class are set with `if_repaired("sara$(file)")`:
+ * pam_limits --> /etc/security/limits.d/scl.conf
+ * pam_listfiles --> /etc/security/<section>.<allow|deny>, section can be `group|user`
+
 These files will be generated with the  json data specified
 the templates are located in:
  * templates/pam/
  * templates/pam/json
 
-The following json variables can be set in def.cf/json to invoke files bundles:                                                                                                                           
+The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
-  * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
 
 ## Usage
 
@@ -51,15 +55,68 @@ If you want to debug these bundle set the `DEBUG_pam` class, eg:
 ## Def.cf/json
 
 See [default.json](/templates/pam/json/default.json) what the default values are and
-which variables can be overriden.
+which variables can be overriden. This are all data section definitions.  To couple a data
+section to a pam file, see [default_pam.json](/templates/pam/json/default_pam.json) for debian|centos.
 
+### pam configuration files
+
+To generate the configuration files for the pam module. We use inline json to trigger the generation:
+
+#### pam_listfile
+
+For we can generate the `group.allow|deny` in /etc/security with the following json file:
+```json
+    pam_listfile: {
+        group: {
+            allow: [
+                lisa_surfsara,
+                surftraining_student_jupyter_ssh,
+                surftraining_teacher
+            ],
+            deny:  [
+                sw_lisa
+           ]
+        }
+    }
+}
+```
+
+The pam module configuration line:
+ * `account required pam_listfile.so onerr=fail item=group sense=allow file=/etc/security/group.allow`
+
+
+#### pam_limits
+
+If data section is defined we generate the following file `/etc/security/limit.d/scl.conf`, eg:
+```json
+
+    "pam_limits": [
+        "# Managed by CFEngine",
+        "#",
+        "*       soft    nofile      4096",
+        "*       hard    nofile      8192",
+        "*       soft    memlock     unlimited",
+        "*       hard    memlock     unlimited",
+        "*       soft    stack       unlimited",
+        "*       hard    stack       unlimited",
+        "root       soft    nofile      4096",
+        "root       hard    nofile      8192",
+        "root       soft    memlock     unlimited",
+        "root       hard    memlock     unlimited",
+        "root       soft    stack       unlimited",
+        "root       hard    stack       unlimited"
+    ]
+}
+```
+
+### Examples
 Here are some examples how to use it:
  * specify pam configuration in def.cf:
 ```
 vars:
     "pam_json_files" slist => { "default_pam.json" };
 ```
- * Define pam stack in *pam/templates/json/sara.json*:
+ * Define pam data stack in *pam/templates/json/scl.json*:
 ```json
 "common-account": {
     "comment": "only local logins",
@@ -136,7 +193,7 @@ vars:
 ]
 ```
 
- * create the pam files with the above  data definitions
+ * create the pam files with the above  pam data definitions
 ```
 vars:
     "pam" data => parsejson('{
@@ -169,3 +226,4 @@ vars:
     }
 }
 ```
+

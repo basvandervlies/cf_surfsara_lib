@@ -4,8 +4,9 @@ Source: [apt.cf](/services/apt.cf)
 
 This bundle will be used to:
  * generate repository files in /etc/apt/sources.list.d
+ * generate /etc/apt/auth.conf, via the json variable `auth_conf`
  * install apt packages
- * Copy the gpg key files if `key_file` is set for repository
+ * Copy the gpg key files if `key_file` is set for repository (prefered method)
  * Fetch the gpg key via `apt_import_key` command if `repo_key` is set for repository
 
 The following actions are proctected by a class:
@@ -30,6 +31,17 @@ The classes can be set in def.cf/json:
 }
 ```
 
+The `/etc/apt/auth.conf` is default empty. But we can configure it for password enabled repositories via `auth.conf`:
+```
+"auth_conf": [
+    {
+        "login": "readonly",
+        "machine": "example.surfsara.nl/artifactory/CC-Debian-",
+        "password": "secret"
+    }
+]
+```
+                                                            ]
 ## Usage
 
 The bundle can be run via:

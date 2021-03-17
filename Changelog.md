@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 0.9.82 (2021-03-16 Dre)](#version-0982-2021-03-16-dre)
+* [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
 * [Version: 0.9.82 (2020-12-05 sint)](#version-0982-2020-12-05-sint)
 * [Version: 0.9.77 (2020-07-14 tommie)](#version-0977-2020-07-14-tommie)
     * [Tarball installation](#tarball-installation)
@@ -21,7 +21,7 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 0.9.82 (2021-03-16 Dre)
+# Version: 0.9.88 (2021-03-16 Dre)
  * apache service changes:
     * Use `data` shortcut for copying files (is cfengine standard)
     * json data format for modules  has been changed for easy overriding configuration files

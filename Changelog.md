@@ -23,7 +23,7 @@
 <!-- vim-markdown-toc -->
 # Version: 0.9.82 (2021-03-16 Dre)
  * apache service changes:
-    *  Use `data` shortcut for copying files (is cfengine standard)
+    * Use `data` shortcut for copying files (is cfengine standard)
     * json data format for modules  has been changed for easy overriding configuration files
       *  added `modules_standard` and `modules_extra`.
     * Clean modules that are not defined in `modules_standard` and `modules_extra`

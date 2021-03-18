@@ -31,6 +31,8 @@
     * All apache directories are now standard variables, eg `apache.sites_dir` and can be specified via json
     * Added a new json variable `sites_generated` a list of files that are generated on the host, eg: jupyterhub
     * Added `copy_dirs` section for apache This allow to copy tomcat configuration file for workers
+ * apt service changes:
+    * Generate /etc/apt/auth.conf. This file is used for password protected repositories. 
  * pam service changes:
     *  Added genertation of /etc/security/limits.d/scl.conf when specified in json file (limits\_compute.json)
  * postfix service changes:

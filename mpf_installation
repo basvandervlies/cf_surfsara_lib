@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 ## Some defaults can be overriden by command line opts
 #
 CFENGINE_DIR=/var/cfengine
 CFENGINE_MASTERFILES_DIR=$CFENGINE_DIR/masterfiles
 CFENGINE_TEMPLATES_DIR=$CFENGINE_DIR/templates
-CFENGINE_MODULES_DIR=$CFENGINE_DIR/modules
+CFENGINE_MODULES_DIR=$CFENGINE_MASTERFILES_DIR/modules
 
 SURFSARA_LIB="masterfiles/lib/surfsara"
 SURFSARA_AUTORUN_SERVICE="masterfiles/services/autorun/surfsara.cf"
@@ -92,6 +92,14 @@ else
     cp $SURFSARA_SERVICES/* $CFENGINE_SERVICES_DIR/surfsara
 fi
 
+### Modules
+#
+if [ ! -d  $CFENGINE_MODULES_DIR/surfsara ]
+then
+    mkdir $CFENGINE_MODULES_DIR/surfsara
+fi
+cp -a $SURFSARA_MODULES/* $CFENGINE_MODULES_DIR/surfsara
+
 ### Templates and json files
 #
 if [ ! -d  $CFENGINE_TEMPLATES_DIR ]
@@ -99,6 +107,7 @@ then
     mkdir $CFENGINE_TEMPLATES_DIR
 fi
 
+### Must we update templates/json files
 cd  $SURFSARA_TEMPLATES || exit 1
 for d in *
 do
@@ -116,11 +125,3 @@ do
             cp --no-dereference -R $d $CFENGINE_TEMPLATES_DIR
         fi
 done
-
-### Modules
-#
-if [ ! -d  $CFENGINE_MODULES_DIR/surfsara ]
-then
-    mkdir $CFENGINE_MODULES_DIR/surfsara
-fi
-cp -a $SURFSARA_MODULES/* $CFENGINE_MODULES_DIR/surfsara

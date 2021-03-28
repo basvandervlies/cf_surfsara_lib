@@ -6,6 +6,8 @@ Source: [slurm.cf](/services/slurm.cf)
 This bundle will generate these/this file(s) from mustache templates:
  * debian in `/etc/slurm-llnl`
  * centos in `/etc/slurm`
+ * tarball installation uses the `config_dir` variable specified in the json file, eg `/opt/slurm/etc`
+    * acct_gather.conf
     * cgroup.conf
     * cgroup_allowed_devices_file.conf
     * gres.conf
@@ -121,6 +123,7 @@ done dynamically,eg:
                 ]
             }
             "run_bundle': <not_required> when set run the specified bundle"
+            "run_class': <not_required> when set run the specified bundle only for the specified classses (string or list)"
         }
     },
 ```

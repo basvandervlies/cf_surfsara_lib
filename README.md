@@ -1,17 +1,54 @@
-# SURFsara CFEngine Library (SCL) for mustache/json templates
+<!-- vim-markdown-toc GFM -->
 
-At SURFsara we have developed a general library to generate files from templates. In our setup we can easily
-specify the default values and override them in other json file(s) or via def.cf/json. The goal is to set
-up an global  repository for mustache templates.
+* [SURF CFEngine Library (SCL) for building services with json/mustache](#surf-cfengine-library-scl-for-building-services-with-jsonmustache)
+    * [mustache/json rules](#mustachejson-rules)
+        * [JSON Merge strategy](#json-merge-strategy)
+    * [Installation](#installation)
+        * [MPF installation](#mpf-installation)
+            * [update](#update)
+        * [Own framework](#own-framework)
+        * [def.node\_template\_dir](#defnode_template_dir)
+        * [CF-serverd shortcut configuration for cfengine version less then 3.10.1](#cf-serverd-shortcut-configuration-for-cfengine-version-less-then-3101)
+    * [Usage](#usage)
+        * [sara\_services\_enabled run method](#sara_services_enabled-run-method)
+        * [def.json](#defjson)
+            * [Service classes](#service-classes)
+        * [lib/surfsara/def.cf](#libsurfsaradefcf)
+    * [cf-agent command line options](#cf-agent-command-line-options)
 
-For all bundles the mustache/json file(s) will be copied to the local node directory (`$(def.node_template_dir)`:
- * The json and template file(s) are copied from the policy hub shortcut: `templates/$(bundle_name)`
- * The copies are placed in the local node directory: `$(def.node_template_dir)/$(bundle_name)`
+<!-- vim-markdown-toc -->
+# SURF CFEngine Library (SCL) for building services with json/mustache
+
+The SCL distribution consists of a library and services part. The services are build with
+the SCL building blocks that can be controlled/configured with json data. The SCL building blocks
+are, eg:
+ * easy generation of configuration files with mustache and json data (merging strategies)
+ * package installation
+ * tarball installation
+ * copy directories
+ * copy files
+ * inventory framework. Which inventory programs must be run, default any class
+ * services framework. Which services must be included and run, defauly any class
+ * inline documentation
+
+The goal is to setup a library were we can easily install/configure/maintain services. There are many
+services included and these are used at SURF for our HPC clusters and Office Automation. We hope that
+this is also useful for others and that will grow as the standard repo for cfengine services. In Ansible
+they call it playbooks and in Salt terms formulas.
+
+## mustache/json rules
+
+The project started as library for generating configuration files with mustache/json.  In our CFengine
+configuration we used different methods and we wanted a standard method for generating these configuration
+files. This is the standard that we defined for the mustache/json files and json merging:
+ * For all bundles the mustache/json file(s) will be copied to the local node directory (`$(def.node_template_dir)`
+ * The json and template file(s) are copied from the policy hub shortcut: `templates/$(service_name)`
+ * The copies are placed in the local node directory: `$(def.node_template_dir)/$(service_name)`
  * The following json must always be present and will always be copied: *default.json*
- * Extra json file(s) can be specified in *def.cf/json*: `$(bundle_name)[json_files]`
+ * Extra json file(s) can be specified in *def.cf/json*: `$(service_name)[json_files]`
  * Scripts can generate json file(s) on a host/node. The json file must be copied into:
-    * `$(def.node_template_dir)/$(bundle_name)`
-    * The generated file(s) are specified in def.cf/json: `$(bundle_name)[local_generated_json_files]`
+    * `$(def.node_template_dir)/$(service_name)`
+    * The generated file(s) are specified in def.cf/json: `$(service_name)[local_generated_json_files]`
  * You can override values via *def.json*, Note: This one always wins.
  * CFEngine variables are expanded:
     *  Bundle data two levels.
@@ -28,15 +65,15 @@ This framework depends on the augemnts file `def.json`, we have developed a mult
  * https://docs.cfengine.com/docs/3.15/reference-language-concepts-augments.html
  * https://basvandervlies.blogspot.com/2018/09/cfengine-312-new-features-missingok-and.html
 
-## Merge strategy
+### JSON Merge strategy
 
 The merge strategy is::
   1. `default.json`
-  1. `def.<bundle_name>_json_files` if defined
-  1. `def.<bundle_name>[json_files]` if defined
-  1. `def.<bundle_name>_local_generated_json_files` if defined
-  1. `def.<bundle_name>[local_generated_json_files]` if defined
-  1. `def.<bundle_name>` if defined in def.json or:
+  1. `def.<service_name>_json_files` if defined
+  1. `def.<service_name>[json_files]` if defined
+  1. `def.<service_name>_local_generated_json_files` if defined
+  1. `def.<service_name>[local_generated_json_files]` if defined
+  1. `def.<service_name>` if defined in def.json or:
         * lib/surfsara/def.cf MPF setup
         * your own file with variable scope `def`
 
@@ -45,30 +82,6 @@ The merge strategy is::
 there are two options
  * Include it in the Master Policy Framework (MPF)
  * Include it in your own framework
-
-### def.node\_template\_dir
-
-The  `def.node_template_dir` variable is set in `lib/surfsara/def.cf`, but can also be set
-set in `def.json`. The *def.json* wins, eg:
-```
-vars:
-{
-   "node_template_dir" : "/etc/node_status/templates"
-}
-```
-
-default value is: `/var/cfengine/node_templates`
-
-### CF-serverd shortcut configuration for cfengine version less then 3.10.1
-
-For older versions you have to manually add the `shorcut templates` to `controls/cf_serverd.cf`
-```
-      "$(sys.workdir)/templates"
-      handle => "server_access_grant_access_templates",
-      shortcut => "templates",
-      comment => "Grant access to templates directory",
-      admit => { @(def.acl) };
-```
 
 ### MPF installation
 
@@ -85,7 +98,7 @@ For older versions you have to manually add the `shorcut templates` to `controls
 ```
 
 You can test your installation with
- * `cf-agent -Kv | grep surfsara_autorun`
+ * `cf-agent -Kv | grep surfsara\_autorun`
 
 #### update ####
 
@@ -110,29 +123,45 @@ body common control
     };
 }
 ```
+
+### def.node\_template\_dir
+
+The  `def.node_template_dir` variable is set in `lib/surfsara/def.cf`, but can also be set
+set in `def.json`. The *def.json* wins, eg:
+```
+vars:
+{
+   "node_template_dir" : "/etc/node_status/templates"
+}
+```
+
+default value is: `/var/cfengine/node_templates`
+
+### CF-serverd shortcut configuration for cfengine version less then 3.10.1
+
+For older versions you have to manually add the `shorcut templates` to `controls/cf_serverd.cf`
+```
+      "$(sys.workdir)/templates"
+      handle => "server_access_grant_access_templates",
+      shortcut => "templates",
+      comment => "Grant access to templates directory",
+      admit => { @(def.acl) };
+```
 See above to add `templates shortcut` to cf-serverd.
 
 ## Usage
 
-
-The documentattion is embed in the source files, and generated:
+The documentattion is embedded in the source files, and generated:
  * [Library documentation](doc/library.md)
  * [Services documentation](doc/services.md)
 
 There are several services setups included with inline documentation. These setups are
-used in production at SURFsara.
+used in production at SURF.
 
-To enable the template on your system:
- * MPF:
-  1. The prefered way is to use `def.sara_services_enabled` method in def.cf/def.json.
-  1. Copy a setup to the `masterfiles/services/autorun` directory
- * Own Framework:
-   * `def.sara_services_enabled` method
-   * usebundle:
-     1. ntp_autorun()
-     1. tcpwrappers_autorun()
+To enable the service on your system use `def.sara_services_enabled` method in def.cf/def.json for
+both installations method
 
-###  sara\_services\_enabled method
+###  sara\_services\_enabled run method
 
 This is the prefered method for MPF and your own frameork. With this method you can contol which services are run
 and which files are included, eg: def.json
@@ -144,19 +173,18 @@ and which files are included, eg: def.json
     ]
 }
 ```
-This will include the surfsara service files for `ntp.cf` and `resolv.cf` and run all bundles that have the meta tag
-`template_ntp` and `template_resolv`. The bundle run can be protected by an class statement, default is `any`, eg:
+This will include the service files `ntp.cf` and `resolv.cf` and run all bundles that have the meta tag
+`service\_ntp` and `service\_resolv`. The bundle run can be protected by an class statement, default is `any`, eg:
 ```
 "ntp": {
     "run_class": "debian|centos"
     }
 ```
-
 This will only run on  debian or centos hosts.
 
 ### def.json
 
-In this file you can override settings for the templates.
+In this file you can override settings for the services.
 ```json
 "vars": {
     "ntp" : {
@@ -181,9 +209,12 @@ or:
 }
 ```
 
-#### Bundle classes
+You can use both definition at the same same time.  the `tcpwrappers_json_files` definition is read first and can be overriden by
+the  `tcpwrappers: { json_files }` definition. See the merge strategy.
 
-For every service you dynamically set classes in the bundle data, eg:
+#### Service classes
+
+For every service you dynamically set classes in the service data, eg:
 ```
 "vars": {
     "dhclient": {
@@ -193,7 +224,7 @@ For every service you dynamically set classes in the bundle data, eg:
     }
 }
 ```
-This will set the class `DHCLIENT_RESOLV_CONF` on host/node `r24n2`
+This will set the class `DHCLIENT\_RESOLV\_CONF` on host/node `r24n2`
 
 ### lib/surfsara/def.cf
 
@@ -215,7 +246,7 @@ If you defined your own `def.cf` and do not want the one included in this framew
 
 ## cf-agent command line options
 
-The SURFsara CFEngine library also checks for some classes:
+The SURF CFEngine library also checks for some classes:
  * To test with a local `templates` directory. This directory must be one level higher than your policy files directory (../templates):
   * `-DTEMPLATE_LOCAL_COPY`: Copy from local directory the mustache and json file(s).
   * `-DMUSTACHE_LOCAL_COPY`: Copy from local directory the mustache file(s)

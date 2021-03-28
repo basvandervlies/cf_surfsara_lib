@@ -1,5 +1,8 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 0.9.89 (2021-03-28)](#version-0989-2021-03-28)
+* [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
+* [Version: 0.9.82 (2020-12-05 sint)](#version-0982-2020-12-05-sint)
 * [Version: 0.9.77 (2020-07-14 tommie)](#version-0977-2020-07-14-tommie)
     * [Tarball installation](#tarball-installation)
     * [Templates generation enhanceent](#templates-generation-enhanceent)
@@ -19,6 +22,59 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 0.9.89 (2021-03-28)
+
+Fixed an installation error in `mpf_installation` script. The surfsara modules were copied to the
+wrong directort was `/var/cfengine/modules` instead of `/var/cfengine/masterfiles/modules`
+
+# Version: 0.9.88 (2021-03-16 Dre)
+ * apache service changes:
+    * Use `data` shortcut for copying files (is cfengine standard)
+    * json data format for modules  has been changed for easy overriding configuration files
+      *  added `modules_standard` and `modules_extra`.
+    * Clean modules that are not defined in `modules_standard` and `modules_extra`
+    * Clean up site files that are not used anymore
+    * All apache directories are now standard variables, eg `apache.sites_dir` and can be specified via json
+    * Added a new json variable `sites_generated` a list of files that are generated on the host, eg: jupyterhub
+    * Added `copy_dirs` section for apache This allow to copy tomcat configuration file for workers
+ * apt service changes:
+    * Generate /etc/apt/auth.conf. This file is used for password protected repositories. 
+ * pam service changes:
+    *  Added genertation of /etc/security/limits.d/scl.conf when specified in json file (limits\_compute.json)
+ * postfix service changes:
+    *  Added new variable `smtpd_relay_restrictions` contolled via json variable `smtpd_relay_restrictions`
+ * slurm service changes:
+    * Added a new slurm configuration file: `acct_gather.conf` controlled with json variable `acct_gather_file`
+    * Grouped accounting storage options in a section json variable `accounting_storage_section`
+    * Added a new json variable `acct_gather_section`
+    * Added a new plugin template `ear.mustache` (Energy  Aware Runtime)
+
+Changed the meta tag for all services to `service_<name>` instead of `autorun`. The servicea can not be enabled via
+the CFengine method it must use the methode defined in the library.  It only let to confusion so do not use the meta tag
+
+# Version: 0.9.82 (2020-12-05 sint)
+ * jupyterhub service chnages:
+    * apache reverse proxy  bug fix do not double escape special chars
+    * added announcement option, eg: maintenance announcement
+    * perms can be set for etc\_dir and configuration files
+    * added a restart schedule: `JUPYTERHUB_RESTART_SCHEDULE`
+ * postfix service chnages:
+    * Enable TLS when possible for postfix
+ * slurm service chnages:
+    * Tarball installations now support additional package installations
+    * Added linkchilderen to create links `/usr/[s]bin` other programs expect this
+    * Added some more config files to `slurm_mog_list`
+    * Added `SLURM_FORCE_LINKS` class to recreate  links in `/usr/[s]bin`
+    * spank\_plugins now supports `run_class` option.  It will only be installed if satisfied
+    * tarball json file simplified
+    * removed obsolete option: `CacheGroups`
+    * symplified current version check for tarball installations
+    * No sacctmgr dump file any more
+    * copy `pam_slurm_adopt.so` if we install a new tarball
+    * restart code for daemons is better
+ * ssh service changes:
+    * Moved `UsePrivilegeSeparation` to the DEPRICATED SECTION
+
 # Version: 0.9.77 (2020-07-14 tommie)
  * Services added: jupyterhub, configurable\_http\_proxy.cf, enroot (nvidia container software), copy\_dirs
  * apache service changes:

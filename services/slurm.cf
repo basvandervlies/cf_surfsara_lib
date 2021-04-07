@@ -284,9 +284,11 @@ bundle agent slurm_config()
             "topology_file_class"    string => canonify("sara$(slurm.topology_config_file)");
 
             "slurm_mog_list" slist => {
+                "$(slurm.acct_gather_file)",
                 "$(slurm.config_file)",
                 "$(slurm.cgroup_config_file)",
                 "$(slurm.cgroup_allowed_file)",
+                "$(slurm.gres_config_file)",
                 "$(slurm.nodes_config_file)",
                 "$(slurm.plugstack_config_file)",
                 "$(slurm.topology_config_file)",
@@ -329,6 +331,9 @@ bundle agent slurm_config()
 
     files:
         any::
+            "$(slurm.slurmdbd_file)"
+                perms => mog("0600", "$(slurm.owner)", "$(slurm.group)");
+
             "$(slurm_mog_list)"
                 perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
 

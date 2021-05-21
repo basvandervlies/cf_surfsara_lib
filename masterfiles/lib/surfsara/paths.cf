@@ -1,0 +1,7 @@
+bundle common scl_paths
+{
+
+   vars:
+       # NOTE: the key will be canonified when it's pulled in to the paths bundle.
+       "path[gzip]" string => "/bin/gzip", meta => { "paths.cf" };
+}

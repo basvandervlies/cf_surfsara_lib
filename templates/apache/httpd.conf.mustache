@@ -87,7 +87,7 @@ ServerTokens ProductOnly
 LogLevel warn
 
 ErrorLog {{{vars.apache.logdir}}}/error.log
-CustomLog {{{vars.apache.logdir}}}/access_log combined
+CustomLog {{{vars.apache.logdir}}}/access.log combined
 
 ## For better oveview the following stuff has configured in it's own file
 Include {{{vars.apache.configdir}}}/ssl.conf

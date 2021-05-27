@@ -10,6 +10,7 @@ bundle agent apache
             "modules_conf_dir" string => "$(configdir)/modules.d";
             "sites_dir" string => "$(configdir)/sites.d";
             "sites_root" string => "$(sara_data.apache[sites_root])";
+            "remove_access_log" string => "/var/log/apache2/access_log.*";
 
             "performance_profile" string => "l_4c8m";
 
@@ -151,6 +152,11 @@ bundle agent apache_config()
                 delete => sara_tidyfiles,
                 file_select => sara_exclude_files("@(site_files)"),
                 depth_search => recurse("inf");
+
+            "$(apache.remove_access_log)"
+                comment => "remove access_log file that was created by bug in mustache file",
+                delete => tidy;
+
     methods:
         any::
             "" usebundle => sara_mustache_autorun("apache"),

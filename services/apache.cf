@@ -94,7 +94,7 @@ bundle agent apache_config()
     classes:
         "apache_config_dir_exists" expression => isdir("$(sara_data.apache[configdir])");
 
-        "apache_copy_dirs_set" expression => isvariable("sara_data.apache[copy_dirs]"),
+        "copy_dirs_set" expression => isvariable("sara_data.apache[copy_dirs]"),
             comment => "Must we copy directories";
 
         "apache_restart" or => {
@@ -165,8 +165,8 @@ bundle agent apache_config()
                     "APACHE_CONFIGDIR_repaired"
                 );
 
-        apache_copy_dirs_set::
-            "" usebundle => sara_service_copy_files("apache");
+        copy_dirs_set::
+            "" usebundle => sara_service_copy_dirs("apache");
 
     commands:
         "$(apache.restart)"

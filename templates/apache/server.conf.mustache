@@ -8,8 +8,10 @@ DocumentRoot "{{{vars.sara_data.apache.document_root}}}"
     Require all granted
 </Directory>
 
+{{^classes.APACHE_SKIP_REDIRECT}}
 <VirtualHost *:80>
-    RewriteEngine On 
-    RewriteCond %{HTTPS}  !=on 
-    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L] 
+    RewriteEngine On
+    RewriteCond %{HTTPS}  !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
 </VirtualHost>
+{{/classes.APACHE_SKIP_REDIRECT}}

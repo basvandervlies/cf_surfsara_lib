@@ -521,6 +521,11 @@ bundle agent slurm_generate_systemd_services()
                     ""),
                 comment => "generate systemd config for slurmd";
 
+    files:
+        any::
+            "$(template_2_destination[$(template_files)])"
+                perms => mog("644", "root", "root");
+
     commands:
         any::
             "$(paths.path[systemctl]) daemon-reload"

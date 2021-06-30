@@ -70,6 +70,9 @@ bundle agent nvidia_gpu_prometheus_exporter_config()
         systemd::
             "$(nvidia_gpu_prometheus_exporter.initd_file)"
                 delete => tidy;
+
+            "$(nvidia_gpu_prometheus_exporter.systemd_file)"
+                perms => mog("644", "root", "root");
 }
 
 bundle agent nvidia_gpu_prometheus_exporter_restart

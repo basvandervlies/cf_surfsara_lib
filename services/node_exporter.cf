@@ -76,6 +76,10 @@ bundle agent node_exporter_config()
         systemd::
             "$(node_exporter.initd_file)"
                 delete => tidy;
+
+            "$(node_exporter.systemd_file)"
+                perms => mog("644", "root", "root");
+
 }
 
 bundle agent node_exporter_restart

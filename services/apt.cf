@@ -81,6 +81,9 @@ bundle agent apt_autorun()
         APT_CHECK_STATUS::
             "" usebundle => apt_check_status();
 
+        APT_DIST_UPGRADE::
+            "" usebundle => apt_package_update("-y dist-upgrade");
+
         APT_KILL_PKG_MANAGER::
             "" usebundle => apt_kill_pkg_manager();
 
@@ -96,8 +99,8 @@ bundle agent apt_autorun()
             "" usebundle => apt_security_update(""),
                 comment => "set via de command line,i -DSecurity";
 
-        Upgrade|Upgrade_force::
-            "" usebundle => apt_package_update(""),
+        Upgrade::
+            "" usebundle => apt_package_update("dist-upgrade"),
                 comment => "set via de command line, -DUpgrade";
 
         # Must be ported to def.json
@@ -144,39 +147,26 @@ bundle agent apt_os_version()
 
     classes:
         any::
-            "apt_os_version_set"  expression => isvariable("def.apt[os_version]"),
-                comment => "This variable will be removed";
+            "flavor_set"  expression => isvariable("def.apt[$(sys.flavor)]");
 
-            "apt_flavor_set"  expression => isvariable("def.apt[$(sys.flavor)]");
-
-        apt_os_version_set::
-            "apt_version_ok" expression => reglist(@(os_class_list), "$(def.apt[os_version])"),
-                comment => "This statement will be removed";
-        apt_flavor_set::
-            "apt_version_ok" expression => reglist(@(os_class_list), "$(def.apt[$(sys.flavor)])");
+        flavor_set::
+            "version_ok" expression => reglist(@(os_class_list), "$(def.apt[$(sys.flavor)])");
 
     methods:
-        !apt_version_ok.(apt_os_version_set|apt_flavor_set)::
+        !version_ok.flavor_set::
             "" usebundle => apt_package_update("-y dist-upgrade");
 
-    reports:
-        apt_os_version_set.DEBUG_apt::
-            "$(this.bundle): OS version is set in def.cf to: $(def.apt[os_version]) (obsolete)"
-                comment => "This statement will be removed";
 
-        apt_flavor_set.DEBUG_apt::
+    reports:
+        DEBUG_apt.flavor_set::
             "$(this.bundle): $(sys.flavor) version is set in def.cf to: $(def.apt[$(sys.flavor)])";
 
-        !(apt_os_version_set|apt_flavor_set)::
+        !flavor_set::
             "$(this.bundle): AUTOMATIC OS update failed due to missing setting in def.cf/json file, eg:";
             "   apt: { debian_10: debian_10_0 }";
 
-        !apt_version_ok.apt_os_version_set::
-            "Debian version MISMATCH: $(def.apt[os_version]) not in $(os_class_string) (obsolete)"
-                comment => "This statement will be removed";
-
-        !apt_version_ok.apt_flavor_set::
-            "Debian version MISMATCH: $(def.apt[$(sys.flavor)]) not in $(os_class_string)";
+        flavor_set.!version_ok::
+            "$(this.bundle): Debian version MISMATCH: $(def.apt[$(sys.flavor)]) not in $(os_class_string)";
 }
 
 
@@ -198,13 +188,6 @@ bundle agent apt_systemd_disable()
 
 bundle agent apt_package_update(update_option)
 {
-    vars:
-        Upgrade_force::
-            "update_option" string => "-y dist-upgrade";
-
-        Upgrade::
-            "update_option" string => "-y upgrade";
-
     commands:
         debian::
             "$(apt.dpkg_command)"   args => "--configure -a";
@@ -213,8 +196,8 @@ bundle agent apt_package_update(update_option)
             "$(apt.pkg_command)"    args => "clean";
 
     reports:
-        debian::
-            "Package update on host $(sys.host)";
+        DEBUG_apt.debian::
+            "$(this.bundle): '$(sys.host)':'$(options)'";
 
 }
 
@@ -550,6 +533,9 @@ The following actions are proctected by a class:
  * setting debconf values for package field(s), controlled via  json data
  * disable systemctl timer services for apt, may interfere with cfengine (APT_SYSTEMD_DISABLE)
  * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
+ * automatic perform an dist-upgrade (DIST_UPGRADE)
+
+
 
 The classes can be set in def.cf/json:
 ```json

@@ -19,7 +19,8 @@
         "batch_lines": [
             "export LMOD_CMD=/hpc/eb/modules-4.0.0/libexec/modulecmd.tcl"
         ],
-        "dir": "$(sara_data.jupyterhub[dir])",
+        "hub_dir": "$(sara_data.jupyterhub[dir])",
+        "hub_version": "current",
         "jupyter_config_dir": "$HOME/.jupyter",
         "notebook_options": {
             "NotebookApp.terminado_settings": "{'shell_command': ['bash']}"

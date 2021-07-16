@@ -13,9 +13,9 @@ User=root
 Group=root
 RuntimeDirectory=jupyterhub-{{{name}}}
 RuntimeDirectoryMode=0755
-WorkingDirectory={{{dir}}}/current
+WorkingDirectory={{{hub_dir}}}/{{{hub_version}}}
 #EnvironmentFile=/etc/default/jupyterhub
-ExecStart={{{dir}}}/bin/{{{name}}}.sh
+ExecStart={{{hub_dir}}}/bin/{{{name}}}.sh
 #ExecStop=/usr/sbin/jupyterhub-backup "systemd service stop"
 
 UMask=0027

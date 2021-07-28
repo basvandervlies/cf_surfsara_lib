@@ -92,6 +92,7 @@ dir: /opt/slurm,
 current_version: 19.05.5,,
 software_dir: $(sara_data.slurm[dir])/sw,
 tarball_dir: $(sara_data.slurm[dir])/tarballs
+```
 @endif
 
 body copy_from sara_cp_dir(bundle_name, var, server)

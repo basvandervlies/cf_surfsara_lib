@@ -86,6 +86,7 @@ dir: /opt/slurm,
 current_version: 19.05.5,,
 software_dir: $(sara_data.slurm[dir])/sw,
 tarball_dir: $(sara_data.slurm[dir])/tarballs
+```
 
 ## sara_make_cron_file(name. data)
 

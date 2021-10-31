@@ -31,7 +31,7 @@ bundle agent nscd_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("nscd");
+            "" usebundle => scl_data_autorun("nscd");
             "" usebundle => nscd_install();
             "" usebundle => nscd_surfsara_config();
             "" usebundle => nscd_daemons_check();
@@ -44,7 +44,7 @@ bundle agent nscd_daemons_check
             "$(nscd.daemon_name)"
                 comment 	    => "Check if nscd is running with PPID=1",
                 process_count   => check_range("$(nscd.daemon_name)", "1", "1"),
-                process_select  => sara_select_parent_process("1");
+                process_select  => scl_select_parent_process("1");
 
     commands:
         any::
@@ -71,7 +71,7 @@ bundle agent nscd_install()
 
     methods:
         any::
-            "" usebundle => sara_service_packages("nscd", "@(nscd_install.packages)");
+            "" usebundle => scl_service_packages("nscd", "@(nscd_install.packages)");
 }
 
 bundle agent nscd_surfsara_config()
@@ -92,7 +92,7 @@ bundle agent nscd_surfsara_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("nscd");
+            "" usebundle => scl_mustache_autorun("nscd");
 
     commands:
        NSCD_RESTART::
@@ -122,10 +122,10 @@ the templates are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "nscd",
             "..."

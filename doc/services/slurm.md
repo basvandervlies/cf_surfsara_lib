@@ -38,9 +38,9 @@ The following `classes` can be set via def.cf/json:
  * TARBALL: Slurm software will be installed as tarball instead of system packages + generate slurm systemd unit files
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
- * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * install_tarballs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 

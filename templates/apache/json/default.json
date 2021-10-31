@@ -1,5 +1,5 @@
 {
-    "args_arguments": "-f $(sara_data.apache[configdir])/httpd.conf",
+    "args_arguments": "-f $(scl.apache[configdir])/httpd.conf",
     "configdir": "/opt/apache",
     "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline' *.bootstrapcdn.com *.cloudflare.com fonts.googleapis.com estudybooks.surf.nl; script-src 'self' 'unsafe-inline' 'unsafe-eval' webstats.surf.nl code.jquery.com *.bootstrapcdn.com *.cloudflare.com *.aspnetcdn.com; img-src 'self' 'unsafe-inline' https: data: webstats.surf.nl; font-src 'self' data: *.bootstrapcdn.com fonts.gstatic.com; connect-src 'self'",
     "csp_enabled": true,

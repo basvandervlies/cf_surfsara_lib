@@ -12,7 +12,7 @@
 #StepPurge=1
 #
 # Authentication info
-AuthType={{{vars.sara_data.slurm.AuthType}}}
+AuthType={{{vars.scl.slurm.AuthType}}}
 #AuthInfo=/var/run/munge/munge.socket.2
 #
 # slurmDBD info
@@ -25,7 +25,7 @@ DebugLevel=4
 #DefaultQOS=normal,standby
 
 LogFile={{{vars.slurm.log_dir}}}/slurmdbd.log
-PidFile={{{vars.sara_data.slurm.pid_dir}}}/slurmdbd.pid
+PidFile={{{vars.scl.slurm.pid_dir}}}/slurmdbd.pid
 PluginDir={{{vars.slurm.plugin_dir}}}
 
 #PrivateData=accounts,users,usage,jobs
@@ -35,11 +35,11 @@ PluginDir={{{vars.slurm.plugin_dir}}}
 StorageType=accounting_storage/mysql
 #StorageHost=r16n22
 #StoragePort=6819
-StoragePass={{{vars.sara_data.slurm.StoragePass}}}
+StoragePass={{{vars.scl.slurm.StoragePass}}}
 StorageUser=slurm
 StorageLoc=slurm_acct_db
 
 # Purge settings
-{{#vars.sara_data.slurm.purge_section}}
+{{#vars.scl.slurm.purge_section}}
 {{{@}}}={{{.}}}
-{{/vars.sara_data.slurm.purge_section}}
+{{/vars.scl.slurm.purge_section}}

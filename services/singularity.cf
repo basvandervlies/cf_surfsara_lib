@@ -40,7 +40,7 @@ bundle agent singularity_autorun
 
     methods:
         debian|centos::
-            "" usebundle => sara_data_autorun("singularity");
+            "" usebundle => scl_data_autorun("singularity");
             "" usebundle => singularity_install;
             "" usebundle => singularity_config;
 
@@ -52,7 +52,7 @@ bundle agent singularity_autorun
 bundle agent singularity_install()
 {
     methods:
-        "" usebundle => sara_service_packages("singularity", "@(singularity.packages)");
+        "" usebundle => scl_service_packages("singularity", "@(singularity.packages)");
 }
 
 bundle agent singularity_config()
@@ -63,7 +63,7 @@ bundle agent singularity_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("singularity");
+            "" usebundle => scl_mustache_autorun("singularity");
 
     reports:
         any::
@@ -92,10 +92,10 @@ the templates are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "singularity",
             "..."

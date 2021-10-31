@@ -4,9 +4,9 @@
 @if minimum_version(99.9)
 # packages.cf
 
-Source: [packages.cf](/masterfiles/lib/surfsara/packages.cf)
+Source: [packages.cf](/masterfiles/lib/scl/packages.cf)
 
-## sara_service_packages
+## scl_service_packages
 This bundle handles  the service packages. The service bundle defines the default
 package(s) to install/remove and/or purge. It can be overriden with json data, eg:
 ```
@@ -46,28 +46,28 @@ The following package actions are implemented:
  * purge: delete the package and all it configuration files
  * remove: delete the package and preserve the configuration files
 @endif
-bundle agent sara_service_packages(bundle_name, data)
+bundle agent scl_service_packages(bundle_name, data)
 {
     vars:
-       sara_json_packages_specified::
-            "pkg_data" data => mergedata("{}", "sara_data.$(bundle_name)[packages]");
+       json_packages_specified::
+            "pkg_data" data => mergedata("{}", "scl.$(bundle_name)[packages]");
             "debug_str" string => "Use 'def.json' service package definition";
 
-       !sara_json_packages_specified::
+       !json_packages_specified::
             "pkg_data" data => mergedata("{}", "data");
             "debug_str" string => "Use bundle service packages definition";
 
 
         any::
             "actions" slist => getindices("pkg_data");
-            "pkg_bundles" slist => maplist("sara_service_packages_$(this)", @(actions));
+            "pkg_bundles" slist => maplist("scl_service_packages_$(this)", @(actions));
 
     classes:
-        "sara_json_packages_specified" expression => isvariable("sara_data.$(bundle_name)[packages]"),
+        "json_packages_specified" expression => isvariable("scl.$(bundle_name)[packages]"),
             comment => "Do we override the bundle services package with def.json settings";
 
     methods:
-        "" usebundle => $(pkg_bundles)("$(bundle_name)", "@(sara_service_packages.pkg_data)"),
+        "" usebundle => $(pkg_bundles)("$(bundle_name)", "@(scl_service_packages.pkg_data)"),
             comment => "package bundle implemented install/remove/purge";
 
     reports:
@@ -76,7 +76,7 @@ bundle agent sara_service_packages(bundle_name, data)
 }
 
 
-bundle agent sara_service_package(bundle_name, package, version, action, options)
+bundle agent scl_service_package(bundle_name, package, version, action, options)
 {
     classes:
         "version_specified" expression => not(strcmp("", "$(version)"));
@@ -107,7 +107,7 @@ bundle agent sara_service_package(bundle_name, package, version, action, options
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
-bundle agent sara_service_packages_install(bundle_name, pkg_data)
+bundle agent scl_service_packages_install(bundle_name, pkg_data)
 {
     vars:
         any::
@@ -115,11 +115,11 @@ bundle agent sara_service_packages_install(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => sara_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(bundle_name)",
                 "$(packages)", "$(pkg_data[install][$(packages)])", "present", "");
 }
 
-bundle agent sara_service_packages_install_backports(bundle_name, pkg_data)
+bundle agent scl_service_packages_install_backports(bundle_name, pkg_data)
 {
     vars:
         any::
@@ -136,7 +136,7 @@ bundle agent sara_service_packages_install_backports(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => sara_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(bundle_name)",
                 "$(packages)", "$(pkg_data[install_backports][$(packages)])", "present", "$(pkg_options)");
 
     reports:
@@ -148,7 +148,7 @@ bundle agent sara_service_packages_install_backports(bundle_name, pkg_data)
                 ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
-bundle agent sara_service_packages_remove(bundle_name, pkg_data)
+bundle agent scl_service_packages_remove(bundle_name, pkg_data)
 {
     vars:
         any::
@@ -156,11 +156,11 @@ bundle agent sara_service_packages_remove(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => sara_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(bundle_name)",
                 "$(packages)", "$(pkg_data[remove][$(packages)])", "absent", "");
 }
 
-bundle agent sara_service_packages_purge(bundle_name, pkg_data)
+bundle agent scl_service_packages_purge(bundle_name, pkg_data)
 {
     vars:
         any::
@@ -173,23 +173,23 @@ bundle agent sara_service_packages_purge(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => sara_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(bundle_name)",
                 "$(packages)", "$(pkg_data[purge][$(packages)])", "absent", "$(pkg_options)");
 }
 
 ###### Obsolete will be deleted
 ##
-bundle agent sara_install_service_packages(bundle_name, default_packages)
+bundle agent scl_install_service_packages(bundle_name, default_packages)
 {
     vars:
-        "package_data" data => mergedata("{}", "sara_data.$(bundle_name)[packages]"),
+        "package_data" data => mergedata("{}", "scl.$(bundle_name)[packages]"),
             ifvarclass => and(
-                "sara_$(bundle_name)_packages_specified"
+                "scl_$(bundle_name)_packages_specified"
                 );
 
         "package_data" data => mergedata("{}", "default_packages"),
             ifvarclass => and(
-                "!sara_$(bundle_name)_packages_specified"
+                "!scl_$(bundle_name)_packages_specified"
                 );
 
         "packages_data_str" string => format("%S", "package_data"),
@@ -199,13 +199,13 @@ bundle agent sara_install_service_packages(bundle_name, default_packages)
 
 
     classes:
-        "sara_$(bundle_name)_packages_specified" expression => reglist("@(sara_data.$(bundle_name)[packages])", ".*");
-        #"sara_$(bundle_name)_packages_specified" expression => regarray("@(sara_data.$(bundle_name)[packages])", ".*");
+        "scl_$(bundle_name)_packages_specified" expression => reglist("@(scl.$(bundle_name)[packages])", ".*");
+        #"scl_$(bundle_name)_packages_specified" expression => regarray("@(scl.$(bundle_name)[packages])", ".*");
 
 
     methods:
         any::
-            "" usebundle => sara_install_service_package("$(bundle_name)", "$(packages)", "$(package_data[$(packages)])"),
+            "" usebundle => scl_install_service_package("$(bundle_name)", "$(packages)", "$(package_data[$(packages)])"),
                 comment => "Install the package with version";
 
     reports:
@@ -213,7 +213,7 @@ bundle agent sara_install_service_packages(bundle_name, default_packages)
             ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
-bundle agent sara_install_service_package(bundle_name, package, version)
+bundle agent scl_install_service_package(bundle_name, package, version)
 {
     classes:
         "version_specified" expression => not(strcmp("", "$(version)"));

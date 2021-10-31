@@ -1,3 +1,6 @@
 ## This file is maintained by CFengine
 #
-include {{{vars.slurm.config_dir}}}/plugstack.conf.d/*.conf
+# all spank configuration must be done in one file for configless and makes more sense
+{{#vars.scl.slurm.spank_plugins.required}}
+required {{{@}}} {{{.}}}
+{{/vars.scl.slurm.spank_config.required}}

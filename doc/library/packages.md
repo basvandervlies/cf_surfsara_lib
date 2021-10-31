@@ -1,6 +1,6 @@
 # packages.cf
 
-Source: [packages.cf](/masterfiles/lib/surfsara/packages.cf)
+Source: [packages.cf](/masterfiles/lib/scl/packages.cf)
 
 ## sara_service_packages
 This bundle handles  the service packages. The service bundle defines the default

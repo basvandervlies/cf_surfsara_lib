@@ -18,8 +18,8 @@ the templates are located in:
  * templates/pam/json
 
 The following json variables can be set in def.cf/json to invoke files bundles:
- * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 

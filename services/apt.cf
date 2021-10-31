@@ -64,7 +64,7 @@ bundle agent apt_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("apt");
+            "" usebundle => scl_data_autorun("apt");
             "" usebundle => apt_install();
             "" usebundle => apt_repository();
             "" usebundle => apt_auth_conf();
@@ -81,6 +81,9 @@ bundle agent apt_autorun()
         APT_CHECK_STATUS::
             "" usebundle => apt_check_status();
 
+        APT_DIST_UPGRADE::
+            "" usebundle => apt_package_update("-y dist-upgrade");
+
         APT_KILL_PKG_MANAGER::
             "" usebundle => apt_kill_pkg_manager();
 
@@ -96,8 +99,8 @@ bundle agent apt_autorun()
             "" usebundle => apt_security_update(""),
                 comment => "set via de command line,i -DSecurity";
 
-        Upgrade|Upgrade_force::
-            "" usebundle => apt_package_update(""),
+        Upgrade::
+            "" usebundle => apt_package_update("dist-upgrade"),
                 comment => "set via de command line, -DUpgrade";
 
         # Must be ported to def.json
@@ -144,39 +147,26 @@ bundle agent apt_os_version()
 
     classes:
         any::
-            "apt_os_version_set"  expression => isvariable("def.apt[os_version]"),
-                comment => "This variable will be removed";
+            "flavor_set"  expression => isvariable("def.apt[$(sys.flavor)]");
 
-            "apt_flavor_set"  expression => isvariable("def.apt[$(sys.flavor)]");
-
-        apt_os_version_set::
-            "apt_version_ok" expression => reglist(@(os_class_list), "$(def.apt[os_version])"),
-                comment => "This statement will be removed";
-        apt_flavor_set::
-            "apt_version_ok" expression => reglist(@(os_class_list), "$(def.apt[$(sys.flavor)])");
+        flavor_set::
+            "version_ok" expression => reglist(@(os_class_list), "$(def.apt[$(sys.flavor)])");
 
     methods:
-        !apt_version_ok.(apt_os_version_set|apt_flavor_set)::
+        !version_ok.flavor_set::
             "" usebundle => apt_package_update("-y dist-upgrade");
 
-    reports:
-        apt_os_version_set.DEBUG_apt::
-            "$(this.bundle): OS version is set in def.cf to: $(def.apt[os_version]) (obsolete)"
-                comment => "This statement will be removed";
 
-        apt_flavor_set.DEBUG_apt::
+    reports:
+        DEBUG_apt.flavor_set::
             "$(this.bundle): $(sys.flavor) version is set in def.cf to: $(def.apt[$(sys.flavor)])";
 
-        !(apt_os_version_set|apt_flavor_set)::
+        !flavor_set::
             "$(this.bundle): AUTOMATIC OS update failed due to missing setting in def.cf/json file, eg:";
             "   apt: { debian_10: debian_10_0 }";
 
-        !apt_version_ok.apt_os_version_set::
-            "Debian version MISMATCH: $(def.apt[os_version]) not in $(os_class_string) (obsolete)"
-                comment => "This statement will be removed";
-
-        !apt_version_ok.apt_flavor_set::
-            "Debian version MISMATCH: $(def.apt[$(sys.flavor)]) not in $(os_class_string)";
+        flavor_set.!version_ok::
+            "$(this.bundle): Debian version MISMATCH: $(def.apt[$(sys.flavor)]) not in $(os_class_string)";
 }
 
 
@@ -198,13 +188,6 @@ bundle agent apt_systemd_disable()
 
 bundle agent apt_package_update(update_option)
 {
-    vars:
-        Upgrade_force::
-            "update_option" string => "-y dist-upgrade";
-
-        Upgrade::
-            "update_option" string => "-y upgrade";
-
     commands:
         debian::
             "$(apt.dpkg_command)"   args => "--configure -a";
@@ -213,8 +196,8 @@ bundle agent apt_package_update(update_option)
             "$(apt.pkg_command)"    args => "clean";
 
     reports:
-        debian::
-            "Package update on host $(sys.host)";
+        DEBUG_apt.debian::
+            "$(this.bundle): '$(sys.host)':'$(options)'";
 
 }
 
@@ -241,13 +224,13 @@ bundle agent apt_security_update(options)
             "$(apt.pkg_command) --quiet update"
                 comment => "Update the repository indexes else we get out of sync",
                 contain => in_shell_and_silent,
-                classes => sara_cmd_repair( "@(apt_return_codes)",  "apt_update");
+                classes => scl_cmd_repair( "@(apt_return_codes)",  "apt_update");
 
             "$(apt.pkg_command) -y upgrade"
                 comment => "New security update command",
                 contain => in_shell,
                 args => "$(dpkg_options_str) $(options)",
-                classes => sara_cmd_repair( "@(apt_return_codes)",  "apt_upgrade");
+                classes => scl_cmd_repair( "@(apt_return_codes)",  "apt_upgrade");
 
         apt_upgrade_failed|apt_update_failed::
             "$(apt.pkg_command) --fix-broken install"
@@ -278,7 +261,7 @@ bundle agent apt_check_status()
             "$(apt.check_command)"
                 comment => "Check status of the APT package manager",
                 contain => in_shell_and_silent,
-                classes => sara_cmd_repair("@(bad_state)", "apt_check_status");
+                classes => scl_cmd_repair("@(bad_state)", "apt_check_status");
 
         apt_check_status_failed::
             "$(apt.dpkg_command)"
@@ -313,8 +296,8 @@ bundle agent apt_repository()
 
     methods:
         any::
-            "" usebundle => sara_json_copy("apt", "@(repo_files)");
-            "" usebundle => sara_mustache_copy("apt", "@(template_list)");
+            "" usebundle => scl_json_copy("apt", "@(repo_files)");
+            "" usebundle => scl_mustache_copy("apt", "@(template_list)");
             "" usebundle => apt_repository_generate("$(template_file)", "@(repo_files)");
 
     reports:
@@ -410,7 +393,7 @@ bundle agent apt_repository_key(name, key)
         any::
             "$(sara_data.apt[import_key]) $(key)"
                 contain => in_shell,
-                classes => sara_cmd_repair ( "@(import_key_error_codes)", "apt_repository_key_cmd" ),
+                classes => scl_cmd_repair ( "@(import_key_error_codes)", "apt_repository_key_cmd" ),
                 action => if_elapsed("50"),
                 if => or(
                     canonify("apt_repository_key_$(key)_repaired"),
@@ -481,7 +464,7 @@ bundle agent apt_debconf()
                 "$(sara_data.apt[debconf][$(index)][value])");
 
 @if minimum_version(3.11)
-            "" usebundle => sara_show_data("sara_data", "apt[debconf][$(index)]"),
+            "" usebundle => scl_show_data("sara_data", "apt[debconf][$(index)]"),
                 if => "DEBGU|DEBUG_apt)|DEBUG_$(this.bundle)";
 @endif
     reports:
@@ -511,7 +494,7 @@ bundle agent apt_debconf_set(package, field, type, value)
                 comment => "Run $(apt.dpkg_reconfigure) $(package)",
                 contain => in_shell,
                 if => "APT_DEBCONF_$(class)_CHANGED",
-                classes => sara_cmd_repair("@(return_codes)",  "dpkg_reconfigure");
+                classes => scl_cmd_repair("@(return_codes)",  "dpkg_reconfigure");
 
     reports:
         any::
@@ -526,7 +509,7 @@ bundle agent apt_install()
 {
     methods:
         any::
-            "" usebundle => sara_service_packages("apt", "@(apt.packages)");
+            "" usebundle => scl_service_packages("apt", "@(apt.packages)");
 }
 
 @if minimum_version(99.9)
@@ -550,6 +533,9 @@ The following actions are proctected by a class:
  * setting debconf values for package field(s), controlled via  json data
  * disable systemctl timer services for apt, may interfere with cfengine (APT_SYSTEMD_DISABLE)
  * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
+ * automatic perform an dist-upgrade (DIST_UPGRADE)
+
+
 
 The classes can be set in def.cf/json:
 ```json
@@ -577,9 +563,9 @@ The `/etc/apt/auth.conf` is default empty. But we can configure it for password 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "apt",
             "..."

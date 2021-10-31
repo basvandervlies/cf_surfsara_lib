@@ -16,7 +16,7 @@ bundle agent sara_user_consume_resources_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("sara_user_consume_resources");
+            "" usebundle => scl_data_autorun("sara_user_consume_resources");
             "" usebundle => sara_user_consume_resources_check();
 
     reports:
@@ -82,10 +82,10 @@ file(s) are:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "sara_user_consume_resources",
             "..."

@@ -10,7 +10,7 @@ see [apache.cf](/services/apache.cf). This service bundle will also generate the
 file for you.
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
- * install_tarballs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 The following clases can be set via def.cf/json:
  *  `RESTART_SCHEDULE`:  Restart the jupyterhub services on specified time(s), eg:

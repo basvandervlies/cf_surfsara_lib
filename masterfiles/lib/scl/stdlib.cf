@@ -14,20 +14,22 @@
 @if minimum_version(99.9)
 # stdlib.cf
 
-Source: [stdlib.cf](/masterfiles/lib/surfsara/stdlib.cf)
+Source: [stdlib.cf](/masterfiles/lib/scl/stdlib.cf)
 
 This is the the file that is included in the MPF or your own framework.
 @endif
-bundle common surfsara_stdlib_common
+bundle common scl_stdlib_common
 {
     vars:
         any::
             "standard" slist => {
+                "$(this.promise_dirname)/boot.cf",
                 "$(this.promise_dirname)/inventory.cf",
                 "$(this.promise_dirname)/templates.cf",
                 "$(this.promise_dirname)/common.cf",
                 "$(this.promise_dirname)/files.cf",
                 "$(this.promise_dirname)/packages.cf",
+                "$(this.promise_dirname)/paths.cf",
                 "$(this.promise_dirname)/processes.cf",
                 "$(this.promise_dirname)/services.cf",
                 "$(this.promise_dirname)/storage.cf",
@@ -35,9 +37,9 @@ bundle common surfsara_stdlib_common
 
             "version" string => "SURFSARA Library 0.9.20";
 
-        SURFSARA_SKIP_DEF_CF_INCLUDE::
+        SCL_SKIP_DEF_CF_INCLUDE::
             "def" slist => { };
-        !SURFSARA_SKIP_DEF_CF_INCLUDE::
+        !SCL_SKIP_DEF_CF_INCLUDE::
             "def" slist => { "$(this.promise_dirname)/def.cf" };
 
   reports:
@@ -48,7 +50,7 @@ bundle common surfsara_stdlib_common
 body file control
 {
     inputs => {
-        @(surfsara_stdlib_common.standard),
-        @(surfsara_stdlib_common.def)
+        @(scl_stdlib_common.standard),
+        @(scl_stdlib_common.def)
     };
 }

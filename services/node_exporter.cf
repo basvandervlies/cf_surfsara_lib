@@ -40,7 +40,7 @@ bundle agent node_exporter_install()
 
     methods:
         node_exporter_copy_dirs_set::
-            "" usebundle => sara_service_copy_dirs("node_exporter");
+            "" usebundle => scl_service_copy_dirs("node_exporter");
 }
 
 bundle agent node_exporter_config()
@@ -54,9 +54,9 @@ bundle agent node_exporter_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("node_exporter");
+            "" usebundle => scl_mustache_autorun("node_exporter");
         node_exporter_cron::
-            "" usebundle => sara_make_cron_file("sys2prometheus","@(sara_data.node_exporter[cron_job])");
+            "" usebundle => scl_make_cron_file("sys2prometheus","@(sara_data.node_exporter[cron_job])");
 
     commands:
         systemd::
@@ -76,6 +76,10 @@ bundle agent node_exporter_config()
         systemd::
             "$(node_exporter.initd_file)"
                 delete => tidy;
+
+            "$(node_exporter.systemd_file)"
+                perms => mog("644", "root", "root");
+
 }
 
 bundle agent node_exporter_restart
@@ -93,7 +97,7 @@ bundle agent node_exporter_daemon_check()
         "$(name)"
             comment => "Check if Prometheus is running",
             process_count   => check_range("$(name)", "1", "1"),
-            process_select  => sara_select_parent_process("1");
+            process_select  => scl_select_parent_process("1");
 
     methods:
         any::
@@ -119,7 +123,7 @@ bundle agent node_exporter_autorun()
         "tags" slist => { "service_node_exporter", "template_node_exporter" };
 
     methods:
-        "" usebundle => sara_data_autorun("node_exporter");
+        "" usebundle => scl_data_autorun("node_exporter");
         "" usebundle => node_exporter_install();
         "" usebundle => node_exporter_config();
         "" usebundle => node_exporter_daemon_check();
@@ -145,16 +149,16 @@ These templates are located in:
  * templates/node_exporter
  * templates/node_exporter/json
 
-The following json variables can be set in def.cf/json to invoke files bundles:                                                                                                                           
-  * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+The following json variables can be set in def.cf/json to invoke files bundles:
+  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "node_exporter",
             "..."

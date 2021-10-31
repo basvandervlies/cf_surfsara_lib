@@ -33,7 +33,7 @@ bundle agent pam_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("pam");
+            "" usebundle => scl_data_autorun("pam");
             "" usebundle => pam_install();
             "" usebundle => pam_surfsara_config();
 
@@ -45,7 +45,7 @@ bundle agent pam_autorun()
 bundle agent pam_install()
 {
     methods:
-        "" usebundle => sara_service_packages("pam", "@(pam.packages)");
+        "" usebundle => scl_service_packages("pam", "@(pam.packages)");
 }
 
 bundle agent pam_surfsara_config()
@@ -67,9 +67,9 @@ bundle agent pam_surfsara_config()
             "" usebundle => pam_listfile_conf_generate();
 
         pam_cp_files_set::
-            "" usebundle => sara_service_copy_files("pam");
+            "" usebundle => scl_service_copy_files("pam");
         pam_cp_dirs_set::
-            "" usebundle => sara_service_copy_dirs("pam");
+            "" usebundle => scl_service_copy_dirs("pam");
 }
 
 bundle agent pam_generate_files()
@@ -219,16 +219,16 @@ the templates are located in:
  * templates/pam/json
 
 The following json variables can be set in def.cf/json to invoke files bundles:
- * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "pam",
             "..."

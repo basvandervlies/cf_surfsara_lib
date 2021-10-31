@@ -49,7 +49,7 @@ bundle agent nhc_install()
 
     methods:
         any::
-            "" usebundle => sara_service_packages("nhc", "@(nhc_install.packages)");
+            "" usebundle => scl_service_packages("nhc", "@(nhc_install.packages)");
 }
 
 bundle agent nhc_config()
@@ -61,13 +61,13 @@ bundle agent nhc_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("nhc");
+            "" usebundle => scl_mustache_autorun("nhc");
 
         nhc_copy_files_set::
-            "" usebundle => sara_service_copy_files("nhc");
+            "" usebundle => scl_service_copy_files("nhc");
 
         nhc_copy_dirs_set::
-            "" usebundle => sara_service_copy_dirs("nhc");
+            "" usebundle => scl_service_copy_dirs("nhc");
 }
 @if minimum_version(99.9)
 # NHC
@@ -89,16 +89,16 @@ the templates are located in:
  * templates/nhc/json
 
 The following json variables can be set in def.cf/json to invoke files bundles:
- * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "nhc",
             "..."

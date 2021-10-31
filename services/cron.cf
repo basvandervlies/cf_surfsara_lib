@@ -28,7 +28,7 @@ bundle agent cron_autorun()
          "tags" slist => { "service_cron", "template_cron" };
 
     methods:
-        "" usebundle => sara_template_autorun("cron"),
+        "" usebundle => scl_template_autorun("cron"),
             classes => results("namespace", "cron");
 
     reports:
@@ -58,10 +58,10 @@ These templates are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled` 
+ * `def.scl_services_enabled` 
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "cron",
             "..."

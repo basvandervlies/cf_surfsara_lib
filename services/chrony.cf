@@ -46,7 +46,7 @@ bundle agent chrony_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("chrony");
+            "" usebundle => scl_data_autorun("chrony");
             "" usebundle => chrony_install();
             "" usebundle => chrony_surfsara_config();
             "" usebundle => chrony_daemons_check();
@@ -59,7 +59,7 @@ bundle agent chrony_autorun()
 bundle agent chrony_install()
 {           
     methods:
-        "" usebundle => sara_service_packages("chrony", "@(chrony.packages)");
+        "" usebundle => scl_service_packages("chrony", "@(chrony.packages)");
 }
 
 bundle agent chrony_surfsara_config()
@@ -87,7 +87,7 @@ bundle agent chrony_surfsara_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("chrony");
+            "" usebundle => scl_mustache_autorun("chrony");
         CHRONY_RESTART::
             "" usebundle => chrony_daemons_restart();
 }
@@ -99,7 +99,7 @@ bundle agent chrony_daemons_check()
             "$(chrony.daemon_name)"
                 comment         => "Check if chronyd is running",
                 process_count   => check_range("$(chrony.daemon_name)", "1", "1"),
-                process_select  => sara_select_parent_process("1");
+                process_select  => scl_select_parent_process("1");
                 
     methods:    
         any::   

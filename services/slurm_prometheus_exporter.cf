@@ -43,7 +43,7 @@ bundle agent slurm_prometheus_exporter_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("slurm_prometheus_exporter");
+            "" usebundle => scl_mustache_autorun("slurm_prometheus_exporter");
 
     commands:
         systemd::
@@ -65,7 +65,7 @@ bundle agent slurm_prometheus_exporter_daemon_check()
         "$(slurm_prometheus_exporter.daemon_name)"
             comment => "Check if GPU Prometheus exporter is running",
             process_count   => check_range("$(slurm_prometheus_exporter.daemon_name)", "1", "1"),
-            process_select  => sara_select_parent_process("1");
+            process_select  => scl_select_parent_process("1");
 
     commands:
         "$(slurm_prometheus_exporter.restart)"
@@ -78,7 +78,7 @@ bundle agent slurm_prometheus_exporter_autorun()
         "tags" slist => { "service_slurm_prometheus_exporter", "template_slurm_prometheus_exporter" };
 
     methods:
-        "" usebundle => sara_data_autorun("slurm_prometheus_exporter");
+        "" usebundle => scl_data_autorun("slurm_prometheus_exporter");
         "" usebundle => slurm_prometheus_exporter_install();
         "" usebundle => slurm_prometheus_exporter_config();
         "" usebundle => slurm_prometheus_exporter_daemon_check();

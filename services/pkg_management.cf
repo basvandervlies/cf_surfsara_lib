@@ -7,7 +7,7 @@ bundle agent pkg_management_autorun()
         "tags" slist => { "service_pkg_management", "template_pkg_management" };
 
     methods:
-        "" usebundle => sara_data_autorun("pkg_management");
+        "" usebundle => scl_data_autorun("pkg_management");
         "" usebundle => pkg_management();
 }
 
@@ -15,7 +15,7 @@ bundle agent pkg_management()
 {
     vars:
         any::
-            "names" slist => getindices("sara_data.pkg_management"),
+            "names" slist => getindices("scl.pkg_management"),
                 comment => "Get all package names";
 
     methods:
@@ -26,8 +26,8 @@ bundle agent pkg_management()
         any::
             "" usebundle => pkg_management_action(
                 "$(names)",
-                "$(sara_data.pkg_management[$(names)][action])",
-                "$(sara_data.pkg_management[$(names)][version])"
+                "$(scl.pkg_management[$(names)][action])",
+                "$(scl.pkg_management[$(names)][version])"
             );
 
    reports:
@@ -42,7 +42,7 @@ bundle agent pkg_management_prio_backport_packages(names)
         any::
             "packages" data => parsejson(' [] ');
             "packages" data => mergedata("packages", parsejson(' [ "$(names)" ] ')),
-                if => and( strcmp("$(sara_data.pkg_management[$(names)][action])", "install_backports") );
+                if => and( strcmp("$(scl.pkg_management[$(names)][action])", "install_backports") );
 
             "release" string => regex_replace("$(sys.os_release[VERSION])", ".*\((\w+).*", "\1", "");
             "header" string => "## Maintained by CFengine$(const.n)#";
@@ -50,14 +50,14 @@ bundle agent pkg_management_prio_backport_packages(names)
 {{#packages}}
 Package: {{.}}
 Pin: release a=$(release)-backports
-Pin-Priority: $(sara_data.pkg_management[pin_priority])
+Pin-Priority: $(scl.pkg_management[pin_priority])
 
 {{/packages}}
 ";
 
     files:
         any::
-            "$(sara_data.pkg_management[apt_preference_file])"
+            "$(scl.pkg_management[apt_preference_file])"
                 comment => "",
                 create => "true",
                 edit_defaults => no_backup,
@@ -67,7 +67,7 @@ Pin-Priority: $(sara_data.pkg_management[pin_priority])
 
     methods:
         any::
-            "" usebundle => sara_show_data("$(this.bundle)", "packages"),
+            "" usebundle => scl_show_data("$(this.bundle)", "packages"),
                 if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
@@ -80,12 +80,12 @@ bundle agent pkg_management_action(name, action, version)
                     "$(action)": { "$(name)" : "$(version)" }
                 }
             '),
-                comment => "Convert to format that sara_service_packages_<action> can handle";
+                comment => "Convert to format that scl_service_packages_<action> can handle";
 
-            "pkg_bundle" string => "sara_service_packages_$(action)",
+            "pkg_bundle" string => "scl_service_packages_$(action)",
                 comment => "Which package bundle to run";
 
-            "run_class_var" slist => getvalues("sara_data.pkg_management[$(name)][run_class]"),
+            "run_class_var" slist => getvalues("scl.pkg_management[$(name)][run_class]"),
                 comment => "Only run package action if this class is true";
 
             "run_class_var_str" string => ifelse(
@@ -165,10 +165,10 @@ package is the same as `stable` package:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "pkg_management",
             "..."

@@ -7,12 +7,12 @@ CFENGINE_MASTERFILES_DIR=$CFENGINE_DIR/masterfiles
 CFENGINE_TEMPLATES_DIR=$CFENGINE_DIR/templates
 CFENGINE_MODULES_DIR=$CFENGINE_MASTERFILES_DIR/modules
 
-SURFSARA_LIB="masterfiles/lib/surfsara"
-SURFSARA_AUTORUN_SERVICE="masterfiles/services/autorun/surfsara.cf"
+SCL_LIB="masterfiles/lib/scl"
+SCL_AUTORUN_SERVICE="masterfiles/services/autorun/scl.cf"
 
-SURFSARA_TEMPLATES="templates"
-SURFSARA_SERVICES="services"
-SURFSARA_MODULES="modules"
+SCL_TEMPLATES="templates"
+SCL_SERVICES="services"
+SCL_MODULES="modules"
 
 
 ### Functions
@@ -67,38 +67,38 @@ then
     exit 1
 fi
 
-if [ -d $CFENGINE_MASTERFILES_DIR/lib/surfsara ]
+if [ -d $CFENGINE_MASTERFILES_DIR/lib/scl ]
 then
     ### what to do about def.cf
-    echo "Updating surfsara library and autorun file"
-    cp  $SURFSARA_LIB/* $CFENGINE_MASTERFILES_DIR/lib/surfsara
+    echo "Updating SCL library and autorun file"
+    cp  $SCL_LIB/* $CFENGINE_MASTERFILES_DIR/lib/scl
 else
-    echo "Installing surfsara library and autorun file"
-    cp --no-dereference -R $SURFSARA_LIB $CFENGINE_MASTERFILES_DIR/lib/
+    echo "Installing SCL library and autorun file"
+    cp --no-dereference -R $SCL_LIB $CFENGINE_MASTERFILES_DIR/lib/
 fi
 
 ### This is always updated
 #
-cp $SURFSARA_AUTORUN_SERVICE $CFENGINE_SERVICES_DIR/autorun
+cp $SCL_AUTORUN_SERVICE $CFENGINE_SERVICES_DIR/autorun
 
 
-if [  -d $CFENGINE_SERVICES_DIR/surfsara ]
+if [  -d $CFENGINE_SERVICES_DIR/scl ]
 then
-    echo "Updating surfsara services"
-    cp $SURFSARA_SERVICES/* $CFENGINE_SERVICES_DIR/surfsara
+    echo "Updating SCL services"
+    cp $SCL_SERVICES/* $CFENGINE_SERVICES_DIR/scl
 else
-    echo "Installing surfsara services"
-    mkdir $CFENGINE_SERVICES_DIR/surfsara
-    cp $SURFSARA_SERVICES/* $CFENGINE_SERVICES_DIR/surfsara
+    echo "Installing SCL services"
+    mkdir $CFENGINE_SERVICES_DIR/scl
+    cp $SCL_SERVICES/* $CFENGINE_SERVICES_DIR/scl
 fi
 
 ### Modules
 #
-if [ ! -d  $CFENGINE_MODULES_DIR/surfsara ]
+if [ ! -d  $CFENGINE_MODULES_DIR/scl ]
 then
-    mkdir $CFENGINE_MODULES_DIR/surfsara
+    mkdir $CFENGINE_MODULES_DIR/scl
 fi
-cp -a $SURFSARA_MODULES/* $CFENGINE_MODULES_DIR/surfsara
+cp -a $SCL_MODULES/* $CFENGINE_MODULES_DIR/scl
 
 ### Templates and json files
 #
@@ -108,7 +108,7 @@ then
 fi
 
 ### Must we update templates/json files
-cd  $SURFSARA_TEMPLATES || exit 1
+cd  $SCL_TEMPLATES || exit 1
 for d in *
 do
         if [ -d $CFENGINE_TEMPLATES_DIR/$d ]

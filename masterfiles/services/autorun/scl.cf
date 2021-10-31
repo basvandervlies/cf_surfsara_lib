@@ -1,0 +1,27 @@
+body file control {
+    inputs => { @{scl_inputs.files}, };
+}
+
+bundle common scl_inputs {
+    meta:
+        'tags' slist => { 'autorun' };
+
+    vars:
+        "files" slist => { "${sys.local_libdir}/scl/stdlib.cf" };
+
+}
+
+bundle agent scl_autorun {
+    meta:
+        "tags" slist => { "autorun" };
+
+    methods:
+        "" usebundle => scl_inventory_modules(),
+            comment => "Which inventory module must be run, controlled via 'def.scl_inventory_modules'";
+        "" usebundle => scl_services_autorun(),
+            comment => "Which service bundle(s) must be run, controlled via 'def.scl_services_enabled'";
+
+    reports:
+        verbose_mode::
+            "$(this.bundle): SCL lib loaded with node template dir: $(def.node_template_dir)";
+}

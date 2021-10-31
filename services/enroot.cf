@@ -17,7 +17,7 @@ bundle agent enroot_autorun()
 
     methods:
         "" usebundle => enroot();
-        "" usebundle => sara_data_autorun("enroot");
+        "" usebundle => scl_data_autorun("enroot");
         "" usebundle => enroot_install();
         "" usebundle => enroot_config();
 }
@@ -38,13 +38,13 @@ bundle agent enroot_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("enroot");
+            "" usebundle => scl_mustache_autorun("enroot");
 
         copy_dirs_set::
-            "" usebundle => sara_service_copy_dirs("enroot");
+            "" usebundle => scl_service_copy_dirs("enroot");
 
         copy_files_set::
-            "" usebundle => sara_service_copy_files("enroot");
+            "" usebundle => scl_service_copy_files("enroot");
 }
 
 bundle agent enroot_install()
@@ -61,7 +61,7 @@ bundle agent enroot_install()
 
     methods:
         any::
-            "" usebundle => sara_service_packages("enroot", "@(enroot_install.packages)"),
+            "" usebundle => scl_service_packages("enroot", "@(enroot_install.packages)"),
                 classes => results("bundle", "enroot_packages");
 
     commands:
@@ -84,10 +84,10 @@ This bundle will generate this file from mustache template:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "enroot",
             "..."

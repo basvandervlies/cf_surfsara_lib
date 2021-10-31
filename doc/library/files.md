@@ -1,6 +1,6 @@
 # files.cf
 
-Source: [files.cf](/masterfiles/lib/surfsara/files.cf)
+Source: [files.cf](/masterfiles/lib/scl/files.cf)
 
 For copying files/dirs in the service bundle from the policy server we have defined 2 bundles:
  1. sara_service_copy_dirs

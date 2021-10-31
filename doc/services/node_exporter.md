@@ -18,8 +18,8 @@ These templates are located in:
  * templates/node_exporter
  * templates/node_exporter/json
 
-The following json variables can be set in def.cf/json to invoke files bundles:                                                                                                                           
-  * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+The following json variables can be set in def.cf/json to invoke files bundles:
+  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 

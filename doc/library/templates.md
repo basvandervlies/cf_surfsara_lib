@@ -1,6 +1,6 @@
 # template.cf
 
-Source: [templates.cf](/masterfiles/lib/surfsara/templates.cf)
+Source: [templates.cf](/masterfiles/lib/scl/templates.cf)
 
 Here all bundles are listed that are involved in parsing json data and
 generating the templates files.

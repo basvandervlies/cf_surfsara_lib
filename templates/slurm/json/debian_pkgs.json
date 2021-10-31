@@ -3,21 +3,21 @@
     "log_dir": "/var/log/slurm-llnl",
     "opt_dir": "/opt/slurm",
     "plugin_dir": "/usr/lib/x86_64-linux-gnu/slurm-wlm/",
-    "plugstack_dir": "$(sara_data.slurm[config_dir])/plugstack.conf.d",
-    "scripts_dir": "$(sara_data.slurm[opt_dir])/scripts",
+    "plugstack_dir": "$(scl.slurm[config_dir])/plugstack.conf.d",
+    "scripts_dir": "$(scl.slurm[opt_dir])/scripts",
     "spool_dir": "/var/spool/slurm-llnl",
     "packages_client": {
         "install": {
-            "libpam-slurm-adopt" : "$(sara_data.slurm[version])",
-            "libpmi0-dev" : "$(sara_data.slurm[version])",
-            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
-            "libslurm-dev" : "$(sara_data.slurm[version])",
-            "libslurm-perl" : "$(sara_data.slurm[version])",
-            "libslurmdb-perl": "$(sara_data.slurm[version])",
-            "slurm-client": "$(sara_data.slurm[version])",
-            "slurmd": "$(sara_data.slurm[version])",
-            "slurm-wlm-basic-plugins ": "$(sara_data.slurm[version])",
-            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+            "libpam-slurm-adopt" : "$(scl.slurm[version])",
+            "libpmi0-dev" : "$(scl.slurm[version])",
+            "libpmi2-0-dev" : "$(scl.slurm[version])",
+            "libslurm-dev" : "$(scl.slurm[version])",
+            "libslurm-perl" : "$(scl.slurm[version])",
+            "libslurmdb-perl": "$(scl.slurm[version])",
+            "slurm-client": "$(scl.slurm[version])",
+            "slurmd": "$(scl.slurm[version])",
+            "slurm-wlm-basic-plugins ": "$(scl.slurm[version])",
+            "python3-pyslurm" : "$(scl.slurm[pyslurm_version])"
         },
         "purge": {
             "libpam-slurm" : "",
@@ -28,19 +28,19 @@
     },
     "packages_server": {
         "install": {
-            "libpam-slurm-adopt" : "$(sara_data.slurm[version])",
-            "libpmi0-dev" : "$(sara_data.slurm[version])",
-            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
-            "libslurm-dev" : "$(sara_data.slurm[version])",
-            "libslurm-perl" : "$(sara_data.slurm[version])",
-            "libslurmdb-perl": "$(sara_data.slurm[version])",
-            "slurm-client": "$(sara_data.slurm[version])",
-            "slurm-wlm": "$(sara_data.slurm[version])",
-            "slurm-wlm-doc ": "$(sara_data.slurm[version])",
-            "slurmctld": "$(sara_data.slurm[version])",
-            "slurmd": "$(sara_data.slurm[version])",
-            "slurmdbd": "$(sara_data.slurm[version])",
-            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+            "libpam-slurm-adopt" : "$(scl.slurm[version])",
+            "libpmi0-dev" : "$(scl.slurm[version])",
+            "libpmi2-0-dev" : "$(scl.slurm[version])",
+            "libslurm-dev" : "$(scl.slurm[version])",
+            "libslurm-perl" : "$(scl.slurm[version])",
+            "libslurmdb-perl": "$(scl.slurm[version])",
+            "slurm-client": "$(scl.slurm[version])",
+            "slurm-wlm": "$(scl.slurm[version])",
+            "slurm-wlm-doc ": "$(scl.slurm[version])",
+            "slurmctld": "$(scl.slurm[version])",
+            "slurmd": "$(scl.slurm[version])",
+            "slurmdbd": "$(scl.slurm[version])",
+            "python3-pyslurm" : "$(scl.slurm[pyslurm_version])"
         },
         "purge": {
             "libpam-slurm" : "",
@@ -51,12 +51,12 @@
     },
     "packages_submit": {
         "install": {
-            "libpmi0-dev" : "$(sara_data.slurm[version])",
-            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
-            "libslurm-perl" : "$(sara_data.slurm[version])",
-            "libslurmdb-perl": "$(sara_data.slurm[version])",
-            "slurm-client": "$(sara_data.slurm[version])",
-            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+            "libpmi0-dev" : "$(scl.slurm[version])",
+            "libpmi2-0-dev" : "$(scl.slurm[version])",
+            "libslurm-perl" : "$(scl.slurm[version])",
+            "libslurmdb-perl": "$(scl.slurm[version])",
+            "slurm-client": "$(scl.slurm[version])",
+            "python3-pyslurm" : "$(scl.slurm[pyslurm_version])"
         },
         "purge": {
             "libpam-slurm" : "",

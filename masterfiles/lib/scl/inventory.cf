@@ -5,23 +5,23 @@
 @if minimum_version(99.9)
 # inventory.cf
 
-Source: [inventory.cf](/masterfiles/lib/surfsara/inventory.cf)
+Source: [inventory.cf](/masterfiles/lib/scl/inventory.cf)
 
 You can control which inventory modules must be run and with optional arguments by
 specifying the following variable in:
  * def.json
 ```json
-"sara_inventory_modules": [
-        "surfsara/lscpu",
-        "surfsara/dmidecode"
+"scl_inventory_modules": [
+        "scl/lscpu",
+        "scl/dmidecode"
 ],
-"surfsara/lscpu": {
-        "args": "$(sara_inventory.cache_dir)"
+"scl/lscpu": {
+        "args": "$(scl_inventory.cache_dir)"
 },
-"surfsara/dmidecode": {
-    "args": "--output $(sara_inventory.cache_dir)/dmidecode.json --cf",
+"scl/dmidecode": {
+    "args": "--output $(scl_inventory.cache_dir)/dmidecode.json --cf",
     "run_class": "debian",
-    "run_bundle": "sara_dmidecode"
+    "run_bundle": "scl_dmidecode"
 }
 ```
 
@@ -30,13 +30,13 @@ This statement determines which modules has to be run with optional arguments:
  * `run_class`: Only run module if this class condition is met (Optional)
  * `run_bundle`: Run this bundle after a successful module execution (Optional)
 
-The inventory bundle defines a directory variable for storing module data `sara_inventory.cache_dir`:
+The inventory bundle defines a directory variable for storing module data `scl_inventory.cache_dir`:
  * `/run/cf_inventory_cache`
- * can be overriden by `def.sara_inventory_cache_dir`
+ * can be overriden by `def.scl_inventory_cache_dir`
 
 The module scripts must be located under `$(sys.workdir)/modules`. Only exit code '0' is considered
 as promise kept all other exit codes are considered as promise failed. The class name is:
- * `canonify("sara_inventory_modules_<module_name>_failed")`
+ * `canonify("scl_inventory_modules_<module_name>_failed")`
 
 ## lscpu
 
@@ -44,9 +44,9 @@ Is a wrapper script around the `lscpu` command. It converts the output to json a
 file. If the file exists it will load the data and convert it to the json module data protocol. The
 data can be accessed in cfengine:
  * `$(lscpu.data[Model_name])`
- * `"" usebundle => sara_show_data("lscpu", "data")`
+ * `"" usebundle => scl_show_data("lscpu", "data")`
 
-Required argument: `"$(sara_inventory.cache_dir)"`
+Required argument: `"$(scl_inventory.cache_dir)"`
 
 ## dmidecode
 
@@ -54,66 +54,66 @@ Is a wrapper script around the `dmidecode` command. It converts the output to js
 file. If the file exists it will load the data and convert it to the json module data protocol. The
 data can be accessed in cfengine:
  * `$(dmidecode.data[Base_Board_Information][0][Manufacturer])`
- * `"" usebundle => sara_show_data("dmidecode", "data")`
+ * `"" usebundle => scl_show_data("dmidecode", "data")`
 
-Required arguments: `"--output $(sara_inventory.cache_dir)/dmidecode.json --cf"`
+Required arguments: `"--output $(scl_inventory.cache_dir)/dmidecode.json --cf"`
 @endif
 
-bundle common sara_inventory
+bundle common scl_inventory
 {
     vars:
-        "modules" slist => { @(def.sara_inventory_modules) },
+        "modules" slist => { @(def.scl_inventory_modules) },
             if => and(
-                    isvariable("def.sara_inventory_modules")
+                    isvariable("def.scl_inventory_modules")
                 );
 
         "modules" slist => {},
             if => and(
-                    not(isvariable("def.sara_inventory_modules"))
+                    not(isvariable("def.scl_inventory_modules"))
                 );
 
         "dir" string => "$(sys.workdir)/modules",
             comment => "CFengine modules directory location";
 
         "cache_dir" string => ifelse(
-            isvariable( "def.sara_inventory_cache_dir"), $(def.sara_inventory_cache_dir),
+            isvariable( "def.scl_inventory_cache_dir"), $(def.scl_inventory_cache_dir),
             "/run/cf_inventory_cache");
 
     classes:
-        "sara_inventory_modules_set" expression => isvariable("def.sara_inventory_modules");
+        "scl_inventory_modules_set" expression => isvariable("def.scl_inventory_modules");
 }
 
-bundle agent sara_inventory_modules
+bundle agent scl_inventory_modules
 {
     classes:
         any::
-            "cache_dir_exists" expression => isdir("$(sara_inventory.cache_dir)");
+            "cache_dir_exists" expression => isdir("$(scl_inventory.cache_dir)");
 
     files:
         !cache_dir_exists::
-            "$(sara_inventory.cache_dir)/."
+            "$(scl_inventory.cache_dir)/."
                 create => "true",
                 perms  => mog("0700", "root", "root");
 
     methods:
-        sara_inventory_modules_set::
-             "" usebundle => sara_inventory_class_run("$(sara_inventory.modules)"),
+        scl_inventory_modules_set::
+             "" usebundle => scl_inventory_class_run("$(scl_inventory.modules)"),
                 comment => "Run module with arg specified in entry";
 
-             "" usebundle => sara_show_data("def", "sara_inventory_modules"),
+             "" usebundle => scl_show_data("def", "scl_inventory_modules"),
                  if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
 
 #        cache_dir_exists::
-#            "" usebundle => sara_data_autorun("inventory"),
+#            "" usebundle => scl_data_autorun("inventory"),
 #                comment => "Maybe needed";
 
     reports:
-        !sara_inventory_modules_set::
-            "$(this.bundle) no inventory modules enabled, set 'def.sara_inventory_modules'"
+        !scl_inventory_modules_set::
+            "$(this.bundle) no inventory modules enabled, set 'def.scl_inventory_modules'"
                 if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
 }
 
-bundle agent sara_inventory_class_run(module)
+bundle agent scl_inventory_class_run(module)
 {
     vars:
         any::
@@ -134,7 +134,7 @@ bundle agent sara_inventory_class_run(module)
 
     methods:
         any::
-            "" usebundle => sara_inventory_module_run("$(module)"),
+            "" usebundle => scl_inventory_module_run("$(module)"),
                 comment => "Run inventory module if class condition is met",
                 if => or(
                     "run_class",
@@ -142,7 +142,7 @@ bundle agent sara_inventory_class_run(module)
                     );
 
 
-             "" usebundle => sara_show_data("def", "$(module)"),
+             "" usebundle => scl_show_data("def", "$(module)"),
                  if => "DEBUG|DEBUG_inventory|DEBUG_$(this.bundle)";
 
     reports:
@@ -160,7 +160,7 @@ bundle agent sara_inventory_class_run(module)
                         );
 }
 
-bundle agent sara_inventory_module_run(module)
+bundle agent scl_inventory_module_run(module)
 {
     vars:
         any::
@@ -182,28 +182,28 @@ bundle agent sara_inventory_module_run(module)
                 comment => "Run inventory module if run_class definitions are met";
 
     methods:
-             "" usebundle => sara_inventory_run_bundle("$(module)"),
+             "" usebundle => scl_inventory_run_bundle("$(module)"),
                 comment => "Must we run a bundle after succesful module run",
                 if => or(
-                        canonify("sara_inventory_modules_$(module)_repaired"),
-                        canonify("sara_inventory_modules_$(module)_kept")
+                        canonify("scl_inventory_modules_$(module)_repaired"),
+                        canonify("scl_inventory_modules_$(module)_kept")
                     );
 
     commands:
         any::
-            "$(sara_inventory.dir)/$(module)"
+            "$(scl_inventory.dir)/$(module)"
                 comment => "Run module with first argument cache dir and specified module args",
                 args => "$(args)",
-                classes => results("namespace", "sara_inventory_modules_$(module)"),
+                classes => results("namespace", "scl_inventory_modules_$(module)"),
                 module => "true";
 
     reports:
         any::
             "$(this.bundle) '$(module)' failed to run"
-                if => canonify("sara_inventory_modules_$(module)_failed");
+                if => canonify("scl_inventory_modules_$(module)_failed");
 }
 
-bundle agent sara_inventory_run_bundle(module)
+bundle agent scl_inventory_run_bundle(module)
 {
     classes:
         any::
@@ -216,7 +216,7 @@ bundle agent sara_inventory_run_bundle(module)
                 comment => "run the bundle";
 }
 
-bundle agent sara_dmidecode_example()
+bundle agent scl_dmidecode_example()
 {
     vars:
         "product_name" string => string_upcase("DMIDECOE_$(dmidecode.data[System_Information][0][Product_Name])");

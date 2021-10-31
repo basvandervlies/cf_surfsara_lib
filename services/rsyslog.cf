@@ -29,7 +29,7 @@ bundle common rsyslog()
 bundle agent rsyslog_install()
 {
     methods:
-        "" usebundle => sara_service_packages("rsyslog", "@(rsyslog.packages)");
+        "" usebundle => scl_service_packages("rsyslog", "@(rsyslog.packages)");
 }
 
 bundle agent rsyslog_config()
@@ -40,7 +40,7 @@ bundle agent rsyslog_config()
         };
 
     methods:
-        "" usebundle => sara_mustache_autorun("rsyslog");
+        "" usebundle => scl_mustache_autorun("rsyslog");
 
     services:
         "$(rsyslog.service_name)"
@@ -57,7 +57,7 @@ bundle agent rsyslog_daemon_check()
         "$(rsyslog.daemon_name)"
             comment => "Check if rsyslog is running",
             process_count => check_range("$(rsyslog.daemon_name)", "1", "1"),
-            process_select => sara_select_parent_process("1");
+            process_select => scl_select_parent_process("1");
 
     commands:
         "$(rsyslog.restart)"
@@ -95,10 +95,10 @@ The class can be set in the def.cf/json:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
         "...",
         "rsyslog",
         "..."

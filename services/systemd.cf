@@ -33,7 +33,7 @@ bundle agent systemd_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("systemd");
+            "" usebundle => scl_data_autorun("systemd");
             "" usebundle => systemd_config();
 }
 
@@ -58,7 +58,7 @@ bundle agent systemd_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("systemd");
+            "" usebundle => scl_mustache_autorun("systemd");
 
     commands:
         SYSTEMD_RELOAD::
@@ -142,10 +142,10 @@ files are installed for:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "systemd",
             "..."

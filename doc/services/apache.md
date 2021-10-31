@@ -29,7 +29,7 @@ Debian Apache file envvars wil be written to `/etc/apache2/envvars`. This is nee
 uses the `/opt/apache/httpd.conf` instead of the default configuration file.
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 TODO:
  - Desining separate services for Python wsgi and PHP

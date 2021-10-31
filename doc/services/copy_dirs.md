@@ -3,7 +3,7 @@
 Source: [copy_dirs.cf](/services/copy_dirs.cf)
 
 This will copy directories from policy hub to the host, with the aid of library
-function [sara_service_copy_dirs}(/masterfiles/lib/surfsara/files.cf).
+function [sara_service_copy_dirs}(/masterfiles/lib/scl/files.cf).
 
 ## Usage
 

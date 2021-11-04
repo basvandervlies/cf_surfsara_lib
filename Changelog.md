@@ -25,7 +25,7 @@
 <!-- vim-markdown-toc -->
 # Version: 1.0.0 (2021-11-??)
 
-Released version 1.0,0 this is a big change and other release will not change the API anymore. We have renamed
+Released version 1.0.0 this is a big change and other release will not change the API anymore. We have renamed
 all `sara_` bundles to `scl_` and  instead of using variable with `sara_data.<bundle>.<var>` it is now
 `scl.<bundle>.<var>`.  The library is named `SCL` and we want to reflect this in the sources.
 
@@ -42,6 +42,7 @@ These services heve bug fixes or new features:
   * Configuration files must have the right perms and owner
   * Added a new json variable `slurmd_service_options` to control the daemon options for slurmd
   * rewrote the slurmd.service for nornal and configless setup
+ * Added an new module `mellanox` this set a class based on the mellanox card.
 
 # Version: 0.9.89 (2021-03-28)
 

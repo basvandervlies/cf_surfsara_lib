@@ -25,9 +25,9 @@
 <!-- vim-markdown-toc -->
 # Version: 1.0.0 (2021-11-??)
 
-Released version 1.0.0 this is a big change and other release will not change the API anymore. We have renamed
+Released version 1.0.0 this is a big change and other releases will not change the API anymore. We have renamed
 all `sara_` bundles to `scl_` and  instead of using variable with `sara_data.<bundle>.<var>` it is now
-`scl.<bundle>.<var>`.  The library is named `SCL` and we want to reflect this in the sources.
+`scl.<bundle>.<var>`.  The library is named `SCL` and we want to reflect this in the source.
 
 The library has 2 new flles:
  * boot.cf: This  will run all bundles that have the tag `scl_boot`. At SURF we use it  like this:
@@ -36,7 +36,7 @@ The library has 2 new flles:
 
 These services heve bug fixes or new features:
  * apache services changes:
-  * fixed a bug in access log was wrong in mustache file
+  * fixed a bug in access log was wrong in the mustache file
  * slurm services changes:
   * Added configless setup can be controlled via class `SLURM_CONFIGLESS`: Do not generate the configuration files. It will served by slurmctld.
   * Configuration files must have the right perms and owner

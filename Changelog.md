@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.0.0 (2021-11-10)](#version-100-2021-11-10)
 * [Version: 0.9.89 (2021-03-28)](#version-0989-2021-03-28)
 * [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
 * [Version: 0.9.82 (2020-12-05 sint)](#version-0982-2020-12-05-sint)
@@ -22,6 +23,27 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.0.0 (2021-11-10)
+
+Released version 1.0.0 this is a big change and other releases will not change the API anymore. We have renamed
+all `sara_` bundles to `scl_` and  instead of using variable with `sara_data.<bundle>.<var>` it is now
+`scl.<bundle>.<var>`.  The library is named `SCL` and we want to reflect this in the source.
+
+The library has 2 new flles:
+ * boot.cf: This  will run all bundles that have the tag `scl_boot`. At SURF we use it  like this:
+  * `cf-agent -KI -DBOOT` -->  eg: install the NVIDIA drivers
+ * paths.cf: This extends the `paths` variable from the CFengine masterfiles library with some utilities that are use in the SCL framework
+
+These services heve bug fixes or new features:
+ * apache services changes:
+  * fixed a bug in access log was wrong in the mustache file
+ * slurm services changes:
+  * Added configless setup can be controlled via class `SLURM_CONFIGLESS`: Do not generate the configuration files. It will served by slurmctld.
+  * Configuration files must have the right perms and owner
+  * Added a new json variable `slurmd_service_options` to control the daemon options for slurmd
+  * rewrote the slurmd.service for nornal and configless setup
+ * Added an new module `mellanox` this set a class based on the mellanox card.
+
 # Version: 0.9.89 (2021-03-28)
 
 Fixed an installation error in `mpf_installation` script. The surfsara modules were copied to the

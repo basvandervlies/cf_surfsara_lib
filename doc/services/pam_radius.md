@@ -11,7 +11,7 @@ This bundle install the software on a node and generete the file from mustache t
  * cfengine variable : `$(pam_radius.config_file)`
 
 When the configuration flle has been changed the following class will be set:
- * `canonify("sara$(pam_radius.config_file)")`
+ * `canonify("scl$(pam_radius.config_file)")`
 
 These files wille be generated  with the aid of mustache templates with json data.
 The templates are located in:
@@ -21,10 +21,10 @@ The templates are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "pam_radius",
             "..."

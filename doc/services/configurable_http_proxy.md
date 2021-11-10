@@ -6,15 +6,15 @@ Source: [configurable_http_proxy.cf](/services/configurable_http_proxy.cf)
 This will install the configurable-http-proxy software on a node. This software is used by [jupyterhub.cf](/services/jupyterhub.cf)
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
- * install_tarballs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "configurable_http_proxy",
             "..."

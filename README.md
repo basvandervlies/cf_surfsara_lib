@@ -10,10 +10,10 @@
         * [def.node\_template\_dir](#defnode_template_dir)
         * [CF-serverd shortcut configuration for cfengine version less then 3.10.1](#cf-serverd-shortcut-configuration-for-cfengine-version-less-then-3101)
     * [Usage](#usage)
-        * [sara\_services\_enabled run method](#sara_services_enabled-run-method)
+        * [scl\_services\_enabled run method](#scl_services_enabled-run-method)
         * [def.json](#defjson)
             * [Service classes](#service-classes)
-        * [lib/surfsara/def.cf](#libsurfsaradefcf)
+        * [lib/scl/def.cf](#libscldefcf)
     * [cf-agent command line options](#cf-agent-command-line-options)
 
 <!-- vim-markdown-toc -->
@@ -74,7 +74,7 @@ The merge strategy is::
   1. `def.<service_name>_local_generated_json_files` if defined
   1. `def.<service_name>[local_generated_json_files]` if defined
   1. `def.<service_name>` if defined in def.json or:
-        * lib/surfsara/def.cf MPF setup
+        * lib/scl/def.cf MPF setup
         * your own file with variable scope `def`
 
 ## Installation
@@ -98,27 +98,27 @@ there are two options
 ```
 
 You can test your installation with
- * `cf-agent -Kv | grep surfsara\_autorun`
+ * `cf-agent -Kv | grep scl\_autorun`
 
 #### update ####
 
 You can run the same script it will detect its an update. This script will overwrite:
- * surfsara library files: `masterfiles/lib/surfsara`
- * surfsara services files: `masterfiles/services/surfsara`
+ * scl library files: `masterfiles/lib/scl`
+ * scl services files: `masterfiles/services/scl`
  * mustache template files and default.json files: `/var/cfengine/templates`
 
 ### Own framework
 
 1. Login on your policy server.
-1. `cp -a masterfiles/lib/surfsara <masterfiles>/lib/surfsara`
-1. `cp -a templates/* $(sys.workdir)/templates`
-1. include `/lib/surfsara/stdlib.cf` in your inputs
+1. `cp -a masterfiles/lib/scl <masterfiles>/lib/scl`
+1. `cp -a templates/\* $(sys.workdir)/templates`
+1. include `/lib/scl/stdlib.cf` in your inputs
 ```
 body common control
 {
     inputs => {
         ...
-        "lib/surfsara/stdlib.cf",
+        "lib/scl/stdlib.cf",
         ...
     };
 }
@@ -126,7 +126,7 @@ body common control
 
 ### def.node\_template\_dir
 
-The  `def.node_template_dir` variable is set in `lib/surfsara/def.cf`, but can also be set
+The  `def.node_template_dir` variable is set in `lib/scl/def.cf`, but can also be set
 set in `def.json`. The *def.json* wins, eg:
 ```
 vars:
@@ -158,16 +158,16 @@ The documentattion is embedded in the source files, and generated:
 There are several services setups included with inline documentation. These setups are
 used in production at SURF.
 
-To enable the service on your system use `def.sara_services_enabled` method in def.cf/def.json for
+To enable the service on your system use `def.scl_services_enabled` method in def.cf/def.json for
 both installations method
 
-###  sara\_services\_enabled run method
+###  scl\_services\_enabled run method
 
 This is the prefered method for MPF and your own frameork. With this method you can contol which services are run
 and which files are included, eg: def.json
 ```
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
         "ntp",
         "resolv"
     ]
@@ -226,7 +226,7 @@ For every service you dynamically set classes in the service data, eg:
 ```
 This will set the class `DHCLIENT\_RESOLV\_CONF` on host/node `r24n2`
 
-### lib/surfsara/def.cf
+### lib/scl/def.cf
 
 You can also override settings in this file, eg:
  * One variable:
@@ -241,7 +241,7 @@ vars:
 ```
 
 If you defined your own `def.cf` and do not want the one included in this framework you can set the following class:
- * `SURFSARA_SKIP_DEF_CF_INCLUDE`
+ * `SCL_SKIP_DEF_CF_INCLUDE`
 
 
 ## cf-agent command line options

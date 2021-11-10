@@ -30,7 +30,7 @@ bundle agent pam_radius_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("pam_radius");
+            "" usebundle => scl_data_autorun("pam_radius");
             "" usebundle => pam_radius_install();
             "" usebundle => pam_radius_surfsara_config();
 }
@@ -59,21 +59,21 @@ bundle agent pam_radius_install()
 
     methods:
         any::
-            "" usebundle => sara_service_packages("pam_radius", "@(pam_radius_install.packages)");
+            "" usebundle => scl_service_packages("pam_radius", "@(pam_radius_install.packages)");
 }
 
 bundle agent pam_radius_surfsara_config()
 {
     vars:
         any::
-            "pam_config_file_class"    string => canonify("sara$(pam_radius.config_file)");
+            "pam_config_file_class"    string => canonify("scl$(pam_radius.config_file)");
 
     classes:
         "pam_radius_report" or => { $(pam_config_file_class) };
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("pam_radius");
+            "" usebundle => scl_mustache_autorun("pam_radius");
 
     reports:
         pam_radius_report::
@@ -94,7 +94,7 @@ This bundle install the software on a node and generete the file from mustache t
  * cfengine variable : `$(pam_radius.config_file)`
 
 When the configuration flle has been changed the following class will be set:
- * `canonify("sara$(pam_radius.config_file)")`
+ * `canonify("scl$(pam_radius.config_file)")`
 
 These files wille be generated  with the aid of mustache templates with json data.
 The templates are located in:
@@ -104,10 +104,10 @@ The templates are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "pam_radius",
             "..."

@@ -19,7 +19,7 @@ bundle agent tripwire_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("tripwire");
+            "" usebundle => scl_data_autorun("tripwire");
             "" usebundle => tripwire_surfsara_config();
 }
 
@@ -66,10 +66,10 @@ file(s) are:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "tripwire",
             "..."

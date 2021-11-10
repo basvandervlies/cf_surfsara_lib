@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Created by Jaap Dijkshoorn @SURF
+#
+# Script to set some classes
+#
+set -euo pipefail
+IFS=$'\t\n'
+
+HCA_TYPE=/sys/class/infiniband/mlx5_0/hca_type
+FW_VER=/sys/class/infiniband/mlx5_0/fw_ver
+
+if [ -f ${HCA_TYPE} ]
+then
+    echo "+MELLANOX_HCA_`cat ${HCA_TYPE}`"
+fi
+
+if [ -f ${FW_VER} ]
+then
+    echo "+MELLANOX_HCA_`cat ${FW_VER}`"
+fi
+
+exit 0

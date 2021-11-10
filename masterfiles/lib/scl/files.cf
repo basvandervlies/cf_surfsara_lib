@@ -6,13 +6,13 @@
 @if minimum_version(99.9)
 # files.cf
 
-Source: [files.cf](/masterfiles/lib/surfsara/files.cf)
+Source: [files.cf](/masterfiles/lib/scl/files.cf)
 
 For copying files/dirs in the service bundle from the policy server we have defined 2 bundles:
- 1. sara_service_copy_dirs
- 1. sara_service_copy_files
+ 1. scl_service_copy_dirs
+ 1. scl_service_copy_files
 
-## sara_service_copy_dirs(bundle_name)
+## scl_service_copy_dirs(bundle_name)
 
 This bundle will read the json attribute `copy_dirs` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -31,7 +31,7 @@ The  copy attributes can be overriden or specified  by json data, eg:
 "slurm": {
     "copy_dirs": [
         {
-            "dest": "$(sara_data.slurm[scripts_dir])",
+            "dest": "$(scl.slurm[scripts_dir])",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0700", "root", "root" ],
             "purge": "true",
@@ -40,7 +40,7 @@ The  copy attributes can be overriden or specified  by json data, eg:
     ]
 }
 ```
-## sara_service_copy_files(bundle_name)
+## scl_service_copy_files(bundle_name)
 
 This bundle will read the json attribute `copy_files` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -63,7 +63,7 @@ The `copy_files` can specified by json data eg:
 }
 ```
 
-## sara_service_install_tarballs(bundle_name)
+## scl_service_install_tarballs(bundle_name)
 
 This bundle will read the json attribute `install_tarballs` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -90,12 +90,12 @@ install_tarballs: [
 ],
 dir: /opt/slurm,
 current_version: 19.05.5,,
-software_dir: $(sara_data.slurm[dir])/sw,
-tarball_dir: $(sara_data.slurm[dir])/tarballs
+software_dir: $(scl.slurm[dir])/sw,
+tarball_dir: $(scl.slurm[dir])/tarballs
 ```
 @endif
 
-body copy_from sara_cp_dir(bundle_name, var, server)
+body copy_from scl_cp_dir(bundle_name, var, server)
 {
     servers     => { "$(server)" };
     compare     => "$($(bundle_name).$(var)[compare])";
@@ -105,7 +105,7 @@ body copy_from sara_cp_dir(bundle_name, var, server)
     type_check  => "$($(bundle_name).$(var)[type_check])";
 }
 
-body copy_from sara_sync_no_perms_cp(from,compare)
+body copy_from scl_sync_no_perms_cp(from,compare)
 {
     servers  => { $(sys.policy_hub) };
     source      => "$(from)";
@@ -121,21 +121,21 @@ windows::
     compare => "mtime";
 }
 
-body copy_from sara_template_local_dcp(from)
+body copy_from scl_template_local_dcp(from)
 {
     compare => "digest";
     source => "$(from)";
     copylink_patterns => { ".*" };
 }
 
-body link_from sara_relative_ln_s(x)
+body link_from scl_relative_ln_s(x)
 {
     link_type => "relative";
     source => "$(x)";
 }
 
 
-bundle agent sara_cp_dir_default
+bundle agent scl_cp_dir_default
 {
     vars:
        any::
@@ -150,10 +150,10 @@ bundle agent sara_cp_dir_default
 
 @if minimum_version(99.9)
 
-## sara_make_cron_file(name. data)
+## scl_make_cron_file(name. data)
 
 This bundle install system cronjob in `/etc/cron.d`. The bundle is called with:
- * sara_make_cron_file(name, data)
+ * scl_make_cron_file(name, data)
 
 Where:
  * name: is the name of the cronjob file
@@ -170,7 +170,7 @@ Where:
 }
 ```
 @endif
-bundle agent sara_make_cron_file(name, data)
+bundle agent scl_make_cron_file(name, data)
 {
     vars:
         any::
@@ -194,13 +194,13 @@ bundle agent sara_make_cron_file(name, data)
                 edit_template_string   => "$(template)$(const.n)",
                 template_method => "inline_mustache",
                 template_data => "@(data)",
-                classes => results("namespace", "sara_make_cron_file_$(name)");
+                classes => results("namespace", "scl_make_cron_file_$(name)");
 @endif
 
     methods:
         CRON_VIXIE.(cfengine_3_10|cfengine_3_7)::
             "" usebundle => file_make("$(cron_dir)/$(name)", "$(job_str)"),
-                classes => results("namespace", "sara_make_cron_file_$(name)");
+                classes => results("namespace", "scl_make_cron_file_$(name)");
 
     reports:
         any::
@@ -211,58 +211,58 @@ bundle agent sara_make_cron_file(name, data)
             "No Vixie cron software installed";
 }
 
-bundle agent sara_service_copy_dirs(bundle_name)
+bundle agent scl_service_copy_dirs(bundle_name)
 {
 vars:
     any::
-        "index" slist => getindices("sara_data.$(bundle_name)[copy_dirs]");
+        "index" slist => getindices("scl.$(bundle_name)[copy_dirs]");
 
-        "cp_attr_$(index)" data => mergedata("sara_cp_dir_default.attributes", "sara_data.$(bundle_name)[copy_dirs][$(index)]"),
+        "cp_attr_$(index)" data => mergedata("scl_cp_dir_default.attributes", "scl.$(bundle_name)[copy_dirs][$(index)]"),
             comment => "Merge each definition the copy default attributes";
 
         "exclude_dir_$(index)" slist => { ".git", ".svn" },
             comment => "Default exclude directories settings for copy_dirs",
             ifvarclass => and(
-                not(isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"))
+                not(isvariable("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"))
             );
 
-        "exclude_dir_$(index)" data => mergedata("sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"),
+        "exclude_dir_$(index)" data => mergedata("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"),
             comment => "Exclude directory settings from json data",
             ifvarclass => and(
-                isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]")
+                isvariable("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]")
             );
 
     cfengine_3_7|cfengine_3_10::
-        "debug_str" string => format("%S", "sara_data.$(bundle_name)[copy_dirs]"),
+        "debug_str" string => format("%S", "scl.$(bundle_name)[copy_dirs]"),
             comment => "Old debug method",
             ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 
 classes:
     any::
-        "$(bundle_name)_copy_dirs_$(index)_run_bundle" expression => isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][run_bundle]"),
+        "$(bundle_name)_copy_dirs_$(index)_run_bundle" expression => isvariable("scl.$(bundle_name)[copy_dirs][$(index)][run_bundle]"),
             comment => "Must we run a bundle when a directory is changed";
 
-        "$(bundle_name)_copy_dirs_$(index)_mog_class" expression => isvariable("sara_data.$(bundle_name)[copy_dirs][$(index)][mog]"),
+        "$(bundle_name)_copy_dirs_$(index)_mog_class" expression => isvariable("scl.$(bundle_name)[copy_dirs][$(index)][mog]"),
             comment => "Must we set directory permission and doit recurse";
 
 files:
     any::
         ## Can not use $(this.bundle) in copy_from body, bug?
-        "$(sara_data.$(bundle_name)[copy_dirs][$(index)][dest])"
+        "$(scl.$(bundle_name)[copy_dirs][$(index)][dest])"
             comment => "Copy bundle dirs and set class if there is a change",
-            copy_from => sara_cp_dir("sara_service_copy_dirs", "cp_attr_$(index)", "$(sys.policy_hub)"),
+            copy_from => scl_cp_dir("scl_service_copy_dirs", "cp_attr_$(index)", "$(sys.policy_hub)"),
             depth_search => recurse_ignore("inf", "@(exclude_dir_$(index))" ),
             classes => results("namespace", "$(bundle_name)_copy_dirs_$(index)"),
             ifvarclass => and(
                 not(canonify("$(bundle_name)_copy_dirs_$(index)_kept"))
             );
 
-        "$(sara_data.$(bundle_name)[copy_dirs][$(index)][dest])"
+        "$(scl.$(bundle_name)[copy_dirs][$(index)][dest])"
             comment => "Set permission on all files/dirs if requested",
             perms => mog(
-                "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][0])",
-                "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][1])",
-                "$(sara_data.$(bundle_name)[copy_dirs][$(index)][mog][2])"
+                "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][0])",
+                "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][1])",
+                "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][2])"
             ),
             depth_search => recurse("inf"),
             ifvarclass => and(
@@ -271,18 +271,18 @@ files:
 
 methods:
     any::
-        "" usebundle => "$(sara_data.$(bundle_name)[copy_dirs][$(index)][run_bundle])",
+        "" usebundle => "$(scl.$(bundle_name)[copy_dirs][$(index)][run_bundle])",
             ifvarclass => and(
                 canonify("$(bundle_name)_copy_dirs_$(index)_repaired"),
                 canonify("$(bundle_name)_copy_dirs_$(index)_run_bundle")
                 );
 
 @if minimum_version(3.11)
-        "" usebundle => sara_show_data("sara_data", "$(bundle_name)[copy_dirs][$(index)]"),
+        "" usebundle => scl_show_data("scl", "$(bundle_name)[copy_dirs][$(index)]"),
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
-        "" usebundle => sara_show_data("$(this.bundle)", "exclude_dir_$(index)"),
+        "" usebundle => scl_show_data("$(this.bundle)", "exclude_dir_$(index)"),
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
-        "" usebundle => sara_show_data("$(this.bundle)", "cp_attr_$(index)"),
+        "" usebundle => scl_show_data("$(this.bundle)", "cp_attr_$(index)"),
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 @endif
 
@@ -293,39 +293,39 @@ reports:
 }
 
 
-bundle agent sara_service_copy_files(bundle_name)
+bundle agent scl_service_copy_files(bundle_name)
 {
     methods:
         any::
-            "" usebundle => sara_service_copy_base("$(bundle_name)", "copy_files");
+            "" usebundle => scl_service_copy_base("$(bundle_name)", "copy_files");
 }
 
-bundle agent sara_service_install_tarballs(bundle_name)
+bundle agent scl_service_install_tarballs(bundle_name)
 {
     vars:
-        "index" slist => getindices("sara_data.$(bundle_name)[install_tarballs]");
+        "index" slist => getindices("scl.$(bundle_name)[install_tarballs]");
 
     classes:
-        "check_dir_$(index)" expression => isdir("$(sara_data.$(bundle_name)[install_tarballs][$(index)][check_dir])"),
+        "check_dir_$(index)" expression => isdir("$(scl.$(bundle_name)[install_tarballs][$(index)][check_dir])"),
             comment => "Check if tarball is extracted";
 
-        "check_tarball_dir" expression => isdir("$(sara_data.$(bundle_name)[tarball_dir])"),
+        "check_tarball_dir" expression => isdir("$(scl.$(bundle_name)[tarball_dir])"),
             comment => "Check if target directory exists";
 
     files:
         !check_tarball_dir::
-            "$(sara_data.$(bundle_name)[tarball_dir])/."
+            "$(scl.$(bundle_name)[tarball_dir])/."
                 create => "true";
 
     methods:
         any::
-            "" usebundle => sara_service_copy_base("$(bundle_name)", "install_tarballs");
+            "" usebundle => scl_service_copy_base("$(bundle_name)", "install_tarballs");
 
     commands:
         any::
-            "$(sara_data.$(bundle_name)[install_tarballs][$(index)][extract][cmd])  $(sara_data.$(bundle_name)[install_tarballs][$(index)][dest])"
+            "$(scl.$(bundle_name)[install_tarballs][$(index)][extract][cmd])  $(scl.$(bundle_name)[install_tarballs][$(index)][dest])"
                 comment => "extract tarball with specified command in a directory",
-                contain => in_dir("$(sara_data.$(bundle_name)[install_tarballs][$(index)][extract][in_dir])"),
+                contain => in_dir("$(scl.$(bundle_name)[install_tarballs][$(index)][extract][in_dir])"),
                 if => or(
                     canonify("$(bundle_name)_install_tarballs_$(index)_repaired"),
                    "!check_dir_$(index)"
@@ -334,61 +334,61 @@ bundle agent sara_service_install_tarballs(bundle_name)
     reports:
         any::
             "$(this.bundle):
-                $(sara_data.$(bundle_name)[install_tarballs][$(index)][extract][cmd]) $(sara_data.$(bundle_name)[install_tarballs][$(index)][dest])
-                in directory: $(sara_data.$(bundle_name)[install_tarballs][$(index)][extract][in_dir])
-                from directory: $(sara_data.$(bundle_name)[tarball_dir])"
+                $(scl.$(bundle_name)[install_tarballs][$(index)][extract][cmd]) $(scl.$(bundle_name)[install_tarballs][$(index)][dest])
+                in directory: $(scl.$(bundle_name)[install_tarballs][$(index)][extract][in_dir])
+                from directory: $(scl.$(bundle_name)[tarball_dir])"
                 if => or(
                     "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)"
                     );
 
-            "$(this.bundle): Software directory does not exists: $(sara_data.$(bundle_name)[install_tarballs][$(index)][check_dir]) force reinstall"
+            "$(this.bundle): Software directory does not exists: $(scl.$(bundle_name)[install_tarballs][$(index)][check_dir]) force reinstall"
                 if => and(
                     "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)",
                     "!check_dir_$(index)"
                     );
 }
 
-bundle agent sara_service_copy_base(bundle_name, section)
+bundle agent scl_service_copy_base(bundle_name, section)
 {
 vars:
     any::
-        "index" slist => getindices("sara_data.$(bundle_name)[$(section)]");
+        "index" slist => getindices("scl.$(bundle_name)[$(section)]");
 
 classes:
     any::
-        "$(bundle_name)_$(section)_$(index)_run_bundle" expression => isvariable("sara_data.$(bundle_name)[$(section)][$(index)][run_bundle]"),
+        "$(bundle_name)_$(section)_$(index)_run_bundle" expression => isvariable("scl.$(bundle_name)[$(section)][$(index)][run_bundle]"),
             comment => "Must we run a bundle when a file is copied";
 
 files:
     any::
-        "$(sara_data.$(bundle_name)[$(section)][$(index)][dest])"
+        "$(scl.$(bundle_name)[$(section)][$(index)][dest])"
             comment => "Copy bundle files and set class if its get copied",
-            copy_from => secure_cp("$(sara_data.$(bundle_name)[$(section)][$(index)][source])", "$(sys.policy_hub)"),
+            copy_from => secure_cp("$(scl.$(bundle_name)[$(section)][$(index)][source])", "$(sys.policy_hub)"),
             classes => results("namespace", "$(bundle_name)_$(section)_$(index)");
 
-        "$(sara_data.$(bundle_name)[$(section)][$(index)][dest])"
+        "$(scl.$(bundle_name)[$(section)][$(index)][dest])"
             comment => "Check permission",
             perms => mog(
-                "$(sara_data.$(bundle_name)[$(section)][$(index)][mog][0])",
-                "$(sara_data.$(bundle_name)[$(section)][$(index)][mog][1])",
-                "$(sara_data.$(bundle_name)[$(section)][$(index)][mog][2])"
+                "$(scl.$(bundle_name)[$(section)][$(index)][mog][0])",
+                "$(scl.$(bundle_name)[$(section)][$(index)][mog][1])",
+                "$(scl.$(bundle_name)[$(section)][$(index)][mog][2])"
             );
 
 methods:
     any::
-        "" usebundle => "$(sara_data.$(bundle_name)[$(section)][$(index)][run_bundle])",
+        "" usebundle => "$(scl.$(bundle_name)[$(section)][$(index)][run_bundle])",
             ifvarclass => and(
                 canonify("$(bundle_name)_$(section)_$(index)_repaired"),
                 canonify("$(bundle_name)_$(section)_$(index)_run_bundle")
                 );
 
 @if minimum_version(3.11)
-        "" usebundle => sara_show_data("sara_data", "$(bundle_name)[$(section)][$(index)]"),
+        "" usebundle => scl_show_data("scl", "$(bundle_name)[$(section)][$(index)]"),
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 @endif
 
 reports:
     any::
-        "$(this.bundle): has been called to use json data: 'sara_data.$(bundle_name)[$(section)]'"
+        "$(this.bundle): has been called to use json data: 'scl.$(bundle_name)[$(section)]'"
             ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }

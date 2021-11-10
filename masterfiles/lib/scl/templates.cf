@@ -4,17 +4,17 @@
 @if minimum_version(99.9)
 # template.cf
 
-Source: [templates.cf](/masterfiles/lib/surfsara/templates.cf)
+Source: [templates.cf](/masterfiles/lib/scl/templates.cf)
 
 Here all bundles are listed that are involved in parsing json data and
 generating the templates files.
 
-## sara_data(bundle_name, json_files)
+## scl(bundle_name, json_files)
 
 This bundle will merge the json files into a data container which has the same name
 as the given `bundle_name`. This data container can be accessed by other bundles
 as:
- * `sara_data.<bundle_name>.<variable_name>`
+ * `scl.<bundle_name>.<variable_name>`
 
 NOTE: cfengine variables that are definied in the json files, eg: `$(def.hostname)`
 are expanded.
@@ -23,12 +23,12 @@ The json files are read from the following local directory on the host:
  * `$(def.node_template_dir)/$(bundle_name)`
 
 There is one exception if the bundle name is `expand_all_service_data`. Then the
-bundle will loop over the list `def.sara_services_enabled` to expand cfengine variables.
+bundle will loop over the list `def.scl_services_enabled` to expand cfengine variables.
 Now service bundles can can reference variables of other service bundles,eg
 ```json
 {
  "nhc": {
-     "timeout": "$(sara_data.slurm[MessageTimeout])"
+     "timeout": "$(scl.slurm[MessageTimeout])"
  },
  "slurm": {
     "MessageTimeout": "20"
@@ -36,7 +36,7 @@ Now service bundles can can reference variables of other service bundles,eg
 }
 ```
 @endif
-bundle agent sara_data(bundle_name, json_files)
+bundle agent scl(bundle_name, json_files)
 {
     vars:
         !expand_all_service_bundles::
@@ -46,54 +46,65 @@ bundle agent sara_data(bundle_name, json_files)
 
             "$(bundle_name)" data => mergedata("$(bundle_name)", readdata("$(template_dir)/$(json_files)", auto)),
                 comment => "Merge the given json files",
-                ifvarclass => canonify("sara_data_json_file_exists_$(json_files)");
+                if => canonify("scl_json_file_exists_$(json_files)");
 
             "$(bundle_name)" data => mergedata("$(bundle_name)", "def.$(bundle_name)"),
                 comment => "Merge the bundle section in def.json",
-                ifvarclass => canonify("sara_data_def_json_$(bundle_name)");
+                if => canonify("scl_def_json_$(bundle_name)");
 
             "$(bundle_name)" data => data_expand($(bundle_name)),
                 comment => "Expand CFengine variables found in countainer",
-                handle => "sara_data_$(bundle)_expand_data";
+                handle => "scl_$(bundle)_expand_data";
 
             "$(bundle_name)" data => data_expand($(bundle_name)),
                 comment => "Expand CFengine variables found in countainer",
-                handle => "sara_data_$(bundle)_expand_data_2";
+                handle => "scl_$(bundle)_expand_data_2";
+
+            "sara_data.$(bundle_name)" data => data_expand($(bundle_name)),
+                comment => "This one will be removed but we need this for conversion from old templates",
+                handle => "scl_$(bundle)_sara_data_old_structure";
 
         expand_all_service_bundles::
-            "$(def.sara_services_enabled)" data => data_expand($(def.sara_services_enabled)),
-                handle => "sara_data_expand_cross_reference_vars";
+            "services_enabled" slist => { @(def.scl_services_enabled) },
+                comment => "To prevent an error in setting foreign vars, needed for backports, will be removed";
+
+            "$(def.scl_services_enabled)" data => data_expand($(def.scl_services_enabled)),
+                handle => "scl_expand_cross_reference_vars";
+
+            "sara_data.$(services_enabled)" data => data_expand($(services_enabled)),
+                comment => "This one will be removed but we need this for conversion from old templates",
+                handle => "This one will be removed but we need this for conversion";
 
         ## Neeed if we want to DEBUG the json data, no 'with' promise attribute
         # for these cfengne versions.
         #
         !expand_all_service_bundles.(cfengine_3_7|cfengine_3_10)::
             "files_str" string => format("%S", json_files),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
 
             "$(bundle_name)_str" string => format("%S", "$(bundle_name)"),
-                ifvarclass => and(
-                                canonify("sara_data_json_file_exists_$(json_files)"),
+                if => and(
+                                canonify("scl_json_file_exists_$(json_files)"),
                                 "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE"
                               );
 
             "data_def_json_$(bundle_name)" string => format("%S", "def.$(bundle_name)"),
-                ifvarclass => and(
-                                "sara_data_def_json_$(bundle_name)",
+                if => and(
+                                "scl_def_json_$(bundle_name)",
                                 "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE"
                               );
 
             "data_$(json_files)"   data => readdata("$(template_dir)/$(json_files)", "auto"),
                 comment => "This only works before versions 3.12, dot (.) is not allowed anymore in var name)",
-                ifvarclass => and(
-                                canonify("sara_data_json_file_exists_$(json_files)"),
+                if => and(
+                                canonify("scl_json_file_exists_$(json_files)"),
                                 "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE"
                               );
 
             "data_str_$(json_files)" string => format("%S", "data_$(json_files)"),
                 comment => "This only works before versions 3.12, dot (.) is not allowed anymore in var name)",
-                ifvarclass => and(
-                                canonify("sara_data_json_file_exists_$(json_files)"),
+                if => and(
+                                canonify("scl_json_file_exists_$(json_files)"),
                                 "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE"
                               );
 
@@ -103,10 +114,10 @@ bundle agent sara_data(bundle_name, json_files)
                 comment => "Try to solve cross reference bundle variables";
 
         !expand_all_service_bundles::
-            "sara_data_json_file_exists_$(json_files)" expression => fileexists("$(template_dir)/$(json_files)"),
+            "scl_json_file_exists_$(json_files)" expression => fileexists("$(template_dir)/$(json_files)"),
                 comment => "Check if json file exists, then we can read it";
 
-            "sara_data_def_json_$(bundle_name)" expression => isvariable("def.$(bundle_name)"),
+            "scl_def_json_$(bundle_name)" expression => isvariable("def.$(bundle_name)"),
                 comment => "Def.json data defined";
 
 
@@ -115,76 +126,76 @@ bundle agent sara_data(bundle_name, json_files)
         expand_all_service_bundles::
             "$(this.bundle): Cross reference variable expanding for bundles
                 $(with)"
-                with => format("%S", "def.sara_services_enabled"),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE|DEBUG_services";
+                with => format("%S", "def.scl_services_enabled"),
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE|DEBUG_services";
 
         !expand_all_service_bundles::
             "$(this.bundle): $(bundle_name) using json files
                 $(with)"
                 with => format("%S", "json_files"),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 
             "$(this.bundle): template_data:
                 $(with)"
                 comment => "Display the used template data",
                 with => string_mustache("{{$-top-}}", "$(bundle_name)"),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 
             "$(this.bundle): def.json/def.cf:
               $(with)"
                 comment => "Display the bundle json data defined in def.json/def.cf",
                 with => string_mustache("{{$-top-}}", data_expand("def.$(bundle_name)")),
-                ifvarclass => "sara_data_def_json_$(bundle_name).(DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE)";
+                if => "scl_def_json_$(bundle_name).(DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE)";
 
             "$(this.bundle): $(json_files)
                 $(with)"
                 with => string_mustache("{{$-top-}}", data_expand(readdata("$(template_dir)/$(json_files)", "auto"))),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 @endif
 
         !expand_all_service_bundles.(cfengine_3_10|cfengine_3_7)::
             "$(this.bundle): $(bundle_name) using json files: $(files_str)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 
             "$(this.bundle): template_data:
                 $($(bundle_name)_str)"
                 comment => "Display the used template data",
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 
             "$(this.bundle): def.json
               $(data_def_json_$(bundle_name))"
                 comment => "Display the bundle json data defined in def.json",
-                ifvarclass => "sara_data_def_json_$(bundle_name).(DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE)";
+                if => "scl_def_json_$(bundle_name).(DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE)";
 
             "$(this.bundle): $(json_files) :
               $(data_str_$(json_files))"
                 comment => "Display the parsed json file data",
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
 @if minimum_version(99.9)
-## sara_data_autorun(bundle_name)
+## scl_data_autorun(bundle_name)
 
 This bundle wil take care of copying the json files from the policy hub to:
  * $(def.node_status_dir)/$(bundle_name)/json
 
 After the copying it will merge all json files and the parsed data is available as:
- * cfengin: `$(sara_data.<bundle_name>[<var>])`
- * mustache: `vars.sara_data.<bundle_mame>.<var>`
+ * cfengine: `$(scl.<bundle_name>[<var>])`
+ * mustache: `vars.scl.<bundle_mame>.<var>`
 
 After merging it will determine if we have to set cfengine classes based on the json variable
 `classes` defined in the bundle json data.
 @endif
-bundle agent sara_data_autorun(bundle_name)
+bundle agent scl_data_autorun(bundle_name)
 {
     methods:
-        "" usebundle => sara_json_copy_and_merge("$(bundle_name)");
-        "" usebundle => sara_json_classes_2_cfengine("$(bundle_name)");
+        "" usebundle => scl_json_copy_and_merge("$(bundle_name)");
+        "" usebundle => scl_json_classes_2_cfengine("$(bundle_name)");
 }
 
 
 @if minimum_version(99.9)
-## sara_json_classes_2_cfengine(bundle_name)
+## scl_json_classes_2_cfengine(bundle_name)
 
 This bundle is internally and will set cfengine classes based on the json `classes`
 variable defined in the bundle json data, eg:
@@ -199,43 +210,43 @@ variable defined in the bundle json data, eg:
 This will set the class: `DHCLIENT_RESOLV_CONF` for class expression `any`.
 all classes wil be prefix by the `bundle_name` in uppercase.
 @endif
-bundle agent sara_json_classes_2_cfengine(bundle_name)
+bundle agent scl_json_classes_2_cfengine(bundle_name)
 {
     vars:
         "class_prefix" string => string_upcase($(bundle_name));
-        "class_name" slist => getindices("sara_data.$(bundle_name)[classes]");
+        "class_name" slist => getindices("scl.$(bundle_name)[classes]");
 
     classes:
-        #"$(class_prefix)_$(sara_data.$(bundle_name)[classes])" expression => "any",
+        #"$(class_prefix)_$(scl.$(bundle_name)[classes])" expression => "any",
         #    scope => "namespace";
 
-        "$(class_prefix)_$(class_name)" expression => "$(sara_data.$(bundle_name)[classes][$(class_name)])",
+        "$(class_prefix)_$(class_name)" expression => "$(scl.$(bundle_name)[classes][$(class_name)])",
             comment => "Set classes bassed on cfengine class expression",
             scope => "namespace";
 
     reports:
         any::
-            "$(this.bundle): Class set: $(class_prefix)_$(class_name) : $(sara_data.$(bundle_name)[classes][$(class_name)])"
-                 ifvarclass => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE).$(class_prefix)_$(class_name)";
+            "$(this.bundle): Class set: $(class_prefix)_$(class_name) : $(scl.$(bundle_name)[classes][$(class_name)])"
+                 if => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE).$(class_prefix)_$(class_name)";
 
-            #"Class is set: $(class_prefix)_$(sara_data.$(bundle_name)[classes])"
-                 #ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+            #"Class is set: $(class_prefix)_$(scl.$(bundle_name)[classes])"
+                 #if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 }
 
 @if minimum_version(99.9)
-## sara_json_copy(bundle_name, json_files)
+## scl_json_copy(bundle_name, json_files)
 
 The bundle is internally and will take care of copying the json file(s) from the bundle data directory
 on the policy hub to a the local node directory.
 @endif
-bundle agent sara_json_copy(bundle_name, files)
+bundle agent scl_json_copy(bundle_name, files)
 {
     vars:
         any::
             "bundle_json_dir"   string => "templates/$(bundle_name)/json";
 
             "files_str" string => format("%S", files),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
 
         TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
             "local_dir" string => "$(this.promise_dirname)/../../../../$(bundle_json_dir)",
@@ -268,7 +279,7 @@ bundle agent sara_json_copy(bundle_name, files)
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
-                copy_from   => sara_template_local_dcp("$(local_dir)/$(files)"),
+                copy_from   => scl_template_local_dcp("$(local_dir)/$(files)"),
                 classes     => results("bundle","$(bundle_name)$(files)");
 
         CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
@@ -282,20 +293,20 @@ bundle agent sara_json_copy(bundle_name, files)
     reports:
         any::
             "$(this.bundle): $(bundle_name) json file(s) : $(files_str)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_JSON|DEBUG_MUSTACHE";
 
             "$(this.bundle):$(bundle_name):json file does not exists:$(files)"
-                ifvarclass => or( canonify("$(bundle_name)$(files)_failed") );
+                if => or( canonify("$(bundle_name)$(files)_failed") );
 
             "$(this.bundle) copying json files from: $(local_dir)"
-                ifvarclass => "(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY).(DEBUG_$(bundle_name)|DEBUG)";
+                if => "(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY).(DEBUG_$(bundle_name)|DEBUG)";
 
         TEMPLATE_SKIP_COPY|JSON_SKIP_COPY::
             "$(this.bundle): Skipped copying of json files";
 }
 
 @if minimum_version(99.9)
-## sara_json_copy_and_merge(bundle_name)
+## scl_json_copy_and_merge(bundle_name)
 
 It use the same setup as above. So the variables must be defined in:
  * `def.$(bundle_name)_json_files` (for global definitions)
@@ -305,13 +316,13 @@ It use the same setup as above. So the variables must be defined in:
 
 This bundle will copy `def.$(bundle_name)_json_files` data files to `$(def.node_template_dir)/$(bundle_name)` directory.
 It uses the following bundles:
- * `bundle agent sara_json_copy`
- * `bundle agent sara_data`
+ * `bundle agent scl_json_copy`
+ * `bundle agent scl`
 
 The bundle is called by:
- * sara_data_autorun or sara_mustache_autorun
+ * scl_data_autorun or scl_mustache_autorun
 @endif
-bundle agent sara_json_copy_and_merge(bundle_name)
+bundle agent scl_json_copy_and_merge(bundle_name)
 {
     vars:
         "files" data => parsejson('[
@@ -348,61 +359,61 @@ bundle agent sara_json_copy_and_merge(bundle_name)
 
     methods:
         any::
-            "" usebundle => sara_json_copy("$(bundle_name)", "@(copy_files)");
+            "" usebundle => scl_json_copy("$(bundle_name)", "@(copy_files)");
 
             ## Now for each template run this method, loop over the key values of data files
-            "" usebundle => sara_data("$(bundle_name)", "@(files)"),
+            "" usebundle => scl("$(bundle_name)", "@(files)"),
                comment => "Sara mustache merge data files bundle";
 
         def_local_set|bundle_local_set::
-            "" usebundle => sara_show_data("$(this.bundle)", "files"),
-                ifvarclass => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
+            "" usebundle => scl_show_data("$(this.bundle)", "files"),
+                if => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
 
     reports:
         any::
             "$(this.bundle) Note: only using: default.json"
-                ifvarclass => "!(bundle_set|def_set|local_set).(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
+                if => "!(bundle_set|def_set|local_set).(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
 }
 
 @if minimum_version(99.9)
-## sara_mustache_autorun(bundle_name)
+## scl_mustache_autorun(bundle_name)
 
 This  bundle will take of copying the mustache template file(s) and expanding the template(s)
 @endif
-bundle agent sara_mustache_autorun(bundle_name)
+bundle agent scl_mustache_autorun(bundle_name)
 {
     vars:
         any::
             "template_files" slist => getindices("$(bundle_name).template_2_destination");
 
     methods:
-        "" usebundle => sara_mustache_copy("$(bundle_name)", "@(template_files)"),
+        "" usebundle => scl_mustache_copy("$(bundle_name)", "@(template_files)"),
             comment => "Sara prepare mustache files bundle";
 
-        "" usebundle => sara_mustache_expand("$(bundle_name)"),
+        "" usebundle => scl_mustache_expand("$(bundle_name)"),
             comment => "Sara mustache expand template files bundle";
 
     reports:
         any::
             "$(this.bundle) : called for $(bundle_name)"
-                ifvarclass => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
+                if => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
 
 }
 
 @if minimum_version(99.9)
-## sara_mustache_copy(bundle_name, files)
+## scl_mustache_copy(bundle_name, files)
 
 The bundle is internally and will take care of copying the template file(s) from the bundle data directory
 on the policy hub to a the local node directory. The bundle is called by:
- * sara_mustache_autorun
+ * scl_mustache_autorun
 @endif
-bundle agent sara_mustache_copy(bundle_name, files)
+bundle agent scl_mustache_copy(bundle_name, files)
 {
     vars:
         any::
             "bundle_template_dir"   string => "templates/$(bundle_name)";
             "files_str" string => format("%S", files),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 
         TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
             "local_dir" string => "$(this.promise_dirname)/../../../../$(bundle_template_dir)",
@@ -435,7 +446,7 @@ bundle agent sara_mustache_copy(bundle_name, files)
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
-                copy_from   => sara_template_local_dcp("$(local_dir)/$(files)"),
+                copy_from   => scl_template_local_dcp("$(local_dir)/$(files)"),
                 classes     => if_repaired("$(bundle_name)_mustache_copied");
 
        CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
@@ -449,60 +460,60 @@ bundle agent sara_mustache_copy(bundle_name, files)
     reports:
         any::
             "$(this.bundle) template file : $(files_str)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 
             "$(this.bundle) copying template files from: $(local_dir)"
-                ifvarclass => "(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY).(DEBUG_$(bundle_name)|DEBUG)";
+                if => "(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY).(DEBUG_$(bundle_name)|DEBUG)";
 
         TEMPLATE_SKIP_COPY|MUSTACHE_SKIP_COPY::
             "$(this.bundle): Skipped copying of mustache files";
 }
 
 @if minimum_version(99.9)
-## sara_mustache_expand(bundle_name)
+## scl_mustache_expand(bundle_name)
 
 This bundle is used internally and will expand the mustache template file(s) with the json data. The
 bundle is called by:
- * sara_mustache_autorun
+ * scl_mustache_autorun
 @endif
-bundle agent sara_mustache_expand(bundle_name)
+bundle agent scl_mustache_expand(bundle_name)
 {
     vars:
         any::
             "template_files"    slist => getindices("$(bundle_name).template_2_destination");
 
     methods:
-        "" usebundle => sara_mustache_cf_data_2_file("$(bundle_name)",
+        "" usebundle => scl_mustache_cf_data_2_file("$(bundle_name)",
                 "$(template_files)",
                 "$($(bundle_name).template_2_destination[$(template_files)])",
                 "");
 
     reports:
             "$(this.bundle): $(template_files) --> $($(bundle_name).template_2_destination[$(template_files)])"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 }
 
 @if minimum_version(99.9)
-## sara_mustache_cf_data_2_file(bundle_name, template_file, destination , data_section)
+## scl_mustache_cf_data_2_file(bundle_name, template_file, destination , data_section)
 
 With this bundle you can generate a file from a template with cfengine internal json data. There are 2
 options:
  1. json data section variable passed as argument. Then the section will be merged from the
     cfengine internal json data as toplevel. So variables in mustache file must be referenced
-    without the bundle name, eg `variable_name` instead of `vars.sara_data.$(bundle_name).<variable_name>`
+    without the bundle name, eg `<variable_name>` instead of `vars.scl.$(bundle_name).<variable_name>`
  1. cfengine internal json data if you do not pass your own json data section variable
 
 The template is fetch from the local node direcrory:
  * `$(def.node_template_dir)/$(bundle_name)/$(template_file)`
 
 When json data section variable is specified. You must specify which date section you want to use. The json
-files must be merged via sara_data, as we only can merge data from this bundle, eg:
- * `sara_data.<bundle_name>[$(data_section)]`
+files must be merged via scl, as we only can merge data from this bundle, eg:
+ * `scl.<bundle_name>[$(data_section)]`
 
 This data will then be used as toplevel for the mustache template. You can just use the variables
 name(s): `<variable_name>`
 @endif
-bundle agent sara_mustache_cf_data_2_file(bundle_name, template_file, destination, data_section)
+bundle agent scl_mustache_cf_data_2_file(bundle_name, template_file, destination, data_section)
 {
 
     vars:
@@ -510,7 +521,7 @@ bundle agent sara_mustache_cf_data_2_file(bundle_name, template_file, destinatio
             "template_dir"     string => "$(def.node_template_dir)/$(bundle_name)";
 
             "data_section_str" string => format("%S", "$(data_section)"),
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 
     classes:
         #"data_section"     expression => isvariable("data_section"),
@@ -528,9 +539,9 @@ bundle agent sara_mustache_cf_data_2_file(bundle_name, template_file, destinatio
                     create          => "true",
                     edit_template   => "$(template_dir)/$(template_file)",
                     template_method => "mustache",
-                    #template_data   => mergedata("sara_data.$(bundle_name)[$(data_section)]"),
+                    #template_data   => mergedata("scl.$(bundle_name)[$(data_section)]"),
                     template_data   => mergedata("$(data_section)"),
-                    classes         => if_repaired("sara$(destination)");
+                    classes         => if_repaired("scl$(destination)");
 
        !data_section.destination_set::
                 "$(destination)"
@@ -538,27 +549,27 @@ bundle agent sara_mustache_cf_data_2_file(bundle_name, template_file, destinatio
                     create          => "true",
                     edit_template   => "$(template_dir)/$(template_file)",
                     template_method => "mustache",
-                    classes         => if_repaired("sara$(destination)");
+                    classes         => if_repaired("scl$(destination)");
 
     reports:
         any::
             "$(bundle_name) : $(destination) has been generated"
-                ifvarclass => canonify("sara$(destination)");
+                if => canonify("scl$(destination)");
 
        destination_set::
             "$(this.bundle): Template $(template_file) : $(destination)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 
        !destination_set::
             "$(this.bundle): Skipping generation for template: $(template_file)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 
        data_section::
             "   data section used: $(data_section_str)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
+                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE";
 }
 
-bundle agent sara_show_data(bundle_name, var)
+bundle agent scl_show_data(bundle_name, var)
 {
     ## https://tracker.mender.io/browse/CFE-2434 bug in passing data containers with vars
     reports:
@@ -571,9 +582,9 @@ bundle agent sara_show_data(bundle_name, var)
 @endif
 }
 
-bundle agent sara_template_autorun(bundle_name)
+bundle agent scl_template_autorun(bundle_name)
 {
     methods:
-        "" usebundle => sara_data_autorun("$(bundle_name)");
-        "" usebundle => sara_mustache_autorun("$(bundle_name)");
+        "" usebundle => scl_data_autorun("$(bundle_name)");
+        "" usebundle => scl_mustache_autorun("$(bundle_name)");
 }

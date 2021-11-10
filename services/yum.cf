@@ -66,7 +66,7 @@ bundle agent yum_autorun()
         "tags"  slist => {"service_yum", "template_yum"};
 
     methods:
-        "" usebundle => sara_data_autorun("yum");
+        "" usebundle => scl_data_autorun("yum");
         "" usebundle => yum_install();
         "" usebundle => yum_surfsara_config();
         "" usebundle => yum_repository();
@@ -75,13 +75,13 @@ bundle agent yum_autorun()
 bundle agent yum_install
 {
     methods:
-        "" usebundle => sara_service_packages("yum", "@(yum.packages)");
+        "" usebundle => scl_service_packages("yum", "@(yum.packages)");
 }
 
 bundle agent yum_surfsara_config
 {
     methods:
-        "" usebundle => sara_mustache_autorun("yum");
+        "" usebundle => scl_mustache_autorun("yum");
 }
 
 bundle agent yum_repository()
@@ -114,11 +114,11 @@ bundle agent yum_repository()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("$(this.bundle)");
-            "" usebundle => sara_mustache_copy("$(this.bundle)", "repository.mustache");
+            "" usebundle => scl_data_autorun("$(this.bundle)");
+            "" usebundle => scl_mustache_copy("$(this.bundle)", "repository.mustache");
 
         YUM_REPOS_FILE_LIST_POPULATED::
-            "" usebundle => sara_mustache_cf_data_2_file("$(this.bundle)",
+            "" usebundle => scl_mustache_cf_data_2_file("$(this.bundle)",
                 "$(template_file)", "$(yum.repos_dir)/$(repository_names).repo", "sara_data.yum_repository[$(repository_names)]" );
 
     reports:
@@ -146,10 +146,10 @@ The templates/json files are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "yum",
             "..."

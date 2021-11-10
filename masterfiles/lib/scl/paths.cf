@@ -1,0 +1,19 @@
+#
+##  SURFsara paths.cf
+#
+@if minimum_version(99.9)
+# paths.cf
+
+Source: [paths.cf](/masterfiles/lib/scl/paths.cf)
+
+This extends the `paths` variable from the CFengine masterfiles library with some
+utilities that are use in the SCL framework.
+
+@endif
+bundle common scl_paths
+{
+
+   vars:
+       # NOTE: the key will be canonified when it's pulled in to the paths bundle.
+       "path[gzip]" string => "/bin/gzip", meta => { "paths.cf" };
+}

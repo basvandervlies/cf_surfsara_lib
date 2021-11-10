@@ -17,10 +17,10 @@ The class can be set in the def.cf/json:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
         "...",
         "rsyslog",
         "..."

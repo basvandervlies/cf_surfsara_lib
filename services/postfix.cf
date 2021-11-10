@@ -84,7 +84,7 @@ bundle agent postfix_autorun()
 
     methods:
         any::
-            ""  usebundle => sara_data_autorun("postfix");
+            ""  usebundle => scl_data_autorun("postfix");
             ""  usebundle => postfix_install();
             ""  usebundle => postfix_surfsara_config();
             ""  usebundle => postfix_daemons_check();
@@ -97,7 +97,7 @@ bundle agent postfix_autorun()
 bundle agent postfix_install()
 {
     methods:
-        "" usebundle => sara_service_packages("postfix", "@(postfix.packages)");
+        "" usebundle => scl_service_packages("postfix", "@(postfix.packages)");
 }
 
 bundle agent postfix_daemons_check
@@ -107,17 +107,17 @@ bundle agent postfix_daemons_check
             "$(postfix.daemon_name)"
                 comment         => "Check if the required daemon is running",
                 process_count   => check_range("$(postfix.daemon_name)", "1", "1"),
-                process_select  => sara_select_parent_process("1");
+                process_select  => scl_select_parent_process("1");
 
     commands:
         linux::
             "$(postfix.postfix_restart)"
-                ifvarclass => canonify("$(postfix.daemon_name)_out_of_range");
+                if => canonify("$(postfix.daemon_name)_out_of_range");
 
     reports:
         linux::
             "$(this.bundle): $(postfix.daemon_name) with PPID:1 not running"
-                ifvarclass => canonify("$(postfix.daemon_name)_out_of_range");
+                if => canonify("$(postfix.daemon_name)_out_of_range");
 }
 
 bundle agent postfix_surfsara_config
@@ -140,7 +140,7 @@ bundle agent postfix_surfsara_config
                 comment => "Must be readable for all users";
 
     methods:
-        "" usebundle => sara_mustache_autorun("postfix");
+        "" usebundle => scl_mustache_autorun("postfix");
 
     commands:
         POSTFIX_NEWALIAS::
@@ -169,7 +169,7 @@ bundle agent postfix_virtual_alias_maps_expand(virtual_map_id)
 
     commands:
         "$(postfix.postmap_cmd) $(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"
-            ifvarclass => and(
+            if => and(
                 "needs_postmap",
                 "postfix_virtual_alias_maps_expand_$(virtual_map_id)_repaired"
             );
@@ -181,12 +181,12 @@ bundle agent postfix_virtual_alias_maps()
         "template_maps" slist => getindices("sara_data.postfix[virtual_alias_maps]");
 
     methods:
-        "" usebundle => sara_mustache_copy("postfix", "$(sara_data.postfix[virtual_alias_maps][$(template_maps)][template])");
+        "" usebundle => scl_mustache_copy("postfix", "$(sara_data.postfix[virtual_alias_maps][$(template_maps)][template])");
         "" usebundle => postfix_virtual_alias_maps_expand("$(template_maps)");
 
     reports:
         "$(this.bundle) Template $(template_maps) : $(sara_data.postfix[virtual_alias_maps][$(template_maps)][template])"
-             ifvarclass => "DEBUG|DEBUG_postfix|DEBUG_$(this.bundle)";
+             if => "DEBUG|DEBUG_postfix|DEBUG_$(this.bundle)";
 }
 
 @if minimum_version(99.9)
@@ -225,10 +225,10 @@ the templates are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "postfix",
             "..."

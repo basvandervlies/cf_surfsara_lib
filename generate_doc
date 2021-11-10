@@ -1,9 +1,5 @@
 #!/usr/bin/python
 #
-# SVN Info
-#   $Id: cf_generate_doc.py 21645 2017-02-10 10:20:24Z paulr $
-#   $URL: https://subtrac.surfsara.nl/beowulf/svn/trunk/cfengine3/doc_generator/cf_generate_doc.py $
-#
 """
     Usage: icf_generate_doc [options] <cfengine_config_dir>>
     Will generate Trac wiki pages from inline cfengine documentation
@@ -219,7 +215,7 @@ if __name__ == '__main__':
         pprint.pprint(options)
 
     cf_files_1 = get_filepaths("services", options)
-    cf_files_2 = get_filepaths("masterfiles/lib/surfsara", options)
+    cf_files_2 = get_filepaths("masterfiles/lib/scl", options)
     cf_files =  dict(cf_files_1, **cf_files_2)
 
     generate_md_files(cf_files, options)

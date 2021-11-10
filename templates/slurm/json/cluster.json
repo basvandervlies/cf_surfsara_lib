@@ -11,38 +11,38 @@
     "ControlMachine": "batch3.test.surfsara.nl",
     "copy_dirs": [
         {
-            "dest": "$(sara_data.slurm[scripts_dir])",
+            "dest": "$(scl.slurm[scripts_dir])",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0700", "root", "root" ],
             "purge": "true",
-            "source": "cf_bundles_dir/slurm/scripts"
+            "source": "data/slurm/scripts"
         },
         {
-            "dest": "$(sara_data.slurm[opt_dir])/epilog",
+            "dest": "$(scl.slurm[opt_dir])/epilog",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0755", "root", "root" ],
             "purge": "true",
-            "source": "cf_bundles_dir/slurm/test/epilog"
+            "source": "data/slurm/test/epilog"
         },
         {
-            "dest": "$(sara_data.slurm[opt_dir])/prolog",
+            "dest": "$(scl.slurm[opt_dir])/prolog",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0755", "root", "root" ],
             "purge": "true",
-            "source": "cf_bundles_dir/slurm/test/prolog"
+            "source": "data/slurm/test/prolog"
         },
         {
-            "dest": "$(sara_data.slurm[opt_dir])/lib",
+            "dest": "$(scl.slurm[opt_dir])/lib",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0644", "root", "root" ],
             "purge": "true",
-            "source": "cf_bundles_dir/slurm/lib"
+            "source": "data/slurm/lib"
         }
     ],
     "copy_files": [
         {
             "dest": "$(slurm.config_dir)/job_submit.lua",
-            "source": "cf_bundles_dir/slurm/lisa/job_submit.lua",
+            "source": "data/slurm/lisa/job_submit.lua",
             "mog": ["0644", "slurm", "slurm"]
         }
     ],
@@ -85,19 +85,19 @@
     ],
     "packages_server": {
         "install": {
-            "libpam-slurm-adopt" : "$(sara_data.slurm[version])",
-            "libpmi0-dev" : "$(sara_data.slurm[version])",
-            "libpmi2-0-dev" : "$(sara_data.slurm[version])",
-            "libslurm-dev" : "$(sara_data.slurm[version])",
-            "libslurm-perl" : "$(sara_data.slurm[version])",
-            "libslurmdb-perl": "$(sara_data.slurm[version])",
-            "slurm-client": "$(sara_data.slurm[version])",
-            "slurm-wlm": "$(sara_data.slurm[version])",
-            "slurm-wlm-doc ": "$(sara_data.slurm[version])",
-            "slurmctld": "$(sara_data.slurm[version])",
-            "slurmd": "$(sara_data.slurm[version])",
-            "slurmdbd": "$(sara_data.slurm[version])",
-            "python3-pyslurm" : "$(sara_data.slurm[pyslurm_version])"
+            "libpam-slurm-adopt" : "$(scl.slurm[version])",
+            "libpmi0-dev" : "$(scl.slurm[version])",
+            "libpmi2-0-dev" : "$(scl.slurm[version])",
+            "libslurm-dev" : "$(scl.slurm[version])",
+            "libslurm-perl" : "$(scl.slurm[version])",
+            "libslurmdb-perl": "$(scl.slurm[version])",
+            "slurm-client": "$(scl.slurm[version])",
+            "slurm-wlm": "$(scl.slurm[version])",
+            "slurm-wlm-doc ": "$(scl.slurm[version])",
+            "slurmctld": "$(scl.slurm[version])",
+            "slurmd": "$(scl.slurm[version])",
+            "slurmdbd": "$(scl.slurm[version])",
+            "python3-pyslurm" : "$(scl.slurm[pyslurm_version])"
         },
         "purge": {
             "libpam-slurm" : "",
@@ -125,14 +125,9 @@
         }
     ],
     "pyslurm_version": "19.05.0-2",
-    "spank_templates": {
-        "private_tmpdir.mustache" : {
-            "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
-            "data": {
-                "config": [
-                    "required /opt/slurm/lib/private-tmpdir.so base=/scratch/slurm  mount=/var/tmp mount=/tmp mount=/scratch"
-                ]
-            }
+    "spank_plugins": {
+        "required": {
+            "${slurm.dir}/lib/private-tmpdir.so": " base=/scratch/slurm mount=/tmp mount=/var/tmp mount=/scratch base=/dev/shm/slurm mount=/dev/shm"
         }
     },
     "topology_file": [

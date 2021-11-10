@@ -8,7 +8,7 @@ inline mustache template. Only work for cfengine => 3.12.
 if one of the files is changed then the following **class** will be set:
  * `sara_etc_pam_d_<filename>`
 
-The bundle can also generate configuration files for, class are set with `if_repaired("sara$(file)")`:
+The bundle can also generate configuration files for, class are set with `if_repaired("scl$(file)")`:
  * pam_limits --> /etc/security/limits.d/scl.conf
  * pam_listfiles --> /etc/security/<section>.<allow|deny>, section can be `group|user`
 
@@ -24,10 +24,10 @@ The following json variables can be set in def.cf/json to invoke files bundles:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "pam",
             "..."

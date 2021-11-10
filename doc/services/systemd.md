@@ -16,10 +16,10 @@ files are installed for:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "systemd",
             "..."

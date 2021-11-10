@@ -3,10 +3,10 @@
 Source: [files.cf](/masterfiles/lib/scl/files.cf)
 
 For copying files/dirs in the service bundle from the policy server we have defined 2 bundles:
- 1. sara_service_copy_dirs
- 1. sara_service_copy_files
+ 1. scl_service_copy_dirs
+ 1. scl_service_copy_files
 
-## sara_service_copy_dirs(bundle_name)
+## scl_service_copy_dirs(bundle_name)
 
 This bundle will read the json attribute `copy_dirs` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -25,7 +25,7 @@ The  copy attributes can be overriden or specified  by json data, eg:
 "slurm": {
     "copy_dirs": [
         {
-            "dest": "$(sara_data.slurm[scripts_dir])",
+            "dest": "$(scl.slurm[scripts_dir])",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0700", "root", "root" ],
             "purge": "true",
@@ -34,7 +34,7 @@ The  copy attributes can be overriden or specified  by json data, eg:
     ]
 }
 ```
-## sara_service_copy_files(bundle_name)
+## scl_service_copy_files(bundle_name)
 
 This bundle will read the json attribute `copy_files` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -57,7 +57,7 @@ The `copy_files` can specified by json data eg:
 }
 ```
 
-## sara_service_install_tarballs(bundle_name)
+## scl_service_install_tarballs(bundle_name)
 
 This bundle will read the json attribute `install_tarballs` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -84,14 +84,14 @@ install_tarballs: [
 ],
 dir: /opt/slurm,
 current_version: 19.05.5,,
-software_dir: $(sara_data.slurm[dir])/sw,
-tarball_dir: $(sara_data.slurm[dir])/tarballs
+software_dir: $(scl.slurm[dir])/sw,
+tarball_dir: $(scl.slurm[dir])/tarballs
 ```
 
-## sara_make_cron_file(name. data)
+## scl_make_cron_file(name. data)
 
 This bundle install system cronjob in `/etc/cron.d`. The bundle is called with:
- * sara_make_cron_file(name, data)
+ * scl_make_cron_file(name, data)
 
 Where:
  * name: is the name of the cronjob file

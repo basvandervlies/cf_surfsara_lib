@@ -26,7 +26,7 @@ The definition of jupyterhub configuration is illustrated via an example:
         "admin_groups": [
             "'lisa_surfsara'"
         ],
-        "dir": "$(sara_data.jupyterhub[dir])",
+        "dir": "$(scl.jupyterhub[dir])",
         "pam_service_file": "jupyterhub",
         "start_timeout": "3600"
     },
@@ -72,10 +72,10 @@ the jupyterhubs are accessible with:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "jupyterhub",
             "..."

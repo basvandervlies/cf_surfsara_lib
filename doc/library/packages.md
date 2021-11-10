@@ -2,7 +2,7 @@
 
 Source: [packages.cf](/masterfiles/lib/scl/packages.cf)
 
-## sara_service_packages
+## scl_service_packages
 This bundle handles  the service packages. The service bundle defines the default
 package(s) to install/remove and/or purge. It can be overriden with json data, eg:
 ```

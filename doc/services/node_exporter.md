@@ -24,10 +24,10 @@ The following json variables can be set in def.cf/json to invoke files bundles:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "node_exporter",
             "..."

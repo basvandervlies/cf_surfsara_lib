@@ -3,15 +3,15 @@
 Source: [copy_dirs.cf](/services/copy_dirs.cf)
 
 This will copy directories from policy hub to the host, with the aid of library
-function [sara_service_copy_dirs}(/masterfiles/lib/scl/files.cf).
+function [scl_service_copy_dirs}(/masterfiles/lib/scl/files.cf).
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled` (prefered)
+ * `def.scl_services_enabled` (prefered)
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "copy_dirs",
             "..."

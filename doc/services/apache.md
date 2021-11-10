@@ -39,10 +39,10 @@ TODO:
 
 The bundle can be run via:
  *  `"" usebundle => apache_autorun();`
- * `def.sara_services_enabled` (prefered)
+ * `def.scl_services_enabled` (prefered)
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "apache",
             "..."

@@ -161,7 +161,7 @@ bundle agent jupyterhub_config()
             "" usebundle => jupyterhub_restart("$(scl.jupyterhub[configs][$(indices)][name])"),
                 comment => "restart jupyterhub service if config file has been changed",
                 if => or(
-                    canonify("sara$(scl.jupyterhub[etc_dir])/$(scl.jupyterhub[configs][$(indices)][name]).py")
+                    canonify("scl$(scl.jupyterhub[etc_dir])/$(scl.jupyterhub[configs][$(indices)][name]).py")
                     );
 
     services:
@@ -169,17 +169,17 @@ bundle agent jupyterhub_config()
             "jupyterhub-$(scl.jupyterhub[configs][$(indices)][name])"
                 comment => "enable and start the jupyterhub service if systemd unit has been changed",
                 service_policy => "start",
-                if => canonify("sara$(systemd.dir)/jupyterhub-$(scl.jupyterhub[configs][$(indices)][name]).service");
+                if => canonify("scl$(systemd.dir)/jupyterhub-$(scl.jupyterhub[configs][$(indices)][name]).service");
 
     commands:
         any::
             "$(apache.restart)"
                 comment => "Restart apache if we generate a new jupyterhub apache file",
-                if => canonify("sara$(scl.apache[configdir])/local.d/jupyterhub_generated.conf");
+                if => canonify("scl$(scl.apache[configdir])/local.d/jupyterhub_generated.conf");
 
             "$(paths.path[systemctl]) daemon-reload"
                 comment => "If service file has been changed reload systemd daemon",
-                if => canonify("sara$(systemd.dir)/jupyterhub-$(scl.jupyterhub[configs][$(indices)][name]).service");
+                if => canonify("scl$(systemd.dir)/jupyterhub-$(scl.jupyterhub[configs][$(indices)][name]).service");
 }
 
 bundle agent jupyterhub_restart(name)

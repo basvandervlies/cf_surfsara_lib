@@ -48,7 +48,7 @@ bundle agent rsyslog_config()
 
     commands:
         "$(rsyslog.restart)"
-            ifvarclass => "rsyslog_restart";
+            if => "rsyslog_restart";
 }
 
 bundle agent rsyslog_daemon_check()
@@ -61,7 +61,7 @@ bundle agent rsyslog_daemon_check()
 
     commands:
         "$(rsyslog.restart)"
-            ifvarclass => canonify("$(rsyslog.daemon_name)_out_of_range");
+            if => canonify("$(rsyslog.daemon_name)_out_of_range");
 }
 
 bundle agent rsyslog_autorun()

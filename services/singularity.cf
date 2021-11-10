@@ -59,7 +59,7 @@ bundle agent singularity_config()
 {
     vars:
         any::
-            "singularity_config_file_class" string => canonify("sara$(singularity.config_file)");
+            "singularity_config_file_class" string => canonify("scl$(singularity.config_file)");
 
     methods:
         any::
@@ -68,7 +68,7 @@ bundle agent singularity_config()
     reports:
         any::
             "$(singularity.config_file) config file has been updated"
-                ifvarclass => "$(singularity_config_file_class)";
+                if => "$(singularity_config_file_class)";
 }
 
 @if minimum_version(99.9)

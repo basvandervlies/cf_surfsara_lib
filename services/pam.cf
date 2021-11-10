@@ -128,7 +128,7 @@ bundle agent pam_generate_file(file, data_section)
                      edit_template_string   => "$(pam_mustache)",
                      template_method => "inline_mustache",
                      template_data => "@(sara_data.pam)",
-                     classes => if_repaired("sara$(file)");
+                     classes => if_repaired("scl$(file)");
 
                 "$(file)"
                     perms => mog("$(pam.mode)", "$(pam.owner)", "$(pam.group)");
@@ -182,7 +182,7 @@ bundle agent pam_conffile_generate(file, data_section)
                      edit_template_string   => "$(simple_list_mustache)",
                      template_method => "inline_mustache",
                      template_data => "@(sara_data.pam)",
-                     classes => if_repaired("sara$(file)");
+                     classes => if_repaired("scl$(file)");
 @endif
 
     reports:
@@ -209,7 +209,7 @@ inline mustache template. Only work for cfengine => 3.12.
 if one of the files is changed then the following **class** will be set:
  * `sara_etc_pam_d_<filename>`
 
-The bundle can also generate configuration files for, class are set with `if_repaired("sara$(file)")`:
+The bundle can also generate configuration files for, class are set with `if_repaired("scl$(file)")`:
  * pam_limits --> /etc/security/limits.d/scl.conf
  * pam_listfiles --> /etc/security/<section>.<allow|deny>, section can be `group|user`
 

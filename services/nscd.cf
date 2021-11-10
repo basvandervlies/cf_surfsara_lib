@@ -49,12 +49,12 @@ bundle agent nscd_daemons_check
     commands:
         any::
             "$(nscd.restart)"
-                ifvarclass => canonify("$(nscd.daemon_name)_out_of_range");
+                if => canonify("$(nscd.daemon_name)_out_of_range");
 
     reports:
         any::
             "nscd_daemons_check : $(nscd.restart)"
-                ifvarclass => canonify("$(nscd.daemon_name)_out_of_range");
+                if => canonify("$(nscd.daemon_name)_out_of_range");
 }
 
 bundle agent nscd_install()
@@ -78,7 +78,7 @@ bundle agent nscd_surfsara_config()
 {
     vars:
         any::
-            "nscd_config_file_class" string => canonify("sara$(nscd.config_file)");
+            "nscd_config_file_class" string => canonify("scl$(nscd.config_file)");
 
     classes:
         "NSCD_RESTART" or => {

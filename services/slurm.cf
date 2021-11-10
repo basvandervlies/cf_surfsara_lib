@@ -273,12 +273,12 @@ bundle agent slurm_config()
 {
     vars:
         any::
-            "cgroup_file_class"    string => canonify("sara$(slurm.cgroup_config_file)");
-            "gres_file_class"    string => canonify("sara$(slurm.gres_config_file)");
-            "nodes_file_class"    string => canonify("sara$(slurm.nodes_config_file)");
-            "plugstack_file_class"  string => canonify("sara$(slurm.plugstack_config_file)");
-            "slurmd_file_class"    string => canonify("sara$(slurm.config_file)");
-            "topology_file_class"    string => canonify("sara$(slurm.topology_config_file)");
+            "cgroup_file_class"    string => canonify("scl$(slurm.cgroup_config_file)");
+            "gres_file_class"    string => canonify("scl$(slurm.gres_config_file)");
+            "nodes_file_class"    string => canonify("scl$(slurm.nodes_config_file)");
+            "plugstack_file_class"  string => canonify("scl$(slurm.plugstack_config_file)");
+            "slurmd_file_class"    string => canonify("scl$(slurm.config_file)");
+            "topology_file_class"    string => canonify("scl$(slurm.topology_config_file)");
 
             "slurm_mog_list" slist => {
                 "$(slurm.acct_gather_file)",
@@ -294,6 +294,9 @@ bundle agent slurm_config()
 
 
             "generated_files" slist => getvalues("slurm.template_2_destination");
+
+        SLURM_CONFIGLESS::
+            "configless_files" slist => lsdir("/run/slurm/conf", ".+", "true");
 
     classes:
         any::
@@ -314,6 +317,8 @@ bundle agent slurm_config()
             "slurm_copy_files_set" expression => isvariable("scl.slurm[copy_files]"),
                 comment => "Must we copy dirs for slurm";
 
+            "slurm_plugstack_dir" expression => isdir("$(slurm.config_dir)/plugstack.conf.d"),
+                comment => "has been replaced by a single file to support configless";
 
         SLURM_CONFIGLESS.!SLURM_SERVER::
             "slurm_conf_link" expression => islink("$(slurm.config_file)");
@@ -332,6 +337,9 @@ bundle agent slurm_config()
             "" usebundle => slurm_service_restart();
         slurm_reload.!slurm_restart::
             "" usebundle => slurm_service_reload();
+
+        slurm_plugstack_dir::
+            "" usebundle => rm_rf("$(slurm.config_dir)/plugstack.conf.d");
 
     files:
         any::
@@ -361,6 +369,13 @@ bundle agent slurm_config()
                 link_from => ln_s("/run/slurm/conf/slurm.conf"),
                 move_obstructions => "true";
 
+        SLURM_CONFIGLESS::
+            "$(configless_files)"
+                comment => "Must slurmd be restarted",
+                changes => detect_content,
+                classes => results("bundle", "slurm_configless");
+
+    reports:
 }
 
 bundle agent slurm_service_restart()
@@ -503,7 +518,7 @@ bundle agent slurm_spank_templates()
 
     methods:
         "" usebundle => "$(scl.slurm[spank_templates][$(files)][run_bundle])",
-            ifvarclass => and(
+            if => and(
                 canonify("SLURM_$(scl.slurm[spank_templates][$(files)][dest])_repaired"),
                 canonify("run_bundle_$(files)"),
                 or(
@@ -550,20 +565,20 @@ bundle agent slurm_generate_systemd_services()
             "$(paths.path[systemctl]) daemon-reload"
                 comment => "If service file has been changed reload systemd daemon",
                 if => or(
-                        canonify("sara$(template_2_destination[$(template_files)])")
+                        canonify("scl$(template_2_destination[$(template_files)])")
                     );
 
             "$(slurm.restart_client)"
                 comment => "If service file has been changed restart slurmd",
                 if => or(
-                        canonify("sara$(template_2_destination[$(template_files)])")
+                        canonify("scl$(template_2_destination[$(template_files)])")
                     );
 
     reports:
         any::
             "$(this.bundle): $(systemd.dir)/$(template_2_destination[$(template_files)]) this has been changed"
                 if => or(
-                        canonify("sara$(template_2_destination[$(template_files)])")
+                        canonify("scl$(template_2_destination[$(template_files)])")
                     );
 }
 @if minimum_version(99.9)

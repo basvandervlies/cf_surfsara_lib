@@ -436,7 +436,7 @@ password {{{password}}}
                 edit_template_string => "$(mustache)",
                 template_method => "inline_mustache",
                 template_data => "@(sara_data.apt)",
-                classes => if_repaired("sara$(file)");
+                classes => if_repaired("scl$(file)");
 
             "$(file)"
                 perms => mog("0600", "root", "root");

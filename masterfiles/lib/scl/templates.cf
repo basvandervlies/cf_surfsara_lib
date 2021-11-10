@@ -541,7 +541,7 @@ bundle agent scl_mustache_cf_data_2_file(bundle_name, template_file, destination
                     template_method => "mustache",
                     #template_data   => mergedata("scl.$(bundle_name)[$(data_section)]"),
                     template_data   => mergedata("$(data_section)"),
-                    classes         => if_repaired("sara$(destination)");
+                    classes         => if_repaired("scl$(destination)");
 
        !data_section.destination_set::
                 "$(destination)"
@@ -549,12 +549,12 @@ bundle agent scl_mustache_cf_data_2_file(bundle_name, template_file, destination
                     create          => "true",
                     edit_template   => "$(template_dir)/$(template_file)",
                     template_method => "mustache",
-                    classes         => if_repaired("sara$(destination)");
+                    classes         => if_repaired("scl$(destination)");
 
     reports:
         any::
             "$(bundle_name) : $(destination) has been generated"
-                if => canonify("sara$(destination)");
+                if => canonify("scl$(destination)");
 
        destination_set::
             "$(this.bundle): Template $(template_file) : $(destination)"

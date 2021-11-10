@@ -151,8 +151,8 @@ bundle agent ssh_surfsara_config()
         any::
             "" usebundle => scl_mustache_autorun("ssh");
             "" usebundle => ssh_daemons_restart(),
-                ifvarclass => or(
-                    canonify("sara$(ssh.server_file)")
+                if => or(
+                    canonify("scl$(ssh.server_file)")
                     );
 
         ssh_copy_files_set::

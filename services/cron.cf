@@ -34,7 +34,7 @@ bundle agent cron_autorun()
     reports:
         any::
             "$(this.bundle): has been called"
-                ifvarclass => "DEBUG|DEBUG_cron|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_cron|DEBUG_$(this.bundle)";
 
 }
 @if minimum_version(99.9)

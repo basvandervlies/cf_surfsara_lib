@@ -99,14 +99,14 @@ bundle agent ntp_install()
     services:
         "$(ntp.service_name)"
             service_policy => "enable",
-            ifvarclass => "systemd.!initd_script";
+            if => "systemd.!initd_script";
 }
 
 bundle agent ntp_surfsara_config()
 {
     vars:
-        "ntp_default_file_class" string => canonify("sara$(ntp.ntp_default)");
-        "ntp_config_file_class" string => canonify("sara$(ntp.config_file)");
+        "ntp_default_file_class" string => canonify("scl$(ntp.ntp_default)");
+        "ntp_config_file_class" string => canonify("scl$(ntp.config_file)");
 
 
     classes:
@@ -116,7 +116,7 @@ bundle agent ntp_surfsara_config()
         };
         "time_zone_isdir" expression => isdir("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])");
         "time_zone_exists" expression => fileexists("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])"),
-            ifvarclass => not("time_zone_isdir");
+            if => not("time_zone_isdir");
 
     files:
         any::
@@ -153,7 +153,7 @@ bundle agent ntp_daemons_check()
     methods:
         any::
             "ntp" usebundle => ntp_daemons_restart(),
-                ifvarclass => canonify("$(ntp.daemon_name)_out_of_range");
+                if => canonify("$(ntp.daemon_name)_out_of_range");
 }
 
 bundle agent ntp_daemons_restart()

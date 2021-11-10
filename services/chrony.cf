@@ -3,7 +3,7 @@ bundle common chrony {
         any::
             "template_2_destination" data => parsejson('
                     {
-                        "surfsara.conf.mustache" : "$(config_file)", 
+                        "surfsara.conf.mustache" : "$(config_file)",
                     }
                 ');
 
@@ -57,23 +57,23 @@ bundle agent chrony_autorun()
 }
 
 bundle agent chrony_install()
-{           
+{
     methods:
         "" usebundle => scl_service_packages("chrony", "@(chrony.packages)");
 }
 
 bundle agent chrony_surfsara_config()
 {
-    vars: 
-        "chrony_config_file_class" string => canonify("sara$(chrony.config_file)");
+    vars:
+        "chrony_config_file_class" string => canonify("scl$(chrony.config_file)");
 
     classes:
-        "CHRONY_RESTART" or => { 
+        "CHRONY_RESTART" or => {
             "$(chrony_config_file_class)",
         };
         "time_zone_isdir" expression => isdir("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])");
         "time_zone_exists" expression => fileexists("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])"),
-            ifvarclass => not("time_zone_isdir");
+            if => not("time_zone_isdir");
 
     files:
         any::
@@ -100,19 +100,19 @@ bundle agent chrony_daemons_check()
                 comment         => "Check if chronyd is running",
                 process_count   => check_range("$(chrony.daemon_name)", "1", "1"),
                 process_select  => scl_select_parent_process("1");
-                
-    methods:    
-        any::   
+
+    methods:
+        any::
             "chrony" usebundle => chrony_daemons_restart(),
-                ifvarclass => canonify("$(chrony.daemon_name)_out_of_range");
-} 
+                if => canonify("$(chrony.daemon_name)_out_of_range");
+}
 
 bundle agent chrony_daemons_restart()
 {
     commands:
         debian|centos|sles::
             "$(chrony.restart)";
-            
+
     reports:
         any::
             "chrony daemons has been restarted $(chrony.restart)";

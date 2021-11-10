@@ -102,12 +102,12 @@ bundle agent systemd_install_and_check_service(service_file)
 
     commands:
         "$(paths.path[systemctl]) daemon-reload"
-                ifvarclass => canonify("systemd_service_$(service_name)_repaired");
+                if => canonify("systemd_service_$(service_name)_repaired");
 
     reports:
         any::
             "$(service_name) has been enabled/started"
-                ifvarclass => canonify("systemd_service_$(service_name)_repaired");
+                if => canonify("systemd_service_$(service_name)_repaired");
 }
 
 bundle agent systemd_stop_service(service_name)

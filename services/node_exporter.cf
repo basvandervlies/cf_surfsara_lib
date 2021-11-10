@@ -61,16 +61,16 @@ bundle agent node_exporter_config()
     commands:
         systemd::
             "$(node_exporter.restart)"
-                ifvarclass => or(
-                    canonify("sara$(node_exporter.systemd_file)"),
-                    canonify("sara$(node_exporter.default_file)")
+                if => or(
+                    canonify("scl$(node_exporter.systemd_file)"),
+                    canonify("scl$(node_exporter.default_file)")
                 );
 
         !systemd::
             "$(node_exporter.restart)"
-                ifvarclass => or(
-                    canonify("sara$(node_exporter.initd_file)"),
-                    canonify("sara$(node_exporter.default_file)")
+                if => or(
+                    canonify("scl$(node_exporter.initd_file)"),
+                    canonify("scl$(node_exporter.default_file)")
                 );
     files:
         systemd::
@@ -102,11 +102,11 @@ bundle agent node_exporter_daemon_check()
     methods:
         any::
             "" usebundle => node_exporter_restart,
-                ifvarclass => canonify("$(name)_out_of_range");
+                if => canonify("$(name)_out_of_range");
 
     reports:
         "$(this.bundle): check $(name)"
-           ifvarclass => "DEBUG|DEBUG_node_exporter|DEBUG_$(this.bundle)";
+           if => "DEBUG|DEBUG_node_exporter|DEBUG_$(this.bundle)";
 }
 
 bundle agent node_exporter_service_status(service, status)

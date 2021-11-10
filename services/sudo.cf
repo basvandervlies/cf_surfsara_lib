@@ -59,7 +59,7 @@ bundle agent sudo_surfsara_config()
 {
     vars:
         any::
-            "sudo_config_file_class" string => canonify("sara$(sudo.surfsara_file)");
+            "sudo_config_file_class" string => canonify("scl$(sudo.surfsara_file)");
             "exclude_list"           slist  => { "$(sudo.file_name)" };
 
     methods:
@@ -76,7 +76,7 @@ bundle agent sudo_surfsara_config()
     reports:
         any::
             "$(this.bundle): $(sudo.file) file has changed"
-               ifvarclass => "$(sudo_default_file_class)";
+               if => "$(sudo_default_file_class)";
 
         DEBUG_sudo.SUDO_ONLY_ONE_CONFIG_FILE::
             "$(this.bundle): Only 'surfsara' config allowed in '$(sudo.dir)'";

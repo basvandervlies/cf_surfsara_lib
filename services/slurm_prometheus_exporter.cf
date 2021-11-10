@@ -48,14 +48,14 @@ bundle agent slurm_prometheus_exporter_config()
     commands:
         systemd::
             "$(paths.path[systemctl]) daemon-reload"
-                ifvarclass => or(
-                    canonify("sara$(slurm_prometheus_exporter.systemd_file)")
+                if => or(
+                    canonify("scl$(slurm_prometheus_exporter.systemd_file)")
                 );
 
         !systemd::
             "$(slurm_gpu_prometheus_exporter.restart)"
-                ifvarclass => or(
-                    canonify("sara$(slurm_prometheus_exporter.systemd_file)")
+                if => or(
+                    canonify("scl$(slurm_prometheus_exporter.systemd_file)")
                 );
 }
 
@@ -69,7 +69,7 @@ bundle agent slurm_prometheus_exporter_daemon_check()
 
     commands:
         "$(slurm_prometheus_exporter.restart)"
-            ifvarclass => canonify("$(slurm_prometheus_exporter.daemon_name)_out_of_range");
+            if => canonify("$(slurm_prometheus_exporter.daemon_name)_out_of_range");
 }
 
 bundle agent slurm_prometheus_exporter_autorun()

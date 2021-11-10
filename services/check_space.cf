@@ -27,7 +27,7 @@ bundle agent check_space_surfsara_config()
     methods:
         any::
             "" usebundle => "$(sara_data.check_space[$(paths)][run_bundle])",
-                ifvarclass => and(
+                if => and(
                     canonify("check_space_$(paths)_failed"),
                     isvariable("sara_data.check_space[$(paths)][run_bundle]")
                     );
@@ -36,7 +36,7 @@ bundle agent check_space_surfsara_config()
         any::
             "$(sara_data.check_space[$(paths)][command])"
                 contain => in_shell,
-                ifvarclass => and(
+                if => and(
                     canonify("check_space_$(paths)_failed"),
                     isvariable("sara_data.check_space[$(paths)][command]")
                     );
@@ -44,7 +44,7 @@ bundle agent check_space_surfsara_config()
     reports:
         any::
             "Disk space for $(paths) is below: $(sara_data.check_space[$(paths)][freespace])!"
-                ifvarclass => and(canonify("check_space_$(paths)_failed"));
+                if => and(canonify("check_space_$(paths)_failed"));
 
         DEBUG_check_space::
             "$(this.bundle): $(paths) freespace: $(sara_data.check_space[$(paths)][freespace])";

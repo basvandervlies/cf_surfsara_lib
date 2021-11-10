@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.0.0 (2021-11-??)](#version-100-2021-11-)
+* [Version: 1.0.0 (2021-11-10)](#version-100-2021-11-10)
 * [Version: 0.9.89 (2021-03-28)](#version-0989-2021-03-28)
 * [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
 * [Version: 0.9.82 (2020-12-05 sint)](#version-0982-2020-12-05-sint)
@@ -23,7 +23,7 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.0.0 (2021-11-??)
+# Version: 1.0.0 (2021-11-10)
 
 Released version 1.0.0 this is a big change and other releases will not change the API anymore. We have renamed
 all `sara_` bundles to `scl_` and  instead of using variable with `sara_data.<bundle>.<var>` it is now

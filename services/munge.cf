@@ -57,7 +57,7 @@ bundle agent munge_daemons_check()
     methods:
         any::
             "" usebundle => munge_daemons_restart,
-                ifvarclass => canonify("munge_out_of_range");
+                if => canonify("munge_out_of_range");
 
     reports:
         munge_out_of_range::
@@ -81,8 +81,8 @@ bundle agent munge_config()
     methods:
         any::
             "" usebundle => munge_daemons_restart(),
-                ifvarclass => or(
-                    canonify("sara$(munge.munge_key_file)")
+                if => or(
+                    canonify("scl$(munge.munge_key_file)")
                 );
 
         munge_copy_files_set::

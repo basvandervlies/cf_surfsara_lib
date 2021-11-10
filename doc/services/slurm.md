@@ -30,6 +30,7 @@ These templates are located in:
 The following `classes` can be set via def.cf/json:
  * BACKUP: When set make a backup of the SQL sever
  * CLIENT: Configure the machine as client
+ * CONFIGLESS: Do not generate the configuration files. It will server by slurmctld.
  * LOGROTATE: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
  * SLURMD_DISABLE: Disable the slurmd systemd service
  * SERVER: Configure the machine as server
@@ -38,17 +39,17 @@ The following `classes` can be set via def.cf/json:
  * TARBALL: Slurm software will be installed as tarball instead of system packages + generate slurm systemd unit files
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
- * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * install_tarballs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "slurm",
             "..."
@@ -114,19 +115,12 @@ plugins are configured via the `plugstack.conf` file.
 This generations of the spank plugin configuration file(s) can be
 done dynamically,eg:
 ```#json
- "spank_templates": {
-        "private_tmpdir.mustache" : {
-            "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
-            "data": {
-                "config": [
-                    "required /opt/slurm/lib/private-tmpdir.so base=/scratch/slurm  mount=/var/tmp mount=/tmp mount=/scratch"
-                ]
-            }
-            "run_bundle': <not_required> when set run the specified bundle"
-            "run_class': <not_required> when set run the specified bundle only for the specified classses (string or list)"
-        }
-    },
+ "spank_plugins": {
+    "required": {
+        "${slurm.dir}/lib/private-tmpdir.so":  "base=/scratch/slurm mount=/tmp mount=/var/tmp mount=/scratch base=/dev/shm/slurm mount=/dev/shm"
+    }
+  },
 ```
 
-This will generate the `private-tmpdir.conf` file with the aid of the specified mustache file and
+This line will be added to the `plugstack.conf` file
 json data.

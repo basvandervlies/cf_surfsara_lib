@@ -25,16 +25,16 @@ The following clases can be set via def.cf/json:
  *  `PUBKEY_AUTHENTICATION`: Enable ssh public keys via `AuthorizedKeysCommand`
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
- * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "ssh",
             "..."

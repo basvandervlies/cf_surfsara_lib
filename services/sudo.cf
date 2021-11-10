@@ -28,7 +28,7 @@ bundle agent sudo_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("sudo");
+            "" usebundle => scl_data_autorun("sudo");
             "" usebundle => sudo_install();
             "" usebundle => sudo_surfsara_config();
 
@@ -52,19 +52,19 @@ bundle agent sudo_install()
 
     methods:
         any::
-            "" usebundle => sara_service_packages("sudo", "@(sudo_install.packages)");
+            "" usebundle => scl_service_packages("sudo", "@(sudo_install.packages)");
 }
 
 bundle agent sudo_surfsara_config()
 {
     vars:
         any::
-            "sudo_config_file_class" string => canonify("sara$(sudo.surfsara_file)");
+            "sudo_config_file_class" string => canonify("scl$(sudo.surfsara_file)");
             "exclude_list"           slist  => { "$(sudo.file_name)" };
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("sudo");
+            "" usebundle => scl_mustache_autorun("sudo");
 
     files:
         SUDO_ONLY_ONE_CONFIG_FILE::
@@ -76,7 +76,7 @@ bundle agent sudo_surfsara_config()
     reports:
         any::
             "$(this.bundle): $(sudo.file) file has changed"
-               ifvarclass => "$(sudo_default_file_class)";
+               if => "$(sudo_default_file_class)";
 
         DEBUG_sudo.SUDO_ONLY_ONE_CONFIG_FILE::
             "$(this.bundle): Only 'surfsara' config allowed in '$(sudo.dir)'";
@@ -114,10 +114,10 @@ sudo json data secton, eg:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "sudo",
             "..."

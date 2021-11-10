@@ -47,7 +47,7 @@ bundle agent tcpwrappers_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("tcpwrappers");
+            "" usebundle => scl_data_autorun("tcpwrappers");
             "" usebundle => tcpwrappers_install();
             "" usebundle => tcpwrappers_surfsara_config();
 }
@@ -56,7 +56,7 @@ bundle agent tcpwrappers_config()
 {
     methods:
         any::
-            "" usebundle => sara_data_autorun("tcpwrappers");
+            "" usebundle => scl_data_autorun("tcpwrappers");
             "" usebundle => tcpwrappers_install();
             "" usebundle => tcpwrappers_surfsara_config();
 }
@@ -64,7 +64,7 @@ bundle agent tcpwrappers_config()
 bundle agent tcpwrappers_install()
 {
     methods:
-        "" usebundle =>  sara_service_packages("tcpwrappers", "@(tcpwrappers.packages)");
+        "" usebundle =>  scl_service_packages("tcpwrappers", "@(tcpwrappers.packages)");
 }
 
 bundle agent tcpwrappers_surfsara_config()
@@ -78,7 +78,7 @@ bundle agent tcpwrappers_surfsara_config()
             perms => mog("$(tcpwrappers.mode)", "$(tcpwrappers.owner)", "$(tcpwrappers.group)");
 
     methods:
-            "" usebundle => sara_mustache_autorun("tcpwrappers");
+            "" usebundle => scl_mustache_autorun("tcpwrappers");
 }
 
 @if minimum_version(99.9)
@@ -103,10 +103,10 @@ the templates are located in:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "tcpwrappers",
             "..."

@@ -1,15 +1,18 @@
 [Unit]
 Description=Slurm node daemon
 After=munge.service network.target remote-fs.target
-#ConditionPathExists=/etc/slurm-llnl/slurm.conf
+{{^classes.SLURM_CONFIGLESS}}
 ConditionPathExists={{{vars.slurm.config_dir}}}/slurm.conf
+{{/classes.SLURM_CONFIGLESS}}
 Documentation=man:slurmd(8)
 
 [Service]
-Type=forking
-EnvironmentFile=-/etc/default/slurmd
-#ExecStart=/usr/sbin/slurmd $SLURMD_OPTIONS
-ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmd $SLURMD_OPTIONS
+Type={{{vars.scl.slurm.slurmd_service_type}}}
+EnvironmentFile=-{{{vars.scl.slurm.slurmd_environment_file}}}
+{{#classes.SLURM_CONFIGLESS}}
+ExecStartPre=-/bin/rm /run/slurm/conf/slurm.conf
+{{/classes.SLURM_CONFIGLESS}}
+ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmd {{{vars.scl.slurm.slurmd_service_options}}} $SLURMD_OPTIONS
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile=/run/slurmd.pid
 KillMode=process

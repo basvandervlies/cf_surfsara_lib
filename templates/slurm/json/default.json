@@ -14,7 +14,7 @@
     },
     "AuthType": "auth/munge",
     "backup_db_dir": "/var/backups",
-    "backup_dir": "$(sara_data.slurm[backup_db_dir])/slurm",
+    "backup_dir": "$(scl.slurm[backup_db_dir])/slurm",
     "backup_schedule": [ "Hr00.Min00_05" ],
     "backup_config": {
         "cmd": "/usr/bin/mysqldump",
@@ -131,25 +131,13 @@
     "SlurmdDebug": "info",
     "SlurmdPort": "6818",
     "SlurmdTimeout": "300",
+    "slurmd_environment_file": "/etc/sysconfig/slurmd",
+    "slurmd_service_options": "-D",
+    "slurmd_service_type": "simple",
     "SlurmUser": "slurm",
-    "spank_templates": {
-        "private_tmpdir.mustache" : {
-            "dest": "$(slurm.plugstack_dir)/private-tmpdir.conf",
-            "data": {
-                "config": [
-                    "required /opt/slurm/lib/private-tmpdir.so base=/scratch/slurm mount=/tmp mount=/var/tmp mount=/scratch base=/dev/shm/slurm mount=/dev/shm"
-                ]
-            }
-        },
-        "pyxis.mustache" : {
-            "dest": "$(slurm.plugstack_dir)/pyxis.conf",
-            "data": {
-                "config": [
-                    "required /opt/slurm/lib/spank_pyxis.so"
-                ]
-            },
-            "run_bundle": "slurm_service_restart",
-            "run_class": "SLURM_CLIENT"
+    "spank_plugins": {
+        "required": {
+            "${slurm.dir}/lib/private-tmpdir.so": " base=/scratch/slurm mount=/tmp mount=/var/tmp mount=/scratch base=/dev/shm/slurm mount=/dev/shm"
         }
     },
     "StoragePass": "not_set",

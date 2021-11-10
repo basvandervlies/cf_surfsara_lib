@@ -94,7 +94,7 @@ bundle agent ssh_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("ssh");
+            "" usebundle => scl_data_autorun("ssh");
             "" usebundle => ssh_install();
             "" usebundle => ssh_surfsara_config();
             "" usebundle => ssh_daemons_check();
@@ -118,7 +118,7 @@ bundle agent ssh_daemons_check()
             "/usr/sbin/sshd.*"
                 comment     => "Check if sshd is running",
                 process_count   => check_range("ssh", "1", "999999"),
-                process_select  => sara_select_parent_process("1");
+                process_select  => scl_select_parent_process("1");
 
     methods:
         ssh_out_of_range::
@@ -133,7 +133,7 @@ bundle agent ssh_daemons_check()
 bundle agent ssh_install()
 {
     methods:
-        "" usebundle => sara_service_packages("ssh", "@(ssh.packages)");
+        "" usebundle => scl_service_packages("ssh", "@(ssh.packages)");
 }
 
 bundle agent ssh_surfsara_config()
@@ -149,14 +149,14 @@ bundle agent ssh_surfsara_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("ssh");
+            "" usebundle => scl_mustache_autorun("ssh");
             "" usebundle => ssh_daemons_restart(),
-                ifvarclass => or(
-                    canonify("sara$(ssh.server_file)")
+                if => or(
+                    canonify("scl$(ssh.server_file)")
                     );
 
         ssh_copy_files_set::
-            "" usebundle => sara_service_copy_files("ssh");
+            "" usebundle => scl_service_copy_files("ssh");
 
     files:
         any::
@@ -207,16 +207,16 @@ The following clases can be set via def.cf/json:
  *  `PUBKEY_AUTHENTICATION`: Enable ssh public keys via `AuthorizedKeysCommand`
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
- * copy_files: See [files.cf](/masterfiles/lib/surfsara/files.cf)
- * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+ * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "ssh",
             "..."

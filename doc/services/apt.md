@@ -18,6 +18,9 @@ The following actions are proctected by a class:
  * setting debconf values for package field(s), controlled via  json data
  * disable systemctl timer services for apt, may interfere with cfengine (APT_SYSTEMD_DISABLE)
  * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
+ * automatic perform an dist-upgrade (DIST_UPGRADE)
+
+
 
 The classes can be set in def.cf/json:
 ```json
@@ -45,9 +48,9 @@ The `/etc/apt/auth.conf` is default empty. But we can configure it for password 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "apt",
             "..."

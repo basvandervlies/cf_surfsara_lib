@@ -5,7 +5,7 @@
 @if minimum_version(99.9)
 # common.cf
 
-Source: [common.cf](/masterfiles/lib/surfsara/common.cf)
+Source: [common.cf](/masterfiles/lib/scl/common.cf)
 
 Some body defininitions that are used in other bundles.
 @endif
@@ -13,7 +13,7 @@ Some body defininitions that are used in other bundles.
 ## cmd_repair in cfengine stdlib does not define # kept_return code :-(
 # see: https://github.com/cfengine/masterfiles/pull/290
 #
-body classes sara_cmd_repair(return_code,class_prefix)
+body classes scl_cmd_repair(return_code,class_prefix)
 {
     kept_returncodes => { "0" };
     repaired_returncodes => { "$(return_code)" };

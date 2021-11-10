@@ -4,7 +4,7 @@
 
 ## Our customization
 APACHE_MPM="worker"
-APACHE_HTTPD_CONF="{{{vars.sara_data.apache.configdir}}}/httpd.conf"
+APACHE_HTTPD_CONF="{{{vars.scl.apache.configdir}}}/httpd.conf"
 
 
 ## Everthing below is default from the file!
@@ -208,7 +208,7 @@ APACHE_SERVERSIGNATURE="off"
 APACHE_LOGLEVEL="warn"
 
 ## Type:	string
-## Default:	"/var/log/apache2/access_log combined"
+## Default:	"/var/log/apache2/access.log combined"
 ## ServiceRestart: apache2
 #
 # The location and format of the access logfile (Common Logfile Format).
@@ -223,19 +223,19 @@ APACHE_LOGLEVEL="warn"
 #
 # If you would like to have agent and referer logfiles:
 #
-# setting it to "/var/log/apache2/referer_log referer, /var/log/apache2/agent_log agent"
+# setting it to "/var/log/apache2/referer.log referer, /var/log/apache2/agent.log agent"
 #   corresponds to 
-# CustomLog /var/log/apache2/referer_log referer
-# CustomLog /var/log/apache2/agent_log   agent
+# CustomLog /var/log/apache2/referer.log referer
+# CustomLog /var/log/apache2/agent.log   agent
 #
 # If you prefer a single logfile with access, agent, and referer information
 # (Combined Logfile Format):
 #
-# setting it to "/var/log/apache2/access_log combined"
+# setting it to "/var/log/apache2/access.log combined"
 #   corresponds to 
-# CustomLog /var/log/apache2/access_log combined
+# CustomLog /var/log/apache2/access.log combined
 #
-APACHE_ACCESS_LOG="/var/log/apache2/access_log combined"
+APACHE_ACCESS_LOG="/var/log/apache2/access.log combined"
 
 ## Type:	list(On,Off,DNS)
 ## Default:	"Off"

@@ -1,14 +1,14 @@
 {
     "install_tarballs": [
         {
-            "check_dir": "$(slurm.software_dir)/$(sara_data.slurm[current_version])",
-            "dest": "$(slurm.tarball_dir)/slurm-$(sara_data.slurm[current_version]).tar.gz",
+            "check_dir": "$(slurm.software_dir)/$(scl.slurm[current_version])",
+            "dest": "$(slurm.tarball_dir)/slurm-$(scl.slurm[current_version]).tar.gz",
             "extract": {
                 "cmd": "$(paths.path[tar]) --extract --gzip --file",
                 "in_dir": "$(slurm.software_dir)"
             },
             "mog": [ "0644", "root", "root"],
-            "source": "data/slurm/tarballs/$(sys.flavor)/slurm-$(sara_data.slurm[current_version]).tar.gz"
+            "source": "data/slurm/tarballs/$(sys.flavor)/slurm-$(scl.slurm[current_version]).tar.gz"
         },
         {
             "check_dir": "$(slurm.software_dir)/19.05.7",
@@ -22,14 +22,14 @@
         }
     ],
     "dir": "/opt/slurm",
-    "config_dir": "$(sara_data.slurm[dir])/etc",
+    "config_dir": "$(scl.slurm[dir])/etc",
     "current_version" : "20.02.6",
     "log_dir": "/var/log/slurm",
     "opt_dir": "/opt/slurm",
-    "plugin_dir": "$(sara_data.slurm[dir])/sw/current/lib/slurm",
-    "plugstack_dir": "$(sara_data.slurm[config_dir])/plugstack.conf.d",
-    "scripts_dir": "$(sara_data.slurm[opt_dir])/scripts",
-    "software_dir": "$(sara_data.slurm[dir])/sw",
+    "plugin_dir": "$(scl.slurm[dir])/sw/current/lib/slurm",
+    "plugstack_dir": "$(scl.slurm[config_dir])/plugstack.conf.d",
+    "scripts_dir": "$(scl.slurm[opt_dir])/scripts",
+    "software_dir": "$(scl.slurm[dir])/sw",
     "spool_dir": "/var/spool/slurm",
-    "tarball_dir": "$(sara_data.slurm[dir])/tarballs"
+    "tarball_dir": "$(scl.slurm[dir])/tarballs"
 }

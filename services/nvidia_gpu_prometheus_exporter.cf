@@ -40,7 +40,7 @@ bundle agent nvidia_gpu_prometheus_exporter_install()
 
     methods:
         nvidia_gpu_prometheus_exporter_copy_dirs_set::
-            "" usebundle => sara_service_copy_dirs("nvidia_gpu_prometheus_exporter");
+            "" usebundle => scl_service_copy_dirs("nvidia_gpu_prometheus_exporter");
 }
 
 bundle agent nvidia_gpu_prometheus_exporter_config()
@@ -51,25 +51,28 @@ bundle agent nvidia_gpu_prometheus_exporter_config()
 
     methods:
         any::
-            "" usebundle => sara_mustache_autorun("nvidia_gpu_prometheus_exporter");
+            "" usebundle => scl_mustache_autorun("nvidia_gpu_prometheus_exporter");
 
     commands:
         systemd::
             "$(paths.path[systemctl]) daemon-reload"
-                ifvarclass => or(
-                    canonify("sara$(nvidia_gpu_prometheus_exporter.systemd_file)")
+                if => or(
+                    canonify("scl$(nvidia_gpu_prometheus_exporter.systemd_file)")
                 );
 
         !systemd::
             "$(nvidia_gpu_prometheus_exporter.restart)"
-                ifvarclass => or(
-                    canonify("sara$(nvidia_gpu_prometheus_exporter.systemd_file)")
+                if => or(
+                    canonify("scl$(nvidia_gpu_prometheus_exporter.systemd_file)")
                 );
 
     files:
         systemd::
             "$(nvidia_gpu_prometheus_exporter.initd_file)"
                 delete => tidy;
+
+            "$(nvidia_gpu_prometheus_exporter.systemd_file)"
+                perms => mog("644", "root", "root");
 }
 
 bundle agent nvidia_gpu_prometheus_exporter_restart
@@ -87,16 +90,16 @@ bundle agent nvidia_gpu_prometheus_exporter_daemon_check()
         "$(name)"
             comment => "Check if GPU Prometheus exporter is running",
             process_count   => check_range("$(name)", "1", "1"),
-            process_select  => sara_select_parent_process("1");
+            process_select  => scl_select_parent_process("1");
 
     methods:
         any::
             "" usebundle => nvidia_gpu_prometheus_exporter_restart,
-                ifvarclass => canonify("$(name)_out_of_range");
+                if => canonify("$(name)_out_of_range");
 
     reports:
         "$(this.bundle): check $(name)"
-           ifvarclass => "DEBUG|DEBUG_nvidia_gpu_prometheus_exporter|DEBUG_$(this.bundle)";
+           if => "DEBUG|DEBUG_nvidia_gpu_prometheus_exporter|DEBUG_$(this.bundle)";
 
 }
 
@@ -106,7 +109,7 @@ bundle agent nvidia_gpu_prometheus_exporter_autorun()
         "tags" slist => { "service_nvidia_gpu_prometheus_exporter", "template_nvidia_gpu_prometheus_exporter" };
 
     methods:
-        "" usebundle => sara_data_autorun("nvidia_gpu_prometheus_exporter");
+        "" usebundle => scl_data_autorun("nvidia_gpu_prometheus_exporter");
         "" usebundle => nvidia_gpu_prometheus_exporter_install();
         "" usebundle => nvidia_gpu_prometheus_exporter_config();
         "" usebundle => nvidia_gpu_prometheus_exporter_daemon_check();
@@ -130,16 +133,16 @@ These templates are located in:
  * templates/nvidia_gpu_prometheus_exporter
  * templates/nvidia_gpu_prometheus_exporter/json
 
-The following json variables can be set in def.cf/json to invoke files bundles:                                                                                                                           
-  * copy_dirs: See [files.cf](/masterfiles/lib/surfsara/files.cf)
+The following json variables can be set in def.cf/json to invoke files bundles:
+  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "nvidia_gpu_prometheus_exporter",
             "..."

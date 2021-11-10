@@ -8,7 +8,7 @@ bundle agent check_space_autorun()
 
     methods:
         any::
-            "" usebundle => sara_data_autorun("check_space");
+            "" usebundle => scl_data_autorun("check_space");
             "" usebundle => check_space_surfsara_config();
 }
 
@@ -21,13 +21,13 @@ bundle agent check_space_surfsara_config()
         any::
             "$(paths)"
                 comment => "Checking if $(paths) has enough free space",
-                volume => sara_min_free_space("$(sara_data.check_space[$(paths)][freespace])"),
+                volume => scl_min_free_space("$(sara_data.check_space[$(paths)][freespace])"),
                 classes => results("namesppace", "check_space_$(paths)");
 
     methods:
         any::
             "" usebundle => "$(sara_data.check_space[$(paths)][run_bundle])",
-                ifvarclass => and(
+                if => and(
                     canonify("check_space_$(paths)_failed"),
                     isvariable("sara_data.check_space[$(paths)][run_bundle]")
                     );
@@ -36,7 +36,7 @@ bundle agent check_space_surfsara_config()
         any::
             "$(sara_data.check_space[$(paths)][command])"
                 contain => in_shell,
-                ifvarclass => and(
+                if => and(
                     canonify("check_space_$(paths)_failed"),
                     isvariable("sara_data.check_space[$(paths)][command]")
                     );
@@ -44,7 +44,7 @@ bundle agent check_space_surfsara_config()
     reports:
         any::
             "Disk space for $(paths) is below: $(sara_data.check_space[$(paths)][freespace])!"
-                ifvarclass => and(canonify("check_space_$(paths)_failed"));
+                if => and(canonify("check_space_$(paths)_failed"));
 
         DEBUG_check_space::
             "$(this.bundle): $(paths) freespace: $(sara_data.check_space[$(paths)][freespace])";
@@ -72,10 +72,10 @@ not enough freespace will:
 ## Usage
 
 The bundle can be run via:
- * `def.sara_services_enabled`
+ * `def.scl_services_enabled`
 ```json
 "vars": {
-    "sara_services_enabled": [
+    "scl_services_enabled": [
             "...",
             "check_space",
             "..."

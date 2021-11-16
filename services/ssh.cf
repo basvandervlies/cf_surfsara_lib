@@ -144,7 +144,7 @@ bundle agent ssh_surfsara_config()
 
     classes:
         any::
-            "ssh_copy_files_set" expression => isvariable("sara_data.ssh[copy_files]"),
+            "ssh_copy_files_set" expression => isvariable("scl.ssh[copy_files]"),
                 comment => "Must we copy extra files for ssh bundle";
 
     methods:
@@ -177,7 +177,7 @@ bundle agent ssh_surfsara_config()
 
     commands:
         SSH_KEYGEN::
-            "$(ssh.ssh_keygen) $(sara_data.ssh[keygen_opt])";
+            "$(ssh.ssh_keygen) $(scl.ssh[keygen_opt])";
 }
 @if minimum_version(99.9)
 # ssh

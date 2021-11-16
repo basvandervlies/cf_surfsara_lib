@@ -51,10 +51,10 @@ bundle agent pam_install()
 bundle agent pam_surfsara_config()
 {
     classes:
-        "pam_listfile_set" expression => isvariable("sara_data.pam[pam_listfile]");
-        "pam_limits_set" expression => isvariable("sara_data.pam[pam_limits]");
-        "pam_cp_files_set" expression => isvariable("sara_data.pam[copy_files]");
-        "pam_cp_dirs_set" expression => isvariable("sara_data.pam[copy_dirs]");
+        "pam_listfile_set" expression => isvariable("scl.pam[pam_listfile]");
+        "pam_limits_set" expression => isvariable("scl.pam[pam_limits]");
+        "pam_cp_files_set" expression => isvariable("scl.pam[copy_files]");
+        "pam_cp_dirs_set" expression => isvariable("scl.pam[copy_dirs]");
 
     methods:
         any::
@@ -84,19 +84,19 @@ bundle agent pam_generate_files()
             "os" string => "centos";
 
         any::
-            "files" slist => getindices("sara_data.pam[$(os)]");
+            "files" slist => getindices("scl.pam[$(os)]");
 
     classes:
-        "pam_generate_files_os_set" expression => isvariable( "sara_data.pam[$(sys.os_release[ID])]" ),
+        "pam_generate_files_os_set" expression => isvariable( "scl.pam[$(sys.os_release[ID])]" ),
             comment => "Modern os has /etc/os-release file";
 
     methods:
         any::
-            "" usebundle => pam_generate_file( "$(files)", "$(sara_data.pam[$(os)][$(files)])" );
+            "" usebundle => pam_generate_file( "$(files)", "$(scl.pam[$(os)][$(files)])" );
 
     reports:
         any::
-            "$(this.bundle): $(os):'$(found))'  $(files): $(sara_data.pam[$(os)][$(files)])"
+            "$(this.bundle): $(os):'$(found))'  $(files): $(scl.pam[$(os)][$(files)])"
                 comment => "Show which files are generated",
                 if => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
 
@@ -118,7 +118,7 @@ bundle agent pam_generate_file(file, data_section)
 ";
 
     classes:
-        "data_section_exists" expression => isvariable("sara_data.pam[$(data_section)]");
+        "data_section_exists" expression => isvariable("scl.pam[$(data_section)]");
 
     files:
 @if minimum_version(3.12)
@@ -127,7 +127,7 @@ bundle agent pam_generate_file(file, data_section)
                      create => "true",
                      edit_template_string   => "$(pam_mustache)",
                      template_method => "inline_mustache",
-                     template_data => "@(sara_data.pam)",
+                     template_data => "@(scl.pam)",
                      classes => if_repaired("scl$(file)");
 
                 "$(file)"
@@ -142,8 +142,8 @@ bundle agent pam_generate_file(file, data_section)
         data_section_exists::
             "$(this.bundle): $(file): $(with)"
                 comment => "Display the pam file data",
-                #with => string_mustache("{{$-top-}}", data_expand("sara_data.pam[$(data_section)]")),
-                with => string_mustache("$(const.n)$(pam_mustache)", "sara_data.pam"),
+                #with => string_mustache("{{$-top-}}", data_expand("scl.pam[$(data_section)]")),
+                with => string_mustache("$(const.n)$(pam_mustache)", "scl.pam"),
                 if => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
 @endif
         !data_section_exists::
@@ -154,7 +154,7 @@ bundle agent pam_listfile_conf_generate()
 {
     vars:
         any::
-            "items" slist => getindices("sara_data.pam[pam_listfile]"),
+            "items" slist => getindices("scl.pam[pam_listfile]"),
                 comment => "pam_listfile can have multiple allow/deny per item, eg: group/user";
 
     methods:
@@ -181,7 +181,7 @@ bundle agent pam_conffile_generate(file, data_section)
                      create => "true",
                      edit_template_string   => "$(simple_list_mustache)",
                      template_method => "inline_mustache",
-                     template_data => "@(sara_data.pam)",
+                     template_data => "@(scl.pam)",
                      classes => if_repaired("scl$(file)");
 @endif
 
@@ -190,9 +190,9 @@ bundle agent pam_conffile_generate(file, data_section)
 @if minimum_version(3.11)
             "$(this.bundle): $(file): $(with)"
                 comment => "Display the pam file data",
-                #with => string_mustache("{{$-top-}}", data_expand("sara_data.pam.$(data_section)")),
-                #with => string_mustache("{{#pam_listfile.$(data_section)}} {{{.}}} {{/pam_listfile.$(data_section)}}", "sara_data.pam"),
-                with => string_mustache("$(const.n)$(simple_list_mustache)", "sara_data.pam"),
+                #with => string_mustache("{{$-top-}}", data_expand("scl.pam.$(data_section)")),
+                #with => string_mustache("{{#pam_listfile.$(data_section)}} {{{.}}} {{/pam_listfile.$(data_section)}}", "scl.pam"),
+                with => string_mustache("$(const.n)$(simple_list_mustache)", "scl.pam"),
                 if => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
 @endif
 

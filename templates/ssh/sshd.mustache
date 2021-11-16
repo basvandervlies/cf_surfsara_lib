@@ -3,102 +3,102 @@
 # SURFsara Bas van der Vlies
 
 # What ports, IPs and protocols we listen for
-Port {{{vars.sara_data.ssh.Port}}}
+Port {{{vars.scl.ssh.Port}}}
 
 # Use these options to restrict which interfaces/protocols sshd will bind to
-AddressFamily {{{vars.sara_data.ssh.AddressFamily}}}
-Protocol {{{vars.sara_data.ssh.Protocol}}}
+AddressFamily {{{vars.scl.ssh.AddressFamily}}}
+Protocol {{{vars.scl.ssh.Protocol}}}
 
-{{#vars.sara_data.ssh.ListenAddress}}
+{{#vars.scl.ssh.ListenAddress}}
 ListenAddress {{address}}
-{{/vars.sara_data.ssh.ListenAddress}}
+{{/vars.scl.ssh.ListenAddress}}
 
 # HostKeys for protocol version 2
-{{#vars.sara_data.ssh.HostKey}}
+{{#vars.scl.ssh.HostKey}}
 HostKey {{key}}
-{{/vars.sara_data.ssh.HostKey}}
+{{/vars.scl.ssh.HostKey}}
 
 # For some hosts this is NOT allowed
-AllowTcpForwarding {{{vars.sara_data.ssh.AllowTcpForwarding}}}
+AllowTcpForwarding {{{vars.scl.ssh.AllowTcpForwarding}}}
 
 # Logging
-SyslogFacility {{{vars.sara_data.ssh.SyslogFacility}}}
-LogLevel {{{vars.sara_data.ssh.LogLevel}}}
+SyslogFacility {{{vars.scl.ssh.SyslogFacility}}}
+LogLevel {{{vars.scl.ssh.LogLevel}}}
 
 # Authentication:
-LoginGraceTime {{{vars.sara_data.ssh.LoginGraceTime}}}
-PermitRootLogin {{{vars.sara_data.ssh.PermitRootLogin}}}
-StrictModes {{{vars.sara_data.ssh.StrictModes}}}
+LoginGraceTime {{{vars.scl.ssh.LoginGraceTime}}}
+PermitRootLogin {{{vars.scl.ssh.PermitRootLogin}}}
+StrictModes {{{vars.scl.ssh.StrictModes}}}
 
-PubkeyAuthentication {{{vars.sara_data.ssh.PubkeyAuthentication}}}
-AuthorizedKeysFile {{{vars.sara_data.ssh.AuthorizedKeysFile}}}
+PubkeyAuthentication {{{vars.scl.ssh.PubkeyAuthentication}}}
+AuthorizedKeysFile {{{vars.scl.ssh.AuthorizedKeysFile}}}
 
 # Don't read the user's ~/.rhosts and ~/.shosts files
-IgnoreRhosts {{{vars.sara_data.ssh.IgnoreRhosts}}}
+IgnoreRhosts {{{vars.scl.ssh.IgnoreRhosts}}}
 # For this to work you will also need host keys in /etc/ssh_known_hosts
 # similar for protocol version 2
-HostbasedAuthentication {{{vars.sara_data.ssh.HostbasedAuthentication}}}
+HostbasedAuthentication {{{vars.scl.ssh.HostbasedAuthentication}}}
 # if you don't trust ~/.ssh/known_hosts for RhostsRSAAuthentication
-IgnoreUserKnownHosts {{{vars.sara_data.ssh.IgnoreUserKnownHosts}}}
+IgnoreUserKnownHosts {{{vars.scl.ssh.IgnoreUserKnownHosts}}}
 
 # To enable empty passwords, change to yes (NOT RECOMMENDED)
-PermitEmptyPasswords {{{vars.sara_data.ssh.PermitEmptyPasswords}}}
+PermitEmptyPasswords {{{vars.scl.ssh.PermitEmptyPasswords}}}
 
 # Change to yes to enable challenge-response passwords (beware issues with
 # some PAM modules and threads)
-ChallengeResponseAuthentication {{{vars.sara_data.ssh.ChallengeResponseAuthentication}}}
+ChallengeResponseAuthentication {{{vars.scl.ssh.ChallengeResponseAuthentication}}}
 
 # Change to no to disable tunnelled clear text passwords
-PasswordAuthentication {{{vars.sara_data.ssh.PasswordAuthentication}}}
+PasswordAuthentication {{{vars.scl.ssh.PasswordAuthentication}}}
 
 ### Some environment settings
 #
-Banner {{{vars.sara_data.ssh.Banner}}}
-MaxAuthTries {{{vars.sara_data.ssh.MaxAuthTries}}}
-PrintLastLog {{{vars.sara_data.ssh.PrintLastLog}}}
-PrintMotd {{{vars.sara_data.ssh.PrintMotd}}}
-TCPKeepAlive {{{vars.sara_data.ssh.TCPKeepAlive}}}
-X11Forwarding {{{vars.sara_data.ssh.X11Forwarding}}}
-X11UseLocalhost {{{vars.sara_data.ssh.X11UseLocalhost}}}
-X11DisplayOffset {{{vars.sara_data.ssh.X11DisplayOffset}}}
-UsePAM {{{vars.sara_data.ssh.UsePAM}}}
-UseDNS {{{vars.sara_data.ssh.UseDNS}}}
-MaxSessions {{{vars.sara_data.ssh.MaxSessions}}}
-MaxStartups {{{vars.sara_data.ssh.MaxStartups}}}
+Banner {{{vars.scl.ssh.Banner}}}
+MaxAuthTries {{{vars.scl.ssh.MaxAuthTries}}}
+PrintLastLog {{{vars.scl.ssh.PrintLastLog}}}
+PrintMotd {{{vars.scl.ssh.PrintMotd}}}
+TCPKeepAlive {{{vars.scl.ssh.TCPKeepAlive}}}
+X11Forwarding {{{vars.scl.ssh.X11Forwarding}}}
+X11UseLocalhost {{{vars.scl.ssh.X11UseLocalhost}}}
+X11DisplayOffset {{{vars.scl.ssh.X11DisplayOffset}}}
+UsePAM {{{vars.scl.ssh.UsePAM}}}
+UseDNS {{{vars.scl.ssh.UseDNS}}}
+MaxSessions {{{vars.scl.ssh.MaxSessions}}}
+MaxStartups {{{vars.scl.ssh.MaxStartups}}}
 
 {{#classes.SSH_USE_DEPRICATED_OPTIONS}}
-KeyRegenerationInterval {{{vars.sara_data.ssh.KeyRegenerationInterval}}}
-RSAAuthentication {{{vars.sara_data.ssh.RSAAuthentication}}}
-RhostsRSAAuthentication {{{vars.sara_data.ssh.RhostsRSAAuthentication}}}
-ServerKeyBits {{{vars.sara_data.ssh.ServerKeyBits}}}
-UseLogin {{{vars.sara_data.ssh.UseLogin}}}
-UsePrivilegeSeparation {{{vars.sara_data.ssh.UsePrivilegeSeparation}}}
+KeyRegenerationInterval {{{vars.scl.ssh.KeyRegenerationInterval}}}
+RSAAuthentication {{{vars.scl.ssh.RSAAuthentication}}}
+RhostsRSAAuthentication {{{vars.scl.ssh.RhostsRSAAuthentication}}}
+ServerKeyBits {{{vars.scl.ssh.ServerKeyBits}}}
+UseLogin {{{vars.scl.ssh.UseLogin}}}
+UsePrivilegeSeparation {{{vars.scl.ssh.UsePrivilegeSeparation}}}
 {{/classes.SSH_USE_DEPRICATED_OPTIONS}}
 
 # Allow client to pass locale environment variables
-AcceptEnv {{{vars.sara_data.ssh.AcceptEnv}}}
-{{#vars.sara_data.ssh.Subsystem}}
+AcceptEnv {{{vars.scl.ssh.AcceptEnv}}}
+{{#vars.scl.ssh.Subsystem}}
 Subsystem {{service}} {{path}}
-{{/vars.sara_data.ssh.HostKey}}
+{{/vars.scl.ssh.HostKey}}
 
 {{#classes.SSH_PUBKEY_AUTHENTICATION}}
-AuthorizedKeysCommand {{vars.sara_data.ssh.authorized_keys_command}}
+AuthorizedKeysCommand {{vars.scl.ssh.authorized_keys_command}}
     {{#classes.SLES}}
-AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
+AuthorizedKeysCommandUser {{vars.scl.ssh.authorized_keys_commanduser}}
     {{/classes.SLES}}
     {{#classes.debian}}
-AuthorizedKeysCommandUser {{vars.sara_data.ssh.authorized_keys_commanduser}}
+AuthorizedKeysCommandUser {{vars.scl.ssh.authorized_keys_commanduser}}
     {{/classes.debian}}
     {{#classes.centos}}
-AuthorizedKeysCommandRunAs {{vars.sara_data.ssh.authorized_keys_commanduser}}
+AuthorizedKeysCommandRunAs {{vars.scl.ssh.authorized_keys_commanduser}}
     {{/classes.centos}}
 {{/classes.SSH_PUBKEY_AUTHENTICATION}}
 
 ##@ Must be the last section
 #
-{{#vars.sara_data.ssh.matches}}
+{{#vars.scl.ssh.matches}}
 {{{match}}}
    {{#settings}}
    {{{.}}}
    {{/settings}}
-{{/vars.sara_data.ssh.matches}}
+{{/vars.scl.ssh.matches}}

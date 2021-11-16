@@ -5,8 +5,6 @@ bundle common rootfiles(params)
 {
     vars:
         any::
-            "bundle_dir"    string => "cf_bundles_dir/rootfiles";
-
             ## Mustache templates
             "template_2_destination" data => parsejson('
                     {
@@ -23,7 +21,6 @@ bundle agent rootfiles_autorun()
         "tags" slist => { "service_rootfiles", "template_rootfiles" };
 
     methods:
-        "" usebundle => scl_data_autorun("rootfiles");
         "" usebundle => rootfiles_surfsara_config();
 }
 
@@ -34,9 +31,9 @@ bundle agent rootfiles_surfsara_config()
             "no_module_load" string => "/root/.no_module_load";
 
     classes:
-        "copy_dirs_set" expression => isvariable("sara_data.rootfiles[copy_dirs]");
-        "copy_files_set" expression => isvariable("sara_data.rootfiles[copy_files]");
-        "ssh_keys_set" expression => reglist("@(sara_data.rootfiles[ssh_keys])", ".+");
+        "copy_dirs_set" expression => isvariable("scl.rootfiles[copy_dirs]");
+        "copy_files_set" expression => isvariable("scl.rootfiles[copy_files]");
+        "ssh_keys_set" expression => reglist("@(scl.rootfiles[ssh_keys])", ".+");
 
     files:
         any::
@@ -73,16 +70,16 @@ bundle agent rootfiles_ssh_keys()
 {
     files:
         any::
-            "/root/.ssh/$(sara_data.rootfiles[ssh_keys][keys])"
+            "/root/.ssh/$(scl.rootfiles[ssh_keys][keys])"
                 comment => "Copy private keys",
                 perms => mog("600", "root", "root"),
-                copy_from => secure_cp("$(sara_data.rootfiles[ssh_keys][source])/$(sara_data.rootfiles[ssh_keys][keys])",
+                copy_from => secure_cp("$(scl.rootfiles[ssh_keys][source])/$(scl.rootfiles[ssh_keys][keys])",
                 "$(sys.policy_hub)");
 
-            "/root/.ssh/$(sara_data.rootfiles[ssh_keys][keys]).pub"
+            "/root/.ssh/$(scl.rootfiles[ssh_keys][keys]).pub"
                 comment => "Copy private keys",
                 perms => mog("644", "root", "root"),
-                copy_from => secure_cp("$(sara_data.rootfiles[ssh_keys][source])/$(sara_data.rootfiles[ssh_keys][keys]).pub",
+                copy_from => secure_cp("$(scl.rootfiles[ssh_keys][source])/$(scl.rootfiles[ssh_keys][keys]).pub",
                     "$(sys.policy_hub)");
 
     reports:
@@ -178,7 +175,7 @@ if there are changes, eg:
     {
         "dest": "/root/.subversion",
         "exclude_dirs": [ ".git", ".svn" ],
-        "source": "cf_bundles_dir/rootfiles/surfsara/.subversion"
+        "source": "data/rootfiles/surfsara/.subversion"
     }
 ]
 ```
@@ -191,12 +188,12 @@ specified destination, example:
 copy_files: [
     {
         "dest": "/root/.bashrc",
-        "source": "cf_bundles_dir/rootfiles/surfsara/root/.bashrc",
+        "source": "data/rootfiles/surfsara/root/.bashrc",
         "mog": [ "0600", "root", "root"]
     },
     {
         "dest": "/root/dynmotd.sh",
-        "source": "cf_bundles_dir/rootfiles/surfsara/root/dynmotd.sh",
+        "source": "data/rootfiles/surfsara/root/dynmotd.sh",
         "mog": [ "0700", "root", "root"]
     }
 ]
@@ -208,7 +205,7 @@ With this variable is set it will copy the specified ssh keys to `/root/.ssh`,
 example:
 ```json
 ssh_keys: {
-    "source": "cf_bundles_dir/rootfiles/ssh_keys/2fa_web",
+    "source": "data/rootfiles/ssh_keys/2fa_web",
     "keys": [ "id_ed25519", "id_rsa" ]
 }
 ```

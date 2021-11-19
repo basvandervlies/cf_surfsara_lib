@@ -205,7 +205,6 @@ or:
 ```json
 "vars": {
     "tcpwrappers_json_files": [ "allow_ssh.json", "allow_http.json" ]
-    }
 }
 ```
 

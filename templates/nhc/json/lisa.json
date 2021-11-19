@@ -4,10 +4,10 @@
     ],
     "copy_dirs": [
         {
-            "dest": "$(sara_data.nhc[commands_dir])",
+            "dest": "$(scl.nhc[commands_dir])",
             "exclude_dirs": [ ".git", ".svn" ],
             "purge": "false",
-            "source": "cf_bundles_dir/nhc/commands"
+            "source": "data/nhc/commands"
         }
     ],
     "rules": [
@@ -21,7 +21,7 @@
                 "check_hw_mcelog",
                 "check_hw_physmem_free 1MB",
                 "check_hw_swap_free 1MB",
-                "check_cmd_status -r 0 $(sara_data.nhc[commands_dir])/clean_node"
+                "check_cmd_status -r 0 $(scl.nhc[commands_dir])/clean_node"
             ],
             "reboot": [
                 "check_file_test -n -e /etc/node_status/reboot_node"

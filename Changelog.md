@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.0.0 (2021-XX-XX)](#version-100-2021-xx-xx)
 * [Version: 1.0.0 (2021-11-10)](#version-100-2021-11-10)
 * [Version: 0.9.89 (2021-03-28)](#version-0989-2021-03-28)
 * [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
@@ -23,6 +24,14 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+
+# Version: 1.0.0 (2021-XX-XX)
+
+These services heve bug fixes or new features:
+ * slurm :
+  * configless enhancements added a new class `CONFIGLESS_CONF_LINKS`:
+    * will create symlinks in configuration directory for utils that need it, eg: pyslurm
+
 # Version: 1.0.0 (2021-11-10)
 
 Released version 1.0.0 this is a big change and other releases will not change the API anymore. We have renamed

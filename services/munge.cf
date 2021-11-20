@@ -28,7 +28,6 @@ bundle agent munge_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("munge");
             "" usebundle => munge_install();
             "" usebundle => munge_config();
             "" usebundle => munge_daemons_check();
@@ -75,7 +74,7 @@ bundle agent munge_config()
 {
     classes:
         any::
-            "munge_copy_files_set" expression => isvariable("sara_data.munge[copy_files]"),
+            "munge_copy_files_set" expression => isvariable("scl.munge[copy_files]"),
                 comment => "check if we should copy any files for the munge bundle";
 
     methods:
@@ -149,11 +148,11 @@ specified destination, example:
 "copy_files": [
     {
         "dest": "$(munge.munge_key_file)",
-        "source": "cf_bundles_dir/munge/lisa/munge.key",
+        "source": "data/munge/lisa/munge.key",
         "mog": [ "0400", "munge", "munge" ],
         "run_bundle": "munge_daemons_restart"
     }
 ]
 ```
-Where `cf_bundles_dir` is a **cf-serverd shortcut**.
+Where `data` is a **cf-serverd shortcut**.
 @endif

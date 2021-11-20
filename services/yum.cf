@@ -93,7 +93,7 @@ bundle agent yum_repository()
         any::
             "template_file" string => "repository.mustache";
 
-            "repository_names" slist => getindices("sara_data.$(this.bundle)");
+            "repository_names" slist => getindices("scl.$(this.bundle)");
 
             "repository_exclude_files" slist => maplist("$(this).repo", @(repository_names));
             "template_2_destination" data => parsejson('{ "$(template_file)" :  "no_destination_defined_is_generated"  }');
@@ -119,7 +119,7 @@ bundle agent yum_repository()
 
         YUM_REPOS_FILE_LIST_POPULATED::
             "" usebundle => scl_mustache_cf_data_2_file("$(this.bundle)",
-                "$(template_file)", "$(yum.repos_dir)/$(repository_names).repo", "sara_data.yum_repository[$(repository_names)]" );
+                "$(template_file)", "$(yum.repos_dir)/$(repository_names).repo", "scl.yum_repository[$(repository_names)]" );
 
     reports:
         DEBUG_yum|DEBUG_yum_repository::

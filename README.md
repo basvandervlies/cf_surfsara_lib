@@ -3,6 +3,7 @@
 * [SURF CFEngine Library (SCL) for building services with json/mustache](#surf-cfengine-library-scl-for-building-services-with-jsonmustache)
     * [mustache/json rules](#mustachejson-rules)
         * [JSON Merge strategy](#json-merge-strategy)
+            * [JSON merge example](#json-merge-example)
     * [Installation](#installation)
         * [MPF installation](#mpf-installation)
             * [update](#update)
@@ -54,7 +55,7 @@ files. This is the standard that we defined for the mustache/json files and json
     *  Bundle data two levels.
     *  When all bundle data is parsed. This allows referencing a variable of another service bundle.
 
-Both senarios will be described in the subsection below. For both senarios you can specifiy multiple
+Both scenarios will be described in the subsection below. For both scenarios you can specifiy multiple
 json files. The files will be merged and the last one wins if the same variable name is used,eg:
  * a.json defines: `a : 1`
  * b.json defines: `a : 2`
@@ -76,6 +77,39 @@ The merge strategy is::
   1. `def.<service_name>` if defined in def.json or:
         * lib/scl/def.cf MPF setup
         * your own file with variable scope `def`
+
+#### JSON merge example
+
+At our site  we have  multiple augments files defined:
+ 1. domain.json
+ 1. os.json
+ 1. key.json
+ 1. ip.json
+
+With scl you can merge at 3 levels
+ * for global settings use eg: `ntp_json_files` (domain|os.json)
+ * to override settings use service definition (key|ip.json), eg:
+```
+ntp: {
+    json_files:  [ role.json ]
+    server: [ ntp.example.org ]
+}
+```
+
+If this is merged as one internal `def.json` file by CFengine:
+```
+ntp_json_files : [ site.json ]
+ntp: {
+    json_files:  [ role.json ]
+    server: [ ntp.example.org ]
+}
+```
+
+SCL has a 3 level merge strategy. The `ntp_json_files` for the global setting and the service definition  we have 2 levels:
+ 1. the `json_files` definition that can be used for override the global ones
+ 1. per attribute this one always wins and also override the `json_files` attribute setting.
+
+The golden rule is to use `<service>_json_files` for the global one and the other scl merge options to override settings.
 
 ## Installation
 
@@ -151,7 +185,7 @@ See above to add `templates shortcut` to cf-serverd.
 
 ## Usage
 
-The documentattion is embedded in the source files, and generated:
+The documentation is embedded in the source files, and generated:
  * [Library documentation](doc/library.md)
  * [Services documentation](doc/services.md)
 
@@ -218,7 +252,7 @@ For every service you dynamically set classes in the service data, eg:
 "vars": {
     "dhclient": {
        "classes": {
-           "RESOLV_CONF": [ "r24n2" ]
+           "RESOLV_CONF": [ "<short_hostname>" ]
        }
     }
 }

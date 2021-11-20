@@ -15,10 +15,10 @@ bugtracker_url=http://bugs.centos.org/set_project.php?project_id=16&ref=http://b
 distroverpkg=centos-release
 
 # Added by the CFEngine mustache
-assumeyes={{{vars.sara_data.yum.assumeyes}}}
-{{#vars.sara_data.yum.use_proxy}}
-proxy={{{vars.sara_data.yum.proxy}}}
-{{/vars.sara_data.yum.use_proxy}}
+assumeyes={{{vars.scl.yum.assumeyes}}}
+{{#vars.scl.yum.use_proxy}}
+proxy={{{vars.scl.yum.proxy}}}
+{{/vars.scl.yum.use_proxy}}
 
 #  This is the default, if you make this bigger yum won't see if the metadata
 # is newer on the remote and so you'll "gain" the bandwidth of not having to

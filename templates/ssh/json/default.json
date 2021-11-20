@@ -6,8 +6,8 @@
     "authorized_keys_commanduser" :  "nobody",
     "AuthorizedKeysFile": "%h/.ssh/authorized_keys",
     "Banner": "none",
-    "Banner_system": "SURFsara",
-    "Banner_system_url": "http://www.surfsara.nl",
+    "Banner_system": "SURF",
+    "Banner_system_url": "http://www.surf.nl/en",
     "ChallengeResponseAuthentication": "no",
     "classes": {
         "SSH_USE_DEPRICATED_OPTIONS": [ "debian_7", "centos" ]

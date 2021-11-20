@@ -1,20 +1,20 @@
 ####
 # Maintained by CFEngine
 
-{{#vars.sara_data.rsyslog.udp_enabled}}
+{{#vars.scl.rsyslog.udp_enabled}}
 ## For syslog just use UDP and not TCP
 $ModLoad imudp.so
 $UDPServerRun 514
-{{/vars.sara_data.rsyslog.udp_enabled}}
+{{/vars.scl.rsyslog.udp_enabled}}
 
 {{#classes.RSYSLOG_ACCEPT_REMOTE_LOG}}
 ## Accept external logs
 $PreserveFQDN on
 
 ## Only store the logs from external hosts
-if ( $fromhost != "{{{ vars.sara_data.rsyslog.hostname }}}" ) then {
+if ( $fromhost != "{{{ vars.scl.rsyslog.hostname }}}" ) then {
     $template IGNORE_REMOTE_TIMESTAMP,"%timegenerated:::date-rfc3339% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%\n"
-    $template FILENAME,"{{{ vars.sara_data.rsyslog.target_remote_log }}}/%fromhost%.log"
+    $template FILENAME,"{{{ vars.scl.rsyslog.target_remote_log }}}/%fromhost%.log"
 
     ## For now log all!
     *.* ?FILENAME;IGNORE_REMOTE_TIMESTAMP
@@ -22,9 +22,9 @@ if ( $fromhost != "{{{ vars.sara_data.rsyslog.hostname }}}" ) then {
 {{/classes.RSYSLOG_ACCEPT_REMOTE_LOG}}
 
 ## Always forward auth,authpriv logs
-auth,authpriv.* {{{ vars.sara_data.rsyslog.forward_auth_log }}}
+auth,authpriv.* {{{ vars.scl.rsyslog.forward_auth_log }}}
 
 ## Custom configuration
-{{#vars.sara_data.rsyslog.extra_lines}}
+{{#vars.scl.rsyslog.extra_lines}}
 {{{.}}}
-{{/vars.sara_data.rsyslog.extra_lines}}
+{{/vars.scl.rsyslog.extra_lines}}

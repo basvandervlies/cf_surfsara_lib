@@ -273,13 +273,6 @@ bundle agent slurm_config()
 {
     vars:
         any::
-            "cgroup_file_class"    string => canonify("scl$(slurm.cgroup_config_file)");
-            "gres_file_class"    string => canonify("scl$(slurm.gres_config_file)");
-            "nodes_file_class"    string => canonify("scl$(slurm.nodes_config_file)");
-            "plugstack_file_class"  string => canonify("scl$(slurm.plugstack_config_file)");
-            "slurmd_file_class"    string => canonify("scl$(slurm.config_file)");
-            "topology_file_class"    string => canonify("scl$(slurm.topology_config_file)");
-
             "slurm_mog_list" slist => {
                 "$(slurm.acct_gather_file)",
                 "$(slurm.config_file)",
@@ -292,7 +285,6 @@ bundle agent slurm_config()
             },
                 comment => "These files must be owned by slurm user";
 
-
             "generated_files" slist => getvalues("slurm.template_2_destination");
 
         SLURM_CONFIGLESS::
@@ -300,17 +292,19 @@ bundle agent slurm_config()
 
     classes:
         any::
-            "slurm_reload" or => {
-                "$(cgroup_file_class)",
-                "$(gres_file_class)",
-                "$(slurmd_file_class)",
-                "$(topology_file_class)",
-            };
+            "slurm_reload"
+                if => or(
+                    canonify("scl$(slurm.cgroup_config_file)"),
+                    canonify("scl$(slurm.gres_config_file)"),
+                    canonify("scl$(slurm.config_file)"),
+                    canonify("scl$(slurm.topology_config_file)")
+                    );
 
-            "slurm_restart" or => {
-                "$(nodes_file_class)",
-                "$(plugstack_file_class)",
-            };
+            "slurm_restart"
+                if => or(
+                    canonify("scl$(slurm.nodes_config_file)"),
+                    canonify("scl$(slurm.plugstack_config_file)")
+                    );
 
             "slurm_copy_dirs_set" expression => isvariable("scl.slurm[copy_dirs]"),
                 comment => "Must we copy dirs for slurm";
@@ -320,8 +314,8 @@ bundle agent slurm_config()
             "slurm_plugstack_dir" expression => isdir("$(slurm.config_dir)/plugstack.conf.d"),
                 comment => "has been replaced by a single file to support configless";
 
-        SLURM_CONFIGLESS.!SLURM_SERVER::
-            "slurm_conf_link" expression => islink("$(slurm.config_file)");
+            "slurm_conf_exists" expression => isplain($(slurm.config_file)),
+                comment => "Needed by SLURM_CONFIGLESS class";
 
     methods:
         SLURM_SERVER|!SLURM_CONFIGLESS::
@@ -335,6 +329,7 @@ bundle agent slurm_config()
 
         slurm_restart|slurm_configless_repaired::
             "" usebundle => slurm_service_restart();
+
         slurm_reload.!slurm_restart::
             "" usebundle => slurm_service_reload();
 
@@ -358,15 +353,21 @@ bundle agent slurm_config()
                 comment => "Not needed for slurm configless setups",
                 perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
 
-        SLURM_CONFIGLESS.!(SLURM_SERVER|slurm_conf_link)::
+        SLURM_CONFIGLESS.!SLURM_SERVER.slurm_conf_exists::
             "$(generated_files)"
-                comment => "These files are not needed any more",
+                comment => "These files are not needed any more for configless setup",
                 delete => tidy,
                 classes => results("bundle", "slurm_configless");
 
+        SLURM_CONFIGLESS_CONF_LINKS.!SLURM_SERVER::
             "$(slurm.config_file)"
                 comment => "needed for pyslurm and other tools",
                 link_from => ln_s("/run/slurm/conf/slurm.conf"),
+                move_obstructions => "true";
+
+            "$(slurm.plugstack_config_file)"
+                comment => "Needed for sbatch/srun spank command line options, if slurm.conf is symbolic link",
+                link_from => ln_s("/run/slurm/conf/plugstack.conf"),
                 move_obstructions => "true";
 
         SLURM_CONFIGLESS::
@@ -614,7 +615,8 @@ These templates are located in:
 The following `classes` can be set via def.cf/json:
  * BACKUP: When set make a backup of the SQL sever
  * CLIENT: Configure the machine as client
- * CONFIGLESS: Do not generate the configuration files. It will server by slurmctld.
+ * CONFIGLESS: Do not generate the configuration files. It will server by slurmctld
+ * CONFIGLESS_CONF_LINKS: Some old utils need `slurm.conf` in the sysconfig directory
  * LOGROTATE: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
  * SLURMD_DISABLE: Disable the slurmd systemd service
  * SERVER: Configure the machine as server

@@ -1,0 +1,21 @@
+{
+  "name": "scl",
+  "description": "SURF CFEngine Library",
+  "type": "module",
+  "provides": {
+    "scl": {
+      "name": "scl",
+      "description": "SURF CFEngine Library",
+      "repo": "https://github.com/basvandervlies/cf_surfsara_lib",
+      "version": "1.0.0",
+      "dependencies": ["autorun"],
+      "steps": [
+        "copy ./masterfiles/lib/scl/ lib/scl/",
+        "copy ./templates/ templates/scl/",
+        "copy ./masterfiles/services/autorun/scl.cf services/autorun/scl.cf",
+        "copy ./services/ services/scl/",
+        "copy ./modules/ modules/scl/"
+      ]
+    }
+  }
+}

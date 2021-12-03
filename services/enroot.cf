@@ -6,7 +6,7 @@ bundle agent enroot()
     vars:
         any::
             "template_2_destination" data => parsejson ('{
-                "enroot.conf.mustache": "$(sara_data.enroot[sysconf_path])/enroot.conf"
+                "enroot.conf.mustache": "$(scl.enroot[sysconf_path])/enroot.conf"
             }');
 }
 
@@ -25,9 +25,9 @@ bundle agent enroot_config()
 {
     classes:
         any::
-            "copy_dirs_set" expression => isvariable("sara_data.enroot[copy_dirs]"),
+            "copy_dirs_set" expression => isvariable("scl.enroot[copy_dirs]"),
                 comment => "Check if we need to copy directories for enroot";
-            "copy_files_set" expression => isvariable("sara_data.enroot[copy_files]"),
+            "copy_files_set" expression => isvariable("scl.enroot[copy_files]"),
                 comment => "Check if we need to copy files for enroot";
 
     files:

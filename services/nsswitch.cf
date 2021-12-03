@@ -36,7 +36,7 @@ bundle agent nsswitch_surfsara_config()
 {
     classes:
         any::
-            "nsswitch_copy_files_set" expression => isvariable("sara_data.nsswitch[copy_files]"),
+            "nsswitch_copy_files_set" expression => isvariable("scl.nsswitch[copy_files]"),
                 comment => "Must we copy extra files for nsswitch bundle";
 
     methods:

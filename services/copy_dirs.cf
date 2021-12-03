@@ -17,7 +17,7 @@ bundle agent copy_dirs_config()
 {
     classes:
         any::
-            "copy_dirs_set" expression => isvariable("sara_data.copy_dirs[copy_dirs]"),
+            "copy_dirs_set" expression => isvariable("scl.copy_dirs[copy_dirs]"),
                 comment => "Must we copy extra files for copy_dirs bundl";
 
     methods:

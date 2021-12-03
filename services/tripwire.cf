@@ -27,14 +27,14 @@ bundle agent tripwire_surfsara_config()
 {
     vars:
         any::
-            "check_data" data => mergedata("sara_data.tripwire", '{ "json_files" : {} }'),
+            "check_data" data => mergedata("scl.tripwire", '{ "json_files" : {} }'),
                 comment => "Filter ou 'json_files' section";
-            #"files" slist => getvalues("sara_data.tripwire");
+            #"files" slist => getvalues("scl.tripwire");
             "files" slist => getvalues("check_data");
             "files_str" string =>  format("%S", "files");
 
         DEBUG_tripwire::
-            "keys" slist => getindices("sara_data.tripwire");
+            "keys" slist => getindices("scl.tripwire");
             "keys_str" string => format("%S",  "keys");
 
 

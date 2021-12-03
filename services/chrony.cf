@@ -71,8 +71,8 @@ bundle agent chrony_surfsara_config()
         "CHRONY_RESTART" or => {
             "$(chrony_config_file_class)",
         };
-        "time_zone_isdir" expression => isdir("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])");
-        "time_zone_exists" expression => fileexists("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])"),
+        "time_zone_isdir" expression => isdir("$(chrony.dir_zoneinfo)/$(scl.chrony[timezone])");
+        "time_zone_exists" expression => fileexists("$(chrony.dir_zoneinfo)/$(scl.chrony[timezone])"),
             if => not("time_zone_isdir");
 
     files:
@@ -82,7 +82,7 @@ bundle agent chrony_surfsara_config()
 
         time_zone_exists::
             "$(chrony.file_localtime)"
-                link_from => ln_s("$(chrony.dir_zoneinfo)/$(sara_data.chrony[timezone])"),
+                link_from => ln_s("$(chrony.dir_zoneinfo)/$(scl.chrony[timezone])"),
                 move_obstructions => "true";
 
     methods:

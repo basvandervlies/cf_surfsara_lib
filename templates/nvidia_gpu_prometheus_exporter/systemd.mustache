@@ -9,8 +9,8 @@ Documentation=https://github.com/mindprince/nvidia_gpu_prometheus_exporter
 [Service]
 Restart=always
 EnvironmentFile=/etc/default/nvidia_gpu_prometheus_exporter
-ExecStartPre=-/bin/mkdir -p {{{vars.sara_data.nvidia_gpu_prometheus_exporter.collector_dir}}} >/dev/null 2>&1
-ExecStart={{{vars.sara_data.nvidia_gpu_prometheus_exporter.dir}}}/nvidia_gpu_prometheus_exporter $ARGS
+ExecStartPre=-/bin/mkdir -p {{{vars.scl.nvidia_gpu_prometheus_exporter.collector_dir}}} >/dev/null 2>&1
+ExecStart={{{vars.scl.nvidia_gpu_prometheus_exporter.dir}}}/nvidia_gpu_prometheus_exporter $ARGS
 ExecReload=/bin/kill -HUP $MAINPID
 TimeoutStopSec=20s
 SendSIGKILL=no

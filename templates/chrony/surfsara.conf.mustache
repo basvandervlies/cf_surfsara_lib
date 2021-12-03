@@ -3,13 +3,13 @@
 # This file is maintained by CFEngine
 #
 
-{{#vars.sara_data.chrony.server}}
+{{#vars.scl.chrony.server}}
 server {{{.}}}
-{{/vars.sara_data.chrony.server}}
+{{/vars.scl.chrony.server}}
 
-{{#vars.sara_data.chrony.allow}}
+{{#vars.scl.chrony.allow}}
 allow {{{.}}}
-{{/vars.sara_data.chrony.allow}}
+{{/vars.scl.chrony.allow}}
 
 {{#classes.SLES}}
 # SUSE specific stuff
@@ -26,9 +26,9 @@ keyfile /etc/chrony/chrony.keys
 logdir /var/log/chrony
 log tracking measurements statistics
 
-{{#vars.sara_data.chrony.adjust_time}}
+{{#vars.scl.chrony.adjust_time}}
 hwclockfile /etc/adjtime
-{{/vars.sara_data.chrony.adjust_time}}
+{{/vars.scl.chrony.adjust_time}}
 
 # In first three updates step the system clock instead of slew
 # if the adjustment is larger than 1 second.

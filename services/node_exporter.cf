@@ -36,7 +36,7 @@ bundle common node_exporter()
 bundle agent node_exporter_install()
 {
     classes:
-        "node_exporter_copy_dirs_set" expression => isvariable("sara_data.node_exporter[copy_dirs]");
+        "node_exporter_copy_dirs_set" expression => isvariable("scl.node_exporter[copy_dirs]");
 
     methods:
         node_exporter_copy_dirs_set::
@@ -46,7 +46,7 @@ bundle agent node_exporter_install()
 bundle agent node_exporter_config()
 {
     classes:
-        "node_exporter_cron" expression => isvariable("sara_data.node_exporter[cron_job]");
+        "node_exporter_cron" expression => isvariable("scl.node_exporter[cron_job]");
 
     services:
         "$(node_exporter.service_name)"
@@ -56,7 +56,7 @@ bundle agent node_exporter_config()
         any::
             "" usebundle => scl_mustache_autorun("node_exporter");
         node_exporter_cron::
-            "" usebundle => scl_make_cron_file("sys2prometheus","@(sara_data.node_exporter[cron_job])");
+            "" usebundle => scl_make_cron_file("sys2prometheus","@(scl.node_exporter[cron_job])");
 
     commands:
         systemd::
@@ -91,7 +91,7 @@ bundle agent node_exporter_restart
 bundle agent node_exporter_daemon_check()
 {
     vars:
-        "name" string => "$(sara_data.node_exporter[dir])/$(node_exporter.service_name)";
+        "name" string => "$(scl.node_exporter[dir])/$(node_exporter.service_name)";
 
     processes:
         "$(name)"
@@ -113,7 +113,7 @@ bundle agent node_exporter_service_status(service, status)
 {
     commands:
         "/usr/bin/echo"
-            args => "-e 'surfsara_service{name=\"$(service)\"} $(status)\n' > $(sara_data.node_exporter[collector_dir])/surfsara_service_$(service).prom",
+            args => "-e 'surfsara_service{name=\"$(service)\"} $(status)\n' > $(scl.node_exporter[collector_dir])/surfsara_service_$(service).prom",
             contain => in_shell_and_silent;
 }
 
@@ -195,7 +195,7 @@ if there are changes, eg:
 ```json
 "copy_dirs": [
     {
-        "dest": "$(sara_data.node_exporter[dir])",
+        "dest": "$(scl.node_exporter[dir])",
         "exclude_dirs": [ ".git", ".svn" ],
         "purge": "true",
         "run_bundle": "node_exporter_restart",

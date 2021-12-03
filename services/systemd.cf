@@ -66,7 +66,7 @@ bundle agent systemd_config()
 
     reports:
         DEBUG_systemd::
-            "$(this.bundle) has run with script_dir: $(sara_data.systemd[script_dir])";
+            "$(this.bundle) has run with script_dir: $(scl.systemd[script_dir])";
 }
 
 
@@ -76,7 +76,7 @@ bundle agent systemd_install_and_check_service(service_file)
         "service_name" string => lastnode("$(service_file)","/");
 
     classes:
-        "def_set" expression => isvariable("sara_data.systemd[script_dir]"),
+        "def_set" expression => isvariable("scl.systemd[script_dir]"),
                 comment => "Check for backword compatible, will be removed";
 
     files:

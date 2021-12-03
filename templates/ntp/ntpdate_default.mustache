@@ -1,8 +1,8 @@
-### 
+###
 # Managed by: CFengine
 
 {{#classes.debian}}
-NTPSERVERS="{{#vars.sara_data.ntp.server}} {{{.}}} {{/vars.sara_data.ntp.server}}"
+NTPSERVERS="{{#vars.scl.ntp.server}} {{{.}}} {{/vars.scl.ntp.server}}"
 #
 # additional options for ntpdate
 #NTPOPTIONS="-v"
@@ -12,7 +12,7 @@ NTPOPTIONS="-u"
 
 {{#classes.centos}}
 # Options for ntpdate
-OPTIONS="-U ntp -s -b {{#vars.sara_data.ntp.server}} {{{.}}} {{/vars.sara_data.ntp.server}}"
+OPTIONS="-U ntp -s -b {{#vars.scl.ntp.server}} {{{.}}} {{/vars.scl.ntp.server}}"
 
 # Set to 'yes' to sync hw clock after successful ntpdate
 SYNC_HWCLOCK=no

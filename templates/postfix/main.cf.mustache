@@ -3,54 +3,54 @@
 # This file is maintained by CFEngine
 #
 
-alias_database = {{#vars.sara_data.postfix.alias_database}}{{{.}}},{{/vars.sara_data.postfix.alias_database}}
+alias_database = {{#vars.scl.postfix.alias_database}}{{{.}}},{{/vars.scl.postfix.alias_database}}
 
-alias_maps = {{#vars.sara_data.postfix.alias_maps}}{{{.}}},{{/vars.sara_data.postfix.alias_maps}}
+alias_maps = {{#vars.scl.postfix.alias_maps}}{{{.}}},{{/vars.scl.postfix.alias_maps}}
 
 {{#classes.POSTFIX_VIRTUAL_MAPS}}
-{{#vars.sara_data.postfix.virtual_alias_maps}}virtual_alias_maps = {{{protocol}}}{{{delimiter}}}{{{dest}}}, {{/vars.sara_data.postfix.virtual_alias_map}}
+{{#vars.scl.postfix.virtual_alias_maps}}virtual_alias_maps = {{{protocol}}}{{{delimiter}}}{{{dest}}}, {{/vars.scl.postfix.virtual_alias_map}}
 {{/classes.POSTFIX_VIRTUAL_MAPS}}
 
-append_dot_mydomain = {{{vars.sara_data.postfix.append_dot_mydomain}}}
-biff = {{{vars.sara_data.postfix.biff}}}
-debugger_command = {{{vars.sara_data.postfix.debugger_command}}}
-empty_address_recipient = {{{vars.sara_data.postfix.empty_address_recipient}}}
+append_dot_mydomain = {{{vars.scl.postfix.append_dot_mydomain}}}
+biff = {{{vars.scl.postfix.biff}}}
+debugger_command = {{{vars.scl.postfix.debugger_command}}}
+empty_address_recipient = {{{vars.scl.postfix.empty_address_recipient}}}
 
-header_checks = {{#vars.sara_data.postfix.header_checks}}{{{.}}},{{/vars.sara_data.postfix.header_checks}}
+header_checks = {{#vars.scl.postfix.header_checks}}{{{.}}},{{/vars.scl.postfix.header_checks}}
 
-inet_interfaces = {{{vars.sara_data.postfix.inet_interfaces}}}
-inet_protocols = {{{vars.sara_data.postfix.inet_protocols}}}
+inet_interfaces = {{{vars.scl.postfix.inet_interfaces}}}
+inet_protocols = {{{vars.scl.postfix.inet_protocols}}}
 
-{{#vars.sara_data.postfix.mailman_destination_recipient_limit}}
+{{#vars.scl.postfix.mailman_destination_recipient_limit}}
 mailman_destination_recipient_limit = 1
-{{/vars.sara_data.postfix.mailman_destination_recipient_limit}}
+{{/vars.scl.postfix.mailman_destination_recipient_limit}}
 
-virtual_mailbox_limit = {{{vars.sara_data.postfix.virtual_mailbox_limit}}}
+virtual_mailbox_limit = {{{vars.scl.postfix.virtual_mailbox_limit}}}
 
-message_size_limit = {{{vars.sara_data.postfix.message_size_limit}}}
+message_size_limit = {{{vars.scl.postfix.message_size_limit}}}
 
-mydestination = {{#vars.sara_data.postfix.mydestination}}{{{.}}},{{/vars.sara_data.postfix.mydestination}}
-mydomain  = {{{vars.sara_data.postfix.mydomain}}}
-mynetworks = {{#vars.sara_data.postfix.mynetworks}}{{{.}}},{{/vars.sara_data.postfix.mynetworks}}
-myorigin = {{{vars.sara_data.postfix.myorigin}}}
-myhostname = {{{vars.sara_data.postfix.myhostname}}}
-recipient_delimiter = {{{vars.sara_data.postfix.recipient_delimiter}}}
+mydestination = {{#vars.scl.postfix.mydestination}}{{{.}}},{{/vars.scl.postfix.mydestination}}
+mydomain  = {{{vars.scl.postfix.mydomain}}}
+mynetworks = {{#vars.scl.postfix.mynetworks}}{{{.}}},{{/vars.scl.postfix.mynetworks}}
+myorigin = {{{vars.scl.postfix.myorigin}}}
+myhostname = {{{vars.scl.postfix.myhostname}}}
+recipient_delimiter = {{{vars.scl.postfix.recipient_delimiter}}}
 
-relay_domains = {{#vars.sara_data.postfix.relay_domains}}{{{.}}},{{/vars.sara_data.postfix.relay_domains}}
-relayhost = {{{vars.sara_data.postfix.relayhost}}}
+relay_domains = {{#vars.scl.postfix.relay_domains}}{{{.}}},{{/vars.scl.postfix.relay_domains}}
+relayhost = {{{vars.scl.postfix.relayhost}}}
 
 smtp_tls_security_level = may
 
-smtpd_banner = {{{vars.sara_data.postfix.smtpd_banner}}}
+smtpd_banner = {{{vars.scl.postfix.smtpd_banner}}}
 
-transport_maps = {{#vars.sara_data.postfix.transport_maps}}{{{.}}},{{/vars.sara_data.postfix.transport_maps}}
+transport_maps = {{#vars.scl.postfix.transport_maps}}{{{.}}},{{/vars.scl.postfix.transport_maps}}
 
-unknown_local_recipient_reject_code = {{{vars.sara_data.postfix.unknown_local_recipient_reject_code}}}
+unknown_local_recipient_reject_code = {{{vars.scl.postfix.unknown_local_recipient_reject_code}}}
 
-smtpd_relay_restrictions = {{#vars.sara_data.postfix.smtpd_relay_restrictions}}{{{.}}} {{/vars.sara_data.postfix.smtpd_relay_restrictions}}
+smtpd_relay_restrictions = {{#vars.scl.postfix.smtpd_relay_restrictions}}{{{.}}} {{/vars.scl.postfix.smtpd_relay_restrictions}}
 
 {{#classes.sles}}
-setgid_group = {{{vars.sara_data.postfix.setgid_group}}}
+setgid_group = {{{vars.scl.postfix.setgid_group}}}
 {{/classes.sles}}
 
 {{#classes.sles_12}}

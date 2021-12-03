@@ -13,10 +13,10 @@ www: root
 ftp: root
 abuse: root
 security: root
-root: {{{ vars.sara_data.postfix.alias_root_email_address }}} 
+root: {{{ vars.scl.postfix.alias_root_email_address }}} 
 
 ## Optional extra aliases below this line
-{{#vars.sara_data.postfix.file_aliases_lines}}
+{{#vars.scl.postfix.file_aliases_lines}}
 {{{ name }}}: {{{ value }}}
-{{/vars.sara_data.postfix.file_aliases_lines}}
+{{/vars.scl.postfix.file_aliases_lines}}
 

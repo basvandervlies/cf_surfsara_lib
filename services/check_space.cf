@@ -15,39 +15,39 @@ bundle agent check_space_autorun()
 bundle agent check_space_surfsara_config()
 {
     vars:
-        "paths" slist => getindices("sara_data.check_space");
+        "paths" slist => getindices("scl.check_space");
 
     storage:
         any::
             "$(paths)"
                 comment => "Checking if $(paths) has enough free space",
-                volume => scl_min_free_space("$(sara_data.check_space[$(paths)][freespace])"),
+                volume => scl_min_free_space("$(scl.check_space[$(paths)][freespace])"),
                 classes => results("namesppace", "check_space_$(paths)");
 
     methods:
         any::
-            "" usebundle => "$(sara_data.check_space[$(paths)][run_bundle])",
+            "" usebundle => "$(scl.check_space[$(paths)][run_bundle])",
                 if => and(
                     canonify("check_space_$(paths)_failed"),
-                    isvariable("sara_data.check_space[$(paths)][run_bundle]")
+                    isvariable("scl.check_space[$(paths)][run_bundle]")
                     );
 
     commands:
         any::
-            "$(sara_data.check_space[$(paths)][command])"
+            "$(scl.check_space[$(paths)][command])"
                 contain => in_shell,
                 if => and(
                     canonify("check_space_$(paths)_failed"),
-                    isvariable("sara_data.check_space[$(paths)][command]")
+                    isvariable("scl.check_space[$(paths)][command]")
                     );
 
     reports:
         any::
-            "Disk space for $(paths) is below: $(sara_data.check_space[$(paths)][freespace])!"
+            "Disk space for $(paths) is below: $(scl.check_space[$(paths)][freespace])!"
                 if => and(canonify("check_space_$(paths)_failed"));
 
         DEBUG_check_space::
-            "$(this.bundle): $(paths) freespace: $(sara_data.check_space[$(paths)][freespace])";
+            "$(this.bundle): $(paths) freespace: $(scl.check_space[$(paths)][freespace])";
 }
 
 bundle agent check_space_run_bundle_test()

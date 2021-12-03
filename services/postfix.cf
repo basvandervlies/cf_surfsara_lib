@@ -54,6 +54,7 @@ bundle common postfix() {
             "newaliases"        string => "/usr/bin/newaliases";
             "postmap_cmd"       string => "/usr/sbin/postmap";
             "config_dir"        string => "/etc/postfix/";
+            "setpermissions"    string => "/usr/sbin/postfix set-permissions";
 
             ## Mustache templates
             "template_2_destination" data => parsejson('
@@ -111,6 +112,9 @@ bundle agent postfix_daemons_check
 
     commands:
         linux::
+            "$(postfix.setpermissions)"
+                if => canonify("$(postfix.daemon_name)_out_of_range");
+
             "$(postfix.postfix_restart)"
                 if => canonify("$(postfix.daemon_name)_out_of_range");
 
@@ -157,18 +161,18 @@ bundle agent postfix_surfsara_config
 bundle agent postfix_virtual_alias_maps_expand(virtual_map_id)
 {
     classes:
-        "needs_postmap" expression => strcmp("$(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][protocol])", "hash");
+        "needs_postmap" expression => strcmp("$(scl.postfix[virtual_alias_maps][$(virtual_map_id)][protocol])", "hash");
 
     files:
-        "$(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"
+        "$(scl.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"
             create => "true",
-            edit_template => "$(def.node_template_dir)/postfix/$(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][template])",
+            edit_template => "$(def.node_template_dir)/postfix/$(scl.postfix[virtual_alias_maps][$(virtual_map_id)][template])",
             template_method => "mustache",
-            template_data => "@(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][data])",
+            template_data => "@(scl.postfix[virtual_alias_maps][$(virtual_map_id)][data])",
             classes => results("namespace", "postfix_virtual_alias_maps_expand_$(virtual_map_id)");
 
     commands:
-        "$(postfix.postmap_cmd) $(sara_data.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"
+        "$(postfix.postmap_cmd) $(scl.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"
             if => and(
                 "needs_postmap",
                 "postfix_virtual_alias_maps_expand_$(virtual_map_id)_repaired"
@@ -178,14 +182,14 @@ bundle agent postfix_virtual_alias_maps_expand(virtual_map_id)
 bundle agent postfix_virtual_alias_maps()
 {
     vars:
-        "template_maps" slist => getindices("sara_data.postfix[virtual_alias_maps]");
+        "template_maps" slist => getindices("scl.postfix[virtual_alias_maps]");
 
     methods:
-        "" usebundle => scl_mustache_copy("postfix", "$(sara_data.postfix[virtual_alias_maps][$(template_maps)][template])");
+        "" usebundle => scl_mustache_copy("postfix", "$(scl.postfix[virtual_alias_maps][$(template_maps)][template])");
         "" usebundle => postfix_virtual_alias_maps_expand("$(template_maps)");
 
     reports:
-        "$(this.bundle) Template $(template_maps) : $(sara_data.postfix[virtual_alias_maps][$(template_maps)][template])"
+        "$(this.bundle) Template $(template_maps) : $(scl.postfix[virtual_alias_maps][$(template_maps)][template])"
              if => "DEBUG|DEBUG_postfix|DEBUG_$(this.bundle)";
 }
 

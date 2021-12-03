@@ -28,8 +28,8 @@ bundle agent sara_user_consume_resources_check()
 {
     vars:
         any::
-            "exclude_owners_str" string => join(" ", "sara_data.sara_user_consume_resources[exclude_owners]");
-            "exclude_owners" slist => getvalues("sara_data.sara_user_consume_resources[exclude_owners]"),
+            "exclude_owners_str" string => join(" ", "scl.sara_user_consume_resources[exclude_owners]");
+            "exclude_owners" slist => getvalues("scl.sara_user_consume_resources[exclude_owners]"),
                 comment => "JSO list must be converted to CFengine slist";
 
     processes:
@@ -39,19 +39,19 @@ bundle agent sara_user_consume_resources_check()
                 signals => { "term", "kill"},
                 action => sara_action,
                 process_select => sara_user_consume_resources_select(
-                    "$(sara_data.sara_user_consume_resources[max_minutes])",
-                    "$(sara_data.sara_user_consume_resources[max_memory])",
+                    "$(scl.sara_user_consume_resources[max_minutes])",
+                    "$(scl.sara_user_consume_resources[max_memory])",
                     @(exclude_owners),
-                    "$(sara_data.sara_user_consume_resources[exclude_processes])");
+                    "$(scl.sara_user_consume_resources[exclude_processes])");
 
-                    #"@(sara_data.sara_user_consume_resources[exclude_owners])",
+                    #"@(scl.sara_user_consume_resources[exclude_owners])",
     reports:
         DEBUG_sara_user_consume_resources::
             "$(this.bundle) is called with args:
-                $(sara_data.sara_user_consume_resources[max_minutes])
-                $(sara_data.sara_user_consume_resources[max_memory])
+                $(scl.sara_user_consume_resources[max_minutes])
+                $(scl.sara_user_consume_resources[max_memory])
                 $(exclude_owners_str)
-                $(sara_data.sara_user_consume_resources[exclude_processes])";
+                $(scl.sara_user_consume_resources[exclude_processes])";
 }
 
 body process_select sara_user_consume_resources_select(minutes, memory, excluded_owners, exclude_commands_regex)

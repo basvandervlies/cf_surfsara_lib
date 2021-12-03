@@ -21,10 +21,10 @@ bundle agent configurable_http_proxy_install()
 {
     classes:
         any::
-            "tarball_set" expression => isvariable("sara_data.configurable_http_proxy[install_tarballs]");
+            "tarball_set" expression => isvariable("scl.configurable_http_proxy[install_tarballs]");
 
     files:
-        "$(sara_data.configurable_http_proxy[dir])/."
+        "$(scl.configurable_http_proxy[dir])/."
             perms => mog("0755", "root", "root"),
             create=> "true";
 
@@ -38,8 +38,8 @@ bundle agent configurable_http_proxy_config()
 {
     files:
         any::
-            "$(sara_data.configurable_http_proxy[dir])/current"
-                link_from => ln_s("$(sara_data.configurable_http_proxy[dir])/$(sara_data.configurable_http_proxy[current])"),
+            "$(scl.configurable_http_proxy[dir])/current"
+                link_from => ln_s("$(scl.configurable_http_proxy[dir])/$(scl.configurable_http_proxy[current])"),
                 move_obstructions => "true";
 }
 @if minimum_version(99.9)

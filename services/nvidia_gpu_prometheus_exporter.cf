@@ -36,7 +36,7 @@ bundle common nvidia_gpu_prometheus_exporter()
 bundle agent nvidia_gpu_prometheus_exporter_install()
 {
     classes:
-        "nvidia_gpu_prometheus_exporter_copy_dirs_set" expression => isvariable("sara_data.nvidia_gpu_prometheus_exporter[copy_dirs]");
+        "nvidia_gpu_prometheus_exporter_copy_dirs_set" expression => isvariable("scl.nvidia_gpu_prometheus_exporter[copy_dirs]");
 
     methods:
         nvidia_gpu_prometheus_exporter_copy_dirs_set::
@@ -84,7 +84,7 @@ bundle agent nvidia_gpu_prometheus_exporter_restart
 bundle agent nvidia_gpu_prometheus_exporter_daemon_check()
 {
     vars:
-        "name" string => "$(sara_data.nvidia_gpu_prometheus_exporter[dir])/$(nvidia_gpu_prometheus_exporter.service_name)";
+        "name" string => "$(scl.nvidia_gpu_prometheus_exporter[dir])/$(nvidia_gpu_prometheus_exporter.service_name)";
 
     processes:
         "$(name)"
@@ -178,7 +178,7 @@ if there are changes, eg:
 ```json
 "copy_dirs": [
     {
-        "dest": "$(sara_data.nvidia_gpu_prometheus_exporter[dir])",
+        "dest": "$(scl.nvidia_gpu_prometheus_exporter[dir])",
         "exclude_dirs": [ ".git", ".svn" ],
         "purge": "true",
         "run_bundle": "nvidia_gpu_prometheus_exporter_restart",

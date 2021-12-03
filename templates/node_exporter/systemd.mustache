@@ -9,8 +9,8 @@ Documentation=https://github.com/prometheus/node_exporter
 [Service]
 Restart=always
 EnvironmentFile=/etc/default/node_exporter
-ExecStartPre=-/bin/mkdir -p {{{vars.sara_data.node_exporter.collector_dir}}} >/dev/null 2>&1
-ExecStart={{{vars.sara_data.node_exporter.dir}}}/node_exporter $ARGS
+ExecStartPre=-/bin/mkdir -p {{{vars.scl.node_exporter.collector_dir}}} >/dev/null 2>&1
+ExecStart={{{vars.scl.node_exporter.dir}}}/node_exporter $ARGS
 ExecReload=/bin/kill -HUP $MAINPID
 TimeoutStopSec=20s
 SendSIGKILL=no

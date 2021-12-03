@@ -28,9 +28,9 @@ bundle agent slurm_prometheus_exporter_install()
 {
     files:
         "/opt/slurm_prometheus_exporter"
-            #copy_from => secure_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-$(sara_data.slurm_prometheus_exporter[version])", "$(sys.policy_hub)"),
+            #copy_from => secure_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-$(scl.slurm_prometheus_exporter[version])", "$(sys.policy_hub)"),
             comment => "Copy the binaries of slurm_prometheus_exporter",
-            copy_from => sara_sync_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-$(sara_data.slurm_prometheus_exporter[version])", "hash"),
+            copy_from => sara_sync_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-$(scl.slurm_prometheus_exporter[version])", "hash"),
             depth_search =>  recurse_ignore("inf", "@(slurm_prometheus_exporter.exclude_list)" ),
             classes => results("namespace", "slurm_prometheus_exporter_updated");
 }

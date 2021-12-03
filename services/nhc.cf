@@ -56,8 +56,8 @@ bundle agent nhc_config()
 {
     classes:
         any::
-            "nhc_copy_files_set" expression => isvariable("sara_data.nhc[copy_files]");
-            "nhc_copy_dirs_set" expression => isvariable("sara_data.nhc[copy_dirs]");
+            "nhc_copy_files_set" expression => isvariable("scl.nhc[copy_files]");
+            "nhc_copy_dirs_set" expression => isvariable("scl.nhc[copy_dirs]");
 
     methods:
         any::

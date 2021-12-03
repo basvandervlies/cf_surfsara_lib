@@ -114,8 +114,8 @@ bundle agent ntp_surfsara_config()
             "$(ntp_default_file_class)",
             "$(ntp_config_file_class)",
         };
-        "time_zone_isdir" expression => isdir("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])");
-        "time_zone_exists" expression => fileexists("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])"),
+        "time_zone_isdir" expression => isdir("$(ntp.dir_zoneinfo)/$(scl.ntp[timezone])");
+        "time_zone_exists" expression => fileexists("$(ntp.dir_zoneinfo)/$(scl.ntp[timezone])"),
             if => not("time_zone_isdir");
 
     files:
@@ -129,7 +129,7 @@ bundle agent ntp_surfsara_config()
 
         time_zone_exists::
             "$(ntp.file_localtime)"
-                link_from => ln_s("$(ntp.dir_zoneinfo)/$(sara_data.ntp[timezone])"),
+                link_from => ln_s("$(ntp.dir_zoneinfo)/$(scl.ntp[timezone])"),
                 move_obstructions => "true";
 
     methods:

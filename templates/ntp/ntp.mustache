@@ -4,9 +4,9 @@
 #
 # /etc/ntp.conf, configuration for ntpd
 #
-logfile {{{vars.sara_data.ntp.logfile}}}
+logfile {{{vars.scl.ntp.logfile}}}
 
-driftfile {{{vars.sara_data.ntp.driftfile}}}
+driftfile {{{vars.scl.ntp.driftfile}}}
 {{^classes.SLES}}
 statsdir /var/log/ntpstats/
 {{/classes.SLES}}
@@ -16,14 +16,14 @@ filegen loopstats file loopstats type day enable
 filegen peerstats file peerstats type day enable
 filegen clockstats file clockstats type day enable
 
-{{#vars.sara_data.ntp.server}}
+{{#vars.scl.ntp.server}}
 server {{.}}
-{{/vars.sara_data.ntp.server}}
+{{/vars.scl.ntp.server}}
 
 restrict default kod notrap nomodify nopeer noquery
 restrict -6 default kod nomodify notrap nopeer noquery
 
-{{#vars.sara_data.ntp.restrict}}
+{{#vars.scl.ntp.restrict}}
 # {{ desc }}
-restrict {{rule}} 
-{{/vars.sara_data.ntp.restrict}}
+restrict {{rule}}
+{{/vars.scl.ntp.restrict}}

@@ -59,7 +59,7 @@ bundle agent apt_autorun()
             "security_updates" string => "off";
 
     classes:
-        "apt_debconf_set" expression => isvariable("sara_data.apt[debconf]"),
+        "apt_debconf_set" expression => isvariable("scl.apt[debconf]"),
             comment => "Must we modify debconf settings";
 
     methods:
@@ -75,7 +75,7 @@ bundle agent apt_autorun()
         APT_AUTOMATIC_SECURITY_UPDATE::
             "" usebundle => apt_security_update_silent(),
                     comment => "Only run once a hour due to if_elapsed",
-                    if => "$(sara_data.apt[security_schedule])",
+                    if => "$(scl.apt[security_schedule])",
                     action => if_elapsed(50);
 
         APT_CHECK_STATUS::
@@ -106,7 +106,7 @@ bundle agent apt_autorun()
         # Must be ported to def.json
         apt_debconf_set::
             "" usebundle => apt_debconf(),
-                if => "$(sara_data.apt[debconf_schedule])";
+                if => "$(scl.apt[debconf_schedule])";
 
     reports:
         DEBUG|DEBUG_apt::
@@ -120,7 +120,7 @@ bundle agent apt_autoremove()
         any::
             "$(apt.command)"
                 args => "-y autoremove",
-                if => "$(sara_data.apt[autoremove_schedule])";
+                if => "$(scl.apt[autoremove_schedule])";
 }
 
 bundle agent apt_kill_pkg_manager()
@@ -216,7 +216,7 @@ bundle agent apt_security_update(options)
     vars:
         debian::
             "apt_return_codes" slist => { "1" , "2" , "100" };
-            "dpkg_options" slist => maplist("-o $(this)", getvalues("sara_data.apt[security_options]"));
+            "dpkg_options" slist => maplist("-o $(this)", getvalues("scl.apt[security_options]"));
             "dpkg_options_str" string => join(" ", dpkg_options);
 
     commands:
@@ -285,9 +285,9 @@ bundle agent apt_repository()
             "template_list" slist => { "$(template_file)" };
 
         !apt_repository_json_files_set::
-            "repo_files" slist => { getvalues("sara_data.apt[repo_files]") };
+            "repo_files" slist => { getvalues("scl.apt[repo_files]") };
         apt_repository_json_files_set::
-            "repo_files" slist => { @(def.apt_repo_files), getvalues("sara_data.apt[repo_files]") },
+            "repo_files" slist => { @(def.apt_repo_files), getvalues("scl.apt[repo_files]") },
                 comment => "Support old behaviour till we converted everything to new apt setup";
 
     classes:
@@ -327,7 +327,7 @@ bundle agent apt_repository_generate(template_file, repo_files)
 
     classes:
         any::
-            "apt_import_key_cmd_exists" expression => fileexists("$(sara_data.apt[import_key])");
+            "apt_import_key_cmd_exists" expression => fileexists("$(scl.apt[import_key])");
 
     files:
         any::
@@ -347,7 +347,7 @@ bundle agent apt_repository_generate(template_file, repo_files)
                 comment => "Must we copy repo key file",
                 move_obstructions => "true",
                 perms => mog("0644", "root", "root"),
-                copy_from   => remote_dcp("$(sara_data.apt[key_dir])/$(repo_data[$(repo_names)][key_file])", "$(sys.policy_hub)");
+                copy_from   => remote_dcp("$(scl.apt[key_dir])/$(repo_data[$(repo_names)][key_file])", "$(sys.policy_hub)");
 
         APT_SOURCES_FILE_REMOVE::
             "/etc/apt/sources.list"
@@ -365,7 +365,7 @@ bundle agent apt_repository_generate(template_file, repo_files)
             "$(this.bundle): Merged data repository files: $(repo_data_str)";
 
         !apt_import_key_cmd_exists::
-            "$(this.bundle): import keys command not found or set: '$(sara_data.apt[import_key])'";
+            "$(this.bundle): import keys command not found or set: '$(scl.apt[import_key])'";
 }
 
 bundle agent apt_repository_key(name, key)
@@ -391,13 +391,13 @@ bundle agent apt_repository_key(name, key)
 
     commands:
         any::
-            "$(sara_data.apt[import_key]) $(key)"
+            "$(scl.apt[import_key]) $(key)"
                 contain => in_shell,
                 classes => scl_cmd_repair ( "@(import_key_error_codes)", "apt_repository_key_cmd" ),
                 action => if_elapsed("50"),
                 if => or(
                     canonify("apt_repository_key_$(key)_repaired"),
-                    "$(sara_data.apt[key_check_schedule])",
+                    "$(scl.apt[key_check_schedule])",
                     "APT_FORCE_KEY_CMD"
                     );
 
@@ -435,7 +435,7 @@ password {{{password}}}
                 create => "true",
                 edit_template_string => "$(mustache)",
                 template_method => "inline_mustache",
-                template_data => "@(sara_data.apt)",
+                template_data => "@(scl.apt)",
                 classes => if_repaired("scl$(file)");
 
             "$(file)"
@@ -450,32 +450,32 @@ password {{{password}}}
 bundle agent apt_debconf()
 {
     vars:
-        "index" slist => getindices("sara_data.apt[debconf]");
+        "index" slist => getindices("scl.apt[debconf]");
 
     classes:
-        "debconf_module_exists" expression => fileexists("$(sara_data.apt[debconf_module])");
+        "debconf_module_exists" expression => fileexists("$(scl.apt[debconf_module])");
 
     methods:
         debconf_module_exists::
             "" usebundle => apt_debconf_set(
-                "$(sara_data.apt[debconf][$(index)][package])",
-                "$(sara_data.apt[debconf][$(index)][field])",
-                "$(sara_data.apt[debconf][$(index)][type])",
-                "$(sara_data.apt[debconf][$(index)][value])");
+                "$(scl.apt[debconf][$(index)][package])",
+                "$(scl.apt[debconf][$(index)][field])",
+                "$(scl.apt[debconf][$(index)][type])",
+                "$(scl.apt[debconf][$(index)][value])");
 
 @if minimum_version(3.11)
-            "" usebundle => scl_show_data("sara_data", "apt[debconf][$(index)]"),
+            "" usebundle => scl_show_data("scl", "apt[debconf][$(index)]"),
                 if => "DEBGU|DEBUG_apt)|DEBUG_$(this.bundle)";
 @endif
     reports:
         !debconf_module_exists::
-            "$(this.bundle): Module '$(sara_data.apt[debconf_module])' not found, skipping debconf settings";
+            "$(this.bundle): Module '$(scl.apt[debconf_module])' not found, skipping debconf settings";
 }
 
 bundle agent apt_debconf_set(package, field, type, value)
 {
     vars:
-        "debconf_module" string => "$(sara_data.apt[debconf_module])";
+        "debconf_module" string => "$(scl.apt[debconf_module])";
         "return_codes" slist => { "1" };
 
         "class" string => canonify("$(field)"),

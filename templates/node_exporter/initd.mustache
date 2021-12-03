@@ -11,7 +11,7 @@
 # Description:       Node exporter for prometheus written in Go
 ### END INIT INFO
 #
-DAEMON={{{vars.sara_data.node_exporter.dir}}}/node_exporter
+DAEMON={{{vars.scl.node_exporter.dir}}}/node_exporter
 NAME=node_exporter
 USER=root
 PIDFILE=/var/run/prometheus/$NAME/$NAME.pid

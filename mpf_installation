@@ -5,7 +5,6 @@
 CFENGINE_DIR=/var/cfengine
 CFENGINE_MASTERFILES_DIR=$CFENGINE_DIR/masterfiles
 CFENGINE_TEMPLATES_DIR=$CFENGINE_DIR/templates
-CFENGINE_MODULES_DIR=$CFENGINE_MASTERFILES_DIR/modules
 
 SCL_LIB="masterfiles/lib/scl"
 SCL_AUTORUN_SERVICE="masterfiles/services/autorun/scl.cf"
@@ -13,7 +12,6 @@ SCL_AUTORUN_SERVICE="masterfiles/services/autorun/scl.cf"
 SCL_TEMPLATES="templates"
 SCL_SERVICES="services"
 SCL_MODULES="modules"
-
 
 ### Functions
 print_usage()
@@ -28,7 +26,6 @@ do
         CFENGINE_DIR="$OPTARG"
         CFENGINE_MASTERFILES_DIR=$CFENGINE_DIR/masterfiles
         CFENGINE_TEMPLATES_DIR=$CFENGINE_DIR/templates
-        CFENGINE_MODULES_DIR=$CFENGINE_DIR/modules
       ;;
       m)
         CFENGINE_MASTERFILES_DIR="$OPTARG"
@@ -51,14 +48,15 @@ do
 done
 
 ##
+CFENGINE_MODULES_DIR=$CFENGINE_MASTERFILES_DIR/modules
 CFENGINE_SERVICES_DIR=$CFENGINE_MASTERFILES_DIR/services
+CFENGINE_TEMPLATES_DIR=$CFENGINE_MASTERFILES_DIR/scl/.git/templates
 
 echo "MPF installation settings":
 cat << EOF
     dir: $CFENGINE_DIR
     masterfiles: $CFENGINE_MASTERFILES_DIR
     templates: $CFENGINE_TEMPLATES_DIR
-    modules: $CFENGINE_MODULES_DIR
 EOF
 
 if [ ! -d $CFENGINE_MASTERFILES_DIR ]
@@ -76,7 +74,6 @@ else
     echo "Installing SCL library and autorun file"
     cp --no-dereference -R $SCL_LIB $CFENGINE_MASTERFILES_DIR/lib/
 fi
-
 ### This is always updated
 #
 cp $SCL_AUTORUN_SERVICE $CFENGINE_SERVICES_DIR/autorun
@@ -104,24 +101,28 @@ cp -a $SCL_MODULES/* $CFENGINE_MODULES_DIR/scl
 #
 if [ ! -d  $CFENGINE_TEMPLATES_DIR ]
 then
-    mkdir $CFENGINE_TEMPLATES_DIR
+    mkdir --parents $CFENGINE_TEMPLATES_DIR
 fi
 
+echo "Installing  mustache template(s) and json file(s): $CFENGINE_TEMPLATES_DIR"
+cp --no-dereference -R $SCL_TEMPLATES $CFENGINE_TEMPLATES_DIR
+
+### old code
 ### Must we update templates/json files
-cd  $SCL_TEMPLATES || exit 1
-for d in *
-do
-        if [ -d $CFENGINE_TEMPLATES_DIR/$d ]
-        then
-            echo "Updating mustache template(s) and default.json: $d"
-            templates=$(ls $d/*.mustache 2>/dev/null)
-            if [ ! -z "$templates" ]
-            then
-                cp $d/*.mustache $CFENGINE_TEMPLATES_DIR/$d
-            fi
-            cp $d/json/default.json $CFENGINE_TEMPLATES_DIR/$d/json
-        else
-            echo "Installing  mustache template(s) and json file(s): $d"
-            cp --no-dereference -R $d $CFENGINE_TEMPLATES_DIR
-        fi
-done
+#cd  $SCL_TEMPLATES || exit 1
+#for d in *
+#do
+        #if [ -d $CFENGINE_TEMPLATES_DIR/$d ]
+        #then
+            #echo "Updating mustache template(s) and default.json: $d"
+            ##templates=$(ls $d/*.mustache 2>/dev/null)
+            #if [ ! -z "$templates" ]
+            #then
+                #cp $d/*.mustache $CFENGINE_TEMPLATES_DIR/$d
+            #fi
+            #cp $d/json/default.json $CFENGINE_TEMPLATES_DIR/$d/json
+        #else
+            #echo "Installing  mustache template(s) and json file(s): $d"
+            #cp --no-dereference -R $d $CFENGINE_TEMPLATES_DIR
+        #fi
+#done

@@ -1,0 +1,15 @@
+{
+    "vars": {
+            "scl_inventory_modules": [
+                "scl/dmidecode"
+            ],
+            "scl_services_enabled": [
+                "ntp"
+            ],
+            "ntp": {
+                "server": [
+                    "example.ntp.org"
+                ]
+            }
+    }
+}

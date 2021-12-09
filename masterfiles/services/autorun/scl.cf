@@ -15,11 +15,25 @@ bundle agent scl_autorun {
     meta:
         "tags" slist => { "autorun" };
 
+    vars:
+        policy_server::
+            "template_pattern" slist => { ".*\.mustache", "default\.json" };
+
+    files:
+        policy_server::
+            "$(def.dir_templates)"
+                comment  => "Copy the the scl template dir to the cfengine template dir (shortcut: templates)",
+                copy_from => local_dcp("$(def.dir_masterfiles)/lib/scl/.git/templates"),
+                depth_search => recurse("inf"),
+                file_select => by_name("@(template_pattern)"),
+                move_obstructions => "true";
+
     methods:
-        "" usebundle => scl_inventory_modules(),
-            comment => "Which inventory module must be run, controlled via 'def.scl_inventory_modules'";
-        "" usebundle => scl_services_autorun(),
-            comment => "Which service bundle(s) must be run, controlled via 'def.scl_services_enabled'";
+        any::
+            "" usebundle => scl_inventory_modules(),
+                comment => "Which inventory module must be run, controlled via 'def.scl_inventory_modules'";
+            "" usebundle => scl_services_autorun(),
+                comment => "Which service bundle(s) must be run, controlled via 'def.scl_services_enabled'";
 
     reports:
         verbose_mode::

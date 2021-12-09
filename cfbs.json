@@ -11,10 +11,11 @@
       "dependencies": ["autorun"],
       "steps": [
         "copy ./masterfiles/lib/scl/ lib/scl/",
-        "copy ./templates/ lib/scl/.git",
         "copy ./masterfiles/services/autorun/scl.cf services/autorun/scl.cf",
+        "copy ./modules/ modules/scl/",
+        "copy ./scl_example.json scl_example.json",
         "copy ./services/ services/scl/",
-        "copy ./modules/ modules/scl/"
+        "copy ./templates/ lib/scl/.git/templates"
       ]
     }
   }

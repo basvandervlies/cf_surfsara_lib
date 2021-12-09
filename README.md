@@ -5,6 +5,7 @@
         * [JSON Merge strategy](#json-merge-strategy)
             * [JSON merge example](#json-merge-example)
     * [Installation](#installation)
+        * [CFEngine Build System](#cfengine-build-system)
         * [MPF installation](#mpf-installation)
             * [update](#update)
         * [Own framework](#own-framework)
@@ -113,9 +114,24 @@ The golden rule is to use `<service>_json_files` for the global one and the othe
 
 ## Installation
 
-there are two options
+there are three options
+ * With the new tool [CFEngine Build System](https://github.com/cfengine/cfbs) **prefered method**
  * Include it in the Master Policy Framework (MPF)
  * Include it in your own framework
+
+### CFEngine Build System
+
+With this you can easily test and build masterfiles configuration. The steps to build your masterfiles:
+ * Read the [CFEngine Build System blog](https://cfengine.com/blog/2021/cfengine-build-launched)
+
+I will publish the "module" to teh [CFEngine build catalogue](https://build.cfengine.com). This are the installation
+instructions:
+ * `mkdir scl_masterfiles`
+ * `cfbs init`
+ * `cfbs add masterfiles`
+ * `cfbs add https://github.com/basvandervlies/cf_surfsara_lib`
+ * `cfbs build`
+ * `cfbs install`
 
 ### MPF installation
 
@@ -138,13 +154,14 @@ You can test your installation with
 
 You can run the same script it will detect its an update. This script will overwrite:
  * scl library files: `masterfiles/lib/scl`
+ * scl modules files: `masterfiles/modules/scl`
  * scl services files: `masterfiles/services/scl`
- * mustache template files and default.json files: `/var/cfengine/templates`
 
 ### Own framework
 
 1. Login on your policy server.
 1. `cp -a masterfiles/lib/scl <masterfiles>/lib/scl`
+1. `cp -a modules/ <masterfiles>/modules/scl`
 1. `cp -a templates/\* $(sys.workdir)/templates`
 1. include `/lib/scl/stdlib.cf` in your inputs
 ```

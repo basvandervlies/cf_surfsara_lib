@@ -124,7 +124,7 @@ there are three options
 With this you can easily test and build masterfiles configuration. The steps to build your masterfiles:
  * Read the [CFEngine Build System blog](https://cfengine.com/blog/2021/cfengine-build-launched)
 
-I will publish the "module" to teh [CFEngine build catalogue](https://build.cfengine.com). This are the installation
+I will publish the "module" to the [CFEngine build catalogue](https://build.cfengine.com). This are the installation
 instructions:
  * `mkdir scl_masterfiles`
  * `cfbs init`

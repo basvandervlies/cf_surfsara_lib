@@ -127,6 +127,7 @@ With this you can easily test and build masterfiles configuration. The steps to 
 I will publish the "module" to the [CFEngine build catalogue](https://build.cfengine.com). This are the installation
 instructions:
  * `mkdir scl_masterfiles`
+ * `cd scl_masterfiles`
  * `cfbs init`
  * `cfbs add masterfiles`
  * `cfbs add https://github.com/basvandervlies/cf_surfsara_lib`

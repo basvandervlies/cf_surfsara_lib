@@ -11,6 +11,10 @@
                     "europe.pool.ntp.org",
                     "north-america.pool.ntp.org"
                 ]
+            },
+            "scl/dmidecode": {
+                "args": "--output $(scl_inventory.cache_dir)/dmidecode.json --cf",
+                "run_bundle": "scl_dmidecode_example"
             }
     }
 }

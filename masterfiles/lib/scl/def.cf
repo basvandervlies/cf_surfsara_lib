@@ -23,9 +23,9 @@ vars:
             "$(sys.workdir)/node_templates");
 
 # Template NTP example
-    centos::
-        "ntp_json_files" slist => { "centos.json", };
-
-    debian::
-        "ntp_json_files" slist => { "debian.json", };
+#    centos::
+#        "ntp_json_files" slist => { "centos.json", };
+#
+#    debian::
+#        "ntp_json_files" slist => { "debian.json", };
 }

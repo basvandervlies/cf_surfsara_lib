@@ -8,7 +8,8 @@
             ],
             "ntp": {
                 "server": [
-                    "example.ntp.org"
+                    "europe.pool.ntp.org",
+                    "north-america.pool.ntp.org"
                 ]
             }
     }

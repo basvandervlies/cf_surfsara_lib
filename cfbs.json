@@ -8,14 +8,15 @@
       "description": "SURF CFEngine Library",
       "repo": "https://github.com/basvandervlies/cf_surfsara_lib",
       "version": "1.0.0",
-      "dependencies": ["autorun"],
+      "dependencies": ["masterfiles", "autorun"],
       "steps": [
         "copy ./masterfiles/lib/scl/ lib/scl/",
         "copy ./masterfiles/services/autorun/scl.cf services/autorun/scl.cf",
         "copy ./modules/ modules/scl/",
         "copy ./scl_example.json scl_example.json",
         "copy ./services/ services/scl/",
-        "copy ./templates/ lib/scl/.git/templates"
+        "copy ./templates/ lib/scl/.git/templates",
+        "json scl_example.json def.json"
       ]
     }
   }

@@ -31,15 +31,21 @@ The  copy attributes can be overriden or specified  by json data, eg:
 "slurm": {
     "copy_dirs": [
         {
-            "dest": "$(scl.slurm[scripts_dir])",
+            "dest": "/opt/slurm/scripts",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0700", "root", "root" ],
             "purge": "true",
-            "source": "cf_bundles_dir/slurm/scripts"
+            "source": "data/slurm/scripts"
         }
     ]
 }
 ```
+
+When a file has been changed in the `copy_dirs` statement the following classes are set:
+ * `canonify("$(bundle_name)_copy_dirs$(dest)")` --> eg: `slurm_copy_dirs_opt_slurm_scripts_repaired`
+ * `$(bundle_name)_copy_dirs_repaired` --> eg: `slurm_copy_dirs_repaired`
+
+
 ## scl_service_copy_files(bundle_name)
 
 This bundle will read the json attribute `copy_files` from the specified `bundle_name`. The following json
@@ -55,13 +61,17 @@ The `copy_files` can specified by json data eg:
 "slurm": {
     "copy_files": [
         {
-            "dest": "$(slurm.config_dir)/job_submit.lua",
-            "source": "cf_bundles_dir/slurm/lisa/job_submit.lua",
+            "dest": "/opt/slurm/etc//job_submit.lua",
+            "source": "data/slurm/lisa/job_submit.lua",
             "mog": ["0644", "slurm", "slurm"]
         }
     ]
 }
 ```
+
+When a file has been changed in the `copy_files` statement the following classes are set:
+ * `canonify("$(bundle_name)_copy_files$(dest)")` --> eg: `slurm_copy_files_opt_slurm_etc_job_submit_lua_repaired`
+ * `$(bundle_name)_copy_files_repaired` --> eg: `slurm_copy_files_repaired`
 
 ## scl_service_install_tarballs(bundle_name)
 
@@ -93,6 +103,11 @@ current_version: 19.05.5,,
 software_dir: $(scl.slurm[dir])/sw,
 tarball_dir: $(scl.slurm[dir])/tarballs
 ```
+
+When a file has been changed in the `copy_files` statement the following classes are set:
+ * `canonify("$(bundle_name)_install_tarballs$(dest)")` --> eg: `slurm_install_tarballs_opt_slurm_tarballs_slurm_19_06_5_tar_gz_repaired`
+ * `$(bundle_name)_install_tarballs_repaired` --> eg: `slurm_install_tarballs_repaired`
+
 @endif
 
 body copy_from scl_cp_dir(bundle_name, var, server)
@@ -205,7 +220,7 @@ bundle agent scl_make_cron_file(name, data)
     reports:
         any::
             "'$(name)' is installed in $(cron_dir): $(const.n)$(job_str)"
-                ifvarclass => "DEBUG|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_$(this.bundle)";
 
         !CRON_VIXIE::
             "No Vixie cron software installed";
@@ -222,20 +237,20 @@ vars:
 
         "exclude_dir_$(index)" slist => { ".git", ".svn" },
             comment => "Default exclude directories settings for copy_dirs",
-            ifvarclass => and(
+            if => and(
                 not(isvariable("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"))
             );
 
         "exclude_dir_$(index)" data => mergedata("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"),
             comment => "Exclude directory settings from json data",
-            ifvarclass => and(
+            if => and(
                 isvariable("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]")
             );
 
     cfengine_3_7|cfengine_3_10::
         "debug_str" string => format("%S", "scl.$(bundle_name)[copy_dirs]"),
             comment => "Old debug method",
-            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+            if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 
 classes:
     any::
@@ -245,6 +260,12 @@ classes:
         "$(bundle_name)_copy_dirs_$(index)_mog_class" expression => isvariable("scl.$(bundle_name)[copy_dirs][$(index)][mog]"),
             comment => "Must we set directory permission and doit recurse";
 
+        "$(bundle_name)_copy_dirs_repaired"
+            scope => "namespace",
+            if => or(
+                canonify("$(bundle_name)_copy_dirs$(scl.$(bundle_name)[copy_dirs][$(index)][dest])_repaired")
+                );
+
 files:
     any::
         ## Can not use $(this.bundle) in copy_from body, bug?
@@ -252,9 +273,9 @@ files:
             comment => "Copy bundle dirs and set class if there is a change",
             copy_from => scl_cp_dir("scl_service_copy_dirs", "cp_attr_$(index)", "$(sys.policy_hub)"),
             depth_search => recurse_ignore("inf", "@(exclude_dir_$(index))" ),
-            classes => results("namespace", "$(bundle_name)_copy_dirs_$(index)"),
-            ifvarclass => and(
-                not(canonify("$(bundle_name)_copy_dirs_$(index)_kept"))
+            classes => results("namespace", "$(bundle_name)_copy_dirs$(scl.$(bundle_name)[copy_dirs][$(index)][dest])"),
+            if => and(
+                not(canonify("$(bundle_name)_copy_dirs$(scl.$(bundle_name)[copy_dirs][$(index)][dest])_kept"))
             );
 
         "$(scl.$(bundle_name)[copy_dirs][$(index)][dest])"
@@ -265,31 +286,31 @@ files:
                 "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][2])"
             ),
             depth_search => recurse("inf"),
-            ifvarclass => and(
+            if => and(
                 canonify("$(bundle_name)_copy_dirs_$(index)_mog_class")
             );
 
 methods:
     any::
         "" usebundle => "$(scl.$(bundle_name)[copy_dirs][$(index)][run_bundle])",
-            ifvarclass => and(
-                canonify("$(bundle_name)_copy_dirs_$(index)_repaired"),
+            if => and(
+                canonify("$(bundle_name)_copy_dirs$(scl.$(bundle_name)[copy_dirs][$(index)][dest])_repaired"),
                 canonify("$(bundle_name)_copy_dirs_$(index)_run_bundle")
                 );
 
 @if minimum_version(3.11)
         "" usebundle => scl_show_data("scl", "$(bundle_name)[copy_dirs][$(index)]"),
-            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+            if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
         "" usebundle => scl_show_data("$(this.bundle)", "exclude_dir_$(index)"),
-            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+            if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
         "" usebundle => scl_show_data("$(this.bundle)", "cp_attr_$(index)"),
-            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+            if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 @endif
 
 reports:
     cfengine_3_7|cfengine_3_10::
         "$(this.bundle):$(bundle_name):$(debug_str)"
-            ifvarclass => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+            if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }
 
 
@@ -323,12 +344,13 @@ bundle agent scl_service_install_tarballs(bundle_name)
 
     commands:
         any::
+                    #canonify("$(bundle_name)_install_tarballs_$(index)_repaired"),
             "$(scl.$(bundle_name)[install_tarballs][$(index)][extract][cmd])  $(scl.$(bundle_name)[install_tarballs][$(index)][dest])"
                 comment => "extract tarball with specified command in a directory",
                 contain => in_dir("$(scl.$(bundle_name)[install_tarballs][$(index)][extract][in_dir])"),
                 if => or(
-                    canonify("$(bundle_name)_install_tarballs_$(index)_repaired"),
-                   "!check_dir_$(index)"
+                    canonify("$(bundle_name)_install_tarballs$(scl.$(bundle_name)[install_tarballs][$(index)][dest])"),
+                    "!check_dir_$(index)"
                     );
 
     reports:
@@ -359,12 +381,20 @@ classes:
         "$(bundle_name)_$(section)_$(index)_run_bundle" expression => isvariable("scl.$(bundle_name)[$(section)][$(index)][run_bundle]"),
             comment => "Must we run a bundle when a file is copied";
 
+        "$(bundle_name)_$(section)_repaired"
+            scope => "namespace",
+            if => or(
+                canonify("$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])_repaired")
+                );
+
+
 files:
     any::
         "$(scl.$(bundle_name)[$(section)][$(index)][dest])"
             comment => "Copy bundle files and set class if its get copied",
             copy_from => secure_cp("$(scl.$(bundle_name)[$(section)][$(index)][source])", "$(sys.policy_hub)"),
-            classes => results("namespace", "$(bundle_name)_$(section)_$(index)");
+            #classes => results("namespace", "$(scl.$(bundle_name)[$(section)][$(index)][dest])");
+            classes => results("namespace", "$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])");
 
         "$(scl.$(bundle_name)[$(section)][$(index)][dest])"
             comment => "Check permission",
@@ -376,19 +406,20 @@ files:
 
 methods:
     any::
+                #canonify("$(scl.$(bundle_name)[$(section)][$(index)][dest])"),
         "" usebundle => "$(scl.$(bundle_name)[$(section)][$(index)][run_bundle])",
-            ifvarclass => and(
-                canonify("$(bundle_name)_$(section)_$(index)_repaired"),
+            if => and(
+                canonify("$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])"),
                 canonify("$(bundle_name)_$(section)_$(index)_run_bundle")
                 );
 
 @if minimum_version(3.11)
         "" usebundle => scl_show_data("scl", "$(bundle_name)[$(section)][$(index)]"),
-            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+            if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 @endif
 
 reports:
     any::
         "$(this.bundle): has been called to use json data: 'scl.$(bundle_name)[$(section)]'"
-            ifvarclass => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+            if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }

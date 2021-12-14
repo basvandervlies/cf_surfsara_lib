@@ -8,7 +8,7 @@ alias_database = {{#vars.scl.postfix.alias_database}}{{{.}}},{{/vars.scl.postfix
 alias_maps = {{#vars.scl.postfix.alias_maps}}{{{.}}},{{/vars.scl.postfix.alias_maps}}
 
 {{#classes.POSTFIX_VIRTUAL_MAPS}}
-{{#vars.scl.postfix.virtual_alias_maps}}virtual_alias_maps = {{{protocol}}}{{{delimiter}}}{{{dest}}}, {{/vars.scl.postfix.virtual_alias_map}}
+virtual_alias_maps = {{#vars.scl.postfix.virtual_alias_maps}}{{{protocol}}}{{{delimiter}}}{{{dest}}}, {{/vars.scl.postfix.virtual_alias_map}}
 {{/classes.POSTFIX_VIRTUAL_MAPS}}
 
 append_dot_mydomain = {{{vars.scl.postfix.append_dot_mydomain}}}
@@ -17,6 +17,7 @@ debugger_command = {{{vars.scl.postfix.debugger_command}}}
 empty_address_recipient = {{{vars.scl.postfix.empty_address_recipient}}}
 
 header_checks = {{#vars.scl.postfix.header_checks}}{{{.}}},{{/vars.scl.postfix.header_checks}}
+canonical_maps = {{#vars.scl.postfix.canonical_maps}}{{{.}}},{{/vars.scl.postfix.canonical_maps}}
 
 inet_interfaces = {{{vars.scl.postfix.inet_interfaces}}}
 inet_protocols = {{{vars.scl.postfix.inet_protocols}}}
@@ -25,9 +26,9 @@ inet_protocols = {{{vars.scl.postfix.inet_protocols}}}
 mailman_destination_recipient_limit = 1
 {{/vars.scl.postfix.mailman_destination_recipient_limit}}
 
-virtual_mailbox_limit = {{{vars.scl.postfix.virtual_mailbox_limit}}}
-
+mailbox_size_limit = {{{vars.scl.postfix.mailbox_size_limit}}}
 message_size_limit = {{{vars.scl.postfix.message_size_limit}}}
+virtual_mailbox_limit = {{{vars.scl.postfix.virtual_mailbox_limit}}}
 
 mydestination = {{#vars.scl.postfix.mydestination}}{{{.}}},{{/vars.scl.postfix.mydestination}}
 mydomain  = {{{vars.scl.postfix.mydomain}}}
@@ -39,24 +40,94 @@ recipient_delimiter = {{{vars.scl.postfix.recipient_delimiter}}}
 relay_domains = {{#vars.scl.postfix.relay_domains}}{{{.}}},{{/vars.scl.postfix.relay_domains}}
 relayhost = {{{vars.scl.postfix.relayhost}}}
 
-smtp_tls_security_level = may
-
 smtpd_banner = {{{vars.scl.postfix.smtpd_banner}}}
 
 transport_maps = {{#vars.scl.postfix.transport_maps}}{{{.}}},{{/vars.scl.postfix.transport_maps}}
 
 unknown_local_recipient_reject_code = {{{vars.scl.postfix.unknown_local_recipient_reject_code}}}
 
+# Sending mail via TLS when possible
+smtp_tls_security_level = may
+smtp_tls_loglevel = 1
+
+{{#classes.POSTFIX_STRICT_HANDLING}}
+# Strict smtpd handling, only needed for mailhandlers
+disable_vrfy_command = yes
+smtpd_helo_required = yes
+strict_rfc821_envelopes = yes
+smtpd_soft_error_limit = 12
+smtpd_hard_error_limit = 20
+smtpd_recipient_limit = 100
+smtpd_error_sleep_time = 2
+smtp_destination_rate_delay = 1s
+smtp_extra_recipient_limit = 100
+swap_bangpath = no
+unknown_address_reject_code = 554
+unknown_client_reject_code = 554
+unknown_hostname_reject_code = 554
+unverified_recipient_reject_code = 550
+
+# Limit relay speed
+relay_destination_rate_delay = 8s
+relay_destination_concurrency_limit = 1
+relay_extra_recipient_limit = 1
+relay_initial_destination_concurrency = 1
+
+smtpd_recipient_restrictions = {{#vars.sara_data.postfix.smtpd_recipient_restrictions}}{{{.}}},{{/vars.sara_data.postfix.smtpd_recipient_restrictions}}
+smtpd_helo_restrictions = {{#vars.sara_data.postfix.smtpd_helo_restrictions}}{{{.}}},{{/vars.sara_data.postfix.smtpd_helo_restrictions}}
+{{/classes.POSTFIX_STRICT_HANDLING}}
+
+{{^classes.POSTFIX_STRICT_HANDLING}}
 smtpd_relay_restrictions = {{#vars.scl.postfix.smtpd_relay_restrictions}}{{{.}}} {{/vars.scl.postfix.smtpd_relay_restrictions}}
+{{/classes.POSTFIX_STRICT_HANDLING}}
+
+{{#classes.POSTFIX_REJECT_LOCAL}}
+# On mailhandlers you don't want local mail delivery!
+local_recipient_maps =
+local_transport = error:no local delivery
+{{/classes.POSTFIX_REJECT_LOCAL}}
+
+{{#classes.POSTFIX_RECEIVE_TLS}}
+# Accept incoming TLS mail
+smtpd_use_tls = yes
+
+smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtpd_tls_mandatory_ciphers = low
+
+#tls_medium_cipherlist = ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+#tls_preempt_cipherlist = no
+
+smtpd_tls_dh1024_param_file = /etc/certificate/dhparam.pem
+
+{{#classes.POSTFIX_LOWER_34}}
+smtpd_tls_cert_file = {{{vars.scl.postfix.smtpd_tls_cert_file}}}
+smtpd_tls_key_file = {{{vars.scl.postfix.smtpd_tls_key_file}}}
+{{/classes.POSTFIX_LOWER_34}}
+{{^classes.POSTFIX_LOWER_34}}
+smtpd_tls_chain_files = {{{vars.scl.postfix.smtpd_tls_chain_files}}}
+{{/classes.POSTFIX_LOWER_34}}
+
+{{#classes.sles}}
+smtp_tls_CAfile = /etc/ssl/ca-bundle.pem
+{{/classes.sles}}
+{{#classes.debian}}
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+{{/classes.debian}}
+
+smtp_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtp_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+{{/classes.POSTFIX_RECEIVE_TLS}}
 
 {{#classes.sles}}
 setgid_group = {{{vars.scl.postfix.setgid_group}}}
+daemon_directory = /usr/lib/postfix/bin
 {{/classes.sles}}
 
-{{#classes.sles_12}}
-daemon_directory = /usr/lib/postfix
-{{/classes.sles_12}}
-
-{{#classes.sles_15}}
-daemon_directory = /usr/lib/postfix/bin
-{{/classes.sles_12}}
+{{#classes.POSTFIX_DOVECOT}}
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = no
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_local_domain = $myhostname
+{{/classes.POSTFIX_DOVECOT}}

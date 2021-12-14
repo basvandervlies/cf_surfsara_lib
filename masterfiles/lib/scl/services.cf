@@ -36,7 +36,7 @@ When `def.scl_services_enabled` is defined it will execute these bundles:
 bundle common scl_services
 {
     vars:
-        "enabled" slist => { @(def.scl_services_enabled) },
+        "enabled" slist => { unique(@(def.scl_services_enabled)) },
             ifvarclass => and(
                     isvariable("def.scl_services_enabled")
                 );

@@ -18,16 +18,14 @@ bundle common postfix() {
                 ');
             "service_name"      string => "postfix";
 
-        debian_6|debian_7|debian_8::
-            "daemon_name"       string => "/usr/lib/postfix/master";
-        debian_9|debian_10::
+        debian_9|debian_10|debian_11::
             "daemon_name"       string => "/usr/lib/postfix/sbin/master";
 
-        centos::
+        redhat::
             "packages"  data  => parsejson('
                     {
                         "install": {
-                            "bsd-mailx" : "",
+                            "mailx" : "",
                             "postfix" : ""
                         },
                         "remove": {
@@ -51,6 +49,7 @@ bundle common postfix() {
             "daemon_name"       string => "/usr/lib/postfix/bin/master";
 
         any::
+            "pflogsumm_dir"     string => "/opt/pflogsumm";
             "newaliases"        string => "/usr/bin/newaliases";
             "postmap_cmd"       string => "/usr/sbin/postmap";
             "config_dir"        string => "/etc/postfix/";
@@ -63,7 +62,7 @@ bundle common postfix() {
                     "main.cf.mustache" : "/etc/postfix/main.cf",
                     "master.cf.mustache" : "/etc/postfix/master.cf",
                     "dynamicmaps.cf.mustache" : "/etc/postfix/dynamicmaps.cf",
-                    "recipient_canonical.mustache" : "/etc/postfix/recipient_canonical",
+                    "canonical_map.mustache" : "/etc/postfix/canonical_map",
                     "header_checks.mustache": "/etc/postfix/header_checks",
                     "transport.mustache": "/etc/postfix/transport"
                 }
@@ -78,21 +77,34 @@ bundle common postfix() {
             "postfix_reload" string => "$(paths.path[service]) $(service_name) reload";
 }
 
+bundle agent postfix_pflogsumm()
+{
+    commands:
+        "/opt/pflogsumm/sara_pflogsumm";
+}
+
 bundle agent postfix_autorun()
 {
     meta:
         "tags"  slist => { "service_postfix", "template_postfix" };
 
+    classes:
+        "postfix_copy_dirs_set" expression => isvariable("scl.postfix[copy_dirs]");
+
     methods:
         any::
             ""  usebundle => scl_data_autorun("postfix");
             ""  usebundle => postfix_install();
+            ""  usebundle => scl_service_copy_dirs("postfix"),
+                    if => "postfix_copy_dirs_set";
             ""  usebundle => postfix_surfsara_config();
             ""  usebundle => postfix_daemons_check();
 
         POSTFIX_VIRTUAL_MAPS::
             "" usebundle => postfix_virtual_alias_maps();
 
+        POSTFIX_PFLOGSUMM.(Hr07.Min00_05)::
+            "" usebundle => postfix_pflogsumm();
 }
 
 bundle agent postfix_install()
@@ -127,16 +139,17 @@ bundle agent postfix_daemons_check
 bundle agent postfix_surfsara_config
 {
     classes:
-        "POSTFIX_NEWALIAS" or => {
-            "sara_etc_aliases"
-        };
+        "POSTFIX_NEWALIAS"
+            if => or(
+                canonify("scl/etc/aliases")
+            );
 
-        "POSTFIX_RELOAD" or => {
-            "sara_etc_postfix_main_cf",
-            "sara_etc_postfix_master_cf",
-            "sara_etc_postfix_dynamicmaps_cf",
-            "sara_etc_postfix_recipient_canonical",
-        };
+        "POSTFIX_RELOAD" 
+            if => or(
+                canonify("scl/etc/postfix/main.cf"),
+                canonify("scl/etc/postfix/master.cf"),
+                canonify("scl/etc/postfix/dynamicmaps.cf")
+        );
 
     files:
         "/etc/postfix/main.cf"
@@ -153,8 +166,16 @@ bundle agent postfix_surfsara_config
         POSTFIX_RELOAD::
             "$(postfix.postfix_reload)";
 
-        sara_etc_postfix_transport::
+        scl_etc_postfix_transport::
             "$(postfix.postmap_cmd) $(postfix.config_dir)/transport"
+                comment => "This is a hashed file, so we need to use postmap after a change";
+
+        scl_etc_postfix_header_checks::
+            "$(postfix.postmap_cmd) $(postfix.config_dir)/header_checks"
+                comment => "This is a hashed file, so we need to use postmap after a change";
+        
+        scl_etc_postfix_canonical_map::
+            "$(postfix.postmap_cmd) $(postfix.config_dir)/canonical_map"
                 comment => "This is a hashed file, so we need to use postmap after a change";
 }
 
@@ -212,13 +233,13 @@ Created by the bundle postfix_virtual_alias_map()
  * /etc/postfix/virtual_alias_maps.cf
 
 If one of the files is changed then the following ''class'' will be set:
- * sara_etc_aliases
- * sara_etc_postfix_main_cf
- * sara_etc_postfix_master_cf
- * sara_etc_postfix_dynamicmaps_cf
- * sara_etc_postfix_recipient_canonical
- * sara_etc_postfix_header_checks
- * sara_etc_postfix_transport
+ * scl_etc_aliases
+ * scl_etc_postfix_main_cf
+ * scl_etc_postfix_master_cf
+ * scl_etc_postfix_dynamicmaps_cf
+ * scl_etc_postfix_recipient_canonical
+ * scl_etc_postfix_header_checks
+ * scl_etc_postfix_transport
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:
@@ -250,6 +271,21 @@ vars:
 ```
 
 The variable must be ''postfix_json_files'' and with this setup 1 extra json file will be  merged.
+
+### Classes
+
+For more complex Postfix servers (for example a mailhandler) some addionall classes have been added
+to the mustache template for more strict handling of mail and enabling TLS for receiving emails.
+
+Also some basic support for DOVECOT can be enabled. These classes are:
+ * POSTFIX_STRICT_HANDLING : Limits the amount of mail per second, and adds more restrictions for accepting mail from other hosts
+ * POSTFIX_REJECT_LOCAL : Reject all mail with the destination localhost
+ * POSTFIX_RECEIVE_TLS : Enable more TLS options to add TLS support on the smtp port for receiving mail
+ * POSTFIX_LOWER_34 : When you are using a Postfix version of 3.4 or lower
+ * POSTFIX_DOVECOT : Enable basic support for authentication via Dovecot
+ * POSTFIX_PFLOGSUMM : Run the pflogsumm command
+
+All of the above classes can be defined in the def.cf/json files.
 
 ### DEBUG
 

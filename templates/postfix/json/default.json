@@ -6,18 +6,16 @@
     "alias_maps": [
         "hash:/etc/aliases"
     ],
-    "virtual_alias_maps": [
-        {
-            "protocol" : "",
-            "delimiter" : "",
-            "dest" : ""
-        }
-    ],
     "append_dot_mydomain": "no",
     "biff": "no",
+    "canonical_maps": [
+        "hash:/etc/postfix/canonical_map"
+    ],
     "debugger_command": "",
     "empty_address_recipient": "devnull",
     "file_aliases_lines": [
+    ],
+    "file_canonical_map_lines": [
     ],
     "file_header_checks_lines": [
     ],
@@ -31,6 +29,7 @@
     "mailman_destination_recipient_limit": false,
     "master_cf_extra_interfaces": [
     ],
+    "mailbox_size_limit": 51200000,
     "message_size_limit": 10240000,
     "mydestination": [
         "$myhostname",  "localhost.$mydomain", "localhost", ".$mydomain"
@@ -42,18 +41,43 @@
     "myorigin": "$myhostname",
     "myhostname": "$(sys.fqhost)",
     "recipient_delimiter": "+",
-    "recipient_canonical_maps": [
-        "hash:/etc/postfix/recipient_canonical"
-    ],
     "relay_domains": [
         "$mydestination"
     ],
     "relayhost": "[mta.yourdomain.nl]",
-    "smtpd_banner": "SURFsara ESMTP host",
+    "smtpd_tls_chain_files": "/etc/certificate/combined.pem",
+    "smtpd_tls_cert_file": "/etc/certificate/certificate.pem",
+    "smtpd_tls_key_file": "/etc/certificate/private_key.pem",
+    "smtpd_banner": "ESMTP host",
     "smtpd_port": "smtp",
+    "smtpd_recipient_restrictions": [
+        "permit_mynetworks",
+        "permit_sasl_authenticated",
+        "reject_unknown_recipient_domain",
+        "reject_unauth_destination",
+        "reject_invalid_hostname",
+        "reject_unauth_pipelining,",
+        "reject_non_fqdn_sender",
+        "permit"
+    ],
+    "smtpd_helo_restrictions": [
+        "permit_mynetworks",
+        "reject_invalid_hostname",
+        "permit"
+    ],
+    "smtpd_relay_restrictions": [
+        "permit_mynetworks", "reject_unauth_destination"
+    ],
     "transport_maps": [
         "hash:/etc/postfix/transport"
     ],
     "unknown_local_recipient_reject_code": 550,
+    "virtual_alias_maps": [
+        {
+            "protocol" : "",
+            "delimiter" : "",
+            "dest" : ""
+        }
+    ],
     "virtual_mailbox_limit": 0
 }

@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.1.0 (2021-12-XX)](#version-110-2021-12-xx)
+* [Version: 1.1.0 (2021-12-21)](#version-110-2021-12-21)
 * [Version: 1.0.0 (2021-11-10)](#version-100-2021-11-10)
 * [Version: 0.9.89 (2021-03-28)](#version-0989-2021-03-28)
 * [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
@@ -24,7 +24,7 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.1.0 (2021-12-XX)
+# Version: 1.1.0 (2021-12-21)
 
 This release added suport to install the software via CFEngine build system (cfbs). The old method `mpf_installation` will
 be deprecated.

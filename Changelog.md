@@ -34,8 +34,13 @@ The SCL enhancements:
   * bundle level: eg: `$(bundle_name)_copy_files_repaired`
   * files level: eg: `canonify("$(bundle_name)_copy_files$(dest)")`
  * `scl_services_enabled`: added `unique` to filter the double entries
+ * changed scl templates directory to `def.dir_templates/scl`
+ * First time installations will copy all template json files
 
-These services heve bug fixes or new features:
+New service added:
+ * sssd -  System Security Services Daemon
+
+These services have bug fixes or new features:
  * nsswitch :
   * rewrote template file to `key: valuue` mustache template. For easy support for debian/centos/suse support
  * postfix :

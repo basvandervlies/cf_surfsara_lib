@@ -1,0 +1,24 @@
+{
+    "config_file_version": "2",
+    "services": "pam,nss,ssh",
+    "domains": [
+        {
+            "name": "example.surf.nl",
+            "cfg": {
+                "id_provider": "ldap",
+                "auth_provider": "ldap",
+                "cache_credentials": "true",
+                "ldap_uri": "ldaps://example1.surf.nl, ldaps://example2.surf.nl",
+                "ldap_search_base": "dc=example,dc=surf,dc=nl",
+                "ldap_netgroup_search_base": "ou=Netgroups,dc=example,dc=surf,dc=nl",
+                "ldap_id_user_start_tls": "true",
+                "ldap_tls_reqcert": "demand",
+                "ldap_tls_cacert": "/etc/pki/tls/certs/ca-bundle.crt",
+                "enumerate": "false",
+                "timeout": "20",
+                "ldap_tls_cipher_suite": "HIGH:-TLSv1.2:+TLSv1.3"
+            }
+        }
+    ],
+    "ssh_debug_level": "3"
+}

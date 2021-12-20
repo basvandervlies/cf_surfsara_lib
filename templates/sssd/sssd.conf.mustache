@@ -1,0 +1,17 @@
+#####
+# This file is maintained by CFEngine
+
+[sssd]
+config_file_version = {{{ vars.scl.sssd.config_file_version }}}
+services = {{{ vars.scl.sssd.services }}}
+domains = {{#vars.scl.sssd.domains}}{{{ name }}},{{/vars.scl.sssd.domains}}
+
+[ssh]
+debug_level = {{ vars.scl.sssd.ssh_debug_level }}
+
+{{#vars.scl.sssd.domains}}
+[domain/{{{ name }}}]
+{{#cfg}}
+{{@}} = {{{ . }}}
+{{/cfg}}
+{{/vars.scl.sssd.domains}}

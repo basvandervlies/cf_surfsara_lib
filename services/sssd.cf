@@ -1,0 +1,166 @@
+
+bundle common sssd()
+{
+    vars:
+
+        "service_name" string => "sssd";
+        "daemon_name" string => "sssd";
+
+        "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+
+        "conf_file" string => "/etc/sssd/sssd.conf";
+
+        "template_2_destination" data => parsejson('
+            {
+                "sssd.conf.mustache": "$(conf_file)",
+            }
+        ');
+
+
+    suse::
+        "packages" data => parsejson('
+            {
+                "install": {
+                    "sssd": "",
+                    "sssd-tools": "",
+                    "sssd-ldap": ""
+                }
+            }
+        ');
+
+    redhat::
+        "packages" data => parsejson('
+            {
+                "install": {
+                    "sssd-client": "",
+                    "sssd-common": "",
+                    "sssd-ldap": "",
+                    "sssd-nfs-idmap": "",
+                    "sssd-krb5": ""
+                }
+            }
+        ');
+}
+
+bundle agent sssd_restart()
+{
+    commands:
+        "$(sssd.restart)";
+}
+
+bundle agent sssd_config()
+{
+
+    classes:
+        "sssd_conf_exists" expression => fileexists("$(sssd.conf_file)");
+
+    files:
+        "$(sssd.conf_file)"
+            perms => mog("0600", "root", "root"),
+            if => "sssd_conf_exists";
+
+    methods:
+        "" usebundle => scl_mustache_autorun("sssd");
+        "" usebundle => sssd_restart(),
+            if => or(
+                    canonify("scl$(sssd.conf_file)")
+                );
+}
+
+
+bundle agent sssd_install()
+{
+    methods:
+        "" usebundle => scl_service_packages("sssd", "@(sssd.packages)");
+}
+
+bundle agent sssd_daemon_check()
+{
+    processes:
+        "$(sssd.daemon_name)"
+            process_count => check_range("$(sssd.daemon_name)", "1", "1"),
+            process_select => scl_select_parent_process("1");
+
+    commands:
+        "$(sssd.restart)"
+            if => canonify("$(sssd.daemon_name)_out_of_range");
+}
+
+bundle agent sssd_autorun()
+{
+    meta:
+        "tags" slist => {"service_sssd", "template_sssd"};
+
+    methods:
+        "" usebundle => sssd_install();
+        "" usebundle => sssd_config();
+        "" usebundle => sssd_daemon_check();
+}
+
+@if minimum_version(99.9)
+
+# sssd
+
+This will install and configure SSSD, and is tested for SUSE and RedHat based OS. This service
+will create a sssd.conf based on the sssd.conf.mustache template
+
+## Usage
+
+The bundle can be run via:
+ * `def.scl_services_enabled`:
+```
+"vars": {
+    "scl_services_enabled": [
+            "...",
+            "sssd",
+            "..."
+    ]
+}
+
+```
+
+The bundle will always read the [default.json](/templates/sssd/json/default.json) file
+and extra json file(s) can be specified via:
+ * def.cf
+
+
+
+## DEBUG
+
+If you want to debug these bundle set the `DEBUG_sssd` class, eg:
+ * `-DDEBUG_sssd`
+
+# def.cf/json
+
+See [default.json](/templates/sssd/json/default.json) what the default values are and
+which variables can be overriden.
+
+Here are some examples how to use it:
+ * specify resolv configuration in def.cf:
+```
+ vars:
+     "sssd_json_files" slist => { "cluster.json" };
+```
+
+ * override config settings in def.cf
+```
+  vars:
+      "sssd" data => parsejson( '{ "ssh_debug_level": "9" }' );
+```
+
+ * override config settings in ''def.json'':
+```
+"vars": {
+   "sssd": {
+       "json_files": [ "snellius.json" ]
+   },
+}
+```
+
+  * override variable config setting in ''def.json''
+```
+"sssd": {
+    "ssh_debug_level": "9"
+}
+```
+@endif

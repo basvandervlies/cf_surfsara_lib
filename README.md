@@ -44,7 +44,7 @@ The project started as library for generating configuration files with mustache/
 configuration we used different methods and we wanted a standard method for generating these configuration
 files. This is the standard that we defined for the mustache/json files and json merging:
  * For all bundles the mustache/json file(s) will be copied to the local node directory (`$(def.node_template_dir)`
- * The json and template file(s) are copied from the policy hub shortcut: `templates/$(service_name)`
+ * The json and template file(s) are copied from the policy hub shortcut: `templates/scl/$(service_name)`
  * The copies are placed in the local node directory: `$(def.node_template_dir)/$(service_name)`
  * The following json must always be present and will always be copied: *default.json*
  * Extra json file(s) can be specified in *def.cf/json*: `$(service_name)[json_files]`
@@ -163,7 +163,7 @@ You can run the same script it will detect its an update. This script will overw
 1. Login on your policy server.
 1. `cp -a masterfiles/lib/scl <masterfiles>/lib/scl`
 1. `cp -a modules/ <masterfiles>/modules/scl`
-1. `cp -a templates/\* $(sys.workdir)/templates`
+1. `cp -a templates/\* $(sys.workdir)/templates/scl`
 1. include `/lib/scl/stdlib.cf` in your inputs
 ```
 body common control

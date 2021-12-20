@@ -15,13 +15,19 @@ bundle agent scl_autorun {
     meta:
         "tags" slist => { "autorun" };
 
+    classes:
+        "template_dir_exists" expression => isdir("$(def.dir_templates)/scl"),
+            comment => "If exists then update the dir";
+
     vars:
-        policy_server::
+        policy_server.template_dir_exists::
             "template_pattern" slist => { ".*\.mustache", "default\.json" };
+        policy_server.!template_dir_exists::
+            "template_pattern" slist => { ".*" };
 
     files:
         policy_server::
-            "$(def.dir_templates)"
+            "$(def.dir_templates)/scl"
                 comment  => "Copy the the scl template dir to the cfengine template dir (shortcut: templates)",
                 copy_from => local_dcp("$(def.dir_masterfiles)/lib/scl/.git/templates"),
                 depth_search => recurse("inf"),

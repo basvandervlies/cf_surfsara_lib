@@ -54,10 +54,10 @@ specified destination, example:
 "copy_files": [
     {
         "dest": "$(munge.munge_key_file)",
-        "source": "cf_bundles_dir/munge/lisa/munge.key",
+        "source": "data/munge/lisa/munge.key",
         "mog": [ "0400", "munge", "munge" ],
         "run_bundle": "munge_daemons_restart"
     }
 ]
 ```
-Where `cf_bundles_dir` is a **cf-serverd shortcut**.
+Where `data` is a **cf-serverd shortcut**.

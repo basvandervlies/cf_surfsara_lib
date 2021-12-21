@@ -64,7 +64,7 @@ if there are changes, eg:
 ```json
 "copy_dirs": [
     {
-        "dest": "$(sara_data.node_exporter[dir])",
+        "dest": "$(scl.node_exporter[dir])",
         "exclude_dirs": [ ".git", ".svn" ],
         "purge": "true",
         "run_bundle": "node_exporter_restart",

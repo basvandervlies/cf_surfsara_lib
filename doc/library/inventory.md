@@ -16,7 +16,7 @@ specifying the following variable in:
 "scl/dmidecode": {
     "args": "--output $(scl_inventory.cache_dir)/dmidecode.json --cf",
     "run_class": "debian",
-    "run_bundle": "scl_dmidecode"
+    "run_bundle": "scl_dmidecode_example"
 }
 ```
 

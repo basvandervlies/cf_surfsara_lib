@@ -30,6 +30,7 @@
  * [slurm](services/slurm.md)
  * [slurm_prometheus_exporter](services/slurm_prometheus_exporter.md)
  * [ssh](services/ssh.md)
+ * [sssd](services/sssd.md)
  * [sudo](services/sudo.md)
  * [systemd](services/systemd.md)
  * [tcpwrappers](services/tcpwrappers.md)

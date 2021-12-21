@@ -30,7 +30,8 @@ These templates are located in:
 The following `classes` can be set via def.cf/json:
  * BACKUP: When set make a backup of the SQL sever
  * CLIENT: Configure the machine as client
- * CONFIGLESS: Do not generate the configuration files. It will server by slurmctld.
+ * CONFIGLESS: Do not generate the configuration files. It will server by slurmctld
+ * CONFIGLESS_CONF_LINKS: Some old utils need `slurm.conf` in the sysconfig directory
  * LOGROTATE: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
  * SLURMD_DISABLE: Disable the slurmd systemd service
  * SERVER: Configure the machine as server

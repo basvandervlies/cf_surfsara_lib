@@ -61,7 +61,7 @@ if there are changes, eg:
 ```json
 "copy_dirs": [
     {
-        "dest": "$(sara_data.nvidia_gpu_prometheus_exporter[dir])",
+        "dest": "$(scl.nvidia_gpu_prometheus_exporter[dir])",
         "exclude_dirs": [ ".git", ".svn" ],
         "purge": "true",
         "run_bundle": "nvidia_gpu_prometheus_exporter_restart",

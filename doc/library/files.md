@@ -25,15 +25,21 @@ The  copy attributes can be overriden or specified  by json data, eg:
 "slurm": {
     "copy_dirs": [
         {
-            "dest": "$(scl.slurm[scripts_dir])",
+            "dest": "/opt/slurm/scripts",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0700", "root", "root" ],
             "purge": "true",
-            "source": "cf_bundles_dir/slurm/scripts"
+            "source": "data/slurm/scripts"
         }
     ]
 }
 ```
+
+When a file has been changed in the `copy_dirs` statement the following classes are set:
+ * `canonify("$(bundle_name)_copy_dirs$(dest)")` --> eg: `slurm_copy_dirs_opt_slurm_scripts_repaired`
+ * `$(bundle_name)_copy_dirs_repaired` --> eg: `slurm_copy_dirs_repaired`
+
+
 ## scl_service_copy_files(bundle_name)
 
 This bundle will read the json attribute `copy_files` from the specified `bundle_name`. The following json
@@ -49,13 +55,17 @@ The `copy_files` can specified by json data eg:
 "slurm": {
     "copy_files": [
         {
-            "dest": "$(slurm.config_dir)/job_submit.lua",
-            "source": "cf_bundles_dir/slurm/lisa/job_submit.lua",
+            "dest": "/opt/slurm/etc//job_submit.lua",
+            "source": "data/slurm/lisa/job_submit.lua",
             "mog": ["0644", "slurm", "slurm"]
         }
     ]
 }
 ```
+
+When a file has been changed in the `copy_files` statement the following classes are set:
+ * `canonify("$(bundle_name)_copy_files$(dest)")` --> eg: `slurm_copy_files_opt_slurm_etc_job_submit_lua_repaired`
+ * `$(bundle_name)_copy_files_repaired` --> eg: `slurm_copy_files_repaired`
 
 ## scl_service_install_tarballs(bundle_name)
 
@@ -87,6 +97,11 @@ current_version: 19.05.5,,
 software_dir: $(scl.slurm[dir])/sw,
 tarball_dir: $(scl.slurm[dir])/tarballs
 ```
+
+When a file has been changed in the `copy_files` statement the following classes are set:
+ * `canonify("$(bundle_name)_install_tarballs$(dest)")` --> eg: `slurm_install_tarballs_opt_slurm_tarballs_slurm_19_06_5_tar_gz_repaired`
+ * `$(bundle_name)_install_tarballs_repaired` --> eg: `slurm_install_tarballs_repaired`
+
 
 ## scl_make_cron_file(name. data)
 

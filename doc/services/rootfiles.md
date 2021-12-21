@@ -85,7 +85,7 @@ if there are changes, eg:
     {
         "dest": "/root/.subversion",
         "exclude_dirs": [ ".git", ".svn" ],
-        "source": "cf_bundles_dir/rootfiles/surfsara/.subversion"
+        "source": "data/rootfiles/surfsara/.subversion"
     }
 ]
 ```
@@ -98,12 +98,12 @@ specified destination, example:
 copy_files: [
     {
         "dest": "/root/.bashrc",
-        "source": "cf_bundles_dir/rootfiles/surfsara/root/.bashrc",
+        "source": "data/rootfiles/surfsara/root/.bashrc",
         "mog": [ "0600", "root", "root"]
     },
     {
         "dest": "/root/dynmotd.sh",
-        "source": "cf_bundles_dir/rootfiles/surfsara/root/dynmotd.sh",
+        "source": "data/rootfiles/surfsara/root/dynmotd.sh",
         "mog": [ "0700", "root", "root"]
     }
 ]
@@ -115,7 +115,7 @@ With this variable is set it will copy the specified ssh keys to `/root/.ssh`,
 example:
 ```json
 ssh_keys: {
-    "source": "cf_bundles_dir/rootfiles/ssh_keys/2fa_web",
+    "source": "data/rootfiles/ssh_keys/2fa_web",
     "keys": [ "id_ed25519", "id_rsa" ]
 }
 ```

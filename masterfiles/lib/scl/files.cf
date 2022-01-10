@@ -225,6 +225,82 @@ bundle agent scl_make_cron_file(name, data)
         !CRON_VIXIE::
             "No Vixie cron software installed";
 }
+@if minimum_version(99.9)
+
+## scl_service_rotate_files(bundle_name, data)
+
+This bundle rotates files. The bundle is called with:
+ * scl_service_rotate_files(bundle_name, data)
+
+Where:
+ * bundle_name: is the name of the bundle that needs rotate
+ * data: Json data. eg: 
+     rotate /var/log/jadi.log with 7 entries at Hr09.Min00_05
+```json
+{
+
+    "rotate_files" data => parsejson('
+        [
+             {
+                  "log_file": "/var/log/jadi.log",
+                  "number_of_backups" : "7",
+                  "run_class" : [ "Hr09.Min00_05" ]
+             }
+       ]
+}
+```
+@endif
+
+bundle agent scl_service_rotate_files(bundle_name, data)
+{
+    vars:
+       json_rotate_files_specified::
+            "rotate_files_data" data => mergedata("{}", "scl.$(bundle_name)[rotate_files]");
+            "debug_str"       string => "Use 'def.json' service rotate_files definition";
+
+       !json_rotate_files_specified::
+            "rotate_files_data" data => mergedata("{}", "data");
+            "debug_str"       string => "Use bundle service rotate_files definition";
+
+       any::
+            "index" slist => getindices("rotate_files_data");
+
+            "run_class_var_$(index)" slist => getvalues("rotate_files_data[$(index)][run_class]"),
+                handle => "$(this.bundle):$(bundle_name):$(index)",
+                comment => "Only run package action if this class is true";
+
+            "run_class_var_str_$(index)" string => ifelse(
+                    "run_class_set_$(index)", format("%s", "$(run_class_var_$(index))"),
+                    "any"
+                ),
+                handle => "$(this.bundle):$(bundle_name):$(index)",
+                if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+
+classes:
+    any::
+        "json_rotate_files_specified" expression => isvariable("scl.$(bundle_name)[rotate_files]"),
+            comment => "Do we override the bundle services rotate_files  with def.json settings";
+
+        "run_class_set_$(index)" expression => classify("$(rotate_files_data[$(index)][run_class])"),
+            comment => "if not set assume 'any' class";
+
+files:
+    any::
+        "$(rotate_files_data[$(index)][log_file])"
+            comment => "rotate_files: $(rotate_files_data[$(index)][log_file]), number of backups: $(rotate_files_data[$(index)][number_of_backups])",
+            rename  => rotate("$(rotate_files_data[$(index)][number_of_backups])"),
+            if => "run_class_set_$(index)";
+
+        "$(rotate_files_data[$(index)][log_file]).1"
+            comment     => "rotate_files: gzip $(rotate_files_data[$(index)][log_file]).1",
+            transformer => "$(paths.path[gzip]) $(this.promiser)",
+            if => "run_class_set_$(index)";
+
+reports:
+    any::
+        "$(this.bundle):$(bundle_name): index: $(index) file: $(rotate_files_data[$(index)][log_file]) #rotates: $(rotate_files_data[$(index)][number_of_backups]) class: $(rotate_files_data[$(index)][run_class]) run_class_var_str: $(run_class_var_str_$(index))"
+            if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+}
 
 bundle agent scl_service_copy_dirs(bundle_name)
 {

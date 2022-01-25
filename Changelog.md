@@ -1,6 +1,7 @@
 <!-- vim-markdown-toc GFM -->
 
 * [Version: 1.1.0 (2021-12-21)](#version-110-2021-12-21)
+    * [scl_service_rotate_files](#scl_service_rotate_files)
 * [Version: 1.0.0 (2021-11-10)](#version-100-2021-11-10)
 * [Version: 0.9.89 (2021-03-28)](#version-0989-2021-03-28)
 * [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
@@ -35,19 +36,35 @@ The SCL enhancements:
   * files level: eg: `canonify("$(bundle_name)_copy_files$(dest)")`
  * `scl_services_enabled`: added `unique` to filter the double entries
  * changed scl templates directory to `def.dir_templates/scl`
- * First time installations will copy all template json files
+ * first time installations will copy all template json files
+ * added new service `scl_service_rotate_files`
+ * added new bodies used by services:
+  * `body action scl_report(level)`
+  * `body delete scl_tidyfiles`
+  * `body depth_search scl_remove_deadlinks`
+  * `body file_select scl_symbolic_link`
+  * `body link_from scl_linkchildren`
+  * `body process_select scl_select_parent_process(ppid)`
+  * `body process_select scl_hours_older_than(hours)`
+ * added new bundles used by services:
+  * `bundle edit_line scl_var_to_file( line )`
+  * `bundle agent scl_kill_process(name, hours)`
 
 New service added:
  * sssd -  System Security Services Daemon
 
 These services have bug fixes or new features:
+ * jupyterhub :
+  * rewrote the json structure for the hub definition. The name of the hub is now the key value
+  * if hub definition is removed from the json data it will automatically removed all generated files.
  * nsswitch :
-  * rewrote template file to `key: valuue` mustache template. For easy support for debian/centos/suse support
+  * rewrote template file to `key: value` mustache template. For easy support for debian/centos/suse support
  * postfix :
   * removed debian 6,7,8 support
   * fix permisions if we can not start the daemon
   * added new template file `/etc/postfix/canonical_map`
   * added `copy_dirs` section
+  * support for new  postmap has `lmdb`
   * added some new classes:
    * `POSTFIX_STRICT_HANDLING`: Limits the amount of mail per second, and adds more restrictions for accepting mail from other hosts
    * `POSTFIX_REJECT_LOCAL`: Reject all mail with the destination localhost
@@ -58,6 +75,30 @@ These services have bug fixes or new features:
  * slurm :
   * configless enhancements added a new class `CONFIGLESS_CONF_LINKS`:
     * will create symlinks in configuration directory for utils that need it, eg: pyslurm
+
+## scl_service_rotate_files
+
+This is a generice service bunlde that can be used to rotate log files. The files can be defined inline and overriden by a json file, eg:
+```
+vars:
+    "rotate_files" data => parsejson('
+        [
+            {
+                "log_file": "$(sys.logdir)/cf3.*runlog",
+                "number_of_backups" : "7",
+                "run_class" : [ "Hr09.Min00_05" ]
+            },
+            {
+                "log_file": "$(sys.logdir)/promise_summary.log",
+                "number_of_backups" : "7",
+                "run_class" : [ "Hr09.Min00_05" ]
+            }
+        ]
+    ');
+
+methods:
+    "" usebundle => scl_service_rotate_files("cfengine", "@(rotate_files)")
+```
 
 # Version: 1.0.0 (2021-11-10)
 

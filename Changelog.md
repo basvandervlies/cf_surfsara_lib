@@ -40,7 +40,7 @@ The SCL enhancements:
 New service added:
  * sssd -  System Security Services Daemon
 
-These services heve bug fixes or new features:
+These services have bug fixes or new features:
  * nsswitch :
   * rewrote template file to `key: valuue` mustache template. For easy support for debian/centos/suse support
  * postfix :

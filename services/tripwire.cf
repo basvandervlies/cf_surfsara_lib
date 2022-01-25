@@ -1,5 +1,5 @@
 #
-## tripwire.cf @SURFsara
+## tripwire.cf @SURF
 #
 bundle common tripwire()
 {
@@ -20,10 +20,10 @@ bundle agent tripwire_autorun()
     methods:
         any::
             "" usebundle => scl_data_autorun("tripwire");
-            "" usebundle => tripwire_surfsara_config();
+            "" usebundle => tripwire_config();
 }
 
-bundle agent tripwire_surfsara_config()
+bundle agent tripwire_config()
 {
     vars:
         any::

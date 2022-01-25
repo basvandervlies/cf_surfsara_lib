@@ -42,8 +42,7 @@ c.PAMAuthenticator.service = "<%pam_service_file%>"
 ## The public facing URL of the whole JupyterHub application.
 
 #  This is the address on which the proxy will bind. Sets protocol, ip, base_url
-#c.JupyterHub.bind_url = 'http://localhost:8000/<%name%>/'
-c.JupyterHub.bind_url = '<%bind_url%>/<%name%>/'
+c.JupyterHub.bind_url = '<%url_bind%><%number%>/<%name%>/'
 
 #  The Hub should be able to resume from database state.
 c.JupyterHub.cleanup_proxy = False
@@ -59,7 +58,7 @@ c.JupyterHub.db_url = 'sqlite:////<%hub_dir%>/state/<%name%>/db.sqlite'
 
 # The URL for connecting to the Hub. Spawners, services, and the proxy will use
 # this URL to talk to the Hub.
-c.JupyterHub.hub_bind_url = '<%hub_bind_url%>'
+c.JupyterHub.hub_bind_url = '<%url_hub_bind%><%number%>'
 
 ## File to write PID Useful for daemonizing JupyterHub.
 c.JupyterHub.pid_file = '/run/jupyterhub-<%name%>/hub.pid'
@@ -76,7 +75,7 @@ c.JupyterHub.proxy_class = 'jupyterhub.proxy.ConfigurableHTTPProxy'
 c.configurableHTTPProxy.debug = True
 c.ConfigurableHTTPProxy.auth_token = "34dcd3fe49846e645d37be4c0f57ee4436a367bcdbffb348c6979a07a63da22a"
 c.ConfigurableHTTPProxy.should_start = True
-c.ConfigurableHTTPProxy.api_url = '<%api_url%>'
+c.ConfigurableHTTPProxy.api_url = '<%url_api%><%number%>'
 c.ConfigurableHTTPProxy.pid_file = '/run/jupyterhub-<%name%>/proxy.pid'
 
 ## The class to use for spawning single-user servers.
@@ -176,6 +175,18 @@ jupyter nbextension <%.%>
 <%#serverextensions%>
 jupyter serverextension <%.%>
 <%/serverextensions%>
+
+if [[ -z ${JUPYTERHUB_SERVICE_PREFIX} ]]
+then
+    export JUPYTERHUB_SERVICE_PREFIX=${JUPYTERHUB_BASE_URL}user/${JUPYTERHUB_USER}
+fi
+echo "JUPYTERHUB_API_URL = ${JUPYTERHUB_API_URL}"
+echo "JUPYTERHUB_BASE_URL = ${JUPYTERHUB_BASE_URL}"
+echo "JUPYTERHUB_CLIENT_ID = ${JUPYTERHUB_CLIENT_ID}"
+echo "JUPYTERHUB_OAUTH_CALLBACK_URL = ${JUPYTERHUB_OAUTH_CALLBACK_URL}"
+echo "JUPYTERHUB_SERVER_NAME = ${JUPYTERHUB_SERVER_NAME}"
+echo "JUPYTERHUB_SERVICE_PREFIX = ${JUPYTERHUB_SERVICE_PREFIX}"
+echo "JUPYTERHUB_USER = ${JUPYTERHUB_USER}"
 
 which batchspawner-singleuser
 which jupyterhub-singleuser

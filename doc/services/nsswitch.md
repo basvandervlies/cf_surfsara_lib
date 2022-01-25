@@ -9,7 +9,7 @@ this bundle will generate this file from mustache templates:
  * /etc/nsswitch.conf
 
 If this file is changed then the following ''class'' will be set:
- * sara_etc_nsswitch_conf
+ * scl_etc_nsswitch_conf
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

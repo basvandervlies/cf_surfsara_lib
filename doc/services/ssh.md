@@ -10,9 +10,9 @@ This bundle will generate these files from mustache templates:
  * /etc//ssh/sshd.conf
 
 If one of the files is changed then the following ''class'' will be set:
- * sara_etc_ssh_ssh_conf
- * sara_etc_ssh_sshd_banner
- * sara_etc_ssh_sshd_conf
+ * scl_etc_ssh_ssh_conf
+ * scl_etc_ssh_sshd_banner
+ * scl_etc_ssh_sshd_conf
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

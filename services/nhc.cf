@@ -1,5 +1,5 @@
 #
-##  nhc.cf @SURFsara
+##  nhc.cf @SURF
 #
 bundle common nhc
 {
@@ -80,8 +80,8 @@ The service file installs nhc software on a node and generates the following fil
  * /etc/sysconfig/nhc (centos/redhat)
 
 If one of the files is changed then the following ''class'' will be set:
- * sara_etc_nhc_conf
- * sara_etc_default_nhc_conf or sara_etc_sysconfig_nhc
+ * scl_etc_nhc_conf
+ * scl_etc_default_nhc_conf or scl_etc_sysconfig_nhc
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:
@@ -139,7 +139,7 @@ vars:
     "nhc" : {
         "copy_files": {
             "dest": "$(nhc.scripts_dir)/sara_health_checks.nhc",
-            "src": "cf_bundles_dir/nhc/scripts/sara_health_checks.nhc",
+            "src": "data/nhc/scripts/sara_health_checks.nhc",
             "mode": "0644", "owner": "root", "group": "root"
         },
         "debug": "1",

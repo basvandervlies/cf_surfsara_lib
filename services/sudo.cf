@@ -1,5 +1,5 @@
 #
-## sudo.cf @SURFsara
+## sudo.cf @SURF
 #
 bundle common sudo
 {
@@ -30,11 +30,11 @@ bundle agent sudo_autorun()
         any::
             "" usebundle => scl_data_autorun("sudo");
             "" usebundle => sudo_install();
-            "" usebundle => sudo_surfsara_config();
+            "" usebundle => sudo_config();
 
     reports:
         DEBUG_sudo::
-            "$(this.bundle): surfsara sudo template run";
+            "$(this.bundle): surf sudo template run";
 }
 
 bundle agent sudo_install()
@@ -55,7 +55,7 @@ bundle agent sudo_install()
             "" usebundle => scl_service_packages("sudo", "@(sudo_install.packages)");
 }
 
-bundle agent sudo_surfsara_config()
+bundle agent sudo_config()
 {
     vars:
         any::
@@ -79,7 +79,7 @@ bundle agent sudo_surfsara_config()
                if => "$(sudo_default_file_class)";
 
         DEBUG_sudo.SUDO_ONLY_ONE_CONFIG_FILE::
-            "$(this.bundle): Only 'surfsara' config allowed in '$(sudo.dir)'";
+            "$(this.bundle): Only 'surf' config allowed in '$(sudo.dir)'";
 
 }
 @if minimum_version(99.9)
@@ -91,7 +91,7 @@ This bundle will generate this file from mustache template:
  * /etc/sudoers.d/surfsara
 
 f one of the files is changed then the followong *class* will be set:
- * sara_etc_sudoers_d_surfsara
+ * scl_etc_sudoers_d_surfsara
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

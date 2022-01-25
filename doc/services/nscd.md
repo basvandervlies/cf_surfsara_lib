@@ -6,7 +6,7 @@ This bundle will generate these files from mustache templates:
  * /etc/nscd.conf
 
 f one of the files is changed then the followong ''class'' will be set:
- * sara_etc_nscd_conf
+ * scl_etc_nscd_conf
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

@@ -48,8 +48,8 @@ This bundle will generate these/this file(s) from mustache templates:
  * /etc/cron.deny
 
 If one of the files is changed then the following ""class"" will be set:
- * sara_etc_cron_allow
- * sara_etc_cron_deny
+ * scl_etc_cron_allow
+ * scl_etc_cron_deny
 
 These templates are located in:
  * templates/cron

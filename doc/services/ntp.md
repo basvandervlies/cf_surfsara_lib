@@ -8,9 +8,9 @@ This bundle will generate these files from mustache templates:
  * /etc/default/ntp (debian), /etc/sysconfig/ntpd (centos)
 
 f one of the files is changed then the followong ''class'' will be set:
- * sara_etc_ntp_conf
- * sara_etc_default_ntp
- * sara_etc_default_ntpdate
+ * scl_etc_ntp_conf
+ * scl_etc_default_ntp
+ * scl_etc_default_ntpdate
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

@@ -28,36 +28,33 @@ The definition of jupyterhub configuration is illustrated via an example:
         ],
         "dir": "$(scl.jupyterhub[dir])",
         "pam_service_file": "jupyterhub",
-        "start_timeout": "3600"
+        "start_timeout": "3600",
+        "url_api": "http://127.0.0.1:81",
+        "url_bind": "http://127.0.0.1:80",
+        "url_hub_bind": "http://:82",
+        "url_ws": "ws://127.0.0.1:80"
     },
-    "configs": [
-        {
-            "api_url": "http://127.0.0.1:8100",
-            "bind_url": "http://127.0.0.1:8000",
-            "hub_bind_url": "http://:8200",
-            "name": "course",
-            "template_file": "jupyterhub_course.mustache",
-            "ws_url": "ws://127.0.0.1:8000"
+    "hubs": [
+        "course": {
+            "number": "01",
+            "template_file": "jupyterhub_course.mustache"
         },
-        {
-            "api_url": "http://127.0.0.1:8101",
-            "bind_url": "http://127.0.0.1:8001",
-            "hub_bind_url": "http://:8201",
-            "name": "prod",
+        "prod": {
+            "number": "02",
             "pam_service_file": "jupyterhub-prod",
-            "template_file": "jupyterhub_prod.mustache",
-            "ws_url": "ws://127.0.0.1:8001"
+            "template_file": "jupyterhub_prod.mustache"
         }
     ],
 ```
 
 The `config_default` section are variables used in all jupyterhub configuration files but you can
-override them in the `configs` section. In the `configs` section there are 2 jupyterhub
-configurations defined:
+override them in the `hubs` section. In the `hubs` section there are 2 jupyterhubs configurations
+defined:
  * course
  * prod
 
-Each configuration must use a unique port number. For the jupyterhub `course` it will generate:
+Each configuration must use a unique port number (the number is appended to the url, eg 8101).
+For the jupyterhub `course` it will generate:
  * /etc/systemd/system/jupyterhub-course unit file
  * /opt/jupyterhub/bin/course.sh (used in the systemd unit file)
  * /opt/jupyterhub/etc/course.py (with the aid of `jupyterhub-course.mustache`)

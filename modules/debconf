@@ -4,9 +4,6 @@
 # Date  : 15 Juni 2011
 # Desc. : Change the value of a field in the debconf database
 #
-# SVN Info:
-# 	$Id: sara_change_debconf_field 17149 2015-12-18 06:33:54Z jaap $
-# 	$URL: https://subtrac.surfsara.nl/osd/beowulf/svn/trunk/cfengine3/data/bundles/mirror_copy/usr/sara/sbin/sara_change_debconf_field $
 
 ## We always need the field and value
 ##  ie. dash/sh false
@@ -33,7 +30,7 @@ RESULT=$(echo "get ${FIELD}" | $DEBCONF_GET 2>/dev/null)
 ## When result is not empty, compare the result with the value
 if [ -n "${RESULT}" ]
 then
-    RESULT=$(echo $RESULT | cut -d " " -f 2-)
+    RESULT=$(echo $RESULT | cut --delimiter=" " --fields=2-)
 
     ## Only adjust the debconf when the value is not equal with the result
     if [ "$RESULT" != "$VALUE" ]

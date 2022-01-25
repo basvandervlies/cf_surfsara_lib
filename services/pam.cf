@@ -1,5 +1,5 @@
 #
-## pam.cf @SURFsara
+## pam.cf @SURF
 #
 bundle common pam()
 {
@@ -35,11 +35,11 @@ bundle agent pam_autorun()
         any::
             "" usebundle => scl_data_autorun("pam");
             "" usebundle => pam_install();
-            "" usebundle => pam_surfsara_config();
+            "" usebundle => pam_config();
 
     reports:
         verbose_mode::
-            "$(this.bundle): surfsara template run";
+            "$(this.bundle): surf template run";
 }
 
 bundle agent pam_install()
@@ -48,7 +48,7 @@ bundle agent pam_install()
         "" usebundle => scl_service_packages("pam", "@(pam.packages)");
 }
 
-bundle agent pam_surfsara_config()
+bundle agent pam_config()
 {
     classes:
         "pam_listfile_set" expression => isvariable("scl.pam[pam_listfile]");
@@ -207,7 +207,7 @@ This bundle will generate pam files in `$(pam.dir):/etc/pam.d` with the aid of
 inline mustache template. Only work for cfengine => 3.12.
 
 if one of the files is changed then the following **class** will be set:
- * `sara_etc_pam_d_<filename>`
+ * `scl_etc_pam_d_<filename>`
 
 The bundle can also generate configuration files for, class are set with `if_repaired("scl$(file)")`:
  * pam_limits --> /etc/security/limits.d/scl.conf

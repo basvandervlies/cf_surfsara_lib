@@ -10,9 +10,9 @@ This bundle will generate these/this file(s) from mustache templates:
  * /etc/init.d/node_exporter (non systemd system)
 
 If one of the files is changed then the following ""class"" will be set:
- * sara_etc_default_node_exporter
- * sara_etc_systemd_system_node_exporter_service
- * sara_etc_init_d_node_exporter
+ * scl_etc_default_node_exporter
+ * scl_etc_systemd_system_node_exporter_service
+ * scl_etc_init_d_node_exporter
 
 These templates are located in:
  * templates/node_exporter

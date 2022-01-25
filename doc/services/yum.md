@@ -3,7 +3,7 @@
 Source: [yum.cf](/services/yum.cf)
 
 This bundle will configure the:
- * yum.conf -> sara_yum_conf class will set
+ * yum.conf -> scl_yum_conf class will set
  * repo files in /etc/yum.repos.d
 
 These will be generated with the aid of the mustache templates with json data.

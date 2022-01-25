@@ -8,7 +8,7 @@ This bundle will generate this file from the mustache template:
  * /etc/singularity/singularity.conf
 
 f one of the files is changed then the followong ''class'' will be set:
- * sara_etc_singularity_singularity._conf
+ * scl_etc_singularity_singularity._conf
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

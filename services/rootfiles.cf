@@ -1,5 +1,5 @@
 #
-## rootfiles.cf @SURFsara
+## rootfiles.cf @SURF
 #
 bundle common rootfiles(params)
 {
@@ -21,10 +21,10 @@ bundle agent rootfiles_autorun()
         "tags" slist => { "service_rootfiles", "template_rootfiles" };
 
     methods:
-        "" usebundle => rootfiles_surfsara_config();
+        "" usebundle => rootfiles_config();
 }
 
-bundle agent rootfiles_surfsara_config()
+bundle agent rootfiles_config()
 {
     vars:
         any::

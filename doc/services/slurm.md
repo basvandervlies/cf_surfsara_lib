@@ -18,8 +18,8 @@ This bundle will generate these/this file(s) from mustache templates:
     * topology.conf
 
 If one of the files is changed then the following ""class"" will be set:
- * sara_etc_slurm_llnl_slurm_conf (debian)
- * sara_etc_slurm_slurm_conf (centos)
+ * scl_etc_slurm_llnl_slurm_conf (debian)
+ * scl_etc_slurm_slurm_conf (centos)
 
 The class name for the other files has the same format.
 

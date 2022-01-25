@@ -1,8 +1,15 @@
 #
-##  SURFsara processes.cf
+##  @SURFsara processes.cf
 #
 @if minimum_version(99.9)
 # processes.cf
+
+bodies process_select:
+ * scl_select_parent_process
+ * scl_hours_older_than
+
+bundles:
+ * scl_kill_process - kill a process by 'name' that is alive for more then x hours
 
 Source: [processes.cf](/masterfiles/lib/scl/processes.cf)
 @endif
@@ -10,4 +17,23 @@ body process_select scl_select_parent_process(ppid)
 {
     ppid => irange("$(ppid)", "$(ppid)");
     process_result => "ppid";
+}
+
+body process_select scl_hours_older_than(hours)
+{
+    stime_range    => irange(0,ago(0,0,0,"$(hours)",0,0));
+    process_result => "stime";
+}
+
+
+bundle agent scl_kill_process(name, hours)
+{
+    # this bundle can be used to kill proces that is alive for x hours
+    processes:
+        any::
+            "$(name)"
+                comment         => "Killed process $(name) that run for more than $(hours) hours",
+                signals         => { "term", "kill"},
+                action          => scl_report("inform"),
+                process_select  => scl_hours_older_than("$(hours)");
 }

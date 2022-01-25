@@ -1,6 +1,6 @@
 #####
 #
-# bundle to create nsswitch.conf @SURFsara
+# bundle to create nsswitch.conf @SURF
 #
 bundle common nsswitch(params)
 {
@@ -25,14 +25,14 @@ bundle agent nsswitch_autorun()
 
     methods:
         "config" usebundle => scl_data_autorun("nsswitch");
-        "config" usebundle => nsswitch_surfsara_config();
+        "config" usebundle => nsswitch_config();
 
     reports:
         DEBUG_nsswitch::
             "$(this.bundle): DEBUG on";
 }
 
-bundle agent nsswitch_surfsara_config()
+bundle agent nsswitch_config()
 {
     classes:
         any::
@@ -58,7 +58,7 @@ this bundle will generate this file from mustache templates:
  * /etc/nsswitch.conf
 
 If this file is changed then the following ''class'' will be set:
- * sara_etc_nsswitch_conf
+ * scl_etc_nsswitch_conf
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

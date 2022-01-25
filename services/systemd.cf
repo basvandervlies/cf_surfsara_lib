@@ -1,5 +1,5 @@
 #
-# systemd.cf  @SURFsara
+# systemd.cf  @SURF
 #
 bundle common systemd
 {
@@ -41,8 +41,8 @@ bundle agent systemd_config()
 {
     classes:
         "SYSTEMD_RELOAD" or => {
-            "sara_etc_systemd_system_conf_d_surfsara_conf",
-            "sara_etc_systemd_user_conf_d_surfsara_conf"
+            "scl_etc_systemd_system_conf_d_surfsara_conf",
+            "scl_etc_systemd_user_conf_d_surfsara_conf"
         };
 
     files:

@@ -8,9 +8,9 @@ This bundle will generate these/this file(s) from mustache templates:
  * /etc/default/nvidia_gpu_prometheus_exporter
 
 If one of the files is changed then the following ""class"" will be set:
- * sara_etc_default_nvidia_gpu_prometheus_exporter
- * sara_etc_systemd_system_nvidia_gpu_prometheus_exporter_service
- * sara_etc_init_d_nvidia_gpu_prometheus_exporter
+ * scl_etc_default_nvidia_gpu_prometheus_exporter
+ * scl_etc_systemd_system_nvidia_gpu_prometheus_exporter_service
+ * scl_etc_init_d_nvidia_gpu_prometheus_exporter
 
 These templates are located in:
  * templates/nvidia_gpu_prometheus_exporter

@@ -1,5 +1,5 @@
 #
-## rsyslog.cf @SURFsara
+## rsyslog.cf @SURF
 #
 bundle common rsyslog()
 {
@@ -36,7 +36,7 @@ bundle agent rsyslog_config()
 {
     classes:
         "rsyslog_restart" or => {
-            "sara_etc_rsyslog_d_z_surfsara_conf"
+            "scl_etc_rsyslog_d_z_surfsara_conf"
         };
 
     methods:

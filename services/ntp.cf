@@ -1,5 +1,5 @@
 #
-## ntp.cf @SURFsara
+## ntp.cf @SURF
 #
 bundle common ntp {
     vars:
@@ -80,12 +80,12 @@ bundle agent ntp_autorun()
         any::
             "" usebundle => scl_data_autorun("ntp");
             "" usebundle => ntp_install();
-            "" usebundle => ntp_surfsara_config();
+            "" usebundle => ntp_config();
             "" usebundle => ntp_daemons_check();
 
     reports:
         DEBUG_ntp|verbose_mode::
-            "$(this.bundle): surfsara ntp template run";
+            "$(this.bundle): surf ntp template run";
 }
 
 bundle agent ntp_install()
@@ -102,7 +102,7 @@ bundle agent ntp_install()
             if => "systemd.!initd_script";
 }
 
-bundle agent ntp_surfsara_config()
+bundle agent ntp_config()
 {
     vars:
         "ntp_default_file_class" string => canonify("scl$(ntp.ntp_default)");
@@ -177,9 +177,9 @@ This bundle will generate these files from mustache templates:
  * /etc/default/ntp (debian), /etc/sysconfig/ntpd (centos)
 
 f one of the files is changed then the followong ''class'' will be set:
- * sara_etc_ntp_conf
- * sara_etc_default_ntp
- * sara_etc_default_ntpdate
+ * scl_etc_ntp_conf
+ * scl_etc_default_ntp
+ * scl_etc_default_ntpdate
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

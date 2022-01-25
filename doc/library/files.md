@@ -2,11 +2,15 @@
 
 Source: [files.cf](/masterfiles/lib/scl/files.cf)
 
-For copying files/dirs in the service bundle from the policy server we have defined 2 bundles:
- 1. scl_service_copy_dirs
- 1. scl_service_copy_files
+Bundles:
+ 1. agent scl_make_cron_file
+ 1. agent scl_service_copy_dirs
+ 1. agent scl_service_copy_files
+ 1. agent scl_service_install_tarballs
+ 1. agent scl_service_rotate_file
+ 1. edit_line edit_line scl_var_to_file
 
-## scl_service_copy_dirs(bundle_name)
+## agent scl_service_copy_dirs(bundle_name)
 
 This bundle will read the json attribute `copy_dirs` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -40,7 +44,7 @@ When a file has been changed in the `copy_dirs` statement the following classes 
  * `$(bundle_name)_copy_dirs_repaired` --> eg: `slurm_copy_dirs_repaired`
 
 
-## scl_service_copy_files(bundle_name)
+## agent scl_service_copy_files(bundle_name)
 
 This bundle will read the json attribute `copy_files` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -67,7 +71,7 @@ When a file has been changed in the `copy_files` statement the following classes
  * `canonify("$(bundle_name)_copy_files$(dest)")` --> eg: `slurm_copy_files_opt_slurm_etc_job_submit_lua_repaired`
  * `$(bundle_name)_copy_files_repaired` --> eg: `slurm_copy_files_repaired`
 
-## scl_service_install_tarballs(bundle_name)
+## agent scl_service_install_tarballs(bundle_name)
 
 This bundle will read the json attribute `install_tarballs` from the specified `bundle_name`. The following json
 attribute can be specified:
@@ -102,8 +106,7 @@ When a file has been changed in the `copy_files` statement the following classes
  * `canonify("$(bundle_name)_install_tarballs$(dest)")` --> eg: `slurm_install_tarballs_opt_slurm_tarballs_slurm_19_06_5_tar_gz_repaired`
  * `$(bundle_name)_install_tarballs_repaired` --> eg: `slurm_install_tarballs_repaired`
 
-
-## scl_make_cron_file(name. data)
+## agent scl_make_cron_file(name. data)
 
 This bundle install system cronjob in `/etc/cron.d`. The bundle is called with:
  * scl_make_cron_file(name, data)
@@ -122,3 +125,31 @@ Where:
     "command": "/bin/ls"
 }
 ```
+
+## agent scl_service_rotate_files(bundle_name, data)
+
+This bundle rotates files. The bundle is called with:
+ * scl_service_rotate_files(bundle_name, data)
+
+Where:
+ * bundle_name: is the name of the bundle that needs rotate
+ * data: Json data. eg: 
+     rotate /var/log/jadi.log with 7 entries at Hr09.Min00_05
+```json
+{
+
+    "rotate_files" data => parsejson('
+        [
+             {
+                  "log_file": "/var/log/jadi.log",
+                  "number_of_backups" : "7",
+                  "run_class" : [ "Hr09.Min00_05" ]
+             }
+       ]
+}
+```
+## edit_line scl_var_to_file
+
+Save an 'variable' to a file.  The file will be emptied id the 'variable' is not
+present in the file and then added.
+

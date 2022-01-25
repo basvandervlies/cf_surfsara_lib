@@ -27,6 +27,7 @@ bundle agent jupyterhub_autorun()
         JUPYTERHUB_SERVER::
             "" usebundle => jupyterhub_config();
             "" usebundle => jupyterhub_daemons_check();
+            "" usebundle => jupyterhub_remove_inactive_hubs();
 }
 
 bundle agent jupyterhub_install()
@@ -49,28 +50,27 @@ bundle agent jupyterhub_install()
 bundle agent jupyterhub_daemons_check()
 {
     vars:
-            "indices" slist => getindices("scl.jupyterhub[configs]");
-            "daemon_$(indices)" string =>
-                "^$(scl.jupyterhub[dir]).*$(scl.jupyterhub[configs][$(indices)][name]).py";
+            "names" slist => getindices("scl.jupyterhub[hubs]");
+            "daemon_$(names)" string => "^$(scl.jupyterhub[dir]).*$(names).py";
 
     processes:
         any::
-            "$(daemon_$(indices))"
+            "$(daemon_$(names))"
                 comment => "Check if the jupyterhub config is runnig",
-                process_count => check_range("$(scl.jupyterhub[configs][$(indices)][name])", "1", "1"),
+                process_count => check_range("$(names)", "1", "1"),
                 process_select => scl_select_parent_process("1");
 
     commands:
         any::
-            "$(paths.path[systemctl])  restart jupyterhub-$(scl.jupyterhub[configs][$(indices)][name])"
+            "$(paths.path[systemctl])  restart jupyterhub-$(names)"
                 if => or(
-                    canonify("$(scl.jupyterhub[configs][$(indices)][name])_out_of_range"),
+                    canonify("$(names)_out_of_range"),
                     JUPYTERHUB_RESTART_SCHEDULE
                     );
 
     reports:
         any::
-            "$(this.bundle): $(daemon_$(indices))"
+            "$(this.bundle): $(daemon_$(names))"
                 if => "DEBUG|DEBUG_jupyterhub|DEBUG_$(this.bundle)";
 }
 
@@ -81,10 +81,14 @@ bundle agent jupyterhub_config()
             "current" string => "$(scl.jupyterhub[current])";
             "template_files" slist => getindices("jupyterhub.template_2_destination");
 
-            "indices" slist => getindices("scl.jupyterhub[configs]");
-            "data_$(indices)" data => mergedata(
-                "scl.jupyterhub[config_default]", "scl.jupyterhub[configs][$(indices)]" ),
+            "names" slist => getindices("scl.jupyterhub[hubs]");
+
+            "data_$(names)" data => mergedata(
+                "scl.jupyterhub[config_default]", "scl.jupyterhub[hubs][$(names)]" ),
                 comment => "Merge the default hub settings with the one defined in the config";
+
+            "data_$(names)" data => mergedata("data_$(names)", '{ "name": "${names}" }'),
+                comment => "We need the hub name in json data";
 
     files:
         any::
@@ -106,16 +110,16 @@ bundle agent jupyterhub_config()
                 ),
                 move_obstructions => "true";
 
-            "$(scl.jupyterhub[state_dir])/$(scl.jupyterhub[configs][$(indices)][name])/."
+            "$(scl.jupyterhub[state_dir])/$(names)/."
                 comment => "Create jupyterhub state dir for this config",
                 create => "true",
                 perms => mog("0700", "root", "root"),
                 move_obstructions => "true";
 
-            "$(scl.jupyterhub[bin_dir])/$(scl.jupyterhub[configs][$(indices)][name]).sh"
+            "$(scl.jupyterhub[bin_dir])/$(names).sh"
                 perms => mog("0700", "root", "root");
 
-            "$(scl.jupyterhub[etc_dir])/$(scl.jupyterhub[configs][$(indices)][name]).py"
+            "$(scl.jupyterhub[etc_dir])/$(names).py"
                 perms => mog(
                     "$(scl.jupyterhub[mog_config_files][0])",
                     "$(scl.jupyterhub[mog_config_files][1])",
@@ -125,17 +129,19 @@ bundle agent jupyterhub_config()
     methods:
         any::
             "" usebundle => scl_mustache_copy("jupyterhub", "@(template_files)"),
-                comment => "Copt the jupyterub static templates";
+                comment => "Copy the jupyterhub static templates";
 
-            "" usebundle => scl_mustache_copy("jupyterhub", "$(scl.jupyterhub[configs][$(indices)][template_file])" ),
-                comment => "Copy the jupyterhub template config file so we can fill in the ports";
+
+            "" usebundle => scl_mustache_copy("jupyterhub", "$(scl.jupyterhub[hubs][$(names)][template_file])" ),
+               comment => "Each hub define its own template file";
+
 
             "" usebundle => scl_mustache_cf_data_2_file("jupyterhub",
                     "systemd.mustache",
-                    "$(systemd.dir)/jupyterhub-$(scl.jupyterhub[configs][$(indices)][name]).service",
-                    "jupyterhub_config.data_$(indices)"
+                    "$(systemd.dir)/jupyterhub-$(names).service",
+                    "jupyterhub_config.data_$(names)"
                     ),
-                comment => "generate per config a systemd unit file loop over $(indices)";
+                comment => "generate per config a systemd unit file loop over $(names)";
 
             "" usebundle => scl_mustache_cf_data_2_file("jupyterhub",
                     "apache.mustache",
@@ -146,30 +152,30 @@ bundle agent jupyterhub_config()
 
             "" usebundle => scl_mustache_cf_data_2_file("jupyterhub",
                     "script.mustache",
-                    "$(scl.jupyterhub[bin_dir])/$(scl.jupyterhub[configs][$(indices)][name]).sh",
-                    "jupyterhub_config.data_$(indices)"
+                    "$(scl.jupyterhub[bin_dir])/$(names).sh",
+                    "jupyterhub_config.data_$(names)"
                     ),
                 comment => "generate start script for hubm used by systemd unit file";
 
             "" usebundle => scl_mustache_cf_data_2_file("jupyterhub",
-                    "$(scl.jupyterhub[configs][$(indices)][template_file])",
-                    "$(scl.jupyterhub[etc_dir])/$(scl.jupyterhub[configs][$(indices)][name]).py",
-                    "jupyterhub_config.data_$(indices)"
+                    "$(scl.jupyterhub[hubs][$(names)][template_file])",
+                    "$(scl.jupyterhub[etc_dir])/$(names).py",
+                    "jupyterhub_config.data_$(names)"
                     ),
-                comment => "generate start script for hubm used by systemd unit file";
+                comment => "generate start script for hub used by systemd unit file";
 
-            "" usebundle => jupyterhub_restart("$(scl.jupyterhub[configs][$(indices)][name])"),
+            "" usebundle => jupyterhub_restart("$(names)"),
                 comment => "restart jupyterhub service if config file has been changed",
                 if => or(
-                    canonify("scl$(scl.jupyterhub[etc_dir])/$(scl.jupyterhub[configs][$(indices)][name]).py")
+                    canonify("scl$(scl.jupyterhub[etc_dir])/$(names).py")
                     );
 
     services:
         any::
-            "jupyterhub-$(scl.jupyterhub[configs][$(indices)][name])"
+            "jupyterhub-$(names)"
                 comment => "enable and start the jupyterhub service if systemd unit has been changed",
                 service_policy => "start",
-                if => canonify("scl$(systemd.dir)/jupyterhub-$(scl.jupyterhub[configs][$(indices)][name]).service");
+                if => canonify("scl$(systemd.dir)/jupyterhub-$(names).service");
 
     commands:
         any::
@@ -179,8 +185,9 @@ bundle agent jupyterhub_config()
 
             "$(paths.path[systemctl]) daemon-reload"
                 comment => "If service file has been changed reload systemd daemon",
-                if => canonify("scl$(systemd.dir)/jupyterhub-$(scl.jupyterhub[configs][$(indices)][name]).service");
+                if => canonify("scl$(systemd.dir)/jupyterhub-$(names).service");
 }
+
 
 bundle agent jupyterhub_restart(name)
 {
@@ -188,6 +195,64 @@ bundle agent jupyterhub_restart(name)
         any::
             "$(paths.path[systemctl]) restart jupyterhub-$(name)";
 }
+
+bundle agent jupyterhub_remove_inactive_hubs
+{
+    vars:
+        "current" slist => sort(getindices("scl.jupyterhub[hubs]"), "lex");
+        "generated" slist => sort(lsdir("$(scl.jupyterhub[state_dir])","[a-zA-Z]+.*", "false"), "lex");
+        "inactive" slist => difference(generated, current);
+
+    services:
+        any::
+            "jupyterhub-$(inactive)"
+                comment => "stop the HUB server",
+                service_policy => "stop",
+                classes => results("bundle", "hub_$(inactive)");
+
+    methods:
+        any::
+            "" usebundle => jupyterhub_rm("$(inactive)"),
+                if => or(
+                            canonify("hub_$(inactive)_kept"),
+                            canonify("hub_$(inactive)_failed")
+                        );
+
+    reports:
+        any::
+            "$(this.bundle):$(inactive)"
+                if => or(
+                            canonify("hub_$(inactive)_kept"),
+                            canonify("hub_$(inactive)_failed")
+                        );
+}
+
+bundle agent jupyterhub_rm(name)
+{
+   files:
+        any::
+            "$(systemd.dir)/jupyterhub-$(name).service"
+                delete => tidy;
+
+            "$(scl.jupyterhub[bin_dir])/$(name).sh"
+                delete => tidy;
+
+            "$(scl.jupyterhub[etc_dir])/$(name).py"
+                delete => tidy;
+
+    methods:
+        any::
+            "" usebundle => rm_rf("$(scl.jupyterhub[state_dir])/$(name)");
+
+    reports:
+        "$(this.bundle): remove hub setup $(name)
+rm $(systemd.dir)/jupyterhub-$(name).service
+rm $(scl.jupyterhub[bin_dir])/$(name).sh
+rm $(scl.jupyterhub[etc_dir])/$(name).piiiiy
+rm -rf $(scl.jupyterhub[state_dir])/$(name)"
+                if => "DEBUG|DEBUG_jupyterhub|DEBUG_$(this.bundle)";
+}
+
 @if minimum_version(99.9)
 # jupyterhub
 
@@ -219,36 +284,33 @@ The definition of jupyterhub configuration is illustrated via an example:
         ],
         "dir": "$(scl.jupyterhub[dir])",
         "pam_service_file": "jupyterhub",
-        "start_timeout": "3600"
+        "start_timeout": "3600",
+        "url_api": "http://127.0.0.1:81",
+        "url_bind": "http://127.0.0.1:80",
+        "url_hub_bind": "http://:82",
+        "url_ws": "ws://127.0.0.1:80"
     },
-    "configs": [
-        {
-            "api_url": "http://127.0.0.1:8100",
-            "bind_url": "http://127.0.0.1:8000",
-            "hub_bind_url": "http://:8200",
-            "name": "course",
-            "template_file": "jupyterhub_course.mustache",
-            "ws_url": "ws://127.0.0.1:8000"
+    "hubs": [
+        "course": {
+            "number": "01",
+            "template_file": "jupyterhub_course.mustache"
         },
-        {
-            "api_url": "http://127.0.0.1:8101",
-            "bind_url": "http://127.0.0.1:8001",
-            "hub_bind_url": "http://:8201",
-            "name": "prod",
+        "prod": {
+            "number": "02",
             "pam_service_file": "jupyterhub-prod",
-            "template_file": "jupyterhub_prod.mustache",
-            "ws_url": "ws://127.0.0.1:8001"
+            "template_file": "jupyterhub_prod.mustache"
         }
     ],
 ```
 
 The `config_default` section are variables used in all jupyterhub configuration files but you can
-override them in the `configs` section. In the `configs` section there are 2 jupyterhub
-configurations defined:
+override them in the `hubs` section. In the `hubs` section there are 2 jupyterhubs configurations
+defined:
  * course
  * prod
 
-Each configuration must use a unique port number. For the jupyterhub `course` it will generate:
+Each configuration must use a unique port number (the number is appended to the url, eg 8101).
+For the jupyterhub `course` it will generate:
  * /etc/systemd/system/jupyterhub-course unit file
  * /opt/jupyterhub/bin/course.sh (used in the systemd unit file)
  * /opt/jupyterhub/etc/course.py (with the aid of `jupyterhub-course.mustache`)

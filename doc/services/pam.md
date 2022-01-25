@@ -6,7 +6,7 @@ This bundle will generate pam files in `$(pam.dir):/etc/pam.d` with the aid of
 inline mustache template. Only work for cfengine => 3.12.
 
 if one of the files is changed then the following **class** will be set:
- * `sara_etc_pam_d_<filename>`
+ * `scl_etc_pam_d_<filename>`
 
 The bundle can also generate configuration files for, class are set with `if_repaired("scl$(file)")`:
  * pam_limits --> /etc/security/limits.d/scl.conf

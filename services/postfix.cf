@@ -1,5 +1,5 @@
 #
-## postfix.cf @SURFsara
+## postfix.cf @SURF
 #
 bundle common postfix() {
     vars:
@@ -97,7 +97,7 @@ bundle agent postfix_autorun()
             ""  usebundle => postfix_install();
             ""  usebundle => scl_service_copy_dirs("postfix"),
                     if => "postfix_copy_dirs_set";
-            ""  usebundle => postfix_surfsara_config();
+            ""  usebundle => postfix_config();
             ""  usebundle => postfix_daemons_check();
 
         POSTFIX_VIRTUAL_MAPS::
@@ -136,7 +136,7 @@ bundle agent postfix_daemons_check
                 if => canonify("$(postfix.daemon_name)_out_of_range");
 }
 
-bundle agent postfix_surfsara_config
+bundle agent postfix_config
 {
     classes:
         "POSTFIX_NEWALIAS"
@@ -182,7 +182,12 @@ bundle agent postfix_surfsara_config
 bundle agent postfix_virtual_alias_maps_expand(virtual_map_id)
 {
     classes:
-        "needs_postmap" expression => strcmp("$(scl.postfix[virtual_alias_maps][$(virtual_map_id)][protocol])", "hash");
+        "needs_postmap_hash" expression => strcmp("$(scl.postfix[virtual_alias_maps][$(virtual_map_id)][protocol])", "hash");
+        "needs_postmap_lmdb" expression => strcmp("$(scl.postfix[virtual_alias_maps][$(virtual_map_id)][protocol])", "lmdb");
+        "needs_postmap"      if => or(
+            "needs_postmap_hash",
+            "needs_postmap_lmdb"
+        );
 
     files:
         "$(scl.postfix[virtual_alias_maps][$(virtual_map_id)][dest])"

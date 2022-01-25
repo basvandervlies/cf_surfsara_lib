@@ -9,20 +9,20 @@
 
     ### Loop over the jupyterhub configs
     #
-    {{#configs}}
-    <Location "/{{name}}">
+    {{#hubs}}
+    <Location "/{{@}}">
         RewriteEngine On
         RewriteCond %{HTTP:Connection} Upgrade [NC]
         RewriteCond %{HTTP:Upgrade} websocket [NC]
-        RewriteRule /{{name}}/(.*) {{ws_url}}/{{name}}/$1 [NE,P,L]
-        RewriteRule /{{name}}/(.*) {{bind_url}}/{{name}}/$1 [NE,P,L]
+        RewriteRule /{{@}}/(.*) {{config_default.url_ws}}{{.number}}/{{@}}/$1 [NE,P,L]
+        RewriteRule /{{@}}/(.*) {{config_default.url_bind}}{{.number}}/{{@}}/$1 [NE,P,L]
 
         # preserve Host header to avoid cross-origin problems
         ProxyPreserveHost on
         # proxy to JupyterHub
-        ProxyPass         {{bind_url}}/{{name}}
-        ProxyPassReverse  {{bind_url}}/{{name}}
+        ProxyPass         {{config_default.url_bind}}{{.number}}/{{@}}
+        ProxyPassReverse  {{config_default.url_bind}}{{.number}}/{{@}}
 
     </Location>
-    {{/configs}}
+    {{/hubs}}
 </VirtualHost>

@@ -31,16 +31,16 @@
 The SCL enhancements:
  * added new service `scl_service_rotate_files`
  * added new bodies used by services bundles:
-  * `body action scl_report(level)`
-  * `body delete scl_tidyfiles`
-  * `body depth_search scl_remove_deadlinks`
-  * `body file_select scl_symbolic_link`
-  * `body link_from scl_linkchildren`
-  * `body process_select scl_select_parent_process(ppid)`
-  * `body process_select scl_hours_older_than(hours)`
+   * `body action scl_report(level)`
+   * `body delete scl_tidyfiles`
+   * `body depth_search scl_remove_deadlinks`
+   * `body file_select scl_symbolic_link`
+   * `body link_from scl_linkchildren`
+   * `body process_select scl_select_parent_process(ppid)`
+   * `body process_select scl_hours_older_than(hours)`
  * added new bundles used by services:
-  * `bundle edit_line scl_var_to_file( line )`
-  * `bundle agent scl_kill_process(name, hours)`
+   * `bundle edit_line scl_var_to_file( line )`
+   * `bundle agent scl_kill_process(name, hours)`
 
 These services have bug fixes or new features:
  * jupyterhub :

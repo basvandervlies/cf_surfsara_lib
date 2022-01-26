@@ -1,3 +1,6 @@
+#
+## chrony.cf  @SURF
+#
 bundle common chrony {
     vars:
         any::

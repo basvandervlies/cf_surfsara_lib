@@ -77,11 +77,14 @@ vars:
 ```
 
  * override allow_ssh setting in def.json:
-```json
+```
 "tcpwrappers" : {
     "json_files" : [ "allow_http.json" ],
     "allow_ssh": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }
+        {
+            "allow": "10.101.32.0/255.255.255.0",
+            "desc": "ALLOW admin lan"
+        }
     ]
 }
 ```

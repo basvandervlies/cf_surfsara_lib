@@ -1,5 +1,5 @@
 
-## slurm.cf  @SURFsara
+## slurm.cf  @SURF
 #
 bundle agent slurm()
 {

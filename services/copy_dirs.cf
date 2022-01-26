@@ -1,5 +1,5 @@
 #
-## copy_dirs.cf @SURFsara
+## copy_dirs.cf @SURF
 #
 bundle agent copy_dirs()
 {

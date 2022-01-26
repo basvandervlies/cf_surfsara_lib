@@ -27,7 +27,7 @@
 <!-- vim-markdown-toc -->
 # Version: 1.1.0 (2021-12-21)
 
-This release added suport to install the software via CFEngine build system (cfbs). The old method `mpf_installation` will
+This release add support to install the software via CFEngine build system (cfbs). The old method `mpf_installation` will
 be deprecated.
 
 The SCL enhancements:
@@ -56,9 +56,9 @@ New service added:
 These services have bug fixes or new features:
  * jupyterhub :
   * rewrote the json structure for the hub definition. The name of the hub is now the key value
-  * if hub definition is removed from the json data it will automatically removed all generated files.
+  * if hub definition is removed from the json data it will automatically removed all generated files
  * nsswitch :
-  * rewrote template file to `key: value` mustache template. For easy support for debian/centos/suse support
+  * rewrote mustache template file to `key: value`. To better support debian/centos/redhat/suse os-es
  * postfix :
   * removed debian 6,7,8 support
   * fix permisions if we can not start the daemon

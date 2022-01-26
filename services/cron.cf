@@ -1,5 +1,5 @@
 #
-## cron.cf @SURFsara
+## cron.cf @SURF
 #
 bundle common cron()
 {

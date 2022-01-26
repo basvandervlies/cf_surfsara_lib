@@ -22,7 +22,7 @@ attribute can be specified:
  * purge: exact copy of the source directory, default: false
  * run_bundle: The name of the bundle to run when something is repaired, default not set.
  * source: source directory
- * type_check:  Check if destination adn source are of the same type, default: false
+ * type_check:  Check if destination and source are of the same type, default: false
 
 The  copy attributes can be overriden or specified  by json data, eg:
 ```json
@@ -75,7 +75,7 @@ When a file has been changed in the `copy_files` statement the following classes
 
 This bundle will read the json attribute `install_tarballs` from the specified `bundle_name`. The following json
 attribute can be specified:
- * check_dir:  CHeck if the directory exists. If not extract the tarball
+ * check_dir:  Check if the directory exists. If not extract the tarball
  * dest:  destination
  * extract:  which `cmd` to use to extract the tarball and `in_dir` which dir to extract
  * mog: mode/owner/group of the file

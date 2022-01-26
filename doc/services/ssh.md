@@ -5,9 +5,9 @@ Source: [ssh.cf](/services/ssh.cf)
 This bundle installs ssh software on a node.
 
 This bundle will generate these files from mustache templates:
- * /etc//ssh/ssh.conf
- * /etc//ssh/sshd_banner
- * /etc//ssh/sshd.conf
+ * /etc/ssh/ssh.conf
+ * /etc/ssh/sshd_banner
+ * /etc/ssh/sshd.conf
 
 If one of the files is changed then the following ''class'' will be set:
  * scl_etc_ssh_ssh_conf

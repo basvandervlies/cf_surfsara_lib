@@ -3,7 +3,7 @@
 Source: [jupyterhub.cf](/services/jupyterhub.cf)
 
 
-This will install the jupyterhub software on a node, and we can generate multiple jupyterhub setups on
+This will install the jupyterhub software on a node and we can generate multiple jupyterhub setups on
 one node. We mostly use jupyterhub to submit jobs to the batch system and start the notebook on a compute
 node. Each jupyterhub has its own parameters for submitting jobs. Apache is used as frontend web server,
 see [apache.cf](/services/apache.cf). This service bundle will also generate the apache configuration

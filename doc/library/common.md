@@ -1,5 +1,5 @@
 # common.cf
-Some body defininitions that are used in other bundles.
+Some body definitions that are used in other bundles.
 
 bodies classes
  * scl_cmd_repair - set classes bases on command 'failed return codes' the classes are set with specified 'prefix'

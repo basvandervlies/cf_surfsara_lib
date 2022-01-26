@@ -1,5 +1,5 @@
 #
-## check_space.cf @SURFsara
+## check_space.cf @SURF
 #
 bundle agent check_space_autorun()
 {

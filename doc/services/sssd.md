@@ -1,7 +1,7 @@
 
 # sssd
 
-This will install and configure SSSD, and is tested for SUSE and RedHat based OS. This service
+This will install and configure SSSD and is tested for SUSE and RedHat based OS. This service
 will create a sssd.conf based on the sssd.conf.mustache template
 
 ## Usage

@@ -1,5 +1,5 @@
 #
-## configurable_http_proxy.cf @SURFsara
+## configurable_http_proxy.cf @SURF
 #
 bundle agent configurable_http_proxy
 {

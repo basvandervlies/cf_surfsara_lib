@@ -4,10 +4,16 @@
 
 @if minimum_version(99.9)
 # common.cf
+Some body definitions that are used in other bundles.
+
+bodies classes
+ * scl_cmd_repair - set classes bases on command 'failed return codes' the classes are set with specified 'prefix'
+
+bodies action
+ * scl_report -  report action anf use specified 'level'
 
 Source: [common.cf](/masterfiles/lib/scl/common.cf)
 
-Some body defininitions that are used in other bundles.
 @endif
 
 ## cmd_repair in cfengine stdlib does not define # kept_return code :-(
@@ -19,4 +25,9 @@ body classes scl_cmd_repair(return_code,class_prefix)
     repaired_returncodes => { "$(return_code)" };
     promise_repaired => { "$(class_prefix)_failed" };
     promise_kept     => { "$(class_prefix)_succeeded" };
+}
+
+body action scl_report(level)
+{
+    report_level => $(level);
 }

@@ -1,5 +1,5 @@
 #
-## sara_user_consume_resources.cf @SURFsara
+## sara_user_consume_resources.cf @SURF
 #
 bundle common sara_user_consume_resources
 {
@@ -16,7 +16,6 @@ bundle agent sara_user_consume_resources_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("sara_user_consume_resources");
             "" usebundle => sara_user_consume_resources_check();
 
     reports:
@@ -37,7 +36,7 @@ bundle agent sara_user_consume_resources_check()
             ".*"
                 comment => "Kill processes that use to much resources",
                 signals => { "term", "kill"},
-                action => sara_action,
+                action => scl_report("inform"),
                 process_select => sara_user_consume_resources_select(
                     "$(scl.sara_user_consume_resources[max_minutes])",
                     "$(scl.sara_user_consume_resources[max_memory])",

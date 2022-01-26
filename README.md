@@ -6,8 +6,6 @@
             * [JSON merge example](#json-merge-example)
     * [Installation](#installation)
         * [CFEngine Build System](#cfengine-build-system)
-        * [MPF installation](#mpf-installation)
-            * [update](#update)
         * [Own framework](#own-framework)
         * [def.node\_template\_dir](#defnode_template_dir)
         * [CF-serverd shortcut configuration for cfengine version less then 3.10.1](#cf-serverd-shortcut-configuration-for-cfengine-version-less-then-3101)
@@ -130,33 +128,10 @@ instructions:
  * `cd scl_masterfiles`
  * `cfbs init`
  * `cfbs add masterfiles`
- * `cfbs add https://github.com/basvandervlies/cf_surfsara_lib`
+    1. `cfbs add https://github.com/basvandervlies/cf_surfsara_lib` (master  branch)
+    1. `cfbs add surf-cfengine-library` (stable one)
  * `cfbs build`
  * `cfbs install`
-
-### MPF installation
-
-1. Login on your policy server.
-1. `./mpf_installation`
-1. Enable autorun, if you have not done it. Add this line to your ```def.json``` file
-```json
-{
-   "classes" :
-   {
-    "services_autorun" : "any"
-   }
-}
-```
-
-You can test your installation with
- * `cf-agent -Kv | grep scl\_autorun`
-
-#### update ####
-
-You can run the same script it will detect its an update. This script will overwrite:
- * scl library files: `masterfiles/lib/scl`
- * scl modules files: `masterfiles/modules/scl`
- * scl services files: `masterfiles/services/scl`
 
 ### Own framework
 

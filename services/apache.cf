@@ -97,15 +97,17 @@ bundle agent apache_config()
         "copy_dirs_set" expression => isvariable("scl.apache[copy_dirs]"),
             comment => "Must we copy directories";
 
-        "apache_restart" or => {
-            "APACHE_MODULES_repaired",
-            "APACHE_SITES_repaired",
-            "sara_opt_apache_httpd_conf",
-            "sara_opt_apache_server_conf",
-            "sara_opt_apache_ssl_conf",
-            "sara_opt_apache_envvars",
-            "sara_etc_sysconfig_apache2"
-        };
+        "apache_restart"
+            if => or(
+                "APACHE_MODULES_repaired",
+                "APACHE_SITES_repaired",
+                "scl_opt_apache_ssl_conf",
+                canonify("scl$(apache.configdir)/httpd.conf"),
+                canonify("scl$(apache.configdir)/server.conf"),
+                canonify("scl$(apache.configdir)/ssl.conf"),
+                canonify("scl/etc/apache2/envvars"),
+                canonify("scl/etc/sysconfig/apache2")
+                );
 
     files:
         any::
@@ -143,14 +145,14 @@ bundle agent apache_config()
 
             "$(apache.modules_conf_dir)"
                 comment => "delete module config file(s) not maintained by CFengine",
-                delete => sara_tidyfiles,
-                file_select => sara_exclude_files("@(module_conf_files)"),
+                delete => scl_tidyfiles,
+                file_select => ex_list("@(module_conf_files)"),
                 depth_search => recurse("inf");
 
             "$(apache.sites_dir)"
                 comment => "delete site config file(s) not maintained by CFengine",
-                delete => sara_tidyfiles,
-                file_select => sara_exclude_files("@(site_files)"),
+                delete => scl_tidyfiles,
+                file_select => ex_list("@(site_files)"),
                 depth_search => recurse("inf");
 
             "$(apache.remove_access_log)"
@@ -173,11 +175,12 @@ bundle agent apache_config()
             if => "apache_restart";
 
     reports:
-        "$(this.bundle) modules: '$(names)':'$(modules[$(names)])'"
-            if => "DEBUG|DEBUG_apache|DEBUG_$(this.bundle)";
+        any::
+            "$(this.bundle) modules: '$(names)':'$(modules[$(names)])'"
+                if => "DEBUG|DEBUG_apache|DEBUG_$(this.bundle)";
 
-        "$(this.bundle) site: '$(site_files)'"
-            if => "DEBUG|DEBUG_apache|DEBUG_$(this.bundle)";
+            "$(this.bundle) site: '$(site_files)'"
+                if => "DEBUG|DEBUG_apache|DEBUG_$(this.bundle)";
 }
 
 bundle agent apache_daemon_check()

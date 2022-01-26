@@ -1,3 +1,6 @@
+#
+## chrony.cf  @SURF
+#
 bundle common chrony {
     vars:
         any::
@@ -48,12 +51,12 @@ bundle agent chrony_autorun()
         any::
             "" usebundle => scl_data_autorun("chrony");
             "" usebundle => chrony_install();
-            "" usebundle => chrony_surfsara_config();
+            "" usebundle => chrony_config();
             "" usebundle => chrony_daemons_check();
 
     reports:
         DEBUG_chrony|verbose_mode::
-            "$(this.bundle): surfsara chrony template run";
+            "$(this.bundle): scl chrony template run";
 }
 
 bundle agent chrony_install()
@@ -62,7 +65,7 @@ bundle agent chrony_install()
         "" usebundle => scl_service_packages("chrony", "@(chrony.packages)");
 }
 
-bundle agent chrony_surfsara_config()
+bundle agent chrony_config()
 {
     vars:
         "chrony_config_file_class" string => canonify("scl$(chrony.config_file)");

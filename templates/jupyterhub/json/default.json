@@ -44,16 +44,19 @@
             "enable --py jupyterlmod --user"
         ],
         "pam_service_file": "jupyterhub",
-        "start_timeout": "3600"
+        "start_timeout": "3600",
+        "url_api": "http://127.0.0.1:81",
+        "url_bind": "http://127.0.0.1:80",
+        "url_hub_bind": "http://:82",
+        "url_ws": "ws://127.0.0.1:80"
     },
-    "configs": [
-        {
-            "api_url": "http://127.0.0.1:8101",
+    "hubs": [
+        "example": {
+            "number": "01",
             "batch_lines": [
                 "export LMOD_CMD=/hpc/eb/modules-4.0.0/libexec/modulecmd.tcl",
                 "pip install tensorflow --user"
             ],
-            "bind_url": "http://127.0.0.1:8001",
             "hub_bind_url": "http://:8201",
             "load_modules": [
                 "2019",
@@ -63,9 +66,7 @@
                 "ErasmusCourse/1.0-foss-2019b-R-3.5.1",
                 "cuDNN/7.6.3-CUDA-10.0.130"
             ],
-            "name": "example",
-            "template_file": "jupyterhub_example.mustache",
-            "ws_url": "ws://127.0.0.1:8001"
+            "template_file": "jupyterhub_example.mustache"
         }
     ],
     "current": "1.0.0",

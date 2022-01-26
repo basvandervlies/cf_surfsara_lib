@@ -6,7 +6,7 @@ This bundle will generate this file from mustache template:
  * /etc/sudoers.d/surfsara
 
 f one of the files is changed then the followong *class* will be set:
- * sara_etc_sudoers_d_surfsara
+ * scl_etc_sudoers_d_surfsara
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

@@ -1,5 +1,5 @@
 #
-## pam_radius.cf @SURFsara
+## pam_radius.cf @SURF
 #
 bundle common pam_radius()
 {
@@ -32,7 +32,7 @@ bundle agent pam_radius_autorun()
         any::
             "" usebundle => scl_data_autorun("pam_radius");
             "" usebundle => pam_radius_install();
-            "" usebundle => pam_radius_surfsara_config();
+            "" usebundle => pam_radius_config();
 }
 
 bundle agent pam_radius_install()
@@ -62,7 +62,7 @@ bundle agent pam_radius_install()
             "" usebundle => scl_service_packages("pam_radius", "@(pam_radius_install.packages)");
 }
 
-bundle agent pam_radius_surfsara_config()
+bundle agent pam_radius_config()
 {
     vars:
         any::

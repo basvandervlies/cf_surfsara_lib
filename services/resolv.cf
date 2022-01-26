@@ -1,5 +1,5 @@
 #
-## resolv.cf @SURFsara
+## resolv.cf @SURF
 #
 bundle common resolv
 {
@@ -26,10 +26,10 @@ bundle agent resolv_autorun()
 
     methods:
         any::
-            "" usebundle => resolv_surfsara_config();
+            "" usebundle => resolv_config();
 }
 
-bundle agent resolv_surfsara_config()
+bundle agent resolv_config()
 {
     methods:
         any::
@@ -51,7 +51,7 @@ This bundle will generate this file from mustache templates:
  * /etc/resolv.conf
 
 If one of the files is changed then the following ""class"" will be set:
- * sara_etc_resolv_conf
+ * scl_etc_resolv_conf
 
 These templates are located in:
  * templates/resolv

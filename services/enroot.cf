@@ -1,5 +1,5 @@
 #
-## enroot.cf @SURFsara
+## enroot.cf @SURF
 #
 bundle agent enroot()
 {

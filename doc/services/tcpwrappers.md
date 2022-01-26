@@ -7,8 +7,8 @@ This bundle will generate these files from mustache templates:
  * /etc/hosts.deny
 
 If one of the files is changed then the followong *class* will be set:
- *  sara_tcpwrappers_etc_hosts_allow
- *  sara_tcpwrappers_etc_hosts_deny
+ *  scl_tcpwrappers_etc_hosts_allow
+ *  scl_tcpwrappers_etc_hosts_deny
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:
@@ -77,11 +77,14 @@ vars:
 ```
 
  * override allow_ssh setting in def.json:
-```json
+```
 "tcpwrappers" : {
     "json_files" : [ "allow_http.json" ],
     "allow_ssh": [
-        { "allow": "10.101.32.0/255.255.255.0", "desc": "ALLOW admin lan" }
+        {
+            "allow": "10.101.32.0/255.255.255.0",
+            "desc": "ALLOW admin lan"
+        }
     ]
 }
 ```

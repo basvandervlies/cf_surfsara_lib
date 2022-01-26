@@ -1,5 +1,5 @@
 #
-## apt.cf @SURFsara
+## apt.cf @SURF
 #
 bundle common apt
 {
@@ -130,7 +130,7 @@ bundle agent apt_kill_pkg_manager()
 
     methods:
         debian::
-            "" usebundle => sara_kill_process("$(apt_cmds)",1),
+            "" usebundle => scl_kill_process("$(apt_cmds)",1),
                 classes =>  results("bundle", "$(this.bundle)_$(apt_cmds)" );
 
     reports:
@@ -339,8 +339,8 @@ bundle agent apt_repository_generate(template_file, repo_files)
 
             "$(apt.repos_dir)"
                 comment         => "Remove apt repository files that are not maintained by CFEngine",
-                delete          => sara_tidyfiles,
-                file_select     => sara_exclude_files("@(repo_exclude_files)"),
+                delete          => scl_tidyfiles,
+                file_select     => ex_list("@(repo_exclude_files)"),
                 depth_search    => recurse("inf");
 
             "$(apt.trusted_dir)/$(repo_data[$(repo_names)][key_file])"
@@ -380,7 +380,7 @@ bundle agent apt_repository_key(name, key)
             "$(filename)"
                 comment => "Create key file name in bundle template directory",
                 create => "true",
-                edit_line => sara_var_to_file("$(key)"),
+                edit_line => scl_var_to_file("$(key)"),
                 edit_defaults => empty,
                 classes => results("bundle", "apt_repository_key_$(key)");
 

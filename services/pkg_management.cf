@@ -1,5 +1,5 @@
 #
-## package_management.cf @SURFsara
+## package_management.cf @SURF
 #
 bundle agent pkg_management_autorun()
 {

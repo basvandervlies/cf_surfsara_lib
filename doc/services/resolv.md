@@ -7,7 +7,7 @@ This bundle will generate this file from mustache templates:
  * /etc/resolv.conf
 
 If one of the files is changed then the following ""class"" will be set:
- * sara_etc_resolv_conf
+ * scl_etc_resolv_conf
 
 These templates are located in:
  * templates/resolv

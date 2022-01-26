@@ -1,5 +1,5 @@
 #
-## check_space.cf @SURFsara
+## check_space.cf @SURF
 #
 bundle agent check_space_autorun()
 {
@@ -9,10 +9,10 @@ bundle agent check_space_autorun()
     methods:
         any::
             "" usebundle => scl_data_autorun("check_space");
-            "" usebundle => check_space_surfsara_config();
+            "" usebundle => check_space_config();
 }
 
-bundle agent check_space_surfsara_config()
+bundle agent check_space_config()
 {
     vars:
         "paths" slist => getindices("scl.check_space");

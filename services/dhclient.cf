@@ -1,5 +1,5 @@
 #
-## dhclient.cf @SURFsara
+## dhclient.cf @SURF
 #
 bundle common dhclient
 {
@@ -27,11 +27,11 @@ bundle agent dhclient_autorun()
     methods:
         any::
             "" usebundle => scl_data_autorun("dhclient");
-            "" usebundle => dhclient_surfsara_config();
+            "" usebundle => dhclient_config();
 
 }
 
-bundle agent dhclient_surfsara_config
+bundle agent dhclient_config
 {
     methods:
         any::

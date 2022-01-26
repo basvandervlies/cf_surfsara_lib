@@ -1,5 +1,5 @@
 #
-## ssh.cf  @SURFsara
+## ssh.cf  @SURF
 #
 bundle common ssh()
 {
@@ -96,7 +96,7 @@ bundle agent ssh_autorun()
         any::
             "" usebundle => scl_data_autorun("ssh");
             "" usebundle => ssh_install();
-            "" usebundle => ssh_surfsara_config();
+            "" usebundle => ssh_config();
             "" usebundle => ssh_daemons_check();
 }
 
@@ -136,7 +136,7 @@ bundle agent ssh_install()
         "" usebundle => scl_service_packages("ssh", "@(ssh.packages)");
 }
 
-bundle agent ssh_surfsara_config()
+bundle agent ssh_config()
 {
     vars:
         any::
@@ -187,14 +187,14 @@ Source: [ssh.cf](/services/ssh.cf)
 This bundle installs ssh software on a node.
 
 This bundle will generate these files from mustache templates:
- * /etc//ssh/ssh.conf
- * /etc//ssh/sshd_banner
- * /etc//ssh/sshd.conf
+ * /etc/ssh/ssh.conf
+ * /etc/ssh/sshd_banner
+ * /etc/ssh/sshd.conf
 
 If one of the files is changed then the following ''class'' will be set:
- * sara_etc_ssh_ssh_conf
- * sara_etc_ssh_sshd_banner
- * sara_etc_ssh_sshd_conf
+ * scl_etc_ssh_ssh_conf
+ * scl_etc_ssh_sshd_banner
+ * scl_etc_ssh_sshd_conf
 
 These files will be generated with the aid of mustache templates with json data.
 the templates are located in:

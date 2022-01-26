@@ -1,5 +1,5 @@
 #
-## yum.cf  @SURFsara
+## yum.cf  @SURF
 #
 bundle common yum
 {
@@ -66,9 +66,8 @@ bundle agent yum_autorun()
         "tags"  slist => {"service_yum", "template_yum"};
 
     methods:
-        "" usebundle => scl_data_autorun("yum");
         "" usebundle => yum_install();
-        "" usebundle => yum_surfsara_config();
+        "" usebundle => yum_config();
         "" usebundle => yum_repository();
 }
 
@@ -78,7 +77,7 @@ bundle agent yum_install
         "" usebundle => scl_service_packages("yum", "@(yum.packages)");
 }
 
-bundle agent yum_surfsara_config
+bundle agent yum_config
 {
     methods:
         "" usebundle => scl_mustache_autorun("yum");
@@ -108,8 +107,8 @@ bundle agent yum_repository()
         YUM_REPOS_FILE_LIST_POPULATED::
             "$(yum.repos_dir)"
                 comment         => "Remove yum files that are not maintained by CFEngine",
-                delete          => sara_tidyfiles,
-                file_select     => sara_exclude_files("@(repository_exclude_files)"),
+                delete          => scl_tidyfiles,
+                file_select     => ex_list("@(repository_exclude_files)"),
                 depth_search    => recurse("inf");
 
     methods:
@@ -133,7 +132,7 @@ bundle agent yum_repository()
 Source: [yum.cf](/services/yum.cf)
 
 This bundle will configure the:
- * yum.conf -> sara_yum_conf class will set
+ * yum.conf -> scl_yum_conf class will set
  * repo files in /etc/yum.repos.d
 
 These will be generated with the aid of the mustache templates with json data.

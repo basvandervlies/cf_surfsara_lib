@@ -1,7 +1,8 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.1.0 (2021-12-21)](#version-110-2021-12-21)
+* [Version: 1.2.0 (2022-01-26)](#version-120-2022-01-26)
     * [scl_service_rotate_files](#scl_service_rotate_files)
+* [Version: 1.1.0 (2021-12-21)](#version-110-2021-12-21)
 * [Version: 1.0.0 (2021-11-10)](#version-100-2021-11-10)
 * [Version: 0.9.89 (2021-03-28)](#version-0989-2021-03-28)
 * [Version: 0.9.88 (2021-03-16 Dre)](#version-0988-2021-03-16-dre)
@@ -25,56 +26,28 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.1.0 (2021-12-21)
-
-This release add support to install the software via CFEngine build system (cfbs). The old method `mpf_installation` will
-be deprecated.
+# Version: 1.2.0 (2022-01-26)
 
 The SCL enhancements:
- * `copy_files`, `copy_dirs` and `install_tarballs` set classes if a file, directory or tarball has been changed:
-  * bundle level: eg: `$(bundle_name)_copy_files_repaired`
-  * files level: eg: `canonify("$(bundle_name)_copy_files$(dest)")`
- * `scl_services_enabled`: added `unique` to filter the double entries
- * changed scl templates directory to `def.dir_templates/scl`
- * first time installations will copy all template json files
  * added new service `scl_service_rotate_files`
- * added new bodies used by services:
-  * `body action scl_report(level)`
-  * `body delete scl_tidyfiles`
-  * `body depth_search scl_remove_deadlinks`
-  * `body file_select scl_symbolic_link`
-  * `body link_from scl_linkchildren`
-  * `body process_select scl_select_parent_process(ppid)`
-  * `body process_select scl_hours_older_than(hours)`
+ * added new bodies used by services bundles:
+   * `body action scl_report(level)`
+   * `body delete scl_tidyfiles`
+   * `body depth_search scl_remove_deadlinks`
+   * `body file_select scl_symbolic_link`
+   * `body link_from scl_linkchildren`
+   * `body process_select scl_select_parent_process(ppid)`
+   * `body process_select scl_hours_older_than(hours)`
  * added new bundles used by services:
-  * `bundle edit_line scl_var_to_file( line )`
-  * `bundle agent scl_kill_process(name, hours)`
-
-New service added:
- * sssd -  System Security Services Daemon
+   * `bundle edit_line scl_var_to_file( line )`
+   * `bundle agent scl_kill_process(name, hours)`
 
 These services have bug fixes or new features:
  * jupyterhub :
-  * rewrote the json structure for the hub definition. The name of the hub is now the key value
-  * if hub definition is removed from the json data it will automatically removed all generated files
- * nsswitch :
-  * rewrote mustache template file to `key: value`. To better support debian/centos/redhat/suse os-es
+   * rewrote the json structure for the hub definition. The name of the hub is now the key value
+   * if hub definition is removed from the json data it will automatically removed all generated files
  * postfix :
-  * removed debian 6,7,8 support
-  * fix permisions if we can not start the daemon
-  * added new template file `/etc/postfix/canonical_map`
-  * added `copy_dirs` section
-  * support for new  postmap has `lmdb`
-  * added some new classes:
-   * `POSTFIX_STRICT_HANDLING`: Limits the amount of mail per second, and adds more restrictions for accepting mail from other hosts
-   * `POSTFIX_REJECT_LOCAL`: Reject all mail with the destination localhost
-   * `POSTFIX_RECEIVE_TLS`: Enable more TLS options to add TLS support on the smtp port for receiving mail
-   * `POSTFIX_LOWER_34`: When you are using a Postfix version of 3.4 or lower
-   * `POSTFIX_DOVECOT`: Enable basic support for authentication via Dovecot
-   * `POSTFIX_PFLOGSUMM`: Run the pflogsumm command incombo with `copy_dirs` section
- * slurm :
-  * configless enhancements added a new class `CONFIGLESS_CONF_LINKS`:
-    * will create symlinks in configuration directory for utils that need it, eg: pyslurm
+   * support for new  postmap has `lmdb`
 
 ## scl_service_rotate_files
 
@@ -99,6 +72,39 @@ vars:
 methods:
     "" usebundle => scl_service_rotate_files("cfengine", "@(rotate_files)")
 ```
+
+# Version: 1.1.0 (2021-12-21)
+
+This release add support to install the software via CFEngine build system (cfbs). The old method `mpf_installation` will
+be deprecated.
+
+The SCL enhancements:
+ * `copy_files`, `copy_dirs` and `install_tarballs` set classes if a file, directory or tarball has been changed:
+   * bundle level: eg: `$(bundle_name)_copy_files_repaired`
+   * files level: eg: `canonify("$(bundle_name)_copy_files$(dest)")`
+ * `scl_services_enabled`: added `unique` to filter the double entries
+ * changed scl templates directory to `def.dir_templates/scl`
+ * first time installations will copy all template json files
+
+New service added:
+ * sssd -  System Security Services Daemon
+ * nsswitch :
+   * rewrote mustache template file to `key: value`. To better support debian/centos/redhat/suse os-es
+ * postfix :
+   * removed debian 6,7,8 support
+   * fix permisions if we can not start the daemon
+   * added new template file `/etc/postfix/canonical_map`
+   * added `copy_dirs` section
+   * added some new classes:
+   * `POSTFIX_STRICT_HANDLING`: Limits the amount of mail per second, and adds more restrictions for accepting mail from other hosts
+   * `POSTFIX_REJECT_LOCAL`: Reject all mail with the destination localhost
+   * `POSTFIX_RECEIVE_TLS`: Enable more TLS options to add TLS support on the smtp port for receiving mail
+   * `POSTFIX_LOWER_34`: When you are using a Postfix version of 3.4 or lower
+   * `POSTFIX_DOVECOT`: Enable basic support for authentication via Dovecot
+   * `POSTFIX_PFLOGSUMM`: Run the pflogsumm command incombo with `copy_dirs` section
+ * slurm :
+   * configless enhancements added a new class `CONFIGLESS_CONF_LINKS`:
+     * will create symlinks in configuration directory for utils that need it, eg: pyslurm
 
 # Version: 1.0.0 (2021-11-10)
 

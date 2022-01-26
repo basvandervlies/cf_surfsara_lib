@@ -7,7 +7,7 @@
       "name": "scl",
       "description": "SURF CFEngine Library",
       "repo": "https://github.com/basvandervlies/cf_surfsara_lib",
-      "version": "1.0.0",
+      "version": "master",
       "dependencies": ["masterfiles", "autorun"],
       "steps": [
         "copy ./masterfiles/lib/scl/ lib/scl/",

@@ -44,10 +44,10 @@ The SCL enhancements:
 
 These services have bug fixes or new features:
  * jupyterhub :
-  * rewrote the json structure for the hub definition. The name of the hub is now the key value
-  * if hub definition is removed from the json data it will automatically removed all generated files
+   * rewrote the json structure for the hub definition. The name of the hub is now the key value
+   * if hub definition is removed from the json data it will automatically removed all generated files
  * postfix :
-  * support for new  postmap has `lmdb`
+   * support for new  postmap has `lmdb`
 
 ## scl_service_rotate_files
 
@@ -80,8 +80,8 @@ be deprecated.
 
 The SCL enhancements:
  * `copy_files`, `copy_dirs` and `install_tarballs` set classes if a file, directory or tarball has been changed:
-  * bundle level: eg: `$(bundle_name)_copy_files_repaired`
-  * files level: eg: `canonify("$(bundle_name)_copy_files$(dest)")`
+   * bundle level: eg: `$(bundle_name)_copy_files_repaired`
+   * files level: eg: `canonify("$(bundle_name)_copy_files$(dest)")`
  * `scl_services_enabled`: added `unique` to filter the double entries
  * changed scl templates directory to `def.dir_templates/scl`
  * first time installations will copy all template json files
@@ -89,13 +89,13 @@ The SCL enhancements:
 New service added:
  * sssd -  System Security Services Daemon
  * nsswitch :
-  * rewrote mustache template file to `key: value`. To better support debian/centos/redhat/suse os-es
+   * rewrote mustache template file to `key: value`. To better support debian/centos/redhat/suse os-es
  * postfix :
-  * removed debian 6,7,8 support
-  * fix permisions if we can not start the daemon
-  * added new template file `/etc/postfix/canonical_map`
-  * added `copy_dirs` section
-  * added some new classes:
+   * removed debian 6,7,8 support
+   * fix permisions if we can not start the daemon
+   * added new template file `/etc/postfix/canonical_map`
+   * added `copy_dirs` section
+   * added some new classes:
    * `POSTFIX_STRICT_HANDLING`: Limits the amount of mail per second, and adds more restrictions for accepting mail from other hosts
    * `POSTFIX_REJECT_LOCAL`: Reject all mail with the destination localhost
    * `POSTFIX_RECEIVE_TLS`: Enable more TLS options to add TLS support on the smtp port for receiving mail
@@ -103,8 +103,8 @@ New service added:
    * `POSTFIX_DOVECOT`: Enable basic support for authentication via Dovecot
    * `POSTFIX_PFLOGSUMM`: Run the pflogsumm command incombo with `copy_dirs` section
  * slurm :
-  * configless enhancements added a new class `CONFIGLESS_CONF_LINKS`:
-    * will create symlinks in configuration directory for utils that need it, eg: pyslurm
+   * configless enhancements added a new class `CONFIGLESS_CONF_LINKS`:
+     * will create symlinks in configuration directory for utils that need it, eg: pyslurm
 
 # Version: 1.0.0 (2021-11-10)
 

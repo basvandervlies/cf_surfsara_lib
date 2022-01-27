@@ -122,7 +122,7 @@ there are three options
 With this you can easily test and build masterfiles configuration. The steps to build your masterfiles:
  * Read the [CFEngine Build System blog](https://cfengine.com/blog/2021/cfengine-build-launched)
 
-I will publish the "module" to the [CFEngine build catalogue](https://build.cfengine.com). This are the installation
+The "module" is published in the [CFEngine build catalogue](https://build.cfengine.com) as [surf-cfengine-library](https://build.cfengine.com/modules/surf-cfengine-library/). These are the installation
 instructions:
  * `mkdir scl_masterfiles`
  * `cd scl_masterfiles`
@@ -132,6 +132,13 @@ instructions:
     1. `cfbs add surf-cfengine-library` (stable one)
  * `cfbs build`
  * `cfbs install`
+
+Note: Due to a bug in CFEngine Enterprise this library only works with CFEngine Community or CFEngine Enterprise versions 3.18.2 or 3.20 and greater.
+
+As of January 2022, these unreleased versions are available as nightly builds installable with [cf-remote](https://github.com/cfengine/cf-remote).
+ * `pip3 install cf-remote`
+ * `cf-remote --version master install --hub <hostname>` # for 3.20
+ * `cf-remote --version 3.18.x install --hub <hostname>`
 
 ### Own framework
 

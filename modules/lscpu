@@ -7,7 +7,7 @@ NAME=lscpu.json
 #
 generate_lscpu_json_file()
 {
-    $LSCPU | jq --raw-input --slurp \
+    ${LSCPU} | ${JQ} --raw-input --slurp \
 '
     split("\n")[:-1] |
     map(split(":")) |
@@ -30,25 +30,31 @@ generate_lscpu_json_file()
 '
 }
 
-if [ -z "$LSCPU" ]
+if [ -z "${LSCPU}" ]
 then
-    echo "lscpu not found"
+    echo "command 'lscpu' not found, please install"
+    exit 1
+fi
+
+if [ -z "${JQ}" ]
+then
+    echo "command 'jq' not found, please install"
     exit 1
 fi
 
 if [ $# -lt 1 ]
 then
-    FILE=/tmp/$NAME
+    FILE=/tmp/${NAME}
 else
-    FILE=$1/$NAME
+    FILE=$1/${NAME}
 fi
 
-if [ ! -f $FILE ]
+if [ ! -f ${FILE} ]
 then
-    generate_lscpu_json_file > $FILE
+    generate_lscpu_json_file > ${FILE}
 fi
 
 ## module output in a single line
-echo "%data=$(jq --compact-output --monochrome-output --ascii-output --unbuffered --sort-keys '.' $FILE)"
+echo "%data=$(jq --compact-output --monochrome-output --ascii-output --unbuffered --sort-keys '.' ${FILE})"
 
 

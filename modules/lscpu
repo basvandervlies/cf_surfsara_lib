@@ -55,6 +55,6 @@ then
 fi
 
 ## module output in a single line
-echo "%data=$(jq --compact-output --monochrome-output --ascii-output --unbuffered --sort-keys '.' ${FILE})"
+echo "%data=$(${JQ} --compact-output --monochrome-output --ascii-output --unbuffered --sort-keys '.' ${FILE})"
 
 

@@ -4,8 +4,6 @@ bundle common munge()
         any::
             "config_dir"        string => "/etc/munge";
             "munge_key_file"    string => "$(config_dir)/munge.key";
-
-        any::
             "service_name"      string => "munge";
             "packages"          data  => parsejson('
                     {
@@ -15,6 +13,15 @@ bundle common munge()
                     }
                 ');
 
+            ## Mustache templates
+            "template_2_destination" data => parsejson('
+                    {
+                        "munge.mustache" : "$(default_file)"
+                    }
+                ');
+        debian::
+            "service_name"     string => "munge";
+            "default_file"     string => "/etc/default/$(service_name)";
         systemd::
             "restart"          string => "$(paths.path[systemctl]) restart $(service_name)";
         !systemd::
@@ -81,8 +88,11 @@ bundle agent munge_config()
         any::
             "" usebundle => munge_daemons_restart(),
                 if => or(
-                    canonify("scl$(munge.munge_key_file)")
+                    canonify("scl$(munge.munge_key_file)"),
+                    canonify("scl$(munge.default_file)")
                 );
+
+            "" usebundle => scl_template_autorun("munge");
 
         munge_copy_files_set::
             "" usebundle => scl_service_copy_files("munge");
@@ -99,6 +109,14 @@ Source: [munge.cf](/services/munge.cf)
 
 This bundle copies a munge key to a node.
  * `/etc/munge/munge.key`
+
+This bundle will install munge and configure the following files with mustache templates:
+ * /etc/default/munge (debian)
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/scl/munge/
+ * templates/scl/munge/json
 
 This bundle also makes sure that the proper owner (munge:munge) and permissions (400) are set.
 
@@ -124,7 +142,7 @@ and extra json file(s) can be specified via:
 ```
 vars:
     any::
-        "munge_json_files" slist => { "lisa.json" }s
+        "munge_json_files" slist => { "lisa.json" }
 ```
 
 The variable must be `cron_json_files` and with this setup 1 extra json file will be  merged.
@@ -139,6 +157,7 @@ To debug this bundle set the `DEBUG_munge` class:
 
 See [default.json](/templates/munge/json/default.json) what the default values are and
 which variables can be overriden.
+
 
 ### copy_files
 

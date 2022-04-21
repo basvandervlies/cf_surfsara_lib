@@ -1,7 +1,7 @@
 #
 ## jupyterhub.cf @SURF
 #
-bundle agent jupyterhub
+bundle common jupyterhub
 {
     vars:
         any::
@@ -21,7 +21,6 @@ bundle agent jupyterhub_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("jupyterhub");
             "" usebundle => jupyterhub_install();
 
         JUPYTERHUB_SERVER::

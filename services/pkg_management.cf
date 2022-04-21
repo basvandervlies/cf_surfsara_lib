@@ -1,18 +1,19 @@
 #
 ## package_management.cf @SURF
 #
+bundle common pkg_management()
+{
+    vars:
+        "version" string => "0.0.2";
+}
+
+
 bundle agent pkg_management_autorun()
 {
     meta:
         "tags" slist => { "service_pkg_management", "template_pkg_management" };
 
-    methods:
-        "" usebundle => scl_data_autorun("pkg_management");
-        "" usebundle => pkg_management();
-}
 
-bundle agent pkg_management()
-{
     vars:
         any::
             "names" slist => getindices("scl.pkg_management"),
@@ -20,7 +21,7 @@ bundle agent pkg_management()
 
     methods:
         PKG_MANAGEMENT_PRIO_BACKPORTS::
-            "" usebundle => pkg_management_prio_backport_packages("@(pkg_management.names)"),
+            "" usebundle => pkg_management_prio_backport_packages("@(pkg_management_autorun.names)"),
                 comment => "Priorize backports packages";
 
         any::

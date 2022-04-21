@@ -1,7 +1,7 @@
 
 ## slurm.cf  @SURF
 #
-bundle agent slurm()
+bundle common slurm()
 {
     vars:
         any::
@@ -75,7 +75,6 @@ bundle agent slurm_autorun()
 
     methods:
         any::
-            "" usebundle => slurm();
             "" usebundle => slurm_install();
             "" usebundle => slurm_config();
             "" usebundle => slurm_daemon_check();

@@ -67,6 +67,9 @@ bundle agent scl_services_autorun
             "" usebundle => scl_services_data_expand(),
                 comment => "Expand cross reference bundle variables";
 
+            "" usebundle => "$(scl_services.enabled)",
+                comment => "Always run the service bundle, mostly it is the common bundle";
+
             "" usebundle => scl_services_run("$(scl_services.enabled)");
 
     reports:

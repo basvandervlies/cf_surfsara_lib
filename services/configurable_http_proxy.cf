@@ -1,7 +1,7 @@
 #
 ## configurable_http_proxy.cf @SURF
 #
-bundle agent configurable_http_proxy
+bundle common configurable_http_proxy
 {
     vars:
 }

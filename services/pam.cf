@@ -33,7 +33,6 @@ bundle agent pam_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("pam");
             "" usebundle => pam_install();
             "" usebundle => pam_config();
 

@@ -42,9 +42,7 @@
         "ConstrainRAMSpace=yes",
         "ConstrainSwapSpace=yes",
         "AllowedRAMSpace=100.0",
-        "AllowedSwapSpace=0.0",
-        "## We have to decide if we need TaskAffinity",
-        "TaskAffinity=yes"
+        "AllowedSwapSpace=0.0"
     ],
     "copy_dirs": [],
     "DebugFlags": [
@@ -89,6 +87,7 @@
     "Prolog": "$(slurm.opt_dir)/prolog/slurmd/*",
     "PrologEpilogTimeout": "3600",
     "PrologFlags": "x11",
+    "prolog_section": {},
     "PrologSlurmctld":"$(slurm.opt_dir)/prolog/slurmctld/check",
     "purge_section": {
         "PurgeJobAfter": "12month",
@@ -128,6 +127,7 @@
     "SlurmctldDebug": "info",
     "SlurmctldPort": "6817",
     "SlurmctldTimeout": "120",
+    "slurmctld_settings": {},
     "SlurmdDebug": "info",
     "SlurmdPort": "6818",
     "SlurmdTimeout": "300",
@@ -142,7 +142,7 @@
     },
     "StoragePass": "not_set",
     "taskplugin_section": {
-        "TaskPlugin": "task/cgroup"
+        "TaskPlugin": "task/affinity,task/cgroup"
     },
     "tmpfs": "/scratch",
     "topology_file": [],

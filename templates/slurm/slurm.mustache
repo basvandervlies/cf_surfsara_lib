@@ -110,7 +110,9 @@ Prolog={{{vars.scl.slurm.Prolog}}}
 PrologEpilogTimeout={{{vars.scl.slurm.PrologEpilogTimeout}}}
 PrologFlags={{{vars.scl.slurm.PrologFlags}}}
 PrologSlurmctld={{{vars.scl.slurm.PrologSlurmctld}}}
-
+{{#vars.scl.slurm.prolog_section}}
+{{{@}}}={{{.}}}
+{{/vars.scl.slurm.prolog_section}}
 
 # NHC health check
 {{#vars.scl.slurm.health_section}}

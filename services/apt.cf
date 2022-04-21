@@ -64,7 +64,6 @@ bundle agent apt_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("apt");
             "" usebundle => apt_install();
             "" usebundle => apt_repository();
             "" usebundle => apt_auth_conf();

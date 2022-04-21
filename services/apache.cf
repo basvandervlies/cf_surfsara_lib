@@ -1,5 +1,5 @@
 
-bundle agent apache
+bundle common apache()
 {
     vars:
 
@@ -203,7 +203,6 @@ bundle agent apache_autorun()
 
     methods:
         debian|sles::
-            "" usebundle => apache();
             "" usebundle => apache_install();
             "" usebundle => apache_config();
             "" usebundle => apache_daemon_check();

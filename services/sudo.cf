@@ -28,7 +28,6 @@ bundle agent sudo_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("sudo");
             "" usebundle => sudo_install();
             "" usebundle => sudo_config();
 

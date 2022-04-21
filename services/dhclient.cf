@@ -26,7 +26,6 @@ bundle agent dhclient_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("dhclient");
             "" usebundle => dhclient_config();
 
 }

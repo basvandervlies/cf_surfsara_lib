@@ -33,7 +33,6 @@ bundle agent systemd_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("systemd");
             "" usebundle => systemd_config();
 }
 

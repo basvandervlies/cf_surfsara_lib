@@ -18,8 +18,9 @@ bundle common node_exporter()
                 }
             ');
 
-            "reload" string => "$(paths.path[systemctl]) reload $(service_name)";
-            "restart" string => "$(paths.path[systemctl]) restart $(service_name)";
+            "daemon_reload" string => "$(paths.path[systemctl]) daemon-reload";
+            "reload"        string => "$(paths.path[systemctl]) reload $(service_name)";
+            "restart"       string => "$(paths.path[systemctl]) restart $(service_name)";
 
         !systemd::
             "template_2_destination" data => parsejson('
@@ -56,10 +57,15 @@ bundle agent node_exporter_config()
         any::
             "" usebundle => scl_mustache_autorun("node_exporter");
         node_exporter_cron::
-            "" usebundle => scl_make_cron_file("sys2prometheus","@(scl.node_exporter[cron_job])");
+            "" usebundle => scl_make_cron_file("sys2prometheus", "@(scl.node_exporter[cron_job])");
 
     commands:
         systemd::
+            "$(node_exporter.daemon_reload)"
+                if => or(
+                    canonify("scl$(node_exporter.systemd_file)")
+                    );
+
             "$(node_exporter.restart)"
                 if => or(
                     canonify("scl$(node_exporter.systemd_file)"),
@@ -79,12 +85,12 @@ bundle agent node_exporter_config()
 
             "$(node_exporter.systemd_file)"
                 perms => mog("644", "root", "root");
-
 }
 
 bundle agent node_exporter_restart
 {
     commands:
+        "$(node_exporter.daemon_reload)";
         "$(node_exporter.restart)";
 }
 
@@ -123,7 +129,6 @@ bundle agent node_exporter_autorun()
         "tags" slist => { "service_node_exporter", "template_node_exporter" };
 
     methods:
-        "" usebundle => scl_data_autorun("node_exporter");
         "" usebundle => node_exporter_install();
         "" usebundle => node_exporter_config();
         "" usebundle => node_exporter_daemon_check();

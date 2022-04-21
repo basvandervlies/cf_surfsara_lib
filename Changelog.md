@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
 * [Version: 1.2.0 (2022-01-26)](#version-120-2022-01-26)
     * [scl_service_rotate_files](#scl_service_rotate_files)
 * [Version: 1.1.0 (2021-12-21)](#version-110-2021-12-21)
@@ -26,6 +27,24 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.3.0 (2022-05-04)
+
+ SCL enhancements:
+ * `lib/scl/services.cf`: Always run `bundle common <service` then all variables are resolved. All services are adjusted
+
+These services have bug fixes or new features:
+ * jupyterhub:
+  *  `JUPYTERHUB_SERVICE_PREFIX` was set incorrectly must end with `/`
+ * munge:
+  * Added a template file and adjusted default.json. So we can specify the daemon options
+ * node\_exporter:
+  * when service file has been changed reload the systemd
+ * resolv:
+  * Change header of the mustache file
+ * slurm:
+  * added `prolog_section` definition to json/mustache
+  * `default.json` has been adjusted to slurm version 21.08
+
 # Version: 1.2.0 (2022-01-26)
 
 The SCL enhancements:

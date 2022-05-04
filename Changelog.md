@@ -32,6 +32,9 @@
  SCL enhancements:
  * `lib/scl/services.cf`: Always run `bundle common <service` then all variables are resolved. All services are adjusted
 
+Inventory bugs or enhancements:
+ * lscpu report when command `jq` is not installed (closes issue #100)
+
 These services have bug fixes or new features:
  * jupyterhub:
   *  `JUPYTERHUB_SERVICE_PREFIX` was set incorrectly must end with `/`

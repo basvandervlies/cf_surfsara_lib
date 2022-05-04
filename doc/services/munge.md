@@ -6,6 +6,14 @@ Source: [munge.cf](/services/munge.cf)
 This bundle copies a munge key to a node.
  * `/etc/munge/munge.key`
 
+This bundle will install munge and configure the following files with mustache templates:
+ * /etc/default/munge (debian)
+
+These files will be generated with the aid of mustache templates with json data.
+the templates are located in:
+ * templates/scl/munge/
+ * templates/scl/munge/json
+
 This bundle also makes sure that the proper owner (munge:munge) and permissions (400) are set.
 
 The following json variables can be set in def.cf/json to invoke files bundles:
@@ -30,7 +38,7 @@ and extra json file(s) can be specified via:
 ```
 vars:
     any::
-        "munge_json_files" slist => { "lisa.json" }s
+        "munge_json_files" slist => { "lisa.json" }
 ```
 
 The variable must be `cron_json_files` and with this setup 1 extra json file will be  merged.
@@ -45,6 +53,7 @@ To debug this bundle set the `DEBUG_munge` class:
 
 See [default.json](/templates/munge/json/default.json) what the default values are and
 which variables can be overriden.
+
 
 ### copy_files
 

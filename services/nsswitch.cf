@@ -2,10 +2,9 @@
 #
 # bundle to create nsswitch.conf @SURF
 #
-bundle common nsswitch(params)
+bundle common nsswitch()
 {
     vars:
-
         any::
             "config_dir"        string => "/etc";
             "file"              string => "$(config_dir)/nsswitch.conf";
@@ -24,7 +23,6 @@ bundle agent nsswitch_autorun()
         "tags" slist => { "service_nsswitch", "template_nsswitch" };
 
     methods:
-        "config" usebundle => scl_data_autorun("nsswitch");
         "config" usebundle => nsswitch_config();
 
     reports:

@@ -47,7 +47,6 @@ bundle agent tcpwrappers_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("tcpwrappers");
             "" usebundle => tcpwrappers_install();
             "" usebundle => tcpwrappers_config();
 }

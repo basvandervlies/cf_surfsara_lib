@@ -1,7 +1,7 @@
 #
 ## enroot.cf @SURF
 #
-bundle agent enroot()
+bundle common enroot()
 {
     vars:
         any::
@@ -16,8 +16,6 @@ bundle agent enroot_autorun()
         "tags" slist => { "service_enroot", "template_enroot" };
 
     methods:
-        "" usebundle => enroot();
-        "" usebundle => scl_data_autorun("enroot");
         "" usebundle => enroot_install();
         "" usebundle => enroot_config();
 }

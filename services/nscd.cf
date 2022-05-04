@@ -31,7 +31,6 @@ bundle agent nscd_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("nscd");
             "" usebundle => nscd_install();
             "" usebundle => nscd_config();
             "" usebundle => nscd_daemons_check();

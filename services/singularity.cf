@@ -40,7 +40,6 @@ bundle agent singularity_autorun
 
     methods:
         debian|centos::
-            "" usebundle => scl_data_autorun("singularity");
             "" usebundle => singularity_install;
             "" usebundle => singularity_config;
 

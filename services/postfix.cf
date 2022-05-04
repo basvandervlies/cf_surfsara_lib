@@ -93,7 +93,6 @@ bundle agent postfix_autorun()
 
     methods:
         any::
-            ""  usebundle => scl_data_autorun("postfix");
             ""  usebundle => postfix_install();
             ""  usebundle => scl_service_copy_dirs("postfix"),
                     if => "postfix_copy_dirs_set";

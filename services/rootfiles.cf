@@ -1,7 +1,7 @@
 #
 ## rootfiles.cf @SURF
 #
-bundle common rootfiles(params)
+bundle common rootfiles()
 {
     vars:
         any::

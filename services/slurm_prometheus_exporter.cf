@@ -77,7 +77,6 @@ bundle agent slurm_prometheus_exporter_autorun()
         "tags" slist => { "service_slurm_prometheus_exporter", "template_slurm_prometheus_exporter" };
 
     methods:
-        "" usebundle => scl_data_autorun("slurm_prometheus_exporter");
         "" usebundle => slurm_prometheus_exporter_install();
         "" usebundle => slurm_prometheus_exporter_config();
         "" usebundle => slurm_prometheus_exporter_daemon_check();

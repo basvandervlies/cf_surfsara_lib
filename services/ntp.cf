@@ -78,7 +78,6 @@ bundle agent ntp_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("ntp");
             "" usebundle => ntp_install();
             "" usebundle => ntp_config();
             "" usebundle => ntp_daemons_check();

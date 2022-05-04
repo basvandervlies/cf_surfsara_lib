@@ -1,14 +1,20 @@
 #
 ## copy_dirs.cf @SURF
 #
-bundle agent copy_dirs()
+bundle common copy_dirs()
+{
+    vars:
+        "version" string => "0.0.1";
+}
+
+
+bundle agent copy_dirs_autorun()
 {
     meta:
         "tags" slist => { "service_copy_dirs", "template_copy_dirs" };
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("copy_dirs");
             "" usebundle => copy_dirs_config();
 }
 

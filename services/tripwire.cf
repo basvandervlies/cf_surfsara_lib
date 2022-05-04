@@ -19,7 +19,6 @@ bundle agent tripwire_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("tripwire");
             "" usebundle => tripwire_config();
 }
 

@@ -1,3 +1,4 @@
 {
-    "copy_files": []
+    "copy_files": [],
+    "daemon_options" : ""
 }

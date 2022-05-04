@@ -18,7 +18,7 @@
             {
                 "name": "debian_security_repo",
                 "desc": "repo for security updates debian",
-                "url": "deb http://security.debian.org/ $(apt.os_name)/updates main contrib"
+                "url": "deb http://security.debian.org/debian-security $(apt.os_name)-security main contrib non-free"
             }
         ]
     }

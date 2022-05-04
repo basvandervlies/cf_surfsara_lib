@@ -94,7 +94,6 @@ bundle agent ssh_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("ssh");
             "" usebundle => ssh_install();
             "" usebundle => ssh_config();
             "" usebundle => ssh_daemons_check();

@@ -49,7 +49,6 @@ bundle agent chrony_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("chrony");
             "" usebundle => chrony_install();
             "" usebundle => chrony_config();
             "" usebundle => chrony_daemons_check();

@@ -30,7 +30,6 @@ bundle agent pam_radius_autorun()
 
     methods:
         any::
-            "" usebundle => scl_data_autorun("pam_radius");
             "" usebundle => pam_radius_install();
             "" usebundle => pam_radius_config();
 }

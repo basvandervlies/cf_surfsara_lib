@@ -197,7 +197,7 @@ both installations method
 
 ###  scl\_services\_enabled run method
 
-This is the prefered method for MPF and your own frameork. With this method you can contol which services are run
+This is the prefered method for MPF and your own framework. With this method you can contol which services are run
 and which files are included, eg: def.json
 ```
 "vars": {

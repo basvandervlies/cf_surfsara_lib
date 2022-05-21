@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.4.0 (2022-0?-??)](#version-140-2022-0-)
 * [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
 * [Version: 1.2.0 (2022-01-26)](#version-120-2022-01-26)
     * [scl_service_rotate_files](#scl_service_rotate_files)
@@ -27,6 +28,17 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.4.0 (2022-0?-??)
+
+SCL enhancements:
+ * Added `lib/scl/commands.cf`:  For command body defintions used in SCL services
+ * `sara_sata` is replaced by `scl` for all json/mustache files
+ * `cf_bundles_dir` is replaced by standard shortcut `data` for all json/mustache files
+
+These services have bug fixes or new features:
+ * slurm_prometheus_exporter
+  * Uses now `scl_service_copy_dirs` method to install the software
+
 # Version: 1.3.0 (2022-05-04)
 
  SCL enhancements:

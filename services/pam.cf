@@ -19,7 +19,6 @@ bundle common pam()
                 {
                     "install": {
                         "libpam-python" :   "",
-                        "python-pyqrcode" : "",
                         "python3-pyqrcode" : ""
                         }
                 }

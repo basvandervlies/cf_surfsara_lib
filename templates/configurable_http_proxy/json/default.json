@@ -3,11 +3,11 @@
     "dir": "/opt/configurable-http-proxy",
     "install_tarballs": [
         {
-            "check_dir": "$(sara_data.configurable_http_proxy[dir])/4.2.0",
-            "dest": "$(sara_data.configurable_http_proxy[dir])/configurable-http-proxy-4.2.0.tar.gz",
+            "check_dir": "$(scl.configurable_http_proxy[dir])/4.2.0",
+            "dest": "$(scl.configurable_http_proxy[dir])/configurable-http-proxy-4.2.0.tar.gz",
             "extract": {
                 "cmd": "$(paths.path[tar]) --extract --gzip --file",
-                "in_dir": "$(sara_data.configurable_http_proxy[dir])"
+                "in_dir": "$(scl.configurable_http_proxy[dir])"
             },
             "mog": [ "0644", "root", "root"],
             "source": "data/configurable_http_proxy/tarballs/configurable-http-proxy-4.2.0.tar.gz"

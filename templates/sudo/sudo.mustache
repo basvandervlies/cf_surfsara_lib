@@ -4,42 +4,42 @@
 
 # Host alias specification
 
-{{#vars.sara_data.sudo.host_alias}}
+{{#vars.scl.sudo.host_alias}}
 Host_Alias {{@}} = {{.}}
-{{/vars.sara_data.sudo.host_alias}}
+{{/vars.scl.sudo.host_alias}}
 
 # User alias specification
 
-{{#vars.sara_data.sudo.user_alias}}
+{{#vars.scl.sudo.user_alias}}
 User_Alias {{@}} =  {{.}}
-{{/vars.sara_data.sudo.user_alias}}
+{{/vars.scl.sudo.user_alias}}
 
 # Cmnd alias specification
 
-{{#vars.sara_data.sudo.cmnd_alias}}
+{{#vars.scl.sudo.cmnd_alias}}
 Cmnd_Alias {{{alias}}} = {{{args}}}
-{{/vars.sara_data.sudo.cmnd_alias}}
+{{/vars.scl.sudo.cmnd_alias}}
 
 # Runas alias specification
 
-{{#vars.sara_data.sudo.runas_alias}}
+{{#vars.scl.sudo.runas_alias}}
 Runas_Alias {{{alias}}} = {{{args}}}
-{{/vars.sara_data.sudo.runas_alias}}
+{{/vars.scl.sudo.runas_alias}}
 
 # Group Permissions
 
-{{#vars.sara_data.sudo.group_permissions}}
+{{#vars.scl.sudo.group_permissions}}
 {{{group}}} {{{args}}}
-{{/vars.sara_data.sudo.group_permissions}}
+{{/vars.scl.sudo.group_permissions}}
 
 # User Permissions
 
-{{#vars.sara_data.sudo.user_permissions}}
+{{#vars.scl.sudo.user_permissions}}
 {{{user}}} {{{args}}}
-{{/vars.sara_data.sudo.user_permissions}}
+{{/vars.scl.sudo.user_permissions}}
 
 # Defaults
 
-{{#vars.sara_data.sudo.defaults}}
+{{#vars.scl.sudo.defaults}}
 {{{defaults}}} {{{args}}}
-{{/vars.sara_data.sudo.defaults}}
+{{/vars.scl.sudo.defaults}}

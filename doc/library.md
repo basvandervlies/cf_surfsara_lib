@@ -2,6 +2,7 @@
 # The library documentattion
 
  * [boot](library/boot.md)
+ * [commands](library/commands.md)
  * [common](library/common.md)
  * [def](library/def.md)
  * [files](library/files.md)

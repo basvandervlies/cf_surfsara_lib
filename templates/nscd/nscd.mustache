@@ -3,27 +3,27 @@
 # nscd.mustache @SURF
 
 #   logfile         /var/log/nscd.log
-    threads         {{{vars.sara_data.nscd.threads}}}
-    max-threads     {{{vars.sara_data.nscd.max-threads}}}
+    threads         {{{vars.scl.nscd.threads}}}
+    max-threads     {{{vars.scl.nscd.max-threads}}}
 
 #   server-user     nobody
 #   stat-user       somebody
-    debug-level     {{{vars.sara_data.nscd.debug-level}}}
-    reload-count    {{{vars.sara_data.nscd.reload-count}}}
-    paranoia        {{{vars.sara_data.nscd.paranoia}}}
-    restart-interval {{{vars.sara_data.nscd.restart-interval}}}
+    debug-level     {{{vars.scl.nscd.debug-level}}}
+    reload-count    {{{vars.scl.nscd.reload-count}}}
+    paranoia        {{{vars.scl.nscd.paranoia}}}
+    restart-interval {{{vars.scl.nscd.restart-interval}}}
 
-    enable-cache hosts {{{vars.sara_data.nscd.enable-cache-hosts}}}
-{{#vars.sara_data.nscd.cache_hosts}}
+    enable-cache hosts {{{vars.scl.nscd.enable-cache-hosts}}}
+{{#vars.scl.nscd.cache_hosts}}
     {{@}}   hosts      {{.}}
-{{/vars.sara_data.nscd.cache_hosts}}
+{{/vars.scl.nscd.cache_hosts}}
 
-    enable-cache group {{{vars.sara_data.nscd.enable-cache-group}}}
-{{#vars.sara_data.nscd.cache_group}}
+    enable-cache group {{{vars.scl.nscd.enable-cache-group}}}
+{{#vars.scl.nscd.cache_group}}
     {{@}}   group       {{.}}
-{{/vars.sara_data.nscd.cache_group}}
+{{/vars.scl.nscd.cache_group}}
 
-    enable-cache passwd {{{vars.sara_data.nscd.enable-cache-passwd}}}
-{{#vars.sara_data.nscd.cache_passwd}}
+    enable-cache passwd {{{vars.scl.nscd.enable-cache-passwd}}}
+{{#vars.scl.nscd.cache_passwd}}
     {{@}}   passwd      {{.}}
-{{/vars.sara_data.nscd.cache_passwd}}
+{{/vars.scl.nscd.cache_passwd}}

@@ -95,15 +95,15 @@ When this variable is set it will copy the specified file to the `ssh.config_dir
 "copy_files": [
     {
         "dest": "$(ssh.config_dir)/shosts.equiv",
-        "source": "cf_bundles_dir/ssh/lisa/shosts.equiv",
+        "source": "data/ssh/lisa/shosts.equiv",
         "mog": [ "0644", "root", "root" ]
     },
     {
         "dest": "$(ssh.config_dir)/ssh_known_hosts2",
-        "source": "cf_bundles_dir/ssh/lisa/ssh_known_hosts2",
+        "source": "data/ssh/lisa/ssh_known_hosts2",
         "mog": [ "0644", "root", "root" ],
         "run_bundle": "ssh_daemons_restart"
     }
 ]
 ```
-where `cf_bundles_dir` is a ''cf-serverd shortcut''.
+where `data` is a ''cf-serverd shortcut''.

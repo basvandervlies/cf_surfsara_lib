@@ -30,7 +30,7 @@
 # Version: 1.3.0 (2022-05-04)
 
  SCL enhancements:
- * `lib/scl/services.cf`: Always run `bundle common <service` then all variables are resolved. All services are adjusted
+ * `lib/scl/services.cf`: Always run `bundle common <service>` then all variables are resolved. All services are adjusted
 
 Inventory bugs or enhancements:
  * lscpu report when command `jq` is not installed (closes issue #100)

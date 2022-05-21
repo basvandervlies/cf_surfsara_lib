@@ -73,8 +73,8 @@ relay_destination_concurrency_limit = 1
 relay_extra_recipient_limit = 1
 relay_initial_destination_concurrency = 1
 
-smtpd_recipient_restrictions = {{#vars.sara_data.postfix.smtpd_recipient_restrictions}}{{{.}}},{{/vars.sara_data.postfix.smtpd_recipient_restrictions}}
-smtpd_helo_restrictions = {{#vars.sara_data.postfix.smtpd_helo_restrictions}}{{{.}}},{{/vars.sara_data.postfix.smtpd_helo_restrictions}}
+smtpd_recipient_restrictions = {{#vars.scl.postfix.smtpd_recipient_restrictions}}{{{.}}},{{/vars.scl.postfix.smtpd_recipient_restrictions}}
+smtpd_helo_restrictions = {{#vars.scl.postfix.smtpd_helo_restrictions}}{{{.}}},{{/vars.scl.postfix.smtpd_helo_restrictions}}
 {{/classes.POSTFIX_STRICT_HANDLING}}
 
 {{^classes.POSTFIX_STRICT_HANDLING}}

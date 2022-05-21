@@ -8,42 +8,42 @@
 #
 ALL: 127.0.0.1 : ALLOW
 
-{{#vars.sara_data.tcpwrappers.allow_all}}
+{{#vars.scl.tcpwrappers.allow_all}}
 # {{{desc}}}
 ALL: {{{allow}}} :ALLOW
-{{/vars.sara_data.tcpwrappers.allow_all}}
+{{/vars.scl.tcpwrappers.allow_all}}
 
-{{#vars.sara_data.tcpwrappers.allow_extra}
+{{#vars.scl.tcpwrappers.allow_extra}
 # {{{desc}}}
 {{{service}}}: {{{allow}}} :ALLOW
-{{/vars.sara_data.tcpwrappers.allow_extra}}
+{{/vars.scl.tcpwrappers.allow_extra}}
 
-{{#vars.sara_data.tcpwrappers.allow_http}}
+{{#vars.scl.tcpwrappers.allow_http}}
 # {{{desc}}}
 http: {{{allow}}} :ALLOW
 https: {{{allow}}} :ALLOW
-{{/vars.sara_data.tcpwrappers.allow_http}}
+{{/vars.scl.tcpwrappers.allow_http}}
 
-{{#vars.sara_data.tcpwrappers.allow_kerberos}}
+{{#vars.scl.tcpwrappers.allow_kerberos}}
 # {{{desc}}}
 krb5kdc: {{{allow}}} :ALLOW
-{{/vars.sara_data.tcpwrappers.allow_kerberos}}
+{{/vars.scl.tcpwrappers.allow_kerberos}}
 
-{{#vars.sara_data.tcpwrappers.allow_ldap}}
+{{#vars.scl.tcpwrappers.allow_ldap}}
 # {{{desc}}}
 slapd: {{{allow}}} :ALLOW
-{{/vars.sara_data.tcpwrappers.allow_ldap}}
+{{/vars.scl.tcpwrappers.allow_ldap}}
 
-{{#vars.sara_data.tcpwrappers.allow_nfs3}}
+{{#vars.scl.tcpwrappers.allow_nfs3}}
 # {{{desc}}}
 mountd: {{{allow}}} :ALLOW
 nfsd: {{{allow}}} :ALLOW
 rpcbind: {{{allow}}} :ALLOW
 rquotad: {{{allow}}} :ALLOW
 sara_quotad: {{{allow}}} :ALLOW
-{{/vars.sara_data.tcpwrappers.allow_nfs3}}
+{{/vars.scl.tcpwrappers.allow_nfs3}}
 
-{{#vars.sara_data.tcpwrappers.allow_ssh}}
+{{#vars.scl.tcpwrappers.allow_ssh}}
 # {{{desc}}}
 sshd: {{{allow}}} :ALLOW
-{{/vars.sara_data.tcpwrappers.allow_ssh}}
+{{/vars.scl.tcpwrappers.allow_ssh}}

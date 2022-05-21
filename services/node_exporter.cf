@@ -204,7 +204,7 @@ if there are changes, eg:
         "exclude_dirs": [ ".git", ".svn" ],
         "purge": "true",
         "run_bundle": "node_exporter_restart",
-        "source": "cf_bundles_dir/prometheus_exporters/node_exporter-0.15.2"
+        "source": "data/prometheus_exporters/node_exporter-0.15.2"
     }
 ]
 ```

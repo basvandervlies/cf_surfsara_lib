@@ -1,4 +1,4 @@
-# ssh
+# SSH
 
 Source: [ssh.cf](/services/ssh.cf)
 
@@ -24,11 +24,11 @@ The following clases can be set via def.cf/json:
  *  `KEYGEN`: Must we generate host keys, command line options can bet set via json
  *  `PUBKEY_AUTHENTICATION`: Enable ssh public keys via `AuthorizedKeysCommand`
 
-The following json variables can be set in def.cf/json to  invoke files bundles:
+The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
@@ -51,7 +51,7 @@ vars:
         "ssh_json_files" slist => { "policy_server.json" };
 ```
 
-The variable must be ''ssh_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be ''ssh_json_files'' and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -72,7 +72,7 @@ vars:
 ```
 
  * Set/Override the daemon options variable in ''def.json'':
-```json
+```
         "ssh" : {
             "classes": {
                 "keygen": [ "any" ]
@@ -88,7 +88,7 @@ vars:
     "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
 ```
 
-### copy_files
+### COPY_FILES
 
 When this variable is set it will copy the specified file to the `ssh.config_dir`, eg:
 ```json

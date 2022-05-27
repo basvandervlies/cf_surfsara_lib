@@ -59,6 +59,10 @@ bundle agent scl_services_autorun
     vars:
         "inputs" slist => maplist("$(scl_services.dir)/$(this).cf", @(scl_services.enabled));
 
+    classes:
+        "SCL_$(scl_services.enabled)_enabled"
+                scope => "namespace";
+
     methods:
         scl_services_set::
             "" usebundle => scl_services_data(@(scl_services.enabled)),

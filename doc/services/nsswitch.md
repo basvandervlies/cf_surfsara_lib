@@ -1,5 +1,5 @@
 
-# nsswitch
+# NSSWITCH
 
 Source: [nsswitch.cf](/services/nsswitch.cf)
 
@@ -42,7 +42,7 @@ vars:
         "nsswitch_json_files" slist => { "lisa.json" };
 ```
 
-The variable must be `nsswitch_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `nsswitch_json_files` and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 

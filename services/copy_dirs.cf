@@ -24,7 +24,7 @@ bundle agent copy_dirs_config()
     classes:
         any::
             "copy_dirs_set" expression => isvariable("scl.copy_dirs[copy_dirs]"),
-                comment => "Must we copy extra files for copy_dirs bundl";
+                comment => "Must we copy extra files for copy_dirs bundle";
 
     methods:
         any::
@@ -70,7 +70,7 @@ vars:
         "copy_dirs_json_files" slist => { "lisa.json" };
 ```
 
-The variable must be `copy_dirs_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `copy_dirs_json_files` and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 

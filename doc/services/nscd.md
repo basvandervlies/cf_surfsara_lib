@@ -1,4 +1,4 @@
-# nscd
+# NSCD
 
 Source: [nscd.cf](/services/nscd.cf)
 
@@ -13,7 +13,7 @@ the templates are located in:
  * templates/nscd/
  * templates/nscd/json
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
@@ -36,7 +36,7 @@ vars:
         "nscd_json_files" slist => { "disable_cache.json" };
 ```
 
-The variable must be `nscd_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `nscd_json_files` and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -50,7 +50,7 @@ See [default.json](/templates/nscd/json/default.json) what the default values ar
 which variables can be overriden
 
 The following must be set in the specific `def.json` hostfile
-```json
+```
 "vars": {
     "nscd": {
         ...
@@ -67,7 +67,7 @@ vars:
     "nscd_json_files" slist => { "disable_cache.json" };
 ```
  * Set/Override the daemon options variable in ''def.json'':
-```json
+```
 "nscd" : {
     "debug-level": "1"
 }

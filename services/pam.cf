@@ -197,7 +197,7 @@ bundle agent pam_conffile_generate(file, data_section)
 }
 
 @if minimum_version(99.9)
-# pam
+# PAM
 
 Source: [pam.cf](/services/pam.cf)
 
@@ -211,7 +211,7 @@ The bundle can also generate configuration files for, class are set with `if_rep
  * pam_limits --> /etc/security/limits.d/scl.conf
  * pam_listfiles --> /etc/security/<section>.<allow|deny>, section can be `group|user`
 
-These files will be generated with the  json data specified
+These files will be generated with the json data specified
 the templates are located in:
  * templates/pam/
  * templates/pam/json
@@ -220,11 +220,11 @@ The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -243,9 +243,9 @@ vars:
         "pam_json_files" slist => { "ldap.json", "ldap_pam.json" };
 ```
 
-The variable must be ''pam_json_files'' and with this setup 2 extra json file will be  merged.
+The variable must be ''pam_json_files'' and with this setup 2 extra json file will be merged.
 
-### Debug
+### DEBUG
 
 If you want to debug these bundle set the `DEBUG_pam` class, eg:
  * `-DDEBUG_pam`
@@ -254,7 +254,7 @@ If you want to debug these bundle set the `DEBUG_pam` class, eg:
 ## Def.cf/json
 
 See [default.json](/templates/pam/json/default.json) what the default values are and
-which variables can be overriden. This are all data section definitions.  To couple a data
+which variables can be overriden. This are all data section definitions. To couple a data
 section to a pam file, see [default_pam.json](/templates/pam/json/default_pam.json) for debian|centos.
 
 ### pam configuration files
@@ -264,7 +264,7 @@ To generate the configuration files for the pam module. We use inline json to tr
 #### pam_listfile
 
 For we can generate the `group.allow|deny` in /etc/security with the following json file:
-```json
+```
     pam_listfile: {
         group: {
             allow: [
@@ -284,10 +284,10 @@ The pam module configuration line:
  * `account required pam_listfile.so onerr=fail item=group sense=allow file=/etc/security/group.allow`
 
 
-#### pam_limits
+#### PAM_LIMITS
 
 If data section is defined we generate the following file `/etc/security/limit.d/scl.conf`, eg:
-```json
+```
 
     "pam_limits": [
         "# Managed by CFEngine",
@@ -315,8 +315,8 @@ Here are some examples how to use it:
 vars:
     "pam_json_files" slist => { "default_pam.json" };
 ```
- * Define pam data stack in *pam/templates/json/scl.json*:
-```json
+ * Define pam data stack in `pam/templates/json/scl.json`:
+```
 "common-account": {
     "comment": "only local logins",
     "rules": [
@@ -410,7 +410,7 @@ vars:
 ```
 
   * You can create your own data section and generate your own pam files, eg:
-```json
+```
 "vars": {
     "pam": {
         "sudo-radius": {

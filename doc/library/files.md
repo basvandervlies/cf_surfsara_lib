@@ -148,6 +148,22 @@ Where:
        ]
 }
 ```
+## bundle agent scl_tidy_directory(directory, days_back) ==
+
+This bundle will delete file(s)/dir(s) in a directory that are older then the specified day(s), eg:
+```
+methods:
+    "" usebundle => scl_tidy_directory("/tmp", "30");
+```
+
+for files `atime` is used and for directories `mtime` is used.
+## bundle agent scl_tidy_files(regexp, days_back) ==
+
+This bundle will delete file(s) in a directory that match the regexp and are older then the specified day(s), eg:
+```
+methods:
+    "" usebundle => scl_tidy_files("/tmp/X.*", "2");
+```
 ## edit_line scl_var_to_file
 
 Save an 'variable' to a file.  The file will be emptied id the 'variable' is not

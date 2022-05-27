@@ -1,4 +1,4 @@
-# tripwire
+# TRIPWIRE
 
 Source: [tripwire.cf](/services/tripwire.cf)
 
@@ -9,11 +9,11 @@ No template file are generated, we only need josn file(s) as input. The location
 file(s) are:
  * templates/tripwire/json
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -32,7 +32,7 @@ vars:
         "tripwire_json_files" slist => { "tomcat.json" };
 ```
 
-The variable must be ''tripwire_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be ''tripwire_json_files'' and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -60,7 +60,7 @@ Same can also be set in `def.json`
 ```
 
 Added some extra binaries to the *standard* ones:
-```json
+```
 {
 "apache":  "/usr/sbin/httpd",
 "sshd": "/usr/sbin/sshd"

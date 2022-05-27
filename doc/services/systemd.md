@@ -1,4 +1,4 @@
-# systemd
+# SYSTEMD
 
 Source: [systemd.cf](/services/systemd.cf)
 
@@ -8,16 +8,16 @@ This bundle will generate overides for system.conf and user.conf in:
 
 The defaults are empty and can overriden by `key = value` pair.
 
-It can also handle the installation and deletion of systemd services The service
+It can also handle the installation and deletion of systemd services. The service
 files are installed for:
  * debian, redhat, centos : /lib/systemd/system
 
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -49,7 +49,7 @@ See [default.json](/templates/systemd/json/default.json) what the default values
 which variables can be overriden.
 
 Here is an example how to use the bundle:
-```json
+```
 {
 "vars": {
     "systemd": {

@@ -1,4 +1,4 @@
-# yum
+# YUM
 
 Source: [yum.cf](/services/yum.cf)
 
@@ -13,11 +13,11 @@ The templates/json files are located in:
  * templates/yum_repository/
  * templates/yum_repository/json
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -36,7 +36,7 @@ vars:
         "yum_repository_json_files" slist => { "surfsara.json" };
 ```
 
-The variable must be `yum_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `yum_json_files` and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -45,7 +45,7 @@ If you want to debug these bundle set the `DEBUG_yum` class, eg:
 
 ## def.cf/json
 
-See what the default values are and which variables can be overriden:j
+See what the default values are and which variables can be overriden
  * [yum default.json](/templates/yum/json/default.json)
  * [yum repository default.json](/templates/yum_repository/json/default.json)
 
@@ -64,7 +64,7 @@ any::
 ```
 
  * def.json
-```json
+```
 "vars": {
     "yum_repository_files": [ "epel.json" ],
 }
@@ -78,7 +78,7 @@ vars:
 ```
 
  * def.json
-```json
+```
 "vars": {
     "yum": {
         "assumeyes":  "0"

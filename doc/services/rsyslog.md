@@ -1,4 +1,4 @@
-# rsyslog.cf
+# RSYSLOG
 
 Source: [rsyslog.cf](/services/rsyslog.cf)
 
@@ -14,7 +14,7 @@ The class can be set in the def.cf/json:
 }
 ```
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`

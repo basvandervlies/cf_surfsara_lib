@@ -1,4 +1,4 @@
-# slurm_prometheus_exporter
+# SLURM_PROMETHEUS_EXPORTER
 
 **This bundle must be rewritten to the new standard**
 

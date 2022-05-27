@@ -32,8 +32,13 @@
 
 SCL enhancements:
  * Added `lib/scl/commands.cf`:  For command body defintions used in SCL services
- * `sara_sata` is replaced by `scl` for all json/mustache files
+ * `sara_data` is replaced by `scl` for all json/mustache files
  * `cf_bundles_dir` is replaced by standard shortcut `data` for all json/mustache files
+ * added new scl library bundles:
+  * `scl_tidy_directory`: delete file(s)/dir(s) that are older then the specified day(s) select by 'atime'
+  * `scl_tidy_files`: delete file(s) with a regexp older then the specified day(s) select by `mtime`
+ * added new scl library bodies:
+  * `scl_days_old_by_atime`: select files that are older then the specified day(s) selected by 'atime'
 
 These services have bug fixes or new features:
  * slurm_prometheus_exporter

@@ -1,4 +1,4 @@
-# sudo
+# SUDO
 
 Source: [sudo.cf](/services/sudo.cf)
 
@@ -26,7 +26,7 @@ sudo json data secton, eg:
     }
 }
 ```
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
@@ -49,7 +49,7 @@ vars:
         "sudo_json_files" slist => { "lisa.json" };
 ```
 
-The variable must be ''sudo_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be ''sudo_json_files'' and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 

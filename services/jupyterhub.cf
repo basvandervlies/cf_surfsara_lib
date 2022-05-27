@@ -253,7 +253,7 @@ rm -rf $(scl.jupyterhub[state_dir])/$(name)"
 }
 
 @if minimum_version(99.9)
-# jupyterhub
+# JUPYTERHUB
 
 Source: [jupyterhub.cf](/services/jupyterhub.cf)
 

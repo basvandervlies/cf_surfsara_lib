@@ -82,7 +82,7 @@ bundle agent slurm_prometheus_exporter_autorun()
         "" usebundle => slurm_prometheus_exporter_daemon_check();
 }
 @if minimum_version(99.9)
-# slurm_prometheus_exporter
+# SLURM_PROMETHEUS_EXPORTER
 
 **This bundle must be rewritten to the new standard**
 

@@ -1,4 +1,4 @@
-# ntp
+# NTP
 
 Source: [ntp.cf](/services/ntp.cf)
 
@@ -7,7 +7,7 @@ This bundle will generate these files from mustache templates:
  * /etc/default/ntpdate (debian), /etc/sysconfig/ntpdate (centos)
  * /etc/default/ntp (debian), /etc/sysconfig/ntpd (centos)
 
-f one of the files is changed then the followong ''class'' will be set:
+if one of the files is changed then the following ''class'' will be set:
  * scl_etc_ntp_conf
  * scl_etc_default_ntp
  * scl_etc_default_ntpdate
@@ -17,11 +17,11 @@ the templates are located in:
  * templates/ntp/
  * templates/ntp/json
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -42,7 +42,7 @@ vars:
 
 The variable must be ''ntp_json_files'' and with this setup 1 extra json file will be  merged.
 
-### Debug
+### DEBUG
 
 If you want to debug these bundle set the `DEBUG_ntp` class, eg:
  * `-DDEBUG_ntp
@@ -59,7 +59,7 @@ vars:
     "ntp_json_files" slist => { "debian.json" };
 ```
  * Set/Override the daemon options variable in ''def.json'':
-```json
+```
 "ntp" : {
     "json_files": [ "debian.json" ],
     "daemon_options": "-g"

@@ -165,6 +165,15 @@ body file_select scl_symbolic_link()
     file_result => "file_types";
 }
 
+body file_select scl_days_old_by_atime(days)
+{
+    # this select files between 3 years ago and 'days' back
+    #atime       => irange(ago(3,0,0,0,0,0),ago(0,0,"$(days)",0,0,0));
+    # this select all files that have not access for 'days'
+    atime => irange(0,ago(0,0,"$(days)",0,0,0));
+    file_result => "$(file_time)";
+}
+
 body link_from scl_relative_ln_s(x)
 {
     link_type => "relative";
@@ -529,6 +538,65 @@ reports:
     any::
         "$(this.bundle): has been called to use json data: 'scl.$(bundle_name)[$(section)]'"
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+}
+
+@if minimum_version(99.9)
+## bundle agent scl_tidy_directory(directory, days_back) ==
+
+This bundle will delete file(s)/dir(s) in a directory that are older then the specified day(s), eg:
+```
+methods:
+    "" usebundle => scl_tidy_directory("/tmp", "30");
+```
+
+for files `atime` is used and for directories `mtime` is used.
+@endif
+bundle agent scl_tidy_directory(directory, days_back)
+{
+    files:
+        "$(directory)"
+            comment         => "delete file(s)/dir(s) that are older then $(days_back) day(s) in $(directory)",
+            delete          => tidy,
+            # links to /home dirs are also deleted, root has no read rights
+            #depth_search    => sara_remove_deadlinks("inf"),
+            depth_search  => recurse_with_base(inf),
+            file_select     => scl_days_old_by_atime("$(days_back)");
+
+        "$(directory)"
+            comment         => "delete empty dirs mtime is used",
+            delete          => tidy,
+            # links to /home dirs are alos deleted, root has no read rights
+            #depth_search    => sara_remove_deadlinks("inf"),
+            depth_search  => recurse_with_base(inf),
+            file_select     => filetype_older_than("dir", "$(days_back)");
+
+    reports:
+        any::
+            "$(this.bundle): clean $(directory) with file(s)/dir(s) older then $(days_back)"
+                if => "DEBUG_$(this.bundle)|DEBUG";
+}
+
+@if minimum_version(99.9)
+## bundle agent scl_tidy_files(regexp, days_back) ==
+
+This bundle will delete file(s) in a directory that match the regexp and are older then the specified day(s), eg:
+```
+methods:
+    "" usebundle => scl_tidy_files("/tmp/X.*", "2");
+```
+@endif
+bundle agent scl_tidy_files(regexp, days_back)
+{
+    files:
+        "$(regexp)"
+            comment         => "clean/tidy file(s) with regular expression: $(regexp) that are older then $(days_back) day(s)",
+            delete          => tidy,
+            file_select     => days_old("$(days_back)");
+
+    reports:
+        any::
+            "$(this.bundle): delete files with regular expression '$(regexp)' older then '$(days_back)'"
+                if => "DEBUG_$(this.bundle)|DEBUG";
 }
 
 

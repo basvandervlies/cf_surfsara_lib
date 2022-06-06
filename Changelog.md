@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.4.0 (2022-0?-??)](#version-140-2022-0-)
+* [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
 * [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
 * [Version: 1.2.0 (2022-01-26)](#version-120-2022-01-26)
     * [scl_service_rotate_files](#scl_service_rotate_files)
@@ -28,9 +28,11 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.4.0 (2022-0?-??)
+# Version: 1.4.0 (2022-06-06)
 
 SCL enhancements:
+ *  A class will be set for each service that is enabled, eg: `SCL_service_ntp_enabled`
+ *  A class will be set for each inventory modules that is enabled, eg: `SCL_inventory_lscpu_enabled`
  * Added `lib/scl/commands.cf`:  For command body defintions used in SCL services
  * `sara_data` is replaced by `scl` for all json/mustache files
  * `cf_bundles_dir` is replaced by standard shortcut `data` for all json/mustache files

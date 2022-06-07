@@ -3,7 +3,7 @@
 
 Source: [check_space.cf](/services/check_space.cf)
 
-This bundles check the given filesystems if there is enought freespace. When there is
+This bundles check the given filesystems if there is enough freespace. When there is
 not enough freespace will:
  * report it
  * run an specified command, if set
@@ -24,7 +24,7 @@ The bundle can be run via:
 }
 ```
 
-The bundle will aways read the [default.json](/templates/check_space/json/default.json) file
+The bundle will always read the [default.json](/templates/check_space/json/default.json) file
 and extra json file(s) can be specified via:
  * def.cf
 ```
@@ -33,7 +33,7 @@ vars:
         "check_space_json_files" slist => { "tmp.json" };
 ```
 
-The variable must be `check_space_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `check_space_json_files` and with this setup 1 extra json file will be merged.
 
 ### Debug
 
@@ -53,7 +53,7 @@ The `default.json` is an empty file. The structure is as follows:
 
 You can specfy more then one path, The example below will
 check:
-  1.  `/tnp` and run a command if it is low on space:
+  1.  `/tmp` and run a command if it is low on space:
   1.  `/boot` and run a bundle if it is low on space:
 ```json
 {

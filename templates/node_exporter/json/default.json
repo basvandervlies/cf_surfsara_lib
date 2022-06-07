@@ -1,13 +1,13 @@
 {
-    "args": "--collector.textfile.directory=$(sara_data.node_exporter[collector_dir]) --no-collector.filesystem",
+    "args": "--collector.textfile.directory=$(scl.node_exporter[collector_dir]) --no-collector.filesystem",
     "collector_dir": "/run/prometheus/node_exporter",
     "copy_dirs": [
         {
-            "dest": "$(sara_data.node_exporter[dir])",
+            "dest": "$(scl.node_exporter[dir])",
             "exclude_dirs": [ ".git", ".svn" ],
             "purge": "true",
             "run_bundle": "node_exporter_restart",
-            "source": "cf_bundles_dir/prometheus_exporters/node_exporter-$(sara_data.node_exporter[version])"
+            "source": "data/prometheus_exporters/node_exporter-$(scl.node_exporter[version])"
         }
     ],
     "dir": "/opt/node_exporter",

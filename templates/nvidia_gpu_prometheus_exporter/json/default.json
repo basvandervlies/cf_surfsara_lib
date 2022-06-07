@@ -3,12 +3,12 @@
     "collector_dir": "/run/prometheus/nvidia_gpu_prometheus_exporter",
     "copy_dirs": [
         {
-            "dest": "$(sara_data.nvidia_gpu_prometheus_exporter[dir])",
+            "dest": "$(scl.nvidia_gpu_prometheus_exporter[dir])",
             "exclude_dirs": [ ".git", ".svn" ],
             "mog": [ "0755", "root", "root" ],
             "purge": "true",
             "run_bundle": "nvidia_gpu_prometheus_exporter_restart",
-            "source": "cf_bundles_dir/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"
+            "source": "data/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"
         }
     ],
     "dir": "/opt/nvidia_gpu_prometheus_exporter",

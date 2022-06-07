@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
 * [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
 * [Version: 1.2.0 (2022-01-26)](#version-120-2022-01-26)
     * [scl_service_rotate_files](#scl_service_rotate_files)
@@ -27,26 +28,44 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.4.0 (2022-06-06)
+
+SCL enhancements:
+ *  A class will be set for each service that is enabled, eg: `SCL_SERVICE_NTP_ENABLED`
+ *  A class will be set for each inventory modules that is enabled, eg: `SCL_INVENTORY_LSCPU_ENABLED`
+ * added `lib/scl/commands.cf`:  For command body defintions used in SCL services
+ * `sara_data` is replaced by `scl` for all json/mustache files
+ * `cf_bundles_dir` is replaced by standard shortcut `data` for all json/mustache files
+ * added new scl library bundles:
+   * `scl_tidy_directory`: delete file(s)/dir(s) that are older then the specified day(s) select by 'atime'
+   * `scl_tidy_files`: delete file(s) with a regexp older then the specified day(s) select by `mtime`
+ * added new scl library bodies:
+   * `scl_days_old_by_atime`: select files that are older then the specified day(s) selected by 'atime'
+
+These services have bug fixes or new features:
+ * slurm_prometheus_exporter
+   * Uses now `scl_service_copy_dirs` method to install the software
+
 # Version: 1.3.0 (2022-05-04)
 
  SCL enhancements:
- * `lib/scl/services.cf`: Always run `bundle common <service` then all variables are resolved. All services are adjusted
+ * `lib/scl/services.cf`: Always run `bundle common <service>` then all variables are resolved. All services are adjusted
 
 Inventory bugs or enhancements:
  * lscpu report when command `jq` is not installed (closes issue #100)
 
 These services have bug fixes or new features:
  * jupyterhub:
-  *  `JUPYTERHUB_SERVICE_PREFIX` was set incorrectly must end with `/`
+    * `JUPYTERHUB_SERVICE_PREFIX` was set incorrectly must end with `/`
  * munge:
-  * Added a template file and adjusted default.json. So we can specify the daemon options
+   * Added a template file and adjusted default.json. So we can specify the daemon options
  * node\_exporter:
-  * when service file has been changed reload the systemd
+   * when service file has been changed reload the systemd
  * resolv:
-  * Change header of the mustache file
+   * Change header of the mustache file
  * slurm:
-  * added `prolog_section` definition to json/mustache
-  * `default.json` has been adjusted to slurm version 21.08
+   * added `prolog_section` definition to json/mustache
+   * `default.json` has been adjusted to slurm version 21.08
 
 # Version: 1.2.0 (2022-01-26)
 

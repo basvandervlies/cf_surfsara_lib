@@ -8,16 +8,16 @@ This will terminate/kill processes that consume to much resources. The resources
  * memory:  Kill process that use more memory then specified.
  * minutes:  Kill process that run longer then specified minutes
 
-No template file are generated, we only need josn file(s) as input. The location of this
+No template file are generated, we only need json file(s) as input. The location of this
 file(s) are:
  * templates/sara_user_consume_resources/json
 
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -54,7 +54,7 @@ vars:
 ```
 
 Same can also be set in `def.json`
-```json
+```
 "vars": {
     "sara_user_consume_resources": {
         "json_files": [ "lisa.json" ]
@@ -62,7 +62,7 @@ Same can also be set in `def.json`
 }
 ```
 
-```json
+```
 "vars": {
     "sara_user_consume_resources": {
         "max_minutes": "20"

@@ -1,4 +1,4 @@
-# rootfiles
+# ROOTFILES
 
 Source: [rootfiles.cf](/services/rootfiles.cf)
 
@@ -21,11 +21,11 @@ The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -44,7 +44,7 @@ vars:
         "rootfiles_json_files" slist => { "surfsara.json" };
 ```
 
-The variable must be `root_files_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `root_files_json_files` and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -60,7 +60,7 @@ which variables can be overriden.
 
 Some example show to us it:
  * Generate `authorized_keys` file with stepping stone public key:
-```json
+```
 {
     "vars": {
         "rootfiles": {
@@ -76,11 +76,11 @@ Some example show to us it:
 }
 ```
 
-### copy_dirs
+### COPY_DIRS
 
 When this variabele is set it will copy the directoy to the specified destination and can run a bundle
 if there are changes, eg:
-```json
+```
 "copy_dirs": [
     {
         "dest": "/root/.subversion",
@@ -90,11 +90,11 @@ if there are changes, eg:
 ]
 ```
 
-### copy_files
+### COPY_FILES
 
 With this variable is set it will copy the specified file(s) to the
 specified destination, example:
-```json
+```
 copy_files: [
     {
         "dest": "/root/.bashrc",
@@ -109,11 +109,11 @@ copy_files: [
 ]
 ```
 
-### ssh_keys
+### SSH_KEYS
 
 With this variable is set it will copy the specified ssh keys to `/root/.ssh`,
 example:
-```json
+```
 ssh_keys: {
     "source": "data/rootfiles/ssh_keys/2fa_web",
     "keys": [ "id_ed25519", "id_rsa" ]

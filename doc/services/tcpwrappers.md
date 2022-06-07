@@ -1,4 +1,4 @@
-# tcpwrappers
+# TCPWRAPPERS
 
 Source: [tcpwrappers.cf](/services/tcpwrappers.cf)
 
@@ -16,11 +16,11 @@ the templates are located in:
  * templates/tcpwrappers/json
 
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",

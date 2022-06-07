@@ -38,7 +38,7 @@ vars:
         "cron_json_files" slist => { "sys_users.json" };
 ```
 
-The variable must be `cron_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `cron_json_files` and with this setup 1 extra json file will be merged.
 
 ###  DEBUG 
 

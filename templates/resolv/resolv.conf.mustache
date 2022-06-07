@@ -1,11 +1,11 @@
 ### Controlled by CFengine3, template file @SURF
 #
 
-search {{#vars.sara_data.resolv.search}}{{{domain}}} {{/vars.sara_data.resolv.search}}
-{{#vars.sara_data.resolv.nameservers}}
+search {{#vars.scl.resolv.search}}{{{domain}}} {{/vars.scl.resolv.search}}
+{{#vars.scl.resolv.nameservers}}
 nameserver {{{ip}}}
-{{/vars.sara_data.resolv.nameservers}}
+{{/vars.scl.resolv.nameservers}}
 
-{{#vars.sara_data.resolv.options}}
+{{#vars.scl.resolv.options}}
 options {{{.}}} 
-{{/vars.sara_data.resolv.options}}
+{{/vars.scl.resolv.options}}

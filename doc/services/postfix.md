@@ -1,4 +1,4 @@
-# postfix
+# POSTFIX
 
 Source: [postfix.cf](/services/postfix.cf)
 
@@ -30,11 +30,11 @@ the templates are located in:
  * templates/postfix/json
 
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -57,7 +57,7 @@ The variable must be ''postfix_json_files'' and with this setup 1 extra json fil
 
 ### Classes
 
-For more complex Postfix servers (for example a mailhandler) some addionall classes have been added
+For more complex Postfix servers (for example a mailhandler) some additonal classes have been added
 to the mustache template for more strict handling of mail and enabling TLS for receiving emails.
 
 Also some basic support for DOVECOT can be enabled. These classes are:
@@ -104,11 +104,11 @@ vars:
 ```
 
 
-### virtual_alias_maps
+### VIRTUAL_ALIAS_MAPS
 
 with this bundle you can define youw own mustache template with json data for creating
 the virtual alias map file(s). The format of the `virtual_alias_maps` is:
-```json
+```
 "virtual_alias_maps": {
     "mustache_file": {
         "data": {},
@@ -118,10 +118,9 @@ the virtual alias map file(s). The format of the `virtual_alias_maps` is:
     }
 }
 ```
-j
 An example for defining an LDAP alias map for mustache (.forward is fetch from LDAP). This will copy the template
 `ldap_aliases_map.mustache` and expand it with the give json data.
-```json
+```
 "postfix": {
     "classes" : {
         "VIRTUAL_MAPS": [ "mta.example.com" ],:

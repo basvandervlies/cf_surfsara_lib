@@ -5,7 +5,7 @@ Source: [configurable_http_proxy.cf](/services/configurable_http_proxy.cf)
 
 This will install the configurable-http-proxy software on a node. This software is used by [jupyterhub.cf](/services/jupyterhub.cf)
 
-The following json variables can be set in def.cf/json to  invoke files bundles:
+The following json variables can be set in def.cf/json to invoke files bundles:
  * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 ## Usage

@@ -1,4 +1,4 @@
-# jupyterhub
+# JUPYTERHUB
 
 Source: [jupyterhub.cf](/services/jupyterhub.cf)
 

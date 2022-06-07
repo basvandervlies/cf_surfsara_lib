@@ -89,6 +89,11 @@ bundle agent scl_inventory_modules
         any::
             "cache_dir_exists" expression => isdir("$(scl_inventory.cache_dir)");
 
+          "SCL_INVENTORY$(with)_ENABLED"
+                comment => "set inventory enabled class for: $(scl_inventory.modules)",
+                with => canonify(string_upcase(regex_replace("$(scl_inventory.modules)", "scl", "", "g"))),
+                scope => "namespace";
+
     files:
         !cache_dir_exists::
             "$(scl_inventory.cache_dir)/."

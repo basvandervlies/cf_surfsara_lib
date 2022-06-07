@@ -1,4 +1,4 @@
-# slurm_prometheus_exporter
+# SLURM_PROMETHEUS_EXPORTER
 
 **This bundle must be rewritten to the new standard**
 
@@ -13,4 +13,7 @@ If one of the files is changed then the following ""class"" will be set:
 These templates are located in:
  * templates/slurm_prometheus_exporter
  * templates/slurm_prometheus_exporter/json
+
+The following json variables can be set in def.cf/json to invoke files bundles:
+  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 

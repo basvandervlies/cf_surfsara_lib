@@ -1,4 +1,4 @@
-# pam_radius
+# PAM_RADIUS
 
 Source: [pam_radius.cf](/services/pam_radius.cf)
 
@@ -13,12 +13,12 @@ This bundle install the software on a node and generete the file from mustache t
 When the configuration flle has been changed the following class will be set:
  * `canonify("scl$(pam_radius.config_file)")`
 
-These files wille be generated  with the aid of mustache templates with json data.
+These files will be generated with the aid of mustache templates with json data.
 The templates are located in:
  * templates/pam_radius
  * templates/pam_radius/json
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
@@ -32,7 +32,7 @@ The bundle can be run via:
 }
 ```
 
-The bundle will aways read the [default.json](/templates/pam_radius/json/default.json) file
+The bundle will always read the [default.json](/templates/pam_radius/json/default.json) file
 and extra json file(s) can be specified via:
  * def.cf
 ```
@@ -41,7 +41,7 @@ vars:
         "pam_radius_json_files" slist => { "surfsara.json" };
 ```
 
-The variable must be ''pam_radius_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be ''pam_radius_json_files'' and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -60,7 +60,7 @@ vars:
     "pam_radius_json_files" slist => { "policy_server.json" };
 ```
  * Set/Override the servers option in *def.json*:
-```json
+```
 "pam_radius" : {
     "servers": [
         {

@@ -1,5 +1,5 @@
 
-# Munge
+# MUNGE
 
 Source: [munge.cf](/services/munge.cf)
 
@@ -19,7 +19,7 @@ This bundle also makes sure that the proper owner (munge:munge) and permissions 
 The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-## Usage
+## USAGE
 
 The bundle can be run via:
 ```json
@@ -41,9 +41,9 @@ vars:
         "munge_json_files" slist => { "lisa.json" }
 ```
 
-The variable must be `cron_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `cron_json_files` and with this setup 1 extra json file will be merged.
 
-### Debug
+### DEBUG
 
 To debug this bundle set the `DEBUG_munge` class:
 
@@ -55,11 +55,11 @@ See [default.json](/templates/munge/json/default.json) what the default values a
 which variables can be overriden.
 
 
-### copy_files
+### COPY_FILES
 
 With this variable is set it will copy the specified file (usually the munge key) to the
 specified destination, example:
-```json
+```
 "copy_files": [
     {
         "dest": "$(munge.munge_key_file)",

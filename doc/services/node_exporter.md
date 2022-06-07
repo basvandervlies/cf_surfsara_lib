@@ -1,5 +1,5 @@
 
-# node_exporter
+# NODE_EXPORTER
 
 Source: [node_exporter.cf](/services/node_exporter.cf)
 
@@ -21,7 +21,7 @@ These templates are located in:
 The following json variables can be set in def.cf/json to invoke files bundles:
   * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
@@ -61,23 +61,22 @@ which variables can be overriden.
 
 When this variabele is set it will copy the directoy to the specified destination and can run a bundle
 if there are changes, eg:
-```json
+```
 "copy_dirs": [
     {
         "dest": "$(scl.node_exporter[dir])",
         "exclude_dirs": [ ".git", ".svn" ],
         "purge": "true",
         "run_bundle": "node_exporter_restart",
-        "source": "cf_bundles_dir/prometheus_exporters/node_exporter-0.15.2"
+        "source": "data/prometheus_exporters/node_exporter-0.15.2"
     }
 ]
 ```
 
-=== cron_jon ===
+### cron_job
 
 When this variabele is set it will create a cron file in  `/etc/cron.d` with name `sys2prometheus`, eg:
 ```
-#!json
 {
     "cron_job": {
         "minute": "*/4",

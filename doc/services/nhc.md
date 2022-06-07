@@ -20,11 +20,11 @@ The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_files: See [files.cf](/masterfiles/lib/scl/files.cf)
  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -43,7 +43,7 @@ vars:
         "nhc_json_files" slist => { "lisa.json" };
 ```
 
-The variable must be `lisa_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `lisa_json_files` and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -75,7 +75,7 @@ vars:
 ```
 
  * override server setting in def.json
-```json
+```
 "vars": {
     "nhc": {
          "debug":  "1"

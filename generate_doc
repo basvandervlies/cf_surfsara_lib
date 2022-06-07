@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 """
     Usage: icf_generate_doc [options] <cfengine_config_dir>>
@@ -7,7 +7,6 @@
 import re
 import sys
 import os
-import urlparse
 import pprint
 
 from argparse import ArgumentParser

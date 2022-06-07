@@ -37,12 +37,12 @@ bundle common scl_services
 {
     vars:
         "enabled" slist => { unique(@(def.scl_services_enabled)) },
-            ifvarclass => and(
+            if => and(
                     isvariable("def.scl_services_enabled")
                 );
 
         "enabled" slist => {},
-            ifvarclass => and(
+            if => and(
                     not(isvariable("def.scl_services_enabled"))
                 );
 
@@ -58,6 +58,12 @@ bundle agent scl_services_autorun
 {
     vars:
         "inputs" slist => maplist("$(scl_services.dir)/$(this).cf", @(scl_services.enabled));
+
+    classes:
+        "SCL_SERVICE_$(with)_ENABLED"
+                comment => "set service enabled class: $(scl_services.enabled)",
+                with => canonify(string_upcase("$(scl_services.enabled)")),
+                scope => "namespace";
 
     methods:
         scl_services_set::
@@ -75,10 +81,10 @@ bundle agent scl_services_autorun
     reports:
         scl_services_set::
             "$(this.bundle) service enabled: $(scl_services.enabled)"
-                ifvarclass => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
         !scl_services_set::
             "$(this.bundle) no service enabled, set 'def.scl_services_enabled'"
-                ifvarclass => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
 }
 
 bundle agent scl_services_data(services)
@@ -109,7 +115,7 @@ bundle agent scl_services_run(service)
                 comment => "Only run service when the specified classes are set";
 
             "run_class_var_str" string => format("%S", "run_class_var"),
-                ifvarclass => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
 
     classes:
         any::
@@ -118,14 +124,14 @@ bundle agent scl_services_run(service)
 
             "run_class" expression => "$(run_class_var)",
                 comment => "Run service if run_class definitions are met",
-                ifvarclass => "run_class_set";
+                if => "run_class_set";
 
     methods:
         any::
             "" usebundle => $(run_bundles),
                 comment => "Run service bundle if run_class is met or if run_class is absent",
                 classes => results("namespace", "$(service)"),
-                ifvarclass => or(
+                if => or(
                     "run_class",
                     "!run_class_set"
                     );
@@ -133,13 +139,13 @@ bundle agent scl_services_run(service)
     reports:
         any::
             "$(this.bundle): '$(service)' is enabled for `any' class"
-                ifvarclass => and(
+                if => and(
                     "DEBUG|DEBUG_services|DEBUG_$(this.bundle)",
                     "!run_class_set"
                     );
 
             "$(this.bundle): '$(service)' is only enabled for class: `$(run_class_var_str)`"
-                ifvarclass => and(
+                if => and(
                         "DEBUG|DEBUG_services|DEBUG_$(this.bundle)",
                         "run_class_set"
                         );

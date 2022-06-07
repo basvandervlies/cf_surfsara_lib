@@ -26,12 +26,12 @@ bundle common slurm_prometheus_exporter()
 
 bundle agent slurm_prometheus_exporter_install()
 {
-    files:
-        "/opt/slurm_prometheus_exporter"
-            comment => "Copy the binaries of slurm_prometheus_exporter",
-            copy_from => scl_sync_no_perms_cp("cf_bundles_dir/prometheus_exporters/slurm_prometheus_exporter-$(scl.slurm_prometheus_exporter[version])", "hash"),
-            depth_search =>  recurse_ignore("inf", "@(slurm_prometheus_exporter.exclude_list)" ),
-            classes => results("namespace", "slurm_prometheus_exporter_updated");
+    classes:
+       "copy_dirs_set" expression => isvariable("scl.slurm_prometheus_exporter[copy_dirs]");
+
+    methods:
+        copy_dirs_set::
+            "" usebundle => scl_service_copy_dirs("slurm_prometheus_exporter");
 }
 
 bundle agent slurm_prometheus_exporter_config()
@@ -82,7 +82,7 @@ bundle agent slurm_prometheus_exporter_autorun()
         "" usebundle => slurm_prometheus_exporter_daemon_check();
 }
 @if minimum_version(99.9)
-# slurm_prometheus_exporter
+# SLURM_PROMETHEUS_EXPORTER
 
 **This bundle must be rewritten to the new standard**
 
@@ -97,5 +97,8 @@ If one of the files is changed then the following ""class"" will be set:
 These templates are located in:
  * templates/slurm_prometheus_exporter
  * templates/slurm_prometheus_exporter/json
+
+The following json variables can be set in def.cf/json to invoke files bundles:
+  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 @endif

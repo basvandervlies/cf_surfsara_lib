@@ -1,0 +1,19 @@
+#
+##  SURFsara commands.cf
+#
+@if minimum_version(99.9)
+# commands.cf
+
+Source: [commands.cf](/masterfiles/lib/scl/commands.cf)
+
+Some body definitions that are used in the SCL framework
+
+@endif
+
+body contain scl_bgshell_umask(value)
+{
+    useshell => "true";
+    umask => "$(value)";
+    no_output => "true";
+}
+

@@ -1,5 +1,5 @@
 
-# nvidia gpu prometheus exporter
+# NVIDIA GPU PROMETHEUS EXPORTER
 
 Source: [nvidia_gpu_prometheus_exporter.cf](/services/nvidia_gpu_prometheus_exporter.cf)
 
@@ -19,7 +19,7 @@ These templates are located in:
 The following json variables can be set in def.cf/json to invoke files bundles:
   * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
@@ -42,7 +42,7 @@ vars:
         "nvidia_gpu_prometheus_exporter_json_files" slist => { "sara.json" };
 ```
 
-The variable must be ''nvidia_gpu_prometheus_exporter_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be ''nvidia_gpu_prometheus_exporter_json_files'' and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -56,16 +56,16 @@ which variables can be overriden
 
 ### copy_dirs
 
-When this variabele is set it will copy the directoy to the specified destination and can run a a bundle
+When this variabele is set it will copy the directoy to the specified destination and can run a bundle
 if there are changes, eg:
-```json
+```
 "copy_dirs": [
     {
         "dest": "$(scl.nvidia_gpu_prometheus_exporter[dir])",
         "exclude_dirs": [ ".git", ".svn" ],
         "purge": "true",
         "run_bundle": "nvidia_gpu_prometheus_exporter_restart",
-        "source": "cf_bundles_dir/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"
+        "source": "data/prometheus_exporters/nvidia_gpu_prometheus_exporter-1.0"
     }
 ]
 ```

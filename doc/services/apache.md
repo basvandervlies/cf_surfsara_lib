@@ -7,11 +7,11 @@ This bundle will be used to:
  * Simplified setup so it is easier to use with CFEngine
  * Still free formatting of Apache code for modules and sites
  * Only configures Apache, for Python wsgi and/or PHP a separate service needs to be created
- * Clean sites.d directory if thee are files that are not specified  with `sites`or `sites_generated`
- * Clean modules.d directory if thee are files that are not specified  with `modules_standard`or `modules_extra`
+ * Clean sites.d directory if thee are files that are not specified with `sites`or `sites_generated`
+ * Clean modules.d directory if thee are files that are not specified with `modules_standard` or `modules_extra`
 
 Some site files may be generated om the machine like we do for JupyterHUB. We generate this file in the
-`apache.sites_dir` variable. To prevent these file from deletion we need to specify this  file(s) in the following
+`apache.sites_dir` variable. To prevent these file from deletion we need to specify this file(s) in the following
 json variable:
  * `sites_generated`
 
@@ -24,7 +24,7 @@ modules_extra: {
 },
 ```
 
-Please note that this bundle has only been tested/designed for Debian Stretch or Buster. And therefor a specific
+Please note that this bundle has only been tested/designed for Debian Stretch or Buster and therefor a specific
 Debian Apache file envvars wil be written to `/etc/apache2/envvars`. This is needed to make sure Apache daemon
 uses the `/opt/apache/httpd.conf` instead of the default configuration file.
 

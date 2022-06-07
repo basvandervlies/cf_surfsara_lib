@@ -1,5 +1,5 @@
 
-# resolv
+# RESOLV
 
 Source: [resolv.cf](/services/resolv.cf)
 
@@ -13,11 +13,11 @@ These templates are located in:
  * templates/resolv
  * templates/resolv/json
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -62,7 +62,7 @@ vars:
 ```
 
  * override config settings in *\<filename\>.json*:
-```json
+```
 "vars": {
     "resolv": {
         "json_files": [ "search_mail.json" ]
@@ -71,7 +71,7 @@ vars:
 ```
 
  * override variable config setting in  *\<filename\>.json*:
-```json
+```
 "resolv": {
     "search": [
         { "domain": "ia.surfsara.nl" }

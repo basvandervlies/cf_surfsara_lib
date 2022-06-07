@@ -524,15 +524,15 @@ This bundle will be used to:
  * Fetch the gpg key via `apt_import_key` command if `repo_key` is set for repository
 
 The following actions are proctected by a class:
- * automatic install security uodate (AUTOMATIC_SECURITY_UPDATE)
+ * automatic install security update (AUTOMATIC_SECURITY_UPDATE)
  * automatic remove obsolete packages (AUTOREMOVE)
  * check the status of the package manager (CHECK_STATUS)
  * kill apt/aptitude processes that run more then 1 hour (KILL_PKG_MANAGER)
- * Check the debian release and upgrade if needed (OS_VERSION_CHECK)
- * setting debconf values for package field(s), controlled via  json data
- * disable systemctl timer services for apt, may interfere with cfengine (APT_SYSTEMD_DISABLE)
+ * Check the Debian release and upgrade if needed (OS_VERSION_CHECK)
+ * setting debconf values for package field(s), controlled via json data
+ * disable systemctl timer services for apt, may interfere with CFEngine (APT_SYSTEMD_DISABLE)
  * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
- * automatic perform an dist-upgrade (DIST_UPGRADE)
+ * automatic perform a dist-upgrade (DIST_UPGRADE)
 
 
 
@@ -558,7 +558,7 @@ The `/etc/apt/auth.conf` is default empty. But we can configure it for password 
     }
 ]
 ```
-                                                            ]
+
 ## Usage
 
 The bundle can be run via:
@@ -581,7 +581,7 @@ vars:
         "apt_json_files" slist => { "debconf.json" };
 ```
 
-The variable must be `apt_json_files` and with this setup 1 extra json file will be  merged.
+The variable must be `apt_json_files` and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 

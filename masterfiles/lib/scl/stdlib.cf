@@ -24,6 +24,7 @@ bundle common scl_stdlib_common
         any::
             "standard" slist => {
                 "$(this.promise_dirname)/boot.cf",
+                "$(this.promise_dirname)/commands.cf",
                 "$(this.promise_dirname)/inventory.cf",
                 "$(this.promise_dirname)/templates.cf",
                 "$(this.promise_dirname)/common.cf",

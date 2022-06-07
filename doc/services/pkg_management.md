@@ -2,10 +2,9 @@
 
 Source: [pkg_management.cf](/services/pkg_management.cf)
 
-
 This will install/delete packages that are not installed via other services files. You just want to make sure that some handy
-utitlities are installed or some anonying utilities are removed, eg:
-```json
+utilities are installed or some anoying utilities are removed, eg:
+```
 {
     "jq": {
         "action": "install",
@@ -36,15 +35,15 @@ When `PRIO_BACKPORTS` class is set the following file will be created with the a
 `inline_mustache`:
   * `/etc/apt/preferences.d/99-surfsara` (overridable via json file)
 
-The `backports` package will now be considers as `stable` package. The upgrade of `backport`
+The `backports` package will now be considered as `stable` package. The upgrade of `backport`
 package is the same as `stable` package:
  * `apt  --simulate --ignore-hold upgrade`
 
-## Usage
+## USAGE
 
 The bundle can be run via:
  * `def.scl_services_enabled`
-```json
+```
 "vars": {
     "scl_services_enabled": [
             "...",
@@ -63,7 +62,7 @@ vars:
         "pkg_management_json_files" slist => { "lisa.json" };
 ```
 
-The variable must be ''pkg_management_json_files'' and with this setup 1 extra json file will be  merged.
+The variable must be ''pkg_management_json_files'' and with this setup 1 extra json file will be merged.
 
 ### DEBUG
 
@@ -83,7 +82,7 @@ vars:
 ```
 
  * Set/Override variables in *def.json*:
-```json
+```
 "pkg_management": {
     "json_files": [ "lisa.json" ],
     "jq": {

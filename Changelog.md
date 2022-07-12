@@ -33,7 +33,7 @@
 
 SCL enhancements:
  * added new scl library bodies:
-   * `perms scl_mog`: Needed for cfengine => 3.20 eles 'scl_service_copy_dirs` will fail due to `rxdirs` default option changed to `false`
+   * `perms scl_mog`: Needed for cfengine => 3.20 else 'scl_service_copy_dirs` will fail due to `rxdirs` default option changed to `false`
 
 # Version: 1.4.0 (2022-06-06)
 

@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
 * [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
 * [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
 * [Version: 1.2.0 (2022-01-26)](#version-120-2022-01-26)
@@ -28,6 +29,12 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.4.1 (2022-07-12)
+
+SCL enhancements:
+ * added new scl library bodies:
+   * `perms scl_mog`: Needed for cfengine => 3.20 eles 'scl_service_copy_dirs` will fail due to `rxdirs` default option changed to `false`
+
 # Version: 1.4.0 (2022-06-06)
 
 SCL enhancements:

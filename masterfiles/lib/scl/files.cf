@@ -189,6 +189,14 @@ body link_from scl_linkchildren(directory)
     when_linking_children   => "override_file";
 }
 
+# https://cfengine.com/blog/2022/rxdirs-default-changing-from-true-to-false/
+body perms scl_mog(mode, user, group, rxdirs_flag)
+{
+   groups => { "$(group)" };
+   mode   => "$(mode)";
+   owners => { "$(user)" };
+   rxdirs => "$(rxdirs_flag)";
+}
 
 bundle agent scl_cp_dir_default
 {
@@ -396,10 +404,11 @@ files:
 
         "$(scl.$(bundle_name)[copy_dirs][$(index)][dest])"
             comment => "Set permission on all files/dirs if requested",
-            perms => mog(
+            perms => scl_mog(
                 "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][0])",
                 "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][1])",
-                "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][2])"
+                "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][2])",
+                "true"
             ),
             depth_search => recurse("inf"),
             if => and(

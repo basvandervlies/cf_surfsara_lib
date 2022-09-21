@@ -89,6 +89,10 @@ bundle agent jupyterhub_config()
             "data_$(names)" data => mergedata("data_$(names)", '{ "name": "${names}" }'),
                 comment => "We need the hub name in json data";
 
+    classes:
+        any::
+            "copy_dirs_set" expression => isvariable("scl.jupyterhub[copy_dirs]");
+
     files:
         any::
             "$(scl.jupyterhub[bin_dir])/."
@@ -168,6 +172,9 @@ bundle agent jupyterhub_config()
                 if => or(
                     canonify("scl$(scl.jupyterhub[etc_dir])/$(names).py")
                     );
+
+        copy_dirs_set::
+            "" usebundle => scl_service_copy_dirs("jupyterhub");
 
     services:
         any::
@@ -265,6 +272,7 @@ see [apache.cf](/services/apache.cf). This service bundle will also generate the
 file for you.
 
 The following json variables can be set in def.cf/json to  invoke files bundles:
+ * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
  * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
 The following clases can be set via def.cf/json:

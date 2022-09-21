@@ -27,6 +27,12 @@ body classes scl_cmd_repair(return_code,class_prefix)
     promise_kept     => { "$(class_prefix)_succeeded" };
 }
 
+body classes scl_cmd_kept(class_prefix)
+{
+      kept_returncodes => { "0" };
+      promise_kept     => { "$(class_prefix)_succeeded" };
+}
+
 body action scl_report(level)
 {
     report_level => $(level);

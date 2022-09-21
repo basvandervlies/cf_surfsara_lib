@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.5.0 (2022-??-??)](#version-150-2022--)
 * [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
 * [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
 * [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
@@ -29,6 +30,24 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.5.0 (2022-??-??)
+
+SCL enhancements:
+ * Added `run_class` option to `copy_files`
+ * added new scl library bodies:
+   * `scl_cmd_kept`:  .....
+
+These services have bug fixes or new features:
+ * jupyterhub:
+    * Added `scl_service_copy_dirs` functionality
+ * node_status:
+    * Must use directory mode bits for cfengine 3.20 and higher
+ * slurm:
+    * Added slurm major version as class based on `current_version` definition, eg: `SLURM_21_08`
+    * When class `SLURM_CONFIGLESS_CONF_LINKS` is unset, remove the create symbolic links
+    * use `mode_file` and `mode_dir` to be compatible with cfengine 3,20 and higher
+    * SLURM version 22.05 and higher do not need file `cgroup_allowed_devices_file.conf`
+
 # Version: 1.4.1 (2022-07-12)
 
 SCL enhancements:

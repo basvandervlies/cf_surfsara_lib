@@ -13,7 +13,7 @@ The following json variables can be set in def.cf/json to  invoke files bundles:
  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
  * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 
-The following clases can be set via def.cf/json:
+The following classes can be set via def.cf/json:
  *  `RESTART_SCHEDULE`:  Restart the jupyterhub services on specified time(s), eg:
 ```
 "RESTART_SCHEDULE": [

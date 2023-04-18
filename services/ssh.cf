@@ -24,7 +24,7 @@ bundle common ssh()
                     }
                 ');
 
-        debian.!debian8::
+        debian::
             "packages"  data  => parsejson('
                     {
                         "install": {
@@ -34,20 +34,6 @@ bundle common ssh()
                     }
                 ');
 
-        debian_8::
-            "packages"  data  => parsejson('
-                    {
-                        "install": {
-                            "dbus" : "",
-                            "libpam-systemd" : "",
-                            "openssh-client" : "",
-                            "openssh-server" : "",
-                            "openssh-blacklist" : ""
-                        }
-                    }
-                ');
-
-        debian::
             "service_name"      string => "ssh";
             "sftp_server_path"  string => "/usr/lib/openssh/sftp-server",
                 comment => "Used in ssh default.json";
@@ -97,6 +83,9 @@ bundle agent ssh_autorun()
             "" usebundle => ssh_install();
             "" usebundle => ssh_config();
             "" usebundle => ssh_daemons_check();
+
+        SSH_HOST_CERTIFICATE::
+            "" usebundle => ssh_generate_known_hosts();
 }
 
 bundle agent ssh_daemons_restart()
@@ -143,8 +132,11 @@ bundle agent ssh_config()
 
     classes:
         any::
-            "ssh_copy_files_set" expression => isvariable("scl.ssh[copy_files]"),
+            "copy_files_set" expression => isvariable("scl.ssh[copy_files]"),
                 comment => "Must we copy extra files for ssh bundle";
+
+            "copy_dirs_set" expression => isvariable("scl.ssh[copy_dirs]"),
+                comment => "Must we copy extra dirs for ssh bundle";
 
     methods:
         any::
@@ -154,8 +146,10 @@ bundle agent ssh_config()
                     canonify("scl$(ssh.server_file)")
                     );
 
-        ssh_copy_files_set::
+        copy_files_set::
             "" usebundle => scl_service_copy_files("ssh");
+        copy_dirs_set::
+            "" usebundle => scl_service_copy_dirs("ssh");
 
     files:
         any::
@@ -177,6 +171,33 @@ bundle agent ssh_config()
     commands:
         SSH_KEYGEN::
             "$(ssh.ssh_keygen) $(scl.ssh[keygen_opt])";
+}
+
+bundle agent ssh_generate_known_hosts()
+{
+
+    vars:
+        "template_2_destination" data => parsejson('{
+            "known_hosts.mustache" : "$(ssh.config_dir)/ssh_known_hosts2"
+         }');
+
+         "template_files" slist => getindices("template_2_destination");
+
+    methods:
+        any::
+            "" usebundle => scl_mustache_copy("ssh", "@(template_files)"),
+                comment => "Copy the template";
+
+            "" usebundle => scl_mustache_cf_data_2_file("ssh",
+                    "$(template_files)",
+                    "$(template_2_destination[$(template_files)])",
+                    ""),
+                comment => "generate the file";
+
+    reports:
+        any::
+            "$(this.bundle): has been run"
+                if => "DEBUG|DEBUG_ssh|DEBUG_$(this.bundle)";
 }
 @if minimum_version(99.9)
 # SSH

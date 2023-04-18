@@ -51,7 +51,7 @@ attribute can be specified:
  * dest: destination
  * mog: mode/owner/group of the file
  * run_bundle: The name of the bundle to run when something is repaired, default not set
- * run_class: When set only copy the file is class condition is met, defauly is `any`
+ * run_class: When set only copy the file when class condition is met, defauly is `any`
  * secure_cp from mpf is used to copy the files
  * source: source
 

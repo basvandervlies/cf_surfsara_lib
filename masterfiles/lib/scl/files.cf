@@ -570,7 +570,7 @@ methods:
                 #canonify("$(scl.$(bundle_name)[$(section)][$(index)][dest])"),
         "" usebundle => "$(scl.$(bundle_name)[$(section)][$(index)][run_bundle])",
             if => and(
-                canonify("$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])"),
+                canonify("$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])_repaired"),
                 canonify("$(bundle_name)_$(section)_$(index)_run_bundle")
                 );
 

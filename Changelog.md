@@ -33,10 +33,12 @@
 # Version: 1.5.0 (2022-??-??)
 
 SCL enhancements:
+ * drop support fro cfengine 3.7 and 3.10 code is removed
  * Added `run_class` option to `copy_files`
  * `scl_service_rotate_files` logic rewrite so that it works as expected
+ * `scl_copy_files` and `scl_service_install_tarballs` fix for `run_bundle` did not work must use class `<file>_repaired`
  * added new scl library bodies:
-   * `scl_cmd_kept`:  Only set class `{value}_succeded` when command exits with value `0`
+     * `scl_cmd_kept`:  Only set class `{value}_succeded` when command exits with value `0`
  * The json filenames that must be loaded can now contain variable names, eg:
 ```
 "ssh": {
@@ -44,6 +46,9 @@ SCL enhancements:
                 "soil_$(def.cluster_role).json"
    ]
 ```
+ *  New method for copy/expanding mustache templates `scl_mustache_service_autorun`, Each bundle can define tenmplates to be used, eg:
+     * `scl_mustache_service_autorun("resolv", "")`, uses `resolv.template_2_destination`
+     * `scl_mustache_service_autorun("resolv", "resolv_other_bundle")`, uses `resolv_other_bundle.template_2_destination`
 
 These services have bug fixes or new features:
  * jupyterhub:
@@ -53,7 +58,26 @@ These services have bug fixes or new features:
  * pam
     * Added generation of /etc/security/limits.sh
  * rootfiles
-    * New `user_ssh_keys_dir` variable for copying user private/public keys to `/root/.ssh`, needeed for git repo's
+    * New `user_ssh_keys_dir` variable for copying user private/public keys to `/root/.ssh`, needed for git repo's
+ * ssh
+    * remove debian_8 setup
+    * Added `scl_service_copy_dirs` functionality
+    * added new class `SSH_HOST_CERTIFICATE`
+      * will generate `$(ssh.config_dir)/ssh_known_hosts2` file with the aid of json variable `scl.ssh.cert_authorities`
+      * [ssh host certificate setup]( https://berndbausch.medium.com/ssh-certificates-a45bdcdfac39)
+```
+"ssh": {
+   "classes": }
+        "HOST_CERTIFICATE": "any"
+   },
+   "cert_authorities": [
+        {
+        "servers": "*",
+        "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA9mwksJWzluDF8ZungY2TiOTYVb6TmuTNi8AsG5+hJa",
+        "comment": "CA-host@clustercomputing"
+        }
+    ]
+```
  * slurm:
     * Added slurm major version as class based on `current_version` definition, eg: `SLURM_21_08`
     * When class `SLURM_CONFIGLESS_CONF_LINKS` is unset, remove the create symbolic links

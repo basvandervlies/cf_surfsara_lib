@@ -143,7 +143,7 @@ bundle agent postfix_config
                 canonify("scl/etc/aliases")
             );
 
-        "POSTFIX_RELOAD" 
+        "POSTFIX_RELOAD"
             if => or(
                 canonify("scl/etc/postfix/main.cf"),
                 canonify("scl/etc/postfix/master.cf"),
@@ -172,7 +172,7 @@ bundle agent postfix_config
         scl_etc_postfix_header_checks::
             "$(postfix.postmap_cmd) $(postfix.config_dir)/header_checks"
                 comment => "This is a hashed file, so we need to use postmap after a change";
-        
+
         scl_etc_postfix_canonical_map::
             "$(postfix.postmap_cmd) $(postfix.config_dir)/canonical_map"
                 comment => "This is a hashed file, so we need to use postmap after a change";
@@ -208,13 +208,16 @@ bundle agent postfix_virtual_alias_maps()
 {
     vars:
         "template_maps" slist => getindices("scl.postfix[virtual_alias_maps]");
+        "files" slist => { };
+        "files" data => mergedata(files, parsejson('[ "$(scl.postfix[virtual_alias_maps][$(template_maps)][template])" ]') ),
+            comment => "scl_mustache_copy expects a slist";
 
     methods:
-        "" usebundle => scl_mustache_copy("postfix", "$(scl.postfix[virtual_alias_maps][$(template_maps)][template])");
+        "" usebundle => scl_mustache_copy("postfix", "@(postfix_virtual_alias_maps.files)");
         "" usebundle => postfix_virtual_alias_maps_expand("$(template_maps)");
 
     reports:
-        "$(this.bundle) Template $(template_maps) : $(scl.postfix[virtual_alias_maps][$(template_maps)][template])"
+        "$(this.bundle) Template : $(files)"
              if => "DEBUG|DEBUG_postfix|DEBUG_$(this.bundle)";
 }
 

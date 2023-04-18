@@ -15,8 +15,14 @@ ListenAddress {{address}}
 
 # HostKeys for protocol version 2
 {{#vars.scl.ssh.HostKey}}
-HostKey {{key}}
+HostKey {{vars.ssh.config_dir}}/ssh_host_{{key}}
 {{/vars.scl.ssh.HostKey}}
+{{#classes.SSH_HOST_CERTIFICATE}}
+{{#vars.scl.ssh.HostKey}}
+HostCertificate {{vars.ssh.config_dir}}/ssh_host_{{key}}-cert.pub
+{{/vars.scl.ssh.HostKey}}
+{{/classes.SSH_HOST_CERTIFICATE}}
+
 
 # For some hosts this is NOT allowed
 AllowTcpForwarding {{{vars.scl.ssh.AllowTcpForwarding}}}

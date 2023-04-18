@@ -60,8 +60,14 @@
     "GresTypes": "gpu",
     "health_section": {},
     "InactiveLimit": "0",
+    "interactive_step_options": {
+        "options": "\"--interactive --preserve-env --pty $SHELL\""
+    },
     "include_files": [],
     "KillWait": "30",
+    "launch_parameters": {
+        "options": "use_interactive_step"
+    },
     "licenses_section": [],
     "logrotate_schedule": [ "Hr00.Min00_05" ],
     "MessageTimeout": "10",
@@ -74,6 +80,9 @@
     "packages_submit": { },
     "partition_section": [],
     "pid_dir": "/var/run/slurm-llnl",
+    "powersave_section": {
+        "ResumeTimeout": "60"
+    },
     "private_tmpdir_section": [],
     "priority_section": {
         "PriorityDecayHalfLife": "7-00",
@@ -93,7 +102,6 @@
         "PurgeJobAfter": "12month",
         "PurgeStepAfter": "1month"
     },
-    "ResumeTimeout": "600",
     "scheduling_section": {
         "comment": [
             "SCHEDULING",

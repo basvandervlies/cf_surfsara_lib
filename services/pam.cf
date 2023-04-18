@@ -6,14 +6,21 @@ bundle common pam()
     vars:
 
         any::
-            "dir"         string => "/etc/pam.d";
-            "lib_dir"     string => "/lib/security";
+            "dir"              string => "/etc/pam.d";
+            "lib_dir"          string => "/lib/security";
             "limits_conf_file" string => "/etc/security/limits.d/scl.conf";
+            "limits_sh_file"   string => "/etc/security/limits.sh";
 
             "mode"   string => "0644";
             "owner"  string => "root";
             "group"  string => "root";
 
+            ## Mustache templates
+            "template_2_destination" data => parsejson('
+                    {
+                        "limits.sh.mustache"  : "$(limits_sh_file)"
+                    }
+                ');
         debian::
             "packages" data => parsejson('
                 {
@@ -23,6 +30,7 @@ bundle common pam()
                         }
                 }
             ');
+
 }
 
 bundle agent pam_autorun()
@@ -57,6 +65,7 @@ bundle agent pam_config()
     methods:
         any::
             "" usebundle => pam_generate_files();
+            "" usebundle => scl_mustache_autorun("pam");
 
         pam_limits_set::
             "" usebundle => pam_conffile_generate($(pam.limits_conf_file), "pam_limits");
@@ -68,6 +77,12 @@ bundle agent pam_config()
             "" usebundle => scl_service_copy_files("pam");
         pam_cp_dirs_set::
             "" usebundle => scl_service_copy_dirs("pam");
+
+    files:
+        any::
+            "$(pam.limits_sh_file)"
+               comment   => "This file needs to be executable else logins will fail",
+               perms     => mog("0755", "root", "root");
 }
 
 bundle agent pam_generate_files()

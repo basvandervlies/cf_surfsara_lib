@@ -41,7 +41,7 @@ and extra json file(s) can be specified via:
 ```
 vars:
     any::
-        "rootfiles_json_files" slist => { "surfsara.json" };
+        "rootfiles_json_files" slist => { "surf.json" };
 ```
 
 The variable must be `root_files_json_files` and with this setup 1 extra json file will be merged.
@@ -118,4 +118,12 @@ ssh_keys: {
     "source": "data/rootfiles/ssh_keys/2fa_web",
     "keys": [ "id_ed25519", "id_rsa" ]
 }
+```
+
+### user_ssh_keys_dir
+
+With this variable is set we copy user private/public keys to the `/root/.ssh` directory. This are user keys for user that can become root
+but want to use their own git repositories. Use `ssh-add -t 4h /root/.ssh/root-bas` in combo with `ssh-agent`, eg:
+```
+"user_ssh_keys_dir": "data/rootfiles/ssh_keys/git_user"
 ```

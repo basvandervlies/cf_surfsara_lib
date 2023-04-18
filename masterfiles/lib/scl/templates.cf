@@ -337,17 +337,22 @@ bundle agent scl_json_copy_and_merge(bundle_name)
 
 
         ### Used in top level json files van be overriden by bundle definitions
+        #
         def_set::
-            "files" data => mergedata("files", "def.$(bundle_name)_json_files");
-            "copy_files" data => mergedata("copy_files", "def.$(bundle_name)_json_files");
+            "names" data => data_expand("def.$(bundle_name)_json_files");
+            "files" data => mergedata("files", "names");
+            "copy_files" data => mergedata("copy_files", "names");
         bundle_set::
-            "files" data => mergedata("files", "def.$(bundle_name)[json_files]");
-            "copy_files" data => mergedata("copy_files", "def.$(bundle_name)[json_files]");
+            "names" data => data_expand("def.$(bundle_name)[json_files]");
+            "files" data => mergedata("files", "names");
+            "copy_files" data => mergedata("copy_files", "names");
 
         def_local_set::
-            "files" data => mergedata("files", "def.$(bundle_name)_local_generated_json_files");
+            "names" data => data_expand("def.$(bundle_name)_local_generated_json_files");
+            "files" data => mergedata("files", "names");
         bundle_local_set::
-            "files" data => mergedata("files", "def.$(bundle_name)[local_generated_json_files]");
+            "names" data => data_expand("def.$(bundle_name)[local_generated_json_files]");
+            "files" data => mergedata("files", "names");
 
     classes:
         any::

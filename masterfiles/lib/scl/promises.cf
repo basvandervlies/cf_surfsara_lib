@@ -1,0 +1,7 @@
+#
+##  @SURFsara promises.cf
+#
+@if minimum_version(99.9)
+Source: [stdlib.cf](/masterfiles/lib/scl/promises.cf)
+
+@endif

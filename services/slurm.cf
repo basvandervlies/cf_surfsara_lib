@@ -20,24 +20,12 @@ bundle common slurm()
             ## slurm uid/gid/mode
             "gid"                   string => "555";
             "group"                 string => "slurm";
-            "mode"                  string => "0644";
+            "mode_file"             string => "0644";
+            "mode_dir"              string => "0755";
             "owner"                 string => "slurm";
             "uid"                   string => "555";
 
-            ## nodes.conf will be removed from template generation BvdV 27/Sep/2021
-            "template_2_destination" data => parsejson('{
-                    "acct_gather.mustache": "$(acct_gather_file)",
-                    "cgroup.mustache": "$(cgroup_config_file)",
-                    "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
-                    "gres.mustache": "$(gres_config_file)",
-                    "nodes.mustache": "$(nodes_config_file)",
-                    "plugstack.conf.mustache": "$(plugstack_config_file)",
-                    "slurm.mustache": "$(config_file)",
-                    "slurmdbd.mustache": "$(slurmdbd_file)",
-                    "topology.mustache": "$(topology_config_file)",
-            }');
 
-        any::
             "dir" string => "$(scl.slurm[dir])";
             "config_dir" string => "$(scl.slurm[config_dir])";
             "current_version" string => "$(scl.slurm[current_version])";
@@ -63,6 +51,38 @@ bundle common slurm()
             "reload_client"     string => "$(paths.path[systemctl]) reload $(client_service_name)";
             "reload_controller" string => "$(scontrol_cmd) reconfigure";
             "reload_database"   string => "$(paths.path[systemctl]) reload $(database_service_name)";
+
+        !SLURM_22_05::
+            "template_2_destination" data => parsejson('{
+                    "acct_gather.mustache": "$(acct_gather_file)",
+                    "cgroup.mustache": "$(cgroup_config_file)",
+                    "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
+                    "gres.mustache": "$(gres_config_file)",
+                    "nodes.mustache": "$(nodes_config_file)",
+                    "plugstack.conf.mustache": "$(plugstack_config_file)",
+                    "slurm.mustache": "$(config_file)",
+                    "slurmdbd.mustache": "$(slurmdbd_file)",
+                    "topology.mustache": "$(topology_config_file)",
+            }');
+
+        SLURM_22_05::
+            # cgroup_allowd_devices is not needed anymore
+            #       "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
+            "template_2_destination" data => parsejson('{
+                "acct_gather.mustache": "$(acct_gather_file)",
+                "cgroup.mustache": "$(cgroup_config_file)",
+                "gres.mustache": "$(gres_config_file)",
+                "plugstack.conf.mustache": "$(plugstack_config_file)",
+                "slurm.mustache": "$(config_file)",
+                "slurmdbd.mustache": "$(slurmdbd_file)",
+                "topology.mustache": "$(topology_config_file)",
+        }');
+
+
+    classes:
+        "SLURM_$(slurm.major_version)"
+            comment => "Set this as class is usefull each SLURM major has big changes",
+            scope => "namespace";
 }
 
 bundle agent slurm_autorun()
@@ -177,7 +197,7 @@ $(slurm.software_dir)/current/lib/slurm
 
             "$(slurm.log_dir)/."
                 create => "true",
-                perms => mog("0700", "root", "root");
+                perms => mog("0700", "$(slurm.owner)", "$(slurm.group)");
 
             "$(slurm.software_dir)/."
                 perms => mog("0755", "root", "root"),
@@ -338,10 +358,13 @@ bundle agent slurm_config()
     files:
         any::
             "$(slurm.config_dir)"
-                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+                perms => mog("$(slurm.mode_dir)", "$(slurm.owner)", "$(slurm.group)");
+
+            "$(slurm.scripts_dir)/."
+                perms => mog("700", "$(slurm.owner)", "$(slurm.group)");
 
             "$(slurm.spool_dir)/."
-                perms => mog("${slurm.mode}", "$(slurm.owner)", "$(slurm.group)"),
+                perms => mog("${slurm.mode_dir}", "$(slurm.owner)", "$(slurm.group)"),
                 create => "true";
 
         SLURM_SERVER|!SLURM_CONFIGLESS::
@@ -350,7 +373,7 @@ bundle agent slurm_config()
 
             "$(slurm_mog_list)"
                 comment => "Not needed for slurm configless setups",
-                perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+                perms => mog("$(slurm.mode_file)", "$(slurm.owner)", "$(slurm.group)");
 
         SLURM_CONFIGLESS.!SLURM_SERVER.slurm_conf_exists::
             "$(generated_files)"
@@ -368,6 +391,16 @@ bundle agent slurm_config()
                 comment => "Needed for sbatch/srun spank command line options, if slurm.conf is symbolic link",
                 link_from => ln_s("/run/slurm/conf/plugstack.conf"),
                 move_obstructions => "true";
+
+        SLURM_CONFIGLESS.!SLURM_CONFIGLESS_CONF_LINKS::
+            "$(slurm.config_file)"
+                comment => "Make sure that the links/files are not there",
+                delete => tidy;
+
+            "$(slurm.plugstack_config_file)"
+                comment => "Make sure that the links/files are not there",
+                delete => tidy;
+
 
         SLURM_CONFIGLESS::
             "$(configless_files)"
@@ -514,7 +547,7 @@ bundle agent slurm_spank_templates()
             classes => results("namespace", "SLURM_$(scl.slurm[spank_templates][$(files)][dest])");
 
         "$(scl.slurm[spank_templates][$(files)][dest])"
-            perms => mog("$(slurm.mode)", "$(slurm.owner)", "$(slurm.group)");
+            perms => mog("$(slurm.mode_file)", "$(slurm.owner)", "$(slurm.group)");
 
     methods:
         "" usebundle => "$(scl.slurm[spank_templates][$(files)][run_bundle])",

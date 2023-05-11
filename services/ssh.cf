@@ -181,18 +181,14 @@ bundle agent ssh_generate_known_hosts()
             "known_hosts.mustache" : "$(ssh.config_dir)/ssh_known_hosts2"
          }');
 
-         "template_files" slist => getindices("template_2_destination");
+    files:
+        any::
+            "$(ssh.config_dir)/ssh_known_hosts2"
+                perms => mog("0644", "root", "root");
 
     methods:
         any::
-            "" usebundle => scl_mustache_copy("ssh", "@(template_files)"),
-                comment => "Copy the template";
-
-            "" usebundle => scl_mustache_cf_data_2_file("ssh",
-                    "$(template_files)",
-                    "$(template_2_destination[$(template_files)])",
-                    ""),
-                comment => "generate the file";
+            "" usebundle => scl_mustache_service_autorun("ssh", "ssh_generate_known_hosts");
 
     reports:
         any::
@@ -287,26 +283,6 @@ vars:
  * override server setting in def.cf
 ```
 vars:
-    "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
+     "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
 ```
-
-### COPY_FILES
-
-When this variable is set it will copy the specified file to the `ssh.config_dir`, eg:
-```json
-"copy_files": [
-    {
-        "dest": "$(ssh.config_dir)/shosts.equiv",
-        "source": "data/ssh/lisa/shosts.equiv",
-        "mog": [ "0644", "root", "root" ]
-    },
-    {
-        "dest": "$(ssh.config_dir)/ssh_known_hosts2",
-        "source": "data/ssh/lisa/ssh_known_hosts2",
-        "mog": [ "0644", "root", "root" ],
-        "run_bundle": "ssh_daemons_restart"
-    }
-]
-```
-where `data` is a ''cf-serverd shortcut''.
 @endif

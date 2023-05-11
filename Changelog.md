@@ -35,6 +35,7 @@
 SCL enhancements:
  * drop support fro cfengine 3.7 and 3.10 code is removed
  * Added `run_class` option to `copy_files`
+ * `scl_mustach_copy` can now handle debug output for string and list
  * `scl_service_rotate_files` logic rewrite so that it works as expected
  * `scl_copy_files` and `scl_service_install_tarballs` fix for `run_bundle` did not work must use class `<file>_repaired`
  * added new scl library bodies:
@@ -53,6 +54,8 @@ SCL enhancements:
 These services have bug fixes or new features:
  * jupyterhub:
     * Added `scl_service_copy_dirs` functionality
+ * munge:
+    * Option to specify the uid/gid for the munge user/group. Controlled via class MUNGE_CHECK_UID_GID
  * node_status:
     * Must use directory mode bits for cfengine 3.20 and higher
  * pam

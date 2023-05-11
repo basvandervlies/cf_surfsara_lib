@@ -3,6 +3,8 @@ bundle common munge()
     vars:
         any::
             "config_dir"        string => "/etc/munge";
+            "log_dir"           string => "/var/log/munge";
+            "var_dir"           string => "/var/lib/munge";
             "munge_key_file"    string => "$(config_dir)/munge.key";
             "service_name"      string => "munge";
             "packages"          data  => parsejson('
@@ -19,6 +21,11 @@ bundle common munge()
                         "munge.mustache" : "$(default_file)"
                     }
                 ');
+
+            ## slurm uid/gid/mode
+            "gid" string => "$(scl.munge[id_group])";
+            "uid" string => "$(scl.munge[id_user])";
+
         debian::
             "service_name"     string => "munge";
             "default_file"     string => "/etc/default/$(service_name)";
@@ -71,10 +78,57 @@ bundle agent munge_daemons_check()
 
 }
 
+### will be scl agent
+bundle agent munge_check_uid_gid()
+{
+    classes:
+        any::
+            "group_id_exists" expression => groupexists("$(munge.gid)");
+            "group_name_exists" expression => groupexists("munge");
+
+            "user_id_exists" expression => userexists("$(munge.uid)");
+            "user_name_exists" expression => userexists("munge");
+
+    files:
+        !group_id_exists.group_name_exists::
+            "/etc/group"
+                edit_line => set_colon_field("munge","3","$(munge.gid)"),
+                classes => results("namespace", "MUNGE_ID");
+            "/etc/passwd"
+                edit_line => set_colon_field("munge","4","$(munge.gid)"),
+                classes => results("namespace", "MUNGE_ID");
+
+        !user_id_exists.user_name_exists::
+            "/etc/passwd"
+                edit_line => set_colon_field("munge","3","$(munge.uid)"),
+                classes => results("namespace", "MUNGE_ID");
+
+    groups:
+        !group_name_exists::
+            "munge"
+                policy => "present",
+                gid => "$(munge.gid)";
+
+    users:
+        !user_name_exists::
+            "munge"
+                policy => "present",
+                home_dir => "/nonexistent",
+                group_primary => "munge",
+                uid => "$(munge.uid)",
+                shell => "/bin/false";
+}
+
 bundle agent munge_install()
 {
+
     methods:
-        "" usebundle => scl_service_packages("munge", "@(munge.packages)");
+        any::
+            "" usebundle => scl_service_packages("munge", "@(munge.packages)");
+
+        MUNGE_CHECK_UID_GID::
+            "" usebundle => munge_check_uid_gid();
+
 }
 
 bundle agent munge_config()
@@ -84,12 +138,27 @@ bundle agent munge_config()
             "munge_copy_files_set" expression => isvariable("scl.munge[copy_files]"),
                 comment => "check if we should copy any files for the munge bundle";
 
+    files:
+        MUNGE_ID_repaired::
+            "$(munge.config_dir)"
+                perms => og("munge", "munge"),
+                depth_search => recurse_with_base("2");
+
+            "$(munge.log_dir)"
+                perms => og(,"munge", "munge"),
+                depth_search => recurse_with_base("2");
+
+            "$(munge.var_dir)"
+                perms => og(,"munge", "munge"),
+                depth_search => recurse_with_base("2");
+
     methods:
         any::
             "" usebundle => munge_daemons_restart(),
                 if => or(
                     canonify("scl$(munge.munge_key_file)"),
-                    canonify("scl$(munge.default_file)")
+                    canonify("scl$(munge.default_file)"),
+                    "MUNGE_ID_repaired"
                 );
 
             "" usebundle => scl_template_autorun("munge");

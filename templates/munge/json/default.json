@@ -1,4 +1,6 @@
 {
     "copy_files": [],
     "daemon_options" : ""
+    "id_user": "554",
+    "id_group": "554"
 }

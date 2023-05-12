@@ -271,7 +271,7 @@ node. Each jupyterhub has its own parameters for submitting jobs. Apache is used
 see [apache.cf](/services/apache.cf). This service bundle will also generate the apache configuration
 file for you.
 
-The following json variables can be set in def.cf/json to  invoke files bundles:
+The following json variables can be set in def.cf/json to invoke files bundles:
  * copy_dirs: See [files.cf](/masterfiles/lib/scl/files.cf)
  * install_tarballs: See [files.cf](/masterfiles/lib/scl/files.cf)
 

@@ -85,25 +85,5 @@ vars:
  * override server setting in def.cf
 ```
 vars:
-    "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
+     "ssh" data => parsejson( '{ "X11Forwarding":  "no"  }' );
 ```
-
-### COPY_FILES
-
-When this variable is set it will copy the specified file to the `ssh.config_dir`, eg:
-```json
-"copy_files": [
-    {
-        "dest": "$(ssh.config_dir)/shosts.equiv",
-        "source": "data/ssh/lisa/shosts.equiv",
-        "mog": [ "0644", "root", "root" ]
-    },
-    {
-        "dest": "$(ssh.config_dir)/ssh_known_hosts2",
-        "source": "data/ssh/lisa/ssh_known_hosts2",
-        "mog": [ "0644", "root", "root" ],
-        "run_bundle": "ssh_daemons_restart"
-    }
-]
-```
-where `data` is a ''cf-serverd shortcut''.

@@ -92,7 +92,7 @@ if there are changes, eg:
 
 ### COPY_FILES
 
-With this variable is set it will copy the specified file(s) to the
+When this variable is set it will copy the specified file(s) to the
 specified destination, example:
 ```
 copy_files: [
@@ -122,7 +122,7 @@ ssh_keys: {
 
 ### user_ssh_keys_dir
 
-With this variable is set we copy user private/public keys to the `/root/.ssh` directory. These are user keys for an user that can become root
+When this variable is set we copy user private/public keys to the `/root/.ssh` directory. These are user keys for an user that can become root
 but want to use their own git repositories. Use `ssh-add -t 4h /root/.ssh/root-bas` in combo with `ssh-agent`, eg:
 ```
 "user_ssh_keys_dir": "data/rootfiles/ssh_keys/git_user"

@@ -204,7 +204,7 @@ if there are changes, eg:
 
 ### COPY_FILES
 
-With this variable is set it will copy the specified file(s) to the
+When this variable is set it will copy the specified file(s) to the
 specified destination, example:
 ```
 copy_files: [

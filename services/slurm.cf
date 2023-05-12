@@ -81,7 +81,7 @@ bundle common slurm()
 
     classes:
         "SLURM_$(slurm.major_version)"
-            comment => "Set this as class is usefull each SLURM major has big changes",
+            comment => "Set this as class is usefull as each SLURM major has big changes",
             scope => "namespace";
 }
 

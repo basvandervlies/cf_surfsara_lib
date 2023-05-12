@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.5.0 (2022-??-??)](#version-150-2022--)
+* [Version: 1.5.0 (2023-05-11)](#version-150-2023-05-11)
 * [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
 * [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
 * [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
@@ -30,10 +30,10 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.5.0 (2022-??-??)
+# Version: 1.5.0 (2023-05-11)
 
 SCL enhancements:
- * drop support fro cfengine 3.7 and 3.10 code is removed
+ * drop support for CFengine 3.7 and 3.10 Code is removed
  * Added `run_class` option to `copy_files`
  * `scl_mustach_copy` can now handle debug output for string and list
  * `scl_service_rotate_files` logic rewrite so that it works as expected
@@ -47,7 +47,7 @@ SCL enhancements:
                 "soil_$(def.cluster_role).json"
    ]
 ```
- *  New method for copy/expanding mustache templates `scl_mustache_service_autorun`, Each bundle can define tenmplates to be used, eg:
+ *  New method for copy/expanding mustache templates `scl_mustache_service_autorun`, Each bundle can define templats to be used, eg:
      * `scl_mustache_service_autorun("resolv", "")`, uses `resolv.template_2_destination`
      * `scl_mustache_service_autorun("resolv", "resolv_other_bundle")`, uses `resolv_other_bundle.template_2_destination`
 
@@ -87,7 +87,7 @@ These services have bug fixes or new features:
     * use `mode_file` and `mode_dir` to be compatible with cfengine 3,20 and higher
     * SLURM version 22.05 and higher do not need file `cgroup_allowed_devices_file.conf`
     * `interactive_step_options` added as json parameter. How start interactive job via salloc
-    * `launch_parameters` set  launch parameters for job launch plugin, default: `use_interactive_step`
+    * `launch_parameters` set launch parameters for job launch plugin, default: `use_interactive_step`
     * `powersave_section` dictionary added to mustache/json options.
 
 # Version: 1.4.1 (2022-07-12)

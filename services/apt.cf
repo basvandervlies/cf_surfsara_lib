@@ -41,6 +41,8 @@ bundle common apt
             "os_name" string => "buster";
         debian_11::
             "os_name" string => "bullseye";
+        debian_12::
+            "os_name" string => "bookworm";
 }
 
 bundle agent apt_autorun()
@@ -162,7 +164,7 @@ bundle agent apt_os_version()
 
         !flavor_set::
             "$(this.bundle): AUTOMATIC OS update failed due to missing setting in def.cf/json file, eg:";
-            "   apt: { debian_10: debian_10_0 }";
+            "   apt: { $(sys.flavor): $(sys.flavor)_4 }";
 
         flavor_set.!version_ok::
             "$(this.bundle): Debian version MISMATCH: $(def.apt[$(sys.flavor)]) not in $(os_class_string)";

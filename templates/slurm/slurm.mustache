@@ -103,6 +103,18 @@ MailProg=/usr/bin/mail
 {{{@}}}={{{.}}}
 {{/vars.scl.slurm.taskplugin_section}}
 
+## Launch Parameters for job launch plugin
+{{#vars.scl.slurm.launch_parameters}}
+LaunchParameters={{{options}}}
+{{/vars.scl.slurm.launch_parameters}}
+
+
+## launching salloc will automatically start an srun process with InteractiveStepOptions
+# to launch a terminal on a node in the job allocation.
+{{#vars.scl.slurm.interactive_step_options}}
+InteractiveStepOptions={{{options}}}
+{{/vars.scl.slurm.interactive_step_options}}
+
 
 # Prolog and Epilog scripts
 Epilog={{{vars.scl.slurm.Epilog}}}
@@ -119,9 +131,14 @@ PrologSlurmctld={{{vars.scl.slurm.PrologSlurmctld}}}
 {{{@}}}={{{.}}}
 {{/vars.scl.slurm.health_section}}
 
+## Power save section parameters
+# https://slurm.schedmd.com/power_save.html
+#{{#vars.scl.slurm.powersave_section}}
+#{{{@}}}={{{.}}}
+#{{/vars.scl.slurm.powersave_section}}
+
 # Reboot
 RebootProgram=/sbin/reboot
-ResumeTimeout={{{vars.scl.slurm.ResumeTimeout}}}
 
 # No default section hold keywords that do nt have a default value
 {{#vars.scl.slurm.no_default_section}}

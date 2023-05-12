@@ -10,6 +10,7 @@
  * [packages](library/packages.md)
  * [paths](library/paths.md)
  * [processes](library/processes.md)
+ * [promises](library/promises.md)
  * [services](library/services.md)
  * [stdlib](library/stdlib.md)
  * [storage](library/storage.md)

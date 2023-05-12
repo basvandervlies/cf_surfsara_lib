@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.5.0 (2023-05-11)](#version-150-2023-05-11)
 * [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
 * [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
 * [Version: 1.3.0 (2022-05-04)](#version-130-2022-05-04)
@@ -29,6 +30,66 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.5.0 (2023-05-11)
+
+SCL enhancements:
+ * drop support for CFengine 3.7 and 3.10 Code is removed
+ * Added `run_class` option to `copy_files`
+ * `scl_mustach_copy` can now handle debug output for string and list
+ * `scl_service_rotate_files` logic rewrite so that it works as expected
+ * `scl_copy_files` and `scl_service_install_tarballs` fix for `run_bundle` did not work must use class `<file>_repaired`
+ * added new scl library bodies:
+     * `scl_cmd_kept`:  Only set class `{value}_succeded` when command exits with value `0`
+ * The json filenames that must be loaded can now contain variable names, eg:
+```
+"ssh": {
+   "json_files": [
+                "soil_$(def.cluster_role).json"
+   ]
+```
+ *  New method for copy/expanding mustache templates `scl_mustache_service_autorun`, Each bundle can define templats to be used, eg:
+     * `scl_mustache_service_autorun("resolv", "")`, uses `resolv.template_2_destination`
+     * `scl_mustache_service_autorun("resolv", "resolv_other_bundle")`, uses `resolv_other_bundle.template_2_destination`
+
+These services have bug fixes or new features:
+ * jupyterhub:
+    * Added `scl_service_copy_dirs` functionality
+ * munge:
+    * Option to specify the uid/gid for the munge user/group. Controlled via class MUNGE_CHECK_UID_GID
+ * node_status:
+    * Must use directory mode bits for cfengine 3.20 and higher
+ * pam
+    * Added generation of /etc/security/limits.sh
+ * rootfiles
+    * New `user_ssh_keys_dir` variable for copying user private/public keys to `/root/.ssh`, needed for git repo's
+ * ssh
+    * remove debian_8 setup
+    * Added `scl_service_copy_dirs` functionality
+    * added new class `SSH_HOST_CERTIFICATE`
+      * will generate `$(ssh.config_dir)/ssh_known_hosts2` file with the aid of json variable `scl.ssh.cert_authorities`
+      * [ssh host certificate setup]( https://berndbausch.medium.com/ssh-certificates-a45bdcdfac39)
+```
+"ssh": {
+   "classes": }
+        "HOST_CERTIFICATE": "any"
+   },
+   "cert_authorities": [
+        {
+        "servers": "*",
+        "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA9mwksJWzluDF8ZungY2TiOTYVb6TmuTNi8AsG5+hJa",
+        "comment": "CA-host@clustercomputing"
+        }
+    ]
+```
+ * slurm:
+    * Added slurm major version as class based on `current_version` definition, eg: `SLURM_21_08`
+    * When class `SLURM_CONFIGLESS_CONF_LINKS` is unset, remove the create symbolic links
+    * use `mode_file` and `mode_dir` to be compatible with cfengine 3,20 and higher
+    * SLURM version 22.05 and higher do not need file `cgroup_allowed_devices_file.conf`
+    * `interactive_step_options` added as json parameter. How start interactive job via salloc
+    * `launch_parameters` set launch parameters for job launch plugin, default: `use_interactive_step`
+    * `powersave_section` dictionary added to mustache/json options.
+
 # Version: 1.4.1 (2022-07-12)
 
 SCL enhancements:

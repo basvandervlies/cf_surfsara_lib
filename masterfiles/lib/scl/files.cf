@@ -56,7 +56,8 @@ This bundle will read the json attribute `copy_files` from the specified `bundle
 attribute can be specified:
  * dest: destination
  * mog: mode/owner/group of the file
- * run_bundle: The name of the bundle to run when something is repaired, default not set.
+ * run_bundle: The name of the bundle to run when something is repaired, default not set
+ * run_class: When set only copy the file is class condition is met, default is `any`
  * secure_cp from mpf is used to copy the files
  * source: source
 
@@ -65,9 +66,16 @@ The `copy_files` can specified by json data eg:
 "slurm": {
     "copy_files": [
         {
-            "dest": "/opt/slurm/etc//job_submit.lua",
+            "dest": "/opt/slurm/etc/job_submit.lua",
             "source": "data/slurm/lisa/job_submit.lua",
-            "mog": ["0644", "slurm", "slurm"]
+            "mog": [
+                "0644",
+                "slurm",
+                "slurm"
+            ],
+            "run_class": [
+                "SLURM_SERVER"
+            ]
         }
     ]
 }
@@ -171,7 +179,7 @@ body file_select scl_days_old_by_atime(days)
     #atime       => irange(ago(3,0,0,0,0,0),ago(0,0,"$(days)",0,0,0));
     # this select all files that have not access for 'days'
     atime => irange(0,ago(0,0,"$(days)",0,0,0));
-    file_result => "$(file_time)";
+    file_result => "atime";
 }
 
 body link_from scl_relative_ln_s(x)
@@ -314,40 +322,43 @@ bundle agent scl_service_rotate_files(bundle_name, data)
             "index" slist => getindices("rotate_files_data");
 
             "run_class_var_$(index)" slist => getvalues("rotate_files_data[$(index)][run_class]"),
-                handle => "$(this.bundle):$(bundle_name):$(index)",
                 comment => "Only run package action if this class is true";
-
-            "run_class_var_str_$(index)" string => ifelse(
-                    "run_class_set_$(index)", format("%s", "$(run_class_var_$(index))"),
-                    "any"
-                ),
-                handle => "$(this.bundle):$(bundle_name):$(index)",
-                if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 
 classes:
     any::
         "json_rotate_files_specified" expression => isvariable("scl.$(bundle_name)[rotate_files]"),
             comment => "Do we override the bundle services rotate_files  with def.json settings";
 
-        "run_class_set_$(index)" expression => classify("$(rotate_files_data[$(index)][run_class])"),
-            comment => "if not set assume 'any' class";
+        "run_class_set" expression => reglist("@(run_class_var_$(index))", ".+"),
+            comment => "Service has specified classes. so check if there are met, if not set assume 'any' class";
+
+        "run_class" expression => "$(run_class_var_$(index))",
+            comment => "Run service if run_class definitions are met",
+            if => "run_class_set";
 
 files:
     any::
         "$(rotate_files_data[$(index)][log_file])"
             comment => "rotate_files: $(rotate_files_data[$(index)][log_file]), number of backups: $(rotate_files_data[$(index)][number_of_backups])",
             rename  => rotate("$(rotate_files_data[$(index)][number_of_backups])"),
-            if => "run_class_set_$(index)";
+            if => or(
+                "run_class",
+                "!run_class_set"
+            );
 
         "$(rotate_files_data[$(index)][log_file]).1"
             comment     => "rotate_files: gzip $(rotate_files_data[$(index)][log_file]).1",
             transformer => "$(paths.path[gzip]) $(this.promiser)",
-            if => "run_class_set_$(index)";
+            if => or(
+                "run_class",
+                "!run_class_set"
+            );
 
-reports:
+methods:
     any::
-        "$(this.bundle):$(bundle_name): index: $(index) file: $(rotate_files_data[$(index)][log_file]) #rotates: $(rotate_files_data[$(index)][number_of_backups]) class: $(rotate_files_data[$(index)][run_class]) run_class_var_str: $(run_class_var_str_$(index))"
-            if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+        "" usebundle => scl_show_data("$(this.bundle)", "rotate_files_data[$(index)]"),
+            handle => "$(this.bundle):$(bundle_name):$(index)",
+            if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }
 
 bundle agent scl_service_copy_dirs(bundle_name)
@@ -501,6 +512,17 @@ vars:
     any::
         "index" slist => getindices("scl.$(bundle_name)[$(section)]");
 
+        "run_class_var_$(index)" slist => getvalues("scl.$(bundle_name)[$(section)][$(index)][run_class]"),
+            handle => "$(this.bundle):$(bundle_name):$(section):$(index)",
+            comment => "Only copy files if this class is true";
+
+        "run_class_var_str_$(index)" string => ifelse(
+                "run_class_set_$(index)", format("%s", "$(run_class_var_$(index))"),
+                "any"
+            ),
+            handle => "$(this.bundle):$(bundle_name):$(section):$(index)",
+            if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
+
 classes:
     any::
         "$(bundle_name)_$(section)_$(index)_run_bundle" expression => isvariable("scl.$(bundle_name)[$(section)][$(index)][run_bundle]"),
@@ -512,6 +534,12 @@ classes:
                 canonify("$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])_repaired")
                 );
 
+        "run_class_$(index)" expression => classify("$(scl.$(bundle_name)[$(section)][$(index)][run_class])"),
+            comment => "Run service if run_class definitions are met";
+
+        "run_class_set_$(index)" expression => reglist("@(run_class_var_$(index))", ".+"),
+            comment => "Service has specified classes. so check if thetre are met, if not set assume 'any' class";
+
 
 files:
     any::
@@ -519,7 +547,11 @@ files:
             comment => "Copy bundle files and set class if its get copied",
             copy_from => secure_cp("$(scl.$(bundle_name)[$(section)][$(index)][source])", "$(sys.policy_hub)"),
             #classes => results("namespace", "$(scl.$(bundle_name)[$(section)][$(index)][dest])");
-            classes => results("namespace", "$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])");
+            classes => results("namespace", "$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])"),
+            if => or(
+                "run_class_$(index)",
+                "!run_class_set_$(index)"
+                );
 
         "$(scl.$(bundle_name)[$(section)][$(index)][dest])"
             comment => "Check permission",
@@ -527,14 +559,18 @@ files:
                 "$(scl.$(bundle_name)[$(section)][$(index)][mog][0])",
                 "$(scl.$(bundle_name)[$(section)][$(index)][mog][1])",
                 "$(scl.$(bundle_name)[$(section)][$(index)][mog][2])"
-            );
+            ),
+            if => or(
+                "run_class_$(index)",
+                "!run_class_set_$(index)"
+                );
 
 methods:
     any::
                 #canonify("$(scl.$(bundle_name)[$(section)][$(index)][dest])"),
         "" usebundle => "$(scl.$(bundle_name)[$(section)][$(index)][run_bundle])",
             if => and(
-                canonify("$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])"),
+                canonify("$(bundle_name)_$(section)$(scl.$(bundle_name)[$(section)][$(index)][dest])_repaired"),
                 canonify("$(bundle_name)_$(section)_$(index)_run_bundle")
                 );
 

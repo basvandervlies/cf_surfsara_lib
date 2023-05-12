@@ -32,11 +32,12 @@ bundle common scl_stdlib_common
                 "$(this.promise_dirname)/packages.cf",
                 "$(this.promise_dirname)/paths.cf",
                 "$(this.promise_dirname)/processes.cf",
+                "$(this.promise_dirname)/promises.cf",
                 "$(this.promise_dirname)/services.cf",
                 "$(this.promise_dirname)/storage.cf",
             };
 
-            "version" string => "SURFSARA Library 0.9.20";
+            "version" string => "SCL 1.5.0";
 
         SCL_SKIP_DEF_CF_INCLUDE::
             "def" slist => { };

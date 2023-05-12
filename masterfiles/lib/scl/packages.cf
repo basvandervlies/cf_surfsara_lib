@@ -46,11 +46,11 @@ The following package actions are implemented:
  * purge: delete the package and all it configuration files
  * remove: delete the package and preserve the configuration files
 @endif
-bundle agent scl_service_packages(bundle_name, data)
+bundle agent scl_service_packages(service_name, data)
 {
     vars:
        json_packages_specified::
-            "pkg_data" data => mergedata("{}", "scl.$(bundle_name)[packages]");
+            "pkg_data" data => mergedata("{}", "scl.$(service_name)[packages]");
             "debug_str" string => "Use 'def.json' service package definition";
 
        !json_packages_specified::
@@ -63,20 +63,20 @@ bundle agent scl_service_packages(bundle_name, data)
             "pkg_bundles" slist => maplist("scl_service_packages_$(this)", @(actions));
 
     classes:
-        "json_packages_specified" expression => isvariable("scl.$(bundle_name)[packages]"),
+        "json_packages_specified" expression => isvariable("scl.$(service_name)[packages]"),
             comment => "Do we override the bundle services package with def.json settings";
 
     methods:
-        "" usebundle => $(pkg_bundles)("$(bundle_name)", "@(scl_service_packages.pkg_data)"),
+        "" usebundle => $(pkg_bundles)("$(service_name)", "@(scl_service_packages.pkg_data)"),
             comment => "package bundle implemented install/remove/purge";
 
     reports:
-        "$(this.bundle): $(actions): $(debug_str))"
-            ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+        "$(this.bundle)($(service_name)):$(actions):$(debug_str)"
+            if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
 
-bundle agent scl_service_package(bundle_name, package, version, action, options)
+bundle agent scl_service_package(service_name, package, version, action, options)
 {
     classes:
         "version_specified" expression => not(strcmp("", "$(version)"));
@@ -103,11 +103,11 @@ bundle agent scl_service_package(bundle_name, package, version, action, options)
 
     reports:
         any::
-            "$(this.bundle): $(package):$(action)  with $(debug_str)"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+            "$(this.bundle)($(service_name)):$(package):$(action)  with $(debug_str)"
+                if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
-bundle agent scl_service_packages_install(bundle_name, pkg_data)
+bundle agent scl_service_packages_install(service_name, pkg_data)
 {
     vars:
         any::
@@ -115,11 +115,11 @@ bundle agent scl_service_packages_install(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => scl_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(service_name)",
                 "$(packages)", "$(pkg_data[install][$(packages)])", "present", "");
 }
 
-bundle agent scl_service_packages_install_backports(bundle_name, pkg_data)
+bundle agent scl_service_packages_install_backports(service_name, pkg_data)
 {
     vars:
         any::
@@ -136,19 +136,16 @@ bundle agent scl_service_packages_install_backports(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => scl_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(service_name)",
                 "$(packages)", "$(pkg_data[install_backports][$(packages)])", "present", "$(pkg_options)");
 
     reports:
-        (cfengine_3_7|cfengine_3_10)::
-            "$(this.bundle) is not supported on versions lower than CFEngine 3.12, falling back to normal install"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
         !debian::
             "$(this.bundle) is only supported on Debian, falling back to normal install"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+                if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
-bundle agent scl_service_packages_remove(bundle_name, pkg_data)
+bundle agent scl_service_packages_remove(service_name, pkg_data)
 {
     vars:
         any::
@@ -156,11 +153,11 @@ bundle agent scl_service_packages_remove(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => scl_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(service_name)",
                 "$(packages)", "$(pkg_data[remove][$(packages)])", "absent", "");
 }
 
-bundle agent scl_service_packages_purge(bundle_name, pkg_data)
+bundle agent scl_service_packages_purge(service_name, pkg_data)
 {
     vars:
         any::
@@ -173,47 +170,47 @@ bundle agent scl_service_packages_purge(bundle_name, pkg_data)
 
     methods:
         any::
-            "" usebundle => scl_service_package("$(bundle_name)",
+            "" usebundle => scl_service_package("$(service_name)",
                 "$(packages)", "$(pkg_data[purge][$(packages)])", "absent", "$(pkg_options)");
 }
 
 ###### Obsolete will be deleted
 ##
-bundle agent scl_install_service_packages(bundle_name, default_packages)
+bundle agent scl_install_service_packages(service_name, default_packages)
 {
     vars:
-        "package_data" data => mergedata("{}", "scl.$(bundle_name)[packages]"),
-            ifvarclass => and(
-                "scl_$(bundle_name)_packages_specified"
+        "package_data" data => mergedata("{}", "scl.$(service_name)[packages]"),
+            if => and(
+                "scl_$(service_name)_packages_specified"
                 );
 
         "package_data" data => mergedata("{}", "default_packages"),
-            ifvarclass => and(
-                "!scl_$(bundle_name)_packages_specified"
+            if => and(
+                "!scl_$(service_name)_packages_specified"
                 );
 
         "packages_data_str" string => format("%S", "package_data"),
-            ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+            if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 
         "packages" slist => getindices("package_data");
 
 
     classes:
-        "scl_$(bundle_name)_packages_specified" expression => reglist("@(scl.$(bundle_name)[packages])", ".*");
-        #"scl_$(bundle_name)_packages_specified" expression => regarray("@(scl.$(bundle_name)[packages])", ".*");
+        "scl_$(service_name)_packages_specified" expression => reglist("@(scl.$(service_name)[packages])", ".*");
+        #"scl_$(service_name)_packages_specified" expression => regarray("@(scl.$(service_name)[packages])", ".*");
 
 
     methods:
         any::
-            "" usebundle => scl_install_service_package("$(bundle_name)", "$(packages)", "$(package_data[$(packages)])"),
+            "" usebundle => scl_install_service_package("$(service_name)", "$(packages)", "$(package_data[$(packages)])"),
                 comment => "Install the package with version";
 
     reports:
-        "$(this.bundle) packages: $(packages_data_str)"
-            ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+        "$(this.bundle)($(service_name)):$(packages_data_str)"
+            if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
-bundle agent scl_install_service_package(bundle_name, package, version)
+bundle agent scl_install_service_package(service_name, package, version)
 {
     classes:
         "version_specified" expression => not(strcmp("", "$(version)"));
@@ -230,9 +227,9 @@ bundle agent scl_install_service_package(bundle_name, package, version)
 
     reports:
         !version_specified::
-            "$(this.bundle): Install package: $(package) with version: 'not specified'"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+            "$(this.bundle)($(service_name)): Install package: $(package) with version: 'not specified'"
+                if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
         version_specified::
-            "$(this.bundle): Install package: '$(package)' with version: '$(version)'"
-                ifvarclass => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+            "$(this.bundle)($(service_name)): Install package: '$(package)' with version: '$(version)'"
+                if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }

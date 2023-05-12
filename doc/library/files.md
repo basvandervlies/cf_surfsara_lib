@@ -50,7 +50,8 @@ This bundle will read the json attribute `copy_files` from the specified `bundle
 attribute can be specified:
  * dest: destination
  * mog: mode/owner/group of the file
- * run_bundle: The name of the bundle to run when something is repaired, default not set.
+ * run_bundle: The name of the bundle to run when something is repaired, default not set
+ * run_class: When set only copy the file is class condition is met, default is `any`
  * secure_cp from mpf is used to copy the files
  * source: source
 
@@ -59,9 +60,16 @@ The `copy_files` can specified by json data eg:
 "slurm": {
     "copy_files": [
         {
-            "dest": "/opt/slurm/etc//job_submit.lua",
+            "dest": "/opt/slurm/etc/job_submit.lua",
             "source": "data/slurm/lisa/job_submit.lua",
-            "mog": ["0644", "slurm", "slurm"]
+            "mog": [
+                "0644",
+                "slurm",
+                "slurm"
+            ],
+            "run_class": [
+                "SLURM_SERVER"
+            ]
         }
     ]
 }

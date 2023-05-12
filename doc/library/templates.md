@@ -77,7 +77,14 @@ The bundle is called by:
  * scl_data_autorun or scl_mustache_autorun
 ## scl_mustache_autorun(bundle_name)
 
-This  bundle will take of copying the mustache template file(s) and expanding the template(s)
+This bundle will take of copying the mustache template file(s) and expanding the template(s)
+## scl_mustache_service_autorun(bundle_name)
+
+This bundle will take of copying the mustache template file(s) and expanding the template(s). The
+parameter required is the `service_name` and optional we can specify form which bundle we need
+to get the `template_2_destination` json definition from, eg:
+ * `scl_mustache_service_autorun("resolv", "")`, uses `resolv.template_2_destination`
+ * `scl_mustache_service_autorun("resolv", "resolv_define")`, uses `resolv_define.template_2_destination`
 ## scl_mustache_copy(bundle_name, files)
 
 The bundle is internally and will take care of copying the template file(s) from the bundle data directory
@@ -88,21 +95,22 @@ on the policy hub to a the local node directory. The bundle is called by:
 This bundle is used internally and will expand the mustache template file(s) with the json data. The
 bundle is called by:
  * scl_mustache_autorun
-## scl_mustache_cf_data_2_file(bundle_name, template_file, destination , data_section)
+ * scl_mustache_service_autorun
+## scl_mustache_cf_data_2_file(service_name, template_file, destination , data_section)
 
 With this bundle you can generate a file from a template with cfengine internal json data. There are 2
 options:
  1. json data section variable passed as argument. Then the section will be merged from the
     cfengine internal json data as toplevel. So variables in mustache file must be referenced
-    without the bundle name, eg `<variable_name>` instead of `vars.scl.$(bundle_name).<variable_name>`
+    without the service name, eg `<variable_name>` instead of `vars.scl.$(service_name).<variable_name>`
  1. cfengine internal json data if you do not pass your own json data section variable
 
 The template is fetch from the local node direcrory:
- * `$(def.node_template_dir)/$(bundle_name)/$(template_file)`
+ * `$(def.node_template_dir)/$(service_name)/$(template_file)`
 
 When json data section variable is specified. You must specify which date section you want to use. The json
 files must be merged via scl, as we only can merge data from this bundle, eg:
- * `scl.<bundle_name>[$(data_section)]`
+ * `scl.<service_name>[$(data_section)]`
 
 This data will then be used as toplevel for the mustache template. You can just use the variables
 name(s): `<variable_name>`

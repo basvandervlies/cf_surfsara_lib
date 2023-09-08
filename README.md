@@ -21,14 +21,14 @@
 
 The SCL distribution consists of a library and services part. The services are build with
 the SCL building blocks that can be controlled/configured with json data. The SCL building blocks
-are, eg:
+are, e.g.:
  * easy generation of configuration files with mustache and json data (merging strategies)
  * package installation
  * tarball installation
  * copy directories
  * copy files
  * inventory framework. Which inventory programs must be run, default any class
- * services framework. Which services must be included and run, defauly any class
+ * services framework. Which services must be included and run, default any class
  * inline documentation
 
 The goal is to setup a library were we can easily install/configure/maintain services. There are many
@@ -54,20 +54,20 @@ files. This is the standard that we defined for the mustache/json files and json
     *  Bundle data two levels.
     *  When all bundle data is parsed. This allows referencing a variable of another service bundle.
 
-Both scenarios will be described in the subsection below. For both scenarios you can specifiy multiple
-json files. The files will be merged and the last one wins if the same variable name is used,eg:
+Both scenarios will be described in the subsection below. For both scenarios you can specify multiple
+json files. The files will be merged and the last one wins if the same variable name is used, e.g.:
  * a.json defines: `a : 1`
  * b.json defines: `a : 2`
 
 If the order is `{ "b.json", "a.json" }` the value of *a* would be *1*
 
-This framework depends on the augemnts file `def.json`, we have developed a multiple augments strategy:
+This framework depends on the augments file `def.json`, we have developed a multiple augments strategy:
  * https://docs.cfengine.com/docs/3.15/reference-language-concepts-augments.html
  * https://basvandervlies.blogspot.com/2018/09/cfengine-312-new-features-missingok-and.html
 
 ### JSON Merge strategy
 
-The merge strategy is::
+The merge strategy is:
   1. `default.json`
   1. `def.<service_name>_json_files` if defined
   1. `def.<service_name>[json_files]` if defined
@@ -86,8 +86,8 @@ At our site  we have  multiple augments files defined:
  1. ip.json
 
 With scl you can merge at 3 levels
- * for global settings use eg: `ntp_json_files` (domain|os.json)
- * to override settings use service definition (key|ip.json), eg:
+ * For global settings use e.g.: `ntp_json_files` (domain|os.json).
+ * To override settings use service definition (key|ip.json), e.g.:
 ```
 ntp: {
     json_files:  [ role.json ]
@@ -104,26 +104,25 @@ ntp: {
 }
 ```
 
-SCL has a 3 level merge strategy. The `ntp_json_files` for the global setting and the service definition  we have 2 levels:
- 1. the `json_files` definition that can be used for override the global ones
- 1. per attribute this one always wins and also override the `json_files` attribute setting.
+SCL has a 3 level merge strategy. The `ntp_json_files` for the global setting and the service definition we have 2 levels:
+ 1. The `json_files` definition that can be used for override the global ones.
+ 1. Per attribute this one always wins and also override the `json_files` attribute setting.
 
 The golden rule is to use `<service>_json_files` for the global one and the other scl merge options to override settings.
 
 ## Installation
 
-there are three options
- * With the new tool [CFEngine Build System](https://github.com/cfengine/cfbs) **prefered method**
- * Include it in the Master Policy Framework (MPF)
- * Include it in your own framework
+there are three options:
+ * With the new tool [CFEngine Build System](https://github.com/cfengine/cfbs) **preferred method**.
+ * Include it in the Master Policy Framework (MPF).
+ * Include it in your own framework.
 
 ### CFEngine Build System
 
 With this you can easily test and build masterfiles configuration. The steps to build your masterfiles:
  * Read the [CFEngine Build System blog](https://cfengine.com/blog/2021/cfengine-build-launched)
 
-The "module" is published in the [CFEngine build catalogue](https://build.cfengine.com) as [surf-cfengine-library](https://build.cfengine.com/modules/surf-cfengine-library/). These are the installation
-instructions:
+The "module" is published in the [CFEngine build catalogue](https://build.cfengine.com) as [surf-cfengine-library](https://build.cfengine.com/modules/surf-cfengine-library/). These are the installation instructions:
  * `mkdir scl_masterfiles`
  * `cd scl_masterfiles`
  * `cfbs init`
@@ -161,7 +160,7 @@ body common control
 ### def.node\_template\_dir
 
 The  `def.node_template_dir` variable is set in `lib/scl/def.cf`, but can also be set
-set in `def.json`. The *def.json* wins, eg:
+set in `def.json`. The *def.json* wins, e.g.:
 ```
 vars:
 {
@@ -193,12 +192,12 @@ There are several services setups included with inline documentation. These setu
 used in production at SURF.
 
 To enable the service on your system use `def.scl_services_enabled` method in def.cf/def.json for
-both installations method
+both installations method.
 
 ###  scl\_services\_enabled run method
 
-This is the preferred method for MPF and your own framework. With this method you can contol which services are run
-and which files are included, eg: def.json
+This is the preferred method for MPF and your own framework. With this method you can control which services are run
+and which files are included, e.g.: def.json
 ```
 "vars": {
     "scl_services_enabled": [
@@ -208,13 +207,13 @@ and which files are included, eg: def.json
 }
 ```
 This will include the service files `ntp.cf` and `resolv.cf` and run all bundles that have the meta tag
-`service\_ntp` and `service\_resolv`. The bundle run can be protected by an class statement, default is `any`, eg:
+`service\_ntp` and `service\_resolv`. The bundle run can be protected by an class statement, default is `any`, e.g.:
 ```
 "ntp": {
     "run_class": "debian|centos"
     }
 ```
-This will only run on  debian or centos hosts.
+This will only run on debian or centos hosts.
 
 ### def.json
 
@@ -242,12 +241,12 @@ or:
 }
 ```
 
-You can use both definition at the same same time.  the `tcpwrappers_json_files` definition is read first and can be overriden by
-the  `tcpwrappers: { json_files }` definition. See the merge strategy.
+You can use both definitions at the same same time. The `tcpwrappers_json_files` definition is read first and can be overwritten by
+the `tcpwrappers: { json_files }` definition. See the merge strategy.
 
 #### Service classes
 
-For every service you dynamically set classes in the service data, eg:
+For every service you dynamically set classes in the service data, e.g.:
 ```
 "vars": {
     "dhclient": {
@@ -261,7 +260,7 @@ This will set the class `DHCLIENT\_RESOLV\_CONF` on host/node `r24n2`
 
 ### lib/scl/def.cf
 
-You can also override settings in this file, eg:
+You can also override settings in this file, e.g.:
  * One variable:
 ```
 vars:
@@ -281,13 +280,13 @@ If you defined your own `def.cf` and do not want the one included in this framew
 
 The SURF CFEngine library also checks for some classes:
  * To test with a local `templates` directory. This directory must be one level higher than your policy files directory (../templates):
-  * `-DTEMPLATE_LOCAL_COPY`: Copy from local directory the mustache and json file(s).
+  * `-DTEMPLATE_LOCAL_COPY`: Copy from local directory the mustache and json file(s)
   * `-DMUSTACHE_LOCAL_COPY`: Copy from local directory the mustache file(s)
   * `-DJSON_LOCAL_COPY`: Copy from local directory the json file(s)
- * To test local mustache/json changes in `$(def.node_template_dir)`, the copy of the json/mustache file(s) from the policy server can be skipped by:
+To test local mustache/json changes in `$(def.node_template_dir)`, the copy of the json/mustache file(s) from the policy server can be skipped by:
   * `-DTEMPLATE_SKIP_COPY`: Skip copying of mustache and json files
   * `-DMUSTACHE_SKIP_COPY`:  Skip copying of the mustache files
   * `-DJSON_SKIP_COPY`: Skip copying of the json files
  * To debug the mustache setup: `-DDEBUG_MUSTACHE` (all service bundles)
- * To debug mustache for a service bundle, eg `-DDEBUG_ntp`
+ * To debug mustache for a service bundle, e.g. `-DDEBUG_ntp`
 

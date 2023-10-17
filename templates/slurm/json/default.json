@@ -53,7 +53,8 @@
     "disable_services": [
         "slurmd",
         "slurmdbd",
-        "slurmctld"
+        "slurmctld",
+        "slurmrestd"
     ],
     "Epilog": "$(slurm.opt_dir)/epilog/slurmd/*",
     "gres_file": [],
@@ -64,6 +65,13 @@
         "options": "\"--interactive --preserve-env --pty $SHELL\""
     },
     "include_files": [],
+    "JobContainerType": "job_container/none",
+    "job_container_tmpfs": {
+        "AutoBasePath": "true",
+        "lines": [
+            "BasePath=/data/slurm Dirs=/tmp,/var/tmp,/dev/shm,/scratch shared=true"
+        ]
+    },
     "KillWait": "30",
     "launch_parameters": {
         "options": "use_interactive_step"
@@ -132,6 +140,12 @@
             "SelectTypeParameters": "CR_Core_Memory"
         }
     },
+    "slurm_user": {
+        "uid": "555",
+        "user": "slurm",
+        "gid": "555",
+        "group": "slurm"
+    },
     "SlurmctldDebug": "info",
     "SlurmctldPort": "6817",
     "SlurmctldTimeout": "120",
@@ -139,10 +153,31 @@
     "SlurmdDebug": "info",
     "SlurmdPort": "6818",
     "SlurmdTimeout": "300",
-    "slurmd_environment_file": "/etc/sysconfig/slurmd",
-    "slurmd_service_options": "-D",
-    "slurmd_service_type": "simple",
-    "SlurmUser": "slurm",
+    "slurmdbd_service": {
+        "options": "",
+        "pid_file": "/run/slurmdbd.pid",
+        "type": "forking"
+    },
+    "slurmctld_service": {
+        "options": "",
+        "pid_file": "/run/slurmctld.pid",
+        "type": "forking"
+    },
+    "slurmd_service": {
+        "options": "-D",
+        "pid_file": "/run/slurmd.pid",
+        "type": "simple"
+    },
+    "slurmrestd_service": {
+        "options": "127.0.0.1:6666",
+        "type": "simple"
+    },
+    "slurmrestd_user": {
+        "uid": "553",
+        "user": "slurmrestd",
+        "gid": "553",
+        "group": "slurmrestd"
+    },
     "spank_plugins": {
         "required": {
             "${slurm.dir}/lib/private-tmpdir.so": " base=/scratch/slurm mount=/tmp mount=/var/tmp mount=/scratch base=/dev/shm/slurm mount=/dev/shm"

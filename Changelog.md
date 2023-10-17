@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.5.1 (2023-07-XX)](#version-151-2023-07-xx)
 * [Version: 1.5.0 (2023-05-11)](#version-150-2023-05-11)
 * [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
 * [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
@@ -30,6 +31,32 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.5.1 (2023-07-XX)
+
+SCL enhancements:
+ * `scl_mustache_service_autorun` bug fix if called 2 times for same service with different bundles
+ * `scl_service_copy_dirs` will also set the destination directory permission to the specified `perm`
+ * renamed run_def_json.sh copy CLASSES ( eg, -DTEMPLATE_LOCAL_COPY, MUSTACHE_LOCAL_COPY and JSON_LOCAL_COPY ) to SCLOCAL
+ * DEBUG service (eg, -DDEBUG_slurm) will show for which classes the service is enabled
+```
+   R: scl_services_run: 'slurm' is only enabled for class: `{ "SLURM_CLIENT", "SLURM_SERVER" }`
+```
+
+These services have bug fixes or new features:
+ * apache:
+    * service/daemon check matched unwanted processes, replace is with `services:` proise type
+ * apt:
+    * Added new class to be set on commandline to byopass schedule for debconf, `APT_DEBCONF`
+    * debian 12 and higher use `non-free-firmware` instead of `non-free`
+ * nvidia:
+    * Added a new class `NVIDIA_ONLY_INSTALL_SW` this will only install the NVIDIA software, some packages rely on this
+    * rewrote some logic
+ * slurm:
+    * Added generation of `job_container.conf`, default mode is ignore the file  `JobContainerType=job_container/none`
+    * Added support for slurmrestd service
+    * systemd service files are more configurable via mustache/json
+    * switch to `group` promise type and create slurm/slurmrestd logins for tarball installations
+
 # Version: 1.5.0 (2023-05-11)
 
 SCL enhancements:

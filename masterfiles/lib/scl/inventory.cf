@@ -85,6 +85,9 @@ bundle common scl_inventory
 
 bundle agent scl_inventory_modules
 {
+    meta:
+        "tags" slist => { "scl_inventory" };
+
     classes:
         any::
             "cache_dir_exists" expression => isdir("$(scl_inventory.cache_dir)");

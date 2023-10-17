@@ -10,6 +10,7 @@ bundle common apt
             "dpkg_command" string => "/usr/bin/dpkg";
             "dpkg_reconfigure"string => "/usr/sbin/dpkg-reconfigure";
             "command" string => "/usr/bin/apt";
+            "non_free_component" string => "non-free-firmware";
             "repos_dir" string => "$(config_dir)/sources.list.d";
             "trusted_dir" string => "$(config_dir)/trusted.gpg.d";
 
@@ -37,10 +38,13 @@ bundle common apt
             "os_name" string => "jessie";
         debian_9::
             "os_name" string => "stretch";
+            "non_free_component" string => "non-free";
         debian_10::
             "os_name" string => "buster";
+            "non_free_component" string => "non-free";
         debian_11::
             "os_name" string => "bullseye";
+            "non_free_component" string => "non-free";
         debian_12::
             "os_name" string => "bookworm";
 }
@@ -107,7 +111,7 @@ bundle agent apt_autorun()
         # Must be ported to def.json
         apt_debconf_set::
             "" usebundle => apt_debconf(),
-                if => "$(scl.apt[debconf_schedule])";
+                if => "$(scl.apt[debconf_schedule])|APT_DEBCONF";
 
     reports:
         DEBUG|DEBUG_apt::

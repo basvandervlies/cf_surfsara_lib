@@ -7,14 +7,13 @@ ConditionPathExists={{{vars.slurm.config_dir}}}/slurm.conf
 Documentation=man:slurmd(8)
 
 [Service]
-Type={{{vars.scl.slurm.slurmd_service_type}}}
-EnvironmentFile=-{{{vars.scl.slurm.slurmd_environment_file}}}
+Type={{{vars.scl.slurm.slurmd_service.type}}}
 {{#classes.SLURM_CONFIGLESS}}
 ExecStartPre=-/bin/rm /run/slurm/conf/slurm.conf
 {{/classes.SLURM_CONFIGLESS}}
-ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmd {{{vars.scl.slurm.slurmd_service_options}}} $SLURMD_OPTIONS
+ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmd {{{vars.scl.slurm.slurmd_service.options}}}
 ExecReload=/bin/kill -HUP $MAINPID
-PIDFile=/run/slurmd.pid
+PIDFile={{{vars.scl.slurm.slurmd_service.pid_file}}}
 KillMode=process
 LimitNOFILE=131072
 LimitMEMLOCK=infinity

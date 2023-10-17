@@ -186,7 +186,7 @@ bundle agent scl_json_copy(service_name, files)
         any::
             "service_json_dir"   string => "templates/scl/$(service_name)/json";
 
-        TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
+        SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
             "local_dir" string => "$(this.promise_dirname)/../../../../$(service_json_dir)",
                 comment => "Can be replaced by $(sys.policy_entry_dirname)/../...";
             #"local_dir" string => "$(sys.policy_entry_dirname)/../$(service_json_dir)",
@@ -204,7 +204,7 @@ bundle agent scl_json_copy(service_name, files)
                 perms => mog("0700", "root", "root"),
                 create => "true";
 
-        !(TEMPLATE_SKIP_COPY|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY|JSON_SKIP_COPY)::
+        !(TEMPLATE_SKIP_COPY|SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY|JSON_SKIP_COPY)::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
@@ -212,7 +212,7 @@ bundle agent scl_json_copy(service_name, files)
                 copy_from   => remote_dcp("$(service_json_dir)/$(files)", "$(sys.policy_hub)"),
                 classes     => results("bundle","$(service_name)$(files)");
 
-        !CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
+        !CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
@@ -220,7 +220,7 @@ bundle agent scl_json_copy(service_name, files)
                 copy_from   => scl_template_local_dcp("$(local_dir)/$(files)"),
                 classes     => results("bundle","$(service_name)$(files)");
 
-        CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
+        CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
@@ -239,9 +239,9 @@ bundle agent scl_json_copy(service_name, files)
                 if => or( canonify("$(bundle_name)$(files)_failed") );
 
             "$(this.bundle)($(service_name)): copying json files from: $(local_dir)"
-                if => "(TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY).(DEBUG_$(service_name)|DEBUG)";
+                if => "(SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY).(DEBUG_$(service_name)|DEBUG)";
 
-        TEMPLATE_SKIP_COPY|JSON_SKIP_COPY::
+        SKIP_SCLOCAL|TEMPLATE_SKIP_COPY|JSON_SKIP_COPY::
             "$(this.bundle): Skipped copying of json files";
 }
 
@@ -356,6 +356,8 @@ bundle agent scl_mustache_service_autorun(service_name, bundle_name)
     methods:
         bundle_name_set::
             "" usebundle => scl_mustache_copy("$(service_name)", "@(template_files)"),
+                comment => "must add handle if we use 2 times in one bundle",
+                handle => "$(service_name)_$(bundle_name)",
                 comment => "Sara prepare mustache files bundle";
 
             "" usebundle => scl_mustache_expand( "$(service_name)", "$(bundle_name)"),
@@ -364,7 +366,6 @@ bundle agent scl_mustache_service_autorun(service_name, bundle_name)
     reports:
             "$(this.bundle)($(service_name)) : called for '$(service_name)' with '$(bundle_name).template_2_destination' as input"
                 if => "(DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE)";
-
 }
 
 @if minimum_version(99.9)
@@ -382,7 +383,7 @@ bundle agent scl_mustache_copy(service_name, files)
             "files" slist => getvalues("files"),
                 comment => "make sure the argument is a list else debug output fails";
 
-        TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
+        SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
             "local_dir" string => "$(this.promise_dirname)/../../../../$(service_template_dir)",
                 comment => "Can be replaced by $(sys.policy_entry_dirname)/../...";
             #"local_dir" string => "$(sys.policy_entry_dirname)/../$(service_template_dir)",
@@ -400,7 +401,7 @@ bundle agent scl_mustache_copy(service_name, files)
                 perms => mog("0700", "root", "root"),
                 create => "true";
 
-        !(TEMPLATE_SKIP_COPY|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY|MUSTACHE_SKIP_COPY)::
+        !(TEMPLATE_SKIP_COPY|SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY|MUSTACHE_SKIP_COPY)::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the mustache files",
                 move_obstructions => "true",
@@ -408,7 +409,7 @@ bundle agent scl_mustache_copy(service_name, files)
                 classes     => if_repaired("$(service_name)_mustache_copied"),
                 copy_from   => remote_dcp("$(service_template_dir)/$(files)", "$(sys.policy_hub)");
 
-       !CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
+       !CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
@@ -416,7 +417,7 @@ bundle agent scl_mustache_copy(service_name, files)
                 copy_from   => scl_template_local_dcp("$(local_dir)/$(files)"),
                 classes     => if_repaired("$(service_name)_mustache_copied");
 
-       CF_COPY_BUG.(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
+       CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
@@ -434,7 +435,7 @@ bundle agent scl_mustache_copy(service_name, files)
     reports:
         any::
             "$(this.bundle)($(service_name)) copying template files from: $(local_dir)"
-                if => "(TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY).(DEBUG_$(service_name)|DEBUG)";
+                if => "(SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY).(DEBUG_$(service_name)|DEBUG)";
 
         TEMPLATE_SKIP_COPY|MUSTACHE_SKIP_COPY::
             "$(this.bundle)($(service_name): Skipped copying of mustache files";

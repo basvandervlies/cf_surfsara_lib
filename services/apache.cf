@@ -44,7 +44,7 @@ bundle common apache()
             ');
 
         debian::
-            "daemon_name" string => "apache2";
+            "daemon_name" string => "/usr/sbin/apache2";
 
             "packages"  data => parsejson('
                 {
@@ -185,15 +185,22 @@ bundle agent apache_config()
 
 bundle agent apache_daemon_check()
 {
-    processes:
-        "$(apache.daemon_name)"
-            comment => "Check if Grafana is running",
-            process_count   => check_range("$(apache.daemon_name)", "1", "1"),
-            process_select  => scl_select_parent_process("1");
-
-    commands:
-        "$(apache.restart)"
-            if => canonify("$(apache.daemon_name)_out_of_range");
+    services:
+       "$(apache.service_name)"
+            service_policy => "start";
+#    processes:
+#        "$(apache.daemon_name)"
+#            comment => "Check if apache is running",
+##            process_count   => check_range("$(apache.daemon_name)", "1", "1"),
+#            process_select  => scl_select_parent_process("1");
+#
+#    commands:
+##        "$(apache.restart)"
+#            if => canonify("$(apache.daemon_name)_out_of_range");
+#
+##    reports:
+#        "$(this.bundle): restarted apache"
+#            if => canonify("$(apache.daemon_name)_out_of_range");
 }
 
 bundle agent apache_autorun()

@@ -1,17 +1,15 @@
 [Unit]
 Description=Slurm controller daemon
 After=network.target munge.service
-#ConditionPathExists=/etc/slurm-llnl/slurm.conf
 ConditionPathExists={{{vars.slurm.config_dir}}}/slurm.conf
 Documentation=man:slurmctld(8)
 
 [Service]
-Type=forking
-EnvironmentFile=-/etc/default/slurmctld
-#ExecStart=/usr/sbin/slurmctld $SLURMCTLD_OPTIONS
-ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmctld $SLURMCTLD_OPTIONS
+Type={{{vars.scl.slurm.slurmctld_service.type}}}
+#EnvironmentFile=-/etc/default/slurmctld
+ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmctld {{{vars.scl.slurm.slurmctld_service.options}}}
 ExecReload=/bin/kill -HUP $MAINPID
-PIDFile=/run/slurmctld.pid
+PIDFile={{{vars.scl.slurm.slurmctld_service.pid_file}}}
 LimitNOFILE=65536
 TasksMax=infinity
 

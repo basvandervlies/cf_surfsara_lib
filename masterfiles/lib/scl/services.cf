@@ -115,7 +115,7 @@ bundle agent scl_services_run(service)
                 comment => "Only run service when the specified classes are set";
 
             "run_class_var_str" string => format("%S", "run_class_var"),
-                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_services|DEBUG_$(service)|DEBUG_$(this.bundle)";
 
     classes:
         any::
@@ -140,13 +140,13 @@ bundle agent scl_services_run(service)
         any::
             "$(this.bundle): '$(service)' is enabled for `any' class"
                 if => and(
-                    "DEBUG|DEBUG_services|DEBUG_$(this.bundle)",
+                    "DEBUG|DEBUG_services|DEBUG_$(service)|DEBUG_$(this.bundle)",
                     "!run_class_set"
                     );
 
             "$(this.bundle): '$(service)' is only enabled for class: `$(run_class_var_str)`"
                 if => and(
-                        "DEBUG|DEBUG_services|DEBUG_$(this.bundle)",
+                        "DEBUG|DEBUG_services|DEBUG_$(service)|DEBUG_$(this.bundle)",
                         "run_class_set"
                         );
 }

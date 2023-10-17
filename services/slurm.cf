@@ -10,6 +10,7 @@ bundle common slurm()
             "cgroup_config_file"    string => "$(config_dir)/cgroup.conf";
             "cgroup_allowed_file"   string => "$(config_dir)/cgroup_allowed_devices_file.conf";
             "gres_config_file"      string => "$(config_dir)/gres.conf";
+            "job_container_file"    string => "$(config_dir)/job_container.conf";
             "nodes_config_file"     string => "$(config_dir)/nodes.conf";
             "plugstack_config_file" string => "$(config_dir)/plugstack.conf";
             "slurmdbd_file"         string => "$(config_dir)/slurmdbd.conf";
@@ -18,12 +19,18 @@ bundle common slurm()
             "scontrol_cmd"          string => "/usr/bin/scontrol";
 
             ## slurm uid/gid/mode
-            "gid"                   string => "555";
-            "group"                 string => "slurm";
+            "gid"                   string => "$(scl.slurm[slurm_user][gid])";
+            "group"                 string => "$(scl.slurm[slurm_user][group])";
             "mode_file"             string => "0644";
             "mode_dir"              string => "0755";
-            "owner"                 string => "slurm";
-            "uid"                   string => "555";
+            "uid"                   string => "$(scl.slurm[slurm_user][uid])";
+            "user"                 string => "$(scl.slurm[slurm_user][user])";
+
+            ## slurm rest uid/gid/mode
+            "restd_gid"                   string => "$(scl.slurm[slurmrestd_user][gid])";
+            "restd_group"                 string => "$(scl.slurm[slurmrestd_user][group])";
+            "restd_uid"                   string => "$(scl.slurm[slurmrestd_user][uid])";
+            "restd_user"                 string => "$(scl.slurm[slurmrestd_user][user])";
 
 
             "dir" string => "$(scl.slurm[dir])";
@@ -43,14 +50,17 @@ bundle common slurm()
             "client_service_name" string => "slurmd";
             "controller_service_name" string => "slurmctld";
             "database_service_name" string => "slurmdbd";
+            "restd_service_name" string => "slurmrestd";
 
             "restart_client"     string => "$(paths.path[systemctl]) restart $(client_service_name)";
             "restart_controller" string => "$(paths.path[systemctl]) restart $(controller_service_name)";
             "restart_database"   string => "$(paths.path[systemctl]) restart $(database_service_name)";
+            "restart_restd"   string => "$(paths.path[systemctl]) restart $(restd_service_name)";
 
             "reload_client"     string => "$(paths.path[systemctl]) reload $(client_service_name)";
             "reload_controller" string => "$(scontrol_cmd) reconfigure";
             "reload_database"   string => "$(paths.path[systemctl]) reload $(database_service_name)";
+            "reload_restd"   string => "$(paths.path[systemctl]) reload $(restd_service_name)";
 
         !SLURM_22_05::
             "template_2_destination" data => parsejson('{
@@ -65,13 +75,14 @@ bundle common slurm()
                     "topology.mustache": "$(topology_config_file)",
             }');
 
-        SLURM_22_05::
+        SLURM_22_05|SLURM_23_02::
             # cgroup_allowd_devices is not needed anymore
             #       "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
             "template_2_destination" data => parsejson('{
                 "acct_gather.mustache": "$(acct_gather_file)",
                 "cgroup.mustache": "$(cgroup_config_file)",
                 "gres.mustache": "$(gres_config_file)",
+                "job_container.mustache": "$(job_container_file)",
                 "plugstack.conf.mustache": "$(plugstack_config_file)",
                 "slurm.mustache": "$(config_file)",
                 "slurmdbd.mustache": "$(slurmdbd_file)",
@@ -132,6 +143,8 @@ bundle agent slurm_install()
             "" usebundle => slurm_install_pkg();
 
         SLURM_TARBALL::
+            "" usebundle => slurm_users(),
+                comment => "slurm logins create/check, must be present";
             "" usebundle => slurm_install_tarball();
             "" usebundle => slurm_current_version();
 
@@ -147,16 +160,21 @@ bundle agent slurm_install_pkg()
             "pyslurm_version" string => ifelse( isvariable("scl.slurm[pyslurm_version]"), "$(scl.slurm[pyslurm_version])", "");
             "packages" data => parsejson('{}');
 
-        SLURM_SERVER:: "packages" data => mergedata( "packages", "scl.slurm[packages_server]"),
-                comment => 'List of slurm packages';
+        SLURM_SERVER::
+            "packages" data => mergedata( "packages", "scl.slurm[packages_server]"),
+                comment => 'List of slurm server packages';
 
         SLURM_CLIENT::
             "packages" data => mergedata( "packages", "scl.slurm[packages_client]"),
-                comment => 'List of slurm packages';
+                comment => 'List of slurm client packages';
 
         SLURM_SUBMIT::
             "packages" data => mergedata( "packages", "scl.slurm[packages_submit]"),
-                comment => 'List of slurm packages';
+                comment => 'List of slurm submit packages';
+
+        SLURM_RESTD::
+            "packages" data => mergedata( "packages", "scl.slurm[packages_restd]"),
+                comment => 'List of slurm restd packages';
 
     methods:
         any::
@@ -166,6 +184,41 @@ bundle agent slurm_install_pkg()
         SLURM_SLURMD_DISABLE::
             "" usebundle => systemd_stop_service("slurm"),
                 if => "slurm_packages_repaired";
+}
+
+bundle agent slurm_users()
+{
+    classes:
+        any::
+            "slurm_grp" expression => groupexists("$(slurm.group)");
+            "slurmrestd_grp" expression => groupexists("$(slurm.restd_group)");
+
+    groups:
+        any::
+            "$(slurm.group)"
+                policy => "present",
+                gid => "$(slurm.gid)";
+
+            "$(slurm.restd_group)"
+                policy => "present",
+                gid => "$(slurm.restd_gid)";
+
+    users:
+        slurm_grp::
+            "$(slurm.user)"
+                policy => "present",
+                home_dir => "/nonexistent",
+                group_primary => "$(slurm.group)",
+                uid => "$(slurm.uid)",
+                shell => "/bin/false";
+
+        slurmrestd_grp::
+            "$(slurm.restd_user)"
+                policy => "present",
+                home_dir => "/nonexistent",
+                group_primary => "$(slurm.restd_group)",
+                uid => "$(slurm.restd_uid)",
+                shell => "/bin/false";
 }
 
 bundle agent slurm_install_tarball()
@@ -184,8 +237,6 @@ $(slurm.software_dir)/current/lib/slurm
             "tarballs_set" expression => isvariable("scl.slurm[install_tarballs]"),
                 comment => "Must we copy tarballs for slurm";
 
-            "slurm_grp" expression => groupexists("$(slurm.group)");
-
     files:
         any::
             "/etc/ld.so.conf.d/slurm.conf"
@@ -197,7 +248,7 @@ $(slurm.software_dir)/current/lib/slurm
 
             "$(slurm.log_dir)/."
                 create => "true",
-                perms => mog("0700", "$(slurm.owner)", "$(slurm.group)");
+                perms => mog("0700", "$(slurm.user)", "$(slurm.group)");
 
             "$(slurm.software_dir)/."
                 perms => mog("0755", "root", "root"),
@@ -210,22 +261,10 @@ $(slurm.software_dir)/current/lib/slurm
 
             "" usebundle => scl_service_packages("slurm", "@(slurm_install_tarball.packages)");
 
-    users:
-        slurm_grp::
-            "slurm"
-                policy => "present",
-                home_dir => "/nonexistent",
-                group_primary => "$(slurm.group)",
-                uid => "$(slurm.uid)",
-                shell => "/bin/false";
-
     commands:
         any::
             "/sbin/ldconfig"
                 if => "ld_config_slurm_repaired";
-
-            "$(paths.path[groupadd]) --gid $(slurm.gid) $(slurm.group)"
-                if => "!slurm_grp";
 }
 
 bundle agent slurm_current_version()
@@ -264,6 +303,12 @@ bundle agent slurm_daemon_check()
                   process_count  => check_range("$(slurm.client_service_name)", "1", "1"),
                   process_select => scl_select_parent_process("1");
 
+        SLURM_RESTD::
+             "$(slurm.restd_service_name)"
+                  comment        => "Check if slurmrest is running",
+                  process_count  => check_range("$(slurm.restd_service_name)", "1", "1"),
+                  process_select => scl_select_parent_process("1");
+
         SLURM_SERVER::
              "$(slurm.controller_service_name)"
                   comment        => "Check if slurmctld is running",
@@ -298,6 +343,7 @@ bundle agent slurm_config()
                 "$(slurm.cgroup_config_file)",
                 "$(slurm.cgroup_allowed_file)",
                 "$(slurm.gres_config_file)",
+                "$(slurm.job_container_file)",
                 "$(slurm.nodes_config_file)",
                 "$(slurm.plugstack_config_file)",
                 "$(slurm.topology_config_file)",
@@ -315,6 +361,7 @@ bundle agent slurm_config()
                 if => or(
                     canonify("scl$(slurm.cgroup_config_file)"),
                     canonify("scl$(slurm.gres_config_file)"),
+                    canonify("$(slurm.job_container_file)"),
                     canonify("scl$(slurm.config_file)"),
                     canonify("scl$(slurm.topology_config_file)")
                     );
@@ -358,22 +405,22 @@ bundle agent slurm_config()
     files:
         any::
             "$(slurm.config_dir)"
-                perms => mog("$(slurm.mode_dir)", "$(slurm.owner)", "$(slurm.group)");
+                perms => mog("$(slurm.mode_dir)", "$(slurm.user)", "$(slurm.group)");
 
             "$(slurm.scripts_dir)/."
-                perms => mog("700", "$(slurm.owner)", "$(slurm.group)");
+                perms => mog("700", "$(slurm.user)", "$(slurm.group)");
 
             "$(slurm.spool_dir)/."
-                perms => mog("${slurm.mode_dir}", "$(slurm.owner)", "$(slurm.group)"),
+                perms => mog("${slurm.mode_dir}", "$(slurm.user)", "$(slurm.group)"),
                 create => "true";
 
         SLURM_SERVER|!SLURM_CONFIGLESS::
             "$(slurm.slurmdbd_file)"
-                perms => mog("0600", "$(slurm.owner)", "$(slurm.group)");
+                perms => mog("0600", "$(slurm.user)", "$(slurm.group)");
 
             "$(slurm_mog_list)"
                 comment => "Not needed for slurm configless setups",
-                perms => mog("$(slurm.mode_file)", "$(slurm.owner)", "$(slurm.group)");
+                perms => mog("$(slurm.mode_file)", "$(slurm.user)", "$(slurm.group)");
 
         SLURM_CONFIGLESS.!SLURM_SERVER.slurm_conf_exists::
             "$(generated_files)"
@@ -401,10 +448,9 @@ bundle agent slurm_config()
                 comment => "Make sure that the links/files are not there",
                 delete => tidy;
 
-
         SLURM_CONFIGLESS::
             "$(configless_files)"
-                comment => "Must slurmd be restarted",
+                comment => "slurmd must be restarted due configuration files are changed",
                 changes => detect_content,
                 classes => results("bundle", "slurm_configless");
 
@@ -416,6 +462,9 @@ bundle agent slurm_service_restart()
     commands:
         SLURM_CLIENT::
             "$(slurm.restart_client)";
+
+        SLURM_RESTD::
+            "$(slurm.restart_restd)";
 
         SLURM_SERVER::
             "$(slurm.restart_controller)";
@@ -430,6 +479,9 @@ bundle agent slurm_service_reload()
     commands:
         SLURM_CLIENT::
             "$(slurm.reload_client)";
+
+        SLURM_RESTD::
+            "$(slurm.reload_restd)";
 
         SLURM_SERVER::
             #"$(slurm.reload_controller)";
@@ -547,7 +599,7 @@ bundle agent slurm_spank_templates()
             classes => results("namespace", "SLURM_$(scl.slurm[spank_templates][$(files)][dest])");
 
         "$(scl.slurm[spank_templates][$(files)][dest])"
-            perms => mog("$(slurm.mode_file)", "$(slurm.owner)", "$(slurm.group)");
+            perms => mog("$(slurm.mode_file)", "$(slurm.user)", "$(slurm.group)");
 
     methods:
         "" usebundle => "$(scl.slurm[spank_templates][$(files)][run_bundle])",
@@ -573,6 +625,7 @@ bundle agent slurm_generate_systemd_services()
                     "slurmctld.service.mustache": "$(systemd.dir)/slurmctld.service",
                     "slurmd.service.mustache": "$(systemd.dir)/slurmd.service",
                     "slurmdbd.service.mustache": "$(systemd.dir)/slurmdbd.service",
+                    "slurmrestd.service.mustache": "$(systemd.dir)/slurmrestd.service"
             }');
 
             "template_files" slist => getindices("template_2_destination");
@@ -603,9 +656,32 @@ bundle agent slurm_generate_systemd_services()
 
             "$(slurm.restart_client)"
                 comment => "If service file has been changed restart slurmd",
-                if => or(
-                        canonify("scl$(template_2_destination[$(template_files)])")
+                if => and(
+                        canonify("scl$(systemd.dir)/slurmd.service"),
+                        "SLURM_CLIENT"
                     );
+
+            "$(slurm.restart_controller)"
+                comment => "If service file has been changed restart slurmd",
+                if => and(
+                        canonify("scl$(systemd.dir)/slurmctld.service"),
+                        "SLURM_SERVER"
+                    );
+
+            "$(slurm.restart_database)"
+                comment => "If service file has been changed restart slurmd",
+                if => and(
+                        canonify("scl$(systemd.dir)/slurmdbd.service"),
+                        "SLURM_SERVER"
+                    );
+
+            "$(slurm.restart_restd)"
+                comment => "If service file has been changed restart slurmd",
+                if => and(
+                        canonify("scl$(systemd.dir)/slurmrestd.service"),
+                        "SLURM_RESTD"
+                    );
+
 
     reports:
         any::
@@ -651,6 +727,7 @@ The following `classes` can be set via def.cf/json:
  * CONFIGLESS_CONF_LINKS: Some old utils need `slurm.conf` in the sysconfig directory
  * LOGROTATE: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
  * SLURMD_DISABLE: Disable the slurmd systemd service
+ * RESTD: Configure the machine as restd server
  * SERVER: Configure the machine as server
  * SUBMIT: Configure the machine as submit host
  * SYSTEMD_SERVICES: generate the slurm systemd unit files.

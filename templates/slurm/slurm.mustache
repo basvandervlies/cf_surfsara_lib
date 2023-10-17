@@ -3,9 +3,9 @@
 # See the slurm.conf man page for more information.
 #
 ClusterName={{{vars.scl.slurm.ClusterName}}}
-ControlMachine={{{vars.scl.slurm.ControlMachine}}}
+SlurmctldHost={{{vars.scl.slurm.ControlMachine}}}
 #
-SlurmUser={{{vars.scl.slurm.SlurmUser}}}
+SlurmUser={{{vars.slurm.user}}}
 SlurmctldPort={{{vars.scl.slurm.SlurmctldPort}}}
 SlurmdPort={{{vars.scl.slurm.SlurmdPort}}}
 
@@ -26,8 +26,13 @@ SlurmdPidFile={{{vars.scl.slurm.pid_dir}}}/slurmd.pid
 PluginDir={{{vars.slurm.plugin_dir}}}
 TmpFS={{{vars.scl.slurm.tmpfs}}}
 
+#
+# job steps/allocation parameters
+#
+JobContainerType={{{vars.scl.slurm.JobContainerType}}}
 #ProctrackType=proctrack/pgid
 ProctrackType=proctrack/cgroup
+
 ReturnToService=1
 #UnkillableStepTimeout=600
 #UnkillableStepProgram="scontrol update NodeName=$(hostname -s) State=down Reason=hung_proc"

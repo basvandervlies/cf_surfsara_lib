@@ -280,13 +280,9 @@ If you defined your own `def.cf` and do not want the one included in this framew
 
 The SURF CFEngine library also checks for some classes:
  * To test with a local `templates` directory. This directory must be one level higher than your policy files directory (../templates):
-  * `-DTEMPLATE_LOCAL_COPY`: Copy from local directory the mustache and json file(s)
-  * `-DMUSTACHE_LOCAL_COPY`: Copy from local directory the mustache file(s)
-  * `-DJSON_LOCAL_COPY`: Copy from local directory the json file(s)
+  * `-DSCLOCAL`: Copy from local directory the mustache and json file(s)
 To test local mustache/json changes in `$(def.node_template_dir)`, the copy of the json/mustache file(s) from the policy server can be skipped by:
-  * `-DTEMPLATE_SKIP_COPY`: Skip copying of mustache and json files
-  * `-DMUSTACHE_SKIP_COPY`:  Skip copying of the mustache files
-  * `-DJSON_SKIP_COPY`: Skip copying of the json files
+  * `-DSKIP_SCLOCAL`: Skip copying of mustache and json files
  * To debug the mustache setup: `-DDEBUG_MUSTACHE` (all service bundles)
  * To debug mustache for a service bundle, e.g. `-DDEBUG_ntp`
 

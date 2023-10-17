@@ -421,7 +421,7 @@ files:
                 "$(scl.$(bundle_name)[copy_dirs][$(index)][mog][2])",
                 "true"
             ),
-            depth_search => recurse("inf"),
+            depth_search => recurse_with_base("inf"),
             if => and(
                 canonify("$(bundle_name)_copy_dirs_$(index)_mog_class")
             );

@@ -1,4 +1,3 @@
-
 ## slurm.cf  @SURF
 #
 bundle common slurm()
@@ -11,6 +10,7 @@ bundle common slurm()
             "cgroup_allowed_file"   string => "$(config_dir)/cgroup_allowed_devices_file.conf";
             "gres_config_file"      string => "$(config_dir)/gres.conf";
             "job_container_file"    string => "$(config_dir)/job_container.conf";
+            "jwt_key_file"          string => "$(spool_dir)/statesave/jwt_hs256.key";
             "nodes_config_file"     string => "$(config_dir)/nodes.conf";
             "plugstack_config_file" string => "$(config_dir)/plugstack.conf";
             "slurmdbd_file"         string => "$(config_dir)/slurmdbd.conf";
@@ -138,6 +138,39 @@ bundle agent slurm_autorun()
 
 bundle agent slurm_install()
 {
+    classes:
+        "jwt_key" expression => fileexists("$(slurm.jwt_key_file)"),
+            comment => "Always create the jwt key token file";
+
+
+    files:
+        any::
+            "$(slurm.log_dir)/."
+                create => "true",
+                perms => mog("0700", "$(slurm.user)", "$(slurm.group)");
+
+            "$(slurm.software_dir)/."
+                perms => mog("0755", "root", "root"),
+                create => "true";
+
+            "$(slurm.config_dir)"
+                perms => mog("$(slurm.mode_dir)", "$(slurm.user)", "$(slurm.group)");
+
+            "$(slurm.scripts_dir)/."
+                perms => mog("700", "$(slurm.user)", "$(slurm.group)");
+
+            "$(slurm.spool_dir)/."
+                perms => mog("${slurm.mode_dir}", "$(slurm.user)", "$(slurm.group)"),
+                create => "true";
+
+            "$(slurm.spool_dir)/statesave/."
+                perms => mog("${slurm.mode_dir}", "$(slurm.user)", "$(slurm.group)"),
+                create => "true";
+
+        SLURM_SERVER.jwt_key::
+            "$(slurm.jwt_key_file)"
+                perms => mog("600", "$(slurm.user)", "$(slurm.group)");
+
     methods:
         !SLURM_TARBALL::
             "" usebundle => slurm_install_pkg();
@@ -150,6 +183,10 @@ bundle agent slurm_install()
 
         SLURM_SYSTEMD_SERVICES|SLURM_TARBALL::
             "" usebundle => slurm_generate_systemd_services();
+
+    commands:
+        SLURM_SERVER.!jwt_key::
+            "/usr/bin/dd if=/dev/random of=$(slurm.jwt_key_file) bs=32 count=1";
 }
 
 bundle agent slurm_install_pkg()
@@ -246,13 +283,6 @@ $(slurm.software_dir)/current/lib/slurm
                 template_method => "inline_mustache",
                 classes => results("bundle", "ld_config_slurm");
 
-            "$(slurm.log_dir)/."
-                create => "true",
-                perms => mog("0700", "$(slurm.user)", "$(slurm.group)");
-
-            "$(slurm.software_dir)/."
-                perms => mog("0755", "root", "root"),
-                create => "true";
 
     methods:
         any::
@@ -330,6 +360,9 @@ bundle agent slurm_daemon_check()
 
             "$(slurm.restart_database)"
                 if => and(canonify("$(slurm.database_service_name)_out_of_range"));
+
+            "$(slurm.restart_restd)"
+                if => and(canonify("$(slurm.restd_service_name)_out_of_range"));
 }
 
 
@@ -403,17 +436,6 @@ bundle agent slurm_config()
             "" usebundle => rm_rf("$(slurm.config_dir)/plugstack.conf.d");
 
     files:
-        any::
-            "$(slurm.config_dir)"
-                perms => mog("$(slurm.mode_dir)", "$(slurm.user)", "$(slurm.group)");
-
-            "$(slurm.scripts_dir)/."
-                perms => mog("700", "$(slurm.user)", "$(slurm.group)");
-
-            "$(slurm.spool_dir)/."
-                perms => mog("${slurm.mode_dir}", "$(slurm.user)", "$(slurm.group)"),
-                create => "true";
-
         SLURM_SERVER|!SLURM_CONFIGLESS::
             "$(slurm.slurmdbd_file)"
                 perms => mog("0600", "$(slurm.user)", "$(slurm.group)");

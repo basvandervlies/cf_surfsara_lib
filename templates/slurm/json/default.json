@@ -12,6 +12,10 @@
         "cmd": "/usr/bin/sacctmgr dump",
         "copies" : "7"
     },
+    "AuthAlt" : {
+        "AuthAltTypes": "auth/jwt",
+        "AuthAltParameters": "jwt_key=$(slurm.jwt_key_file)"
+    },
     "AuthType": "auth/munge",
     "backup_db_dir": "/var/backups",
     "backup_dir": "$(scl.slurm[backup_db_dir])/slurm",
@@ -82,6 +86,7 @@
     "MinJobAge": "300",
     "MpiDefault": "none",
     "no_default_section": {},
+    "nodeset_section": {},
     "nodes_section": [],
     "packages_client": { },
     "packages_server": { },

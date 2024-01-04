@@ -56,6 +56,7 @@ These services have bug fixes or new features:
     * Added support for slurmrestd service
     * systemd service files are more configurable via mustache/json
     * switch to `group` promise type and create slurm/slurmrestd logins for tarball installations
+    * Added `nodeset_section` to define `Nodesets` with as keyword the `name` of the Nodeset
 
 # Version: 1.5.0 (2023-05-11)
 

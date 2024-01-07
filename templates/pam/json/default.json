@@ -77,5 +77,7 @@
         "session     required      pam_limits.so",
         "session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid",
         "session     required      pam_unix.so"
-    ]
+    ],
+    "uid_limit_line": "CPUQuota=400% CPUAccounting=true MemoryMax=16G MemoryAccounting=true TasksMax=10000 TasksAccounting=true",
+    "uid_min_limits_check": "1000"
 }

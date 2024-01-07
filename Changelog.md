@@ -48,6 +48,8 @@ These services have bug fixes or new features:
  * apt:
     * Added new class to be set on commandline to byopass schedule for debconf, `APT_DEBCONF`
     * debian 12 and higher use `non-free-firmware` instead of `non-free`
+ * pam:
+    * made `/etc/security/limits.sh` configurable via mustache/json
  * nvidia:
     * Added a new class `NVIDIA_ONLY_INSTALL_SW` this will only install the NVIDIA software, some packages rely on this
     * rewrote some logic

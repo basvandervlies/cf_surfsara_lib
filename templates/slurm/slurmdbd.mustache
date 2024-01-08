@@ -13,6 +13,10 @@
 #
 # Authentication info
 AuthType={{{vars.scl.slurm.AuthType}}}
+{{#vars.scl.slurm.AuthAlt}}
+{{{@}}}={{{.}}}
+{{/vars.scl.slurm.AuthAlt}}
+
 #AuthInfo=/var/run/munge/munge.socket.2
 #
 # slurmDBD info

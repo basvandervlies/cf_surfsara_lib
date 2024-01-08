@@ -9,7 +9,6 @@ bundle common apt
             "config_dir" string => "/etc/apt";
             "dpkg_command" string => "/usr/bin/dpkg";
             "dpkg_reconfigure"string => "/usr/sbin/dpkg-reconfigure";
-            "command" string => "/usr/bin/apt";
             "non_free_component" string => "non-free-firmware";
             "repos_dir" string => "$(config_dir)/sources.list.d";
             "trusted_dir" string => "$(config_dir)/trusted.gpg.d";
@@ -123,7 +122,7 @@ bundle agent apt_autoremove()
 {
     commands:
         any::
-            "$(apt.command)"
+            "$(apt.pkg_command)"
                 args => "-y autoremove",
                 if => "$(scl.apt[autoremove_schedule])";
 }

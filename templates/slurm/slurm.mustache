@@ -10,6 +10,9 @@ SlurmctldPort={{{vars.scl.slurm.SlurmctldPort}}}
 SlurmdPort={{{vars.scl.slurm.SlurmdPort}}}
 
 AuthType={{{vars.scl.slurm.AuthType}}}
+{{#vars.scl.slurm.AuthAlt}}
+{{{@}}}={{{.}}}
+{{/vars.scl.slurm.AuthAlt}}
 
 SwitchType=switch/none
 MpiDefault={{{vars.scl.slurm.MpiDefault}}}
@@ -160,6 +163,10 @@ PartitionName={{{name}}} {{#settings}}{{{@}}}={{{.}}} {{/settings}}
 Licenses={{#vars.scl.slurm.licenses_section}}{{{.}}},{{/vars.scl.slurm.licenses_section}}
 
 # NODE configuration
+{{#vars.scl.slurm.nodeset_section}}
+{{{@}}} {{{.}}}
+{{/vars.scl.slurm.nodeset_section}}
+
 {{#vars.scl.slurm.nodes_section}}
 NodeName={{{Name}}} {{#settings}}{{{@}}}={{{.}}} {{/settings}}
 {{/vars.scl.slurm.nodes_section}}

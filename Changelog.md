@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.5.1 (2023-07-XX)](#version-151-2023-07-xx)
+* [Version: 1.6.0 (2024-01-09)](#version-160-2024-01-09)
 * [Version: 1.5.0 (2023-05-11)](#version-150-2023-05-11)
 * [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
 * [Version: 1.4.0 (2022-06-06)](#version-140-2022-06-06)
@@ -31,7 +31,7 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.5.1 (2023-07-XX)
+# Version: 1.6.0 (2024-01-09)
 
 SCL enhancements:
  * `scl_mustache_service_autorun` bug fix if called 2 times for same service with different bundles
@@ -48,14 +48,16 @@ These services have bug fixes or new features:
  * apt:
     * Added new class to be set on commandline to byopass schedule for debconf, `APT_DEBCONF`
     * debian 12 and higher use `non-free-firmware` instead of `non-free`
- * nvidia:
-    * Added a new class `NVIDIA_ONLY_INSTALL_SW` this will only install the NVIDIA software, some packages rely on this
-    * rewrote some logic
+ * pam:
+    * made `/etc/security/limits.sh` configurable via mustache/json
  * slurm:
     * Added generation of `job_container.conf`, default mode is ignore the file  `JobContainerType=job_container/none`
     * Added support for slurmrestd service
     * systemd service files are more configurable via mustache/json
     * switch to `group` promise type and create slurm/slurmrestd logins for tarball installations
+    * Added `nodeset_section` to define `Nodesets` with as keyword the `name` of the Nodeset
+    * Added support for [job_container_tmpfs](https://slurm.schedmd.com/job_container_tmpfs.htmljob_container_tmpfs)
+    * Enabled default [jwt](https://slurm.schedmd.com/jwt.html) support needed from slurmrestd, See `AuthAlt` keyword
 
 # Version: 1.5.0 (2023-05-11)
 

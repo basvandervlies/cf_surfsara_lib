@@ -2,6 +2,6 @@
 
 PAM_UID=$(getent passwd "${PAM_USER}" | cut -d: -f3)
 
-if [ "${PAM_UID}" -ge 1000 ]; then
-    /bin/systemctl set-property "user-${PAM_UID}.slice" CPUQuota=400% CPUAccounting=true MemoryLimit=16G MemoryAccounting=true
+if [ "${PAM_UID}" -ge {{{vars.scl.pam.uid_min_limits_check}}} ]; then
+/bin/systemctl set-property "user-${PAM_UID}.slice" {{{vars.scl.pam.uid_limit_line}}}
 fi

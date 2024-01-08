@@ -37,7 +37,7 @@ bundle common scl_stdlib_common
                 "$(this.promise_dirname)/storage.cf",
             };
 
-            "version" string => "SCL 1.5.0";
+            "version" string => "SCL 1.6.0";
 
         SCL_SKIP_DEF_CF_INCLUDE::
             "def" slist => { };

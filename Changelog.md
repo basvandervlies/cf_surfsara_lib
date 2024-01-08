@@ -44,9 +44,9 @@ SCL enhancements:
 
 These services have bug fixes or new features:
  * apache:
-    * service/daemon check matched unwanted processes, replace is with `services:` proise type
+    * service/daemon check matched unwanted processes, replace is with `services:` promise type
  * apt:
-    * Added new class to be set on commandline to byopass schedule for debconf, `APT_DEBCONF`
+    * Added new class to be set on the commandline to bypass schedule for debconf, `APT_DEBCONF`
     * debian 12 and higher use `non-free-firmware` instead of `non-free`
  * pam:
     * made `/etc/security/limits.sh` configurable via mustache/json

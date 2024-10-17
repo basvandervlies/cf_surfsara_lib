@@ -42,7 +42,7 @@ bundle agent pam_radius_install()
                 {
                     "install": {
                         "freeradius-utils": "",
-                        "libpam-radius-auth": ""
+                        "libpam-radius-auth": "latest"
                     }
                 }
             ');

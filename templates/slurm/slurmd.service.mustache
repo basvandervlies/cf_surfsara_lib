@@ -7,6 +7,7 @@ ConditionPathExists={{{vars.slurm.config_dir}}}/slurm.conf
 Documentation=man:slurmd(8)
 
 [Service]
+EnvironmentFile=-{{{vars.scl.slurm.slurmd_service.environment_file}}}
 Type={{{vars.scl.slurm.slurmd_service.type}}}
 {{#classes.SLURM_CONFIGLESS}}
 ExecStartPre=-/bin/rm /run/slurm/conf/slurm.conf

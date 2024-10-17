@@ -77,7 +77,7 @@ bundle agent apt_autorun()
             "" usebundle => apt_autoremove();
 
         APT_AUTOMATIC_SECURITY_UPDATE::
-            "" usebundle => apt_security_update_silent(),
+            "" usebundle => apt_security_update("-qq"),
                     comment => "Only run once a hour due to if_elapsed",
                     if => "$(scl.apt[security_schedule])",
                     action => if_elapsed(50);
@@ -86,26 +86,27 @@ bundle agent apt_autorun()
             "" usebundle => apt_check_status();
 
         APT_DIST_UPGRADE::
-            "" usebundle => apt_package_update("-y dist-upgrade");
+            "" usebundle => apt_os_version_check(),
+                comment => "will be obsolete 3 July 2024";
 
         APT_KILL_PKG_MANAGER::
             "" usebundle => apt_kill_pkg_manager();
 
         APT_OS_VERSION_CHECK::
-            "" usebundle => apt_os_version();
+            "" usebundle => apt_os_version_check();
 
         APT_SYSTEMD_DISABLE::
             "" usebundle => apt_systemd_disable(),
                     comment => "Only run once a day",
                     action => if_elapsed_day;
 
-        Security::
+        Security|SECURITY::
             "" usebundle => apt_security_update(""),
-                comment => "set via de command line,i -DSecurity";
+                comment => "set via de command line,i -DSecurity or -DSECURITY";
 
         Upgrade::
-            "" usebundle => apt_package_update("dist-upgrade"),
-                comment => "set via de command line, -DUpgrade";
+            "" usebundle => apt_upgrade_packages(""),
+                comment => "Will upgrade ALL packages from all configured repo's to latest level";
 
         # Must be ported to def.json
         apt_debconf_set::
@@ -120,10 +121,18 @@ bundle agent apt_autorun()
 
 bundle agent apt_autoremove()
 {
+    vars:
+        #any::
+            #"purged_packages" string => execresult("$(apt.dpkg_command) --purge `$(apt.dpkg_command) -l |grep ^rc|awk '{ print $2 }'`", "useshell"),
+            #    if => "$(scl.apt[autoremove_schedule])";
     commands:
         any::
             "$(apt.pkg_command)"
                 args => "-y autoremove",
+                if => "$(scl.apt[autoremove_schedule])";
+    reports:
+        any::
+            "$(this.bundle): $(purged_packages) were purged"
                 if => "$(scl.apt[autoremove_schedule])";
 }
 
@@ -142,35 +151,38 @@ bundle agent apt_kill_pkg_manager()
             if => or( canonify("$(this.bundle)_$(apt_cmds)_repaired") );
 }
 
-bundle agent apt_os_version()
+bundle agent apt_os_version_check()
 {
     vars:
-        debian::
+        any::
             "os_class_list" slist => classesmatching("debian.*");
             "os_class_string" string => format("%S", os_class_list);
+            "options" slist => maplist("-o $(this)", getvalues("scl.apt[upgrade_options]"));
+            "options_str" string => join(" ", options);
 
     classes:
         any::
-            "flavor_set"  expression => isvariable("def.apt[$(sys.flavor)]");
+            "flavor_set"  expression => isvariable("scl.apt[$(sys.flavor)]");
 
         flavor_set::
-            "version_ok" expression => reglist(@(os_class_list), "$(def.apt[$(sys.flavor)])");
+            "version_ok" expression => reglist(@(os_class_list), "$(scl.apt[$(sys.flavor)])");
 
     methods:
         !version_ok.flavor_set::
-            "" usebundle => apt_package_update("-y dist-upgrade");
-
+            "" usebundle => apt_upgrade_packages("$(options_str)");
+            "" usebundle => apt_security_update("-qq"),
+                comment => "also run secuity update after os upgrade";
 
     reports:
         DEBUG_apt.flavor_set::
-            "$(this.bundle): $(sys.flavor) version is set in def.cf to: $(def.apt[$(sys.flavor)])";
+            "$(this.bundle): $(sys.flavor) version is set in def.cf to: $(scl.apt[$(sys.flavor)])";
 
         !flavor_set::
             "$(this.bundle): AUTOMATIC OS update failed due to missing setting in def.cf/json file, eg:";
             "   apt: { $(sys.flavor): $(sys.flavor)_4 }";
 
         flavor_set.!version_ok::
-            "$(this.bundle): Debian version MISMATCH: $(def.apt[$(sys.flavor)]) not in $(os_class_string)";
+            "$(this.bundle): Debian version MISMATCH: $(scl.apt[$(sys.flavor)]) not in $(os_class_string)";
 }
 
 
@@ -181,7 +193,7 @@ bundle agent apt_systemd_disable()
             "systemd_services_timers" slist => { "apt-daily.timer", "apt-daily-upgrade.timer" };
 
     methods:
-        debian_9::
+        debian::
             "" usebundle => systemd_stop_service("$(systemd_services_timers)");
 
     commands:
@@ -190,38 +202,24 @@ bundle agent apt_systemd_disable()
 }
 
 
-bundle agent apt_package_update(update_option)
+bundle agent apt_security_update(quiet)
 {
-    commands:
+    vars:
         debian::
-            "$(apt.dpkg_command)"   args => "--configure -a";
-            "$(apt.pkg_command)"    args => "--quiet update";
-            "$(apt.pkg_command)"    args => "$(update_option)";
-            "$(apt.pkg_command)"    args => "clean";
+            "options" slist => maplist("-o $(this)", getvalues("scl.apt[security_options]"));
+            "options_str" string => join(" ", options);
 
-    reports:
-        DEBUG_apt.debian::
-            "$(this.bundle): '$(sys.host)':'$(options)'";
-
-}
-
-bundle agent apt_security_update_silent()
-{
     methods:
         any::
-            "" usebundle => apt_security_update("-qq"),
-                comment => "Show only the packages that are updated",
-                action => immediate;
+            "" usebundle => apt_upgrade_packages("$(quiet) $(options_str)");
 }
 
-bundle agent apt_security_update(options)
+bundle agent apt_upgrade_packages(options)
 {
 
     vars:
         debian::
             "apt_return_codes" slist => { "1" , "2" , "100" };
-            "dpkg_options" slist => maplist("-o $(this)", getvalues("scl.apt[security_options]"));
-            "dpkg_options_str" string => join(" ", dpkg_options);
 
     commands:
         debian::
@@ -231,9 +229,9 @@ bundle agent apt_security_update(options)
                 classes => scl_cmd_repair( "@(apt_return_codes)",  "apt_update");
 
             "$(apt.pkg_command) -y upgrade"
-                comment => "New security update command",
+                comment => "Upgrade with the right repo's",
                 contain => in_shell,
-                args => "$(dpkg_options_str) $(options)",
+                args => "$(options)",
                 classes => scl_cmd_repair( "@(apt_return_codes)",  "apt_upgrade");
 
         apt_upgrade_failed|apt_update_failed::
@@ -251,8 +249,8 @@ bundle agent apt_security_update(options)
         apt_upgrade_failed::
             "$(this,bundle): apt -y upgrade FAILED on host  $(sys.host), running commands to fix it";
 
-        DEBUG_apt|Security::
-            "$(this.bundle): has run with the dpkg options: '$(dpkg_options_str)'";
+        DEBUG_apt::
+            "$(this.bundle): has run with the dpkg options: '$(options)'";
 }
 
 bundle agent apt_check_status()
@@ -320,14 +318,12 @@ bundle agent apt_repository_generate(template_file, repo_files)
             "repo_data" data => mergedata("repo_data", readjson("$(json_dir)/$(repo_files)"));
             "repo_data" data => data_expand("repo_data");
 
-            "repo_data_str" string => format("%S", "repo_data"),
-                if => "DEBUG|DEBUG_apt|DEBUG_apt_repository";
-
             "repo_names" slist => getindices("repo_data");
-            "repo_exclude_files" slist => maplist("$(this).list", @(repo_names));
+            "repo_data[$(repo_names)][run_class]" string => "any",
+                comment => "run_class needs a value else the resolving of the class goes wrong",
+                unless => isvariable("repo_data[$(repo_names)][run_class]");
 
-        DEBUG|DEBUG_apt|DEBUG_apt_repository::
-            "repo_exclude_files_str" string => format("%S", repo_exclude_files);
+            "repo_exclude_files" slist => maplist("$(this).list", @(repo_names));
 
     classes:
         any::
@@ -339,7 +335,12 @@ bundle agent apt_repository_generate(template_file, repo_files)
                 create          => "true",
                 edit_template   => "/etc/node_status/templates/apt/$(template_file)",
                 template_method => "mustache",
-                template_data   => mergedata("repo_data[$(repo_names)]");
+                template_data   => mergedata("repo_data[$(repo_names)]"),
+                if => canonify("$(repo_data[$(repo_names)][run_class])");
+
+            "$(apt.repos_dir)/$(repo_names).list"
+                delete          => scl_tidyfiles,
+                unless => canonify("$(repo_data[$(repo_names)][run_class])");
 
             "$(apt.repos_dir)"
                 comment         => "Remove apt repository files that are not maintained by CFEngine",
@@ -363,10 +364,21 @@ bundle agent apt_repository_generate(template_file, repo_files)
             "" usebundle => apt_repository_key("$(repo_names)", "$(repo_data[$(repo_names)][repo_key])"),
                 comment => "Check if the repo key is known";
 
+        DEBUG|DEBUG_apt|DEBUG_apt_repository::
+            "" usebundle => scl_show_data("$(this.bundle)", "repo_data");
+            "" usebundle => scl_show_data("$(this.bundle)", "repo_exclude_files");
+
     reports:
         DEBUG|DEBUG_apt|DEBUG_apt_repository::
-            "$(this.bundle): repository_file excluded from deletion: $(repo_exclude_files_str)";
-            "$(this.bundle): Merged data repository files: $(repo_data_str)";
+            "$(this.bundle): delete file:s $(apt.repos_dir)/$(repo_names).list,  not class: $(repo_data[$(repo_names)][run_class])"
+                unless => and(
+                    canonify("$(repo_data[$(repo_names)][run_class])")
+                    );
+
+            "$(this.bundle): generated files:  $(apt.repos_dir)/$(repo_names).list"
+                if => and(
+                    canonify("$(repo_data[$(repo_names)][run_class])")
+                    );
 
         !apt_import_key_cmd_exists::
             "$(this.bundle): import keys command not found or set: '$(scl.apt[import_key])'";
@@ -537,8 +549,6 @@ The following actions are proctected by a class:
  * setting debconf values for package field(s), controlled via json data
  * disable systemctl timer services for apt, may interfere with CFEngine (APT_SYSTEMD_DISABLE)
  * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
- * automatic perform a dist-upgrade (DIST_UPGRADE)
-
 
 
 The classes can be set in def.cf/json:

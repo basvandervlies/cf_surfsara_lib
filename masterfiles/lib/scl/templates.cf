@@ -217,7 +217,7 @@ bundle agent scl_json_copy(service_name, files)
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
-                copy_from   => scl_template_local_dcp("$(local_dir)/$(files)"),
+                copy_from   => scl_dereference_dcp("$(local_dir)/$(files)"),
                 classes     => results("bundle","$(service_name)$(files)");
 
         CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
@@ -414,7 +414,7 @@ bundle agent scl_mustache_copy(service_name, files)
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
-                copy_from   => scl_template_local_dcp("$(local_dir)/$(files)"),
+                copy_from   => scl_dereference_dcp("$(local_dir)/$(files)"),
                 classes     => if_repaired("$(service_name)_mustache_copied");
 
        CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::

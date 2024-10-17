@@ -17,8 +17,6 @@ bundle common postfix() {
                     }
                 ');
             "service_name"      string => "postfix";
-
-        debian_9|debian_10|debian_11::
             "daemon_name"       string => "/usr/lib/postfix/sbin/master";
 
         redhat::

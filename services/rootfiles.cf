@@ -33,7 +33,7 @@ bundle agent rootfiles_config()
     classes:
         "copy_dirs_set" expression => isvariable("scl.rootfiles[copy_dirs]");
         "copy_files_set" expression => isvariable("scl.rootfiles[copy_files]");
-        "ssh_keys_set" expression => reglist("@(scl.rootfiles[ssh_keys])", ".+");
+        "ssh_keys_set" expression => some(".*", "scl.rootfiles[ssh_keys]");
         "user_ssh_keys_dir_set" expression => isvariable("scl.rootfiles[user_ssh_keys_dir]");
 
     files:

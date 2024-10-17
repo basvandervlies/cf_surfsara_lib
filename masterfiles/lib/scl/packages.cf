@@ -93,11 +93,13 @@ bundle agent scl_service_package(service_name, package, version, action, options
         !version_specified::
             "$(package)"
                 policy => "$(action)",
+                package_method => generic,
                 options => { "$(options)" };
 
         version_specified::
             "$(package)"
                 policy => "$(action)",
+                package_method => generic,
                 version => "$(version)",
                 options => { "$(options)" };
 

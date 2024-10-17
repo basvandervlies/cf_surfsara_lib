@@ -109,7 +109,7 @@ bundle agent pam_generate_files()
 
     reports:
         any::
-            "$(this.bundle): $(os):'$(found))'  $(files): $(scl.pam[$(os)][$(files)])"
+            "$(this.bundle):$(os) found in:'$(found)'  $(files): $(scl.pam[$(os)][$(files)])"
                 comment => "Show which files are generated",
                 if => "DEBUG|DEBUG_pam|DEBUG_$(this.bundle)";
 

@@ -139,6 +139,11 @@ bundle agent munge_config()
                 comment => "check if we should copy any files for the munge bundle";
 
     files:
+        any::
+            "$(munge.log_dir)/."
+                perms => og(,"munge", "munge"),
+                create => "true";
+
         MUNGE_ID_repaired::
             "$(munge.config_dir)"
                 perms => og("munge", "munge"),

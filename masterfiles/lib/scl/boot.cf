@@ -14,7 +14,7 @@ follows:
 
 When this class is set we call this bundle.
 @endif
-bundle agent boot_run
+bundle agent scl_boot_run
 {
     vars:
         any::

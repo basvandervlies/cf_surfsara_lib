@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.x.x (2024-02-21)](#version-1xx-2024-02-21)
 * [Version: 1.6.0 (2024-01-09)](#version-160-2024-01-09)
 * [Version: 1.5.0 (2023-05-11)](#version-150-2023-05-11)
 * [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
@@ -31,6 +32,53 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.x.x (2024-02-21)
+
+SCL enhancements:
+ * added `scl_dri_fixed_perms` to set rw permissions on /dev/dri/* for all owners
+ * `scl_service_install_tarballs` extract when tarball is copied even if `check_dir` exists (bug fix)
+ * renamed `scl_template_local_dcp` to `scl_dereference_dcp`.  Is also useful in other service files
+ * renamed `boot_run` to `scl_boot_run`. It is a SCL agent bundle.
+
+These services have bug fixes or new features:
+ * apt:
+    * added `run_class` to repo json file, eg: only generate repo file on `x86_64` systems
+```
+amdgpu: {
+ run_class: linux_x86_64,
+ key_file: rocm.asc,
+ repo: [
+    {
+        name: amd_repo,
+        desc: amd gpu,
+        url: deb https://repo.radeon.com/amdgpu/$(rocm.driver_version)/ubuntu $(rocm.distribution) main
+    }
+]
+```
+    * `APT_DIST_UPGRADE` will be obsolete and is replaced by `APT_OS_VERSION_CHECK`
+    * `apt_autoremove` bundle also purged leftovers from removed packages.
+    * we can now control how the OS will be upgrade and which repo's will be used (default.json), eg:
+```
+"upgrade_options": [
+    "Dir::Etc::sourceparts=/dev/null",
+    "Dir::Etc::SourceList=$(apt.repos_dir)/debian_security.list",
+    "Dir::Etc::SourceList=$(apt.repos_dir)/debian.list",
+    "Dpkg::Options::=--force-confdef",
+    "Dpkg::Options::=--force-confold"
+]
+```
+ * munge:
+    * Make sure that `log_dir` exists.
+ * ntp:
+    * ntp becomes ntpsec by default. Bundle tested on Debian 11 & 12.
+ * rootfiles:
+    * use the `some` function to test if var has a value
+ * slurm:
+    * Added `reboot_node` string that can be used to reboot node through Slurm
+    * Added a new class `SLURM_INSTALL_ONLY`. This will only install the software via packages or tarball
+    * You can now set all user atrtibutes like `homedir` and `shell`
+    * Added support for environment file in slurmd systemd service, default: `/etc/default/slurmd`
+
 # Version: 1.6.0 (2024-01-09)
 
 SCL enhancements:

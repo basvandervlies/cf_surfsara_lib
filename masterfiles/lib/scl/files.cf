@@ -148,7 +148,7 @@ windows::
     compare => "mtime";
 }
 
-body copy_from scl_template_local_dcp(from)
+body copy_from scl_dereference_dcp(from)
 {
     compare => "digest";
     source => "$(from)";
@@ -485,7 +485,7 @@ bundle agent scl_service_install_tarballs(bundle_name)
                 comment => "extract tarball with specified command in a directory",
                 contain => in_dir("$(scl.$(bundle_name)[install_tarballs][$(index)][extract][in_dir])"),
                 if => or(
-                    canonify("$(bundle_name)_install_tarballs$(scl.$(bundle_name)[install_tarballs][$(index)][dest])"),
+                    canonify("$(bundle_name)_install_tarballs$(scl.$(bundle_name)[install_tarballs][$(index)][dest])_repaired"),
                     "!check_dir_$(index)"
                     );
 
@@ -665,4 +665,21 @@ bundle edit_line scl_var_to_file( line )
         insert_lines:
                 !infile::
                        "$(line)";
+}
+@if minimum_version(99.9)
+## scl_dri_fixed_file_perms
+
+Used to set permissions on device files in the directory `/dev/dri/` so everybody can use them.
+
+@endif
+
+bundle agent scl_dri_fixed_perms()
+{
+    files:
+        any::
+            "/dev/dri"
+                comment => "needed for right permissions on files",
+                file_select =>  not_dir,
+                depth_search => recurse("1"),
+                perms => mog("666", "root", "root");
 }

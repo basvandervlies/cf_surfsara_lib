@@ -18,6 +18,7 @@ empty_address_recipient = {{{vars.scl.postfix.empty_address_recipient}}}
 
 header_checks = {{#vars.scl.postfix.header_checks}}{{{.}}},{{/vars.scl.postfix.header_checks}}
 canonical_maps = {{#vars.scl.postfix.canonical_maps}}{{{.}}},{{/vars.scl.postfix.canonical_maps}}
+sender_canonical_maps = {{#vars.scl.postfix.sender_canonical_maps}}{{{.}}},{{/vars.scl.postfix.sender_canonical_maps}}
 
 inet_interfaces = {{{vars.scl.postfix.inet_interfaces}}}
 inet_protocols = {{{vars.scl.postfix.inet_protocols}}}
@@ -75,9 +76,7 @@ relay_initial_destination_concurrency = 1
 
 smtpd_recipient_restrictions = {{#vars.scl.postfix.smtpd_recipient_restrictions}}{{{.}}},{{/vars.scl.postfix.smtpd_recipient_restrictions}}
 smtpd_helo_restrictions = {{#vars.scl.postfix.smtpd_helo_restrictions}}{{{.}}},{{/vars.scl.postfix.smtpd_helo_restrictions}}
-{{/classes.POSTFIX_STRICT_HANDLING}}
 
-{{^classes.POSTFIX_STRICT_HANDLING}}
 smtpd_relay_restrictions = {{#vars.scl.postfix.smtpd_relay_restrictions}}{{{.}}} {{/vars.scl.postfix.smtpd_relay_restrictions}}
 {{/classes.POSTFIX_STRICT_HANDLING}}
 
@@ -104,20 +103,24 @@ smtpd_tls_dh1024_param_file = /etc/certificate/dhparam.pem
 smtpd_tls_cert_file = {{{vars.scl.postfix.smtpd_tls_cert_file}}}
 smtpd_tls_key_file = {{{vars.scl.postfix.smtpd_tls_key_file}}}
 {{/classes.POSTFIX_LOWER_34}}
-{{^classes.POSTFIX_LOWER_34}}
+
+{{#classes.POSTFIX_LOWER_34}}
 smtpd_tls_chain_files = {{{vars.scl.postfix.smtpd_tls_chain_files}}}
 {{/classes.POSTFIX_LOWER_34}}
 
 {{#classes.sles}}
 smtp_tls_CAfile = /etc/ssl/ca-bundle.pem
 {{/classes.sles}}
-{{#classes.debian}}
-smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-{{/classes.debian}}
+
 
 smtp_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
 smtp_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
 {{/classes.POSTFIX_RECEIVE_TLS}}
+
+{{#classes.debian}}
+smtp_tls_CApath = /etc/ssl/certs
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+{{/classes.debian}}
 
 {{#classes.sles}}
 setgid_group = {{{vars.scl.postfix.setgid_group}}}

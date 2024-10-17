@@ -13,6 +13,7 @@ bundle common slurm()
             "jwt_key_file"          string => "$(spool_dir)/statesave/jwt_hs256.key";
             "nodes_config_file"     string => "$(config_dir)/nodes.conf";
             "plugstack_config_file" string => "$(config_dir)/plugstack.conf";
+            "reboot_node"           string => "/usr/bin/scontrol reboot ASAP nextstate=RESUME reason=kernel_update $(sys.uqhost)";
             "slurmdbd_file"         string => "$(config_dir)/slurmdbd.conf";
             "topology_config_file"  string => "$(config_dir)/topology.conf";
 
@@ -21,10 +22,12 @@ bundle common slurm()
             ## slurm uid/gid/mode
             "gid"                   string => "$(scl.slurm[slurm_user][gid])";
             "group"                 string => "$(scl.slurm[slurm_user][group])";
+            "homedir"               string => "$(scl.slurm[slurm_user][homedir])";
             "mode_file"             string => "0644";
             "mode_dir"              string => "0755";
+            "shell"                 string => "$(scl.slurm[slurm_user][shell])";
             "uid"                   string => "$(scl.slurm[slurm_user][uid])";
-            "user"                 string => "$(scl.slurm[slurm_user][user])";
+            "user"                  string => "$(scl.slurm[slurm_user][user])";
 
             ## slurm rest uid/gid/mode
             "restd_gid"                   string => "$(scl.slurm[slurmrestd_user][gid])";
@@ -62,7 +65,7 @@ bundle common slurm()
             "reload_database"   string => "$(paths.path[systemctl]) reload $(database_service_name)";
             "reload_restd"   string => "$(paths.path[systemctl]) reload $(restd_service_name)";
 
-        !SLURM_22_05::
+        SLURM_22_05::
             "template_2_destination" data => parsejson('{
                     "acct_gather.mustache": "$(acct_gather_file)",
                     "cgroup.mustache": "$(cgroup_config_file)",
@@ -75,7 +78,7 @@ bundle common slurm()
                     "topology.mustache": "$(topology_config_file)",
             }');
 
-        SLURM_22_05|SLURM_23_02::
+        !SLURM_22_05::
             # cgroup_allowd_devices is not needed anymore
             #       "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
             "template_2_destination" data => parsejson('{
@@ -87,7 +90,7 @@ bundle common slurm()
                 "slurm.mustache": "$(config_file)",
                 "slurmdbd.mustache": "$(slurmdbd_file)",
                 "topology.mustache": "$(topology_config_file)",
-        }');
+            }');
 
 
     classes:
@@ -107,6 +110,8 @@ bundle agent slurm_autorun()
     methods:
         any::
             "" usebundle => slurm_install();
+
+        !SLURM_INSTALL_ONLY::
             "" usebundle => slurm_config();
             "" usebundle => slurm_daemon_check();
 
@@ -187,6 +192,10 @@ bundle agent slurm_install()
     commands:
         SLURM_SERVER.!jwt_key::
             "/usr/bin/dd if=/dev/random of=$(slurm.jwt_key_file) bs=32 count=1";
+
+    reports:
+            "$(this.bundle): has been called"
+                 if => "DEBUG|DEBUG_slurm|DEBUG_$(this.bundle)";
 }
 
 bundle agent slurm_install_pkg()
@@ -244,10 +253,10 @@ bundle agent slurm_users()
         slurm_grp::
             "$(slurm.user)"
                 policy => "present",
-                home_dir => "/nonexistent",
+                home_dir => "$(slurm.homedir)",
                 group_primary => "$(slurm.group)",
                 uid => "$(slurm.uid)",
-                shell => "/bin/false";
+                shell => "$(slurm.shell)";
 
         slurmrestd_grp::
             "$(slurm.restd_user)"
@@ -747,9 +756,10 @@ The following `classes` can be set via def.cf/json:
  * CLIENT: Configure the machine as client
  * CONFIGLESS: Do not generate the configuration files. It will server by slurmctld
  * CONFIGLESS_CONF_LINKS: Some old utils need `slurm.conf` in the sysconfig directory
+ * INSTALL_ONLY: Only install the slurm software via tarball or packages, NO configuration
  * LOGROTATE: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
- * SLURMD_DISABLE: Disable the slurmd systemd service
  * RESTD: Configure the machine as restd server
+ * SLURMD_DISABLE: Disable the slurmd systemd service
  * SERVER: Configure the machine as server
  * SUBMIT: Configure the machine as submit host
  * SYSTEMD_SERVICES: generate the slurm systemd unit files.

@@ -86,37 +86,26 @@ bundle agent pkg_management_action(name, action, version)
             "pkg_bundle" string => "scl_service_packages_$(action)",
                 comment => "Which package bundle to run";
 
-            "run_class_var" slist => getvalues("scl.pkg_management[$(name)][run_class]"),
-                comment => "Only run package action if this class is true";
+            "run_class" slist => { "any" },
+                comment => "Set to 'any' if varianle is not defined",
+                unless => isvariable("scl.pkg_management[$(name)][run_class]");
 
-            "run_class_var_str" string => ifelse(
-                    "run_class_set", format("%S", "run_class_var"),
-                    "any"
-                ),
-                if => "DEBUG|DEBUG_pkg_management|DEBUG_$(this.bundle)";
+            "run_class" slist => getvalues("scl.pkg_management[$(name)][run_class]"),
+                comment => "Use variable if defined",
+                if => isvariable("scl.pkg_management[$(name)][run_class]");
 
-    classes:
-        any::
-            "run_class_set" expression => reglist("@(run_class_var)", ".+"),
-                comment => "if not set assume 'any' class";
-
-            "run_class" expression => "$(run_class_var)",
-                comment => "Run pkg_management action if run_class definitions are met",
-                if => "run_class_set";
 
     methods:
         any::
             "" usebundle => $(pkg_bundle)("pkg_management", "@(pkg_data)"),
-                comment => "Must create dynamic handle, else CF won't run a second time",
+                comment => "Must create dynamic handle, else CF won't run a second time + only use if no other functios",
                 handle => "$(this.bundle)_$(name)",
-                if => or(
-                        "!run_class_set",
-                        "run_class"
-                    );
+                if => "$(run_class)";
 
     reports:
         any::
-            "$(this.bundle): run_class = $(run_class_var_str): $(pkg_bundle) '$(name)':'$(version)'"
+            "$(this.bundle): run_class = '$(with)' : $(pkg_bundle) '$(name)':'$(version)'"
+                   with => format("%S", "run_class"),
                    if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 

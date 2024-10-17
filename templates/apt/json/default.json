@@ -1,13 +1,20 @@
 {
-    "autoremove_schedule": [ "Day1" ],
+    "autoremove_schedule": [ "Day1.once_a_day" ],
     "debconf_schedule":  [ "Min00_05" ],
-    "debconf_module": "$(sys.workdir)/modules/surfsara/debconf",
-    "import_key": "$(sys.workdir)/modules/surfsara/apt_import_key",
-    "key_check_schedule": [ "Day1" ],
+    "debconf_module": "$(sys.workdir)/modules/scl/debconf",
+    "import_key": "$(sys.workdir)/modules/scl/apt_import_key",
+    "key_check_schedule": [ "Hr14" ],
+    "key_dir": "data/apt/keys",
     "security_schedule": [ "Hr00", "Hr06", "Hr12", "Hr18" ],
     "security_options": [
             "Dir::Etc::sourceparts=/dev/null",
             "Dir::Etc::SourceList=$(apt.repos_dir)/debian_security.list",
+            "Dpkg::Options::=--force-confdef",
+            "Dpkg::Options::=--force-confold"
+    ],
+    "upgrade_options": [
+            "Dir::Etc::sourceparts=/dev/null",
+            "Dir::Etc::SourceList=$(apt.repos_dir)/debian.list",
             "Dpkg::Options::=--force-confdef",
             "Dpkg::Options::=--force-confold"
     ]

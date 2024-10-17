@@ -13,11 +13,13 @@ bundle common ntp {
                 ');
 
             "mode"              string => "0644";
-            "group"             string => "root";
-            "owner"             string => "root";
+            "group"             string => "ntpsec";
+            "owner"             string => "ntpsec";
 
-            "file_localtime"     string => "/etc/localtime";
+            "file_localtime"    string => "/etc/localtime";
             "dir_zoneinfo"      string => "/usr/share/zoneinfo";
+
+            "logdir"            string => "$(scl.ntp[logdir])";
 
         !systemd::
             "restart"           string => "$(paths.path[service]) $(service_name) restart";
@@ -27,29 +29,37 @@ bundle common ntp {
 
         centos::
             "daemon_name"       string => "ntpd";
-            "config_file"       string => "/etc/ntp.conf";
+            "config_file"       string => "/etc/ntpsec/ntp.conf";
             "ntp_default"       string => "/etc/sysconfig/ntpd";
-            "ntpdate_default"   string => "/etc/sysconfig/ntpdate";
+            "ntpdate_default"   string => "/etc/sysconfig/ntpsec-ntpdate";
             "packages"  data  => parsejson('
                     {
-                        "install": {
+                        "purge": {
                             "ntp" : "",
                             "ntpdate" : ""
+                        },
+                        "install": {
+                            "ntpsec" : "",
+                            "ntpsec-ntpdate" : ""
                         }
                     }
                 ');
-            "service_name"      string => "ntpd";
+            "service_name"      string => "ntpsec";
 
         debian::
             "daemon_name"       string => "ntpd";
-            "config_file"       string => "/etc/ntp.conf";
-            "ntp_default"       string => "/etc/default/ntp";
-            "ntpdate_default"   string => "/etc/default/ntpdate";
+            "config_file"       string => "/etc/ntpsec/ntp.conf";
+            "ntp_default"       string => "/etc/default/ntpsec";
+            "ntpdate_default"   string => "/etc/default/ntpsec-ntpdate";
             "packages"  data  => parsejson('
                     {
-                        "install": {
+                        "purge": {
                             "ntp" : "",
                             "ntpdate" : ""
+                        },
+                        "install": {
+                            "ntpsec" : "",
+                            "ntpsec-ntpdate" : ""
                         }
                     }
                 ');
@@ -58,17 +68,21 @@ bundle common ntp {
         sles::
             "group"             string => "ntp";
             "daemon_name"       string => "ntpd";
-            "config_file"       string => "/etc/ntp.conf";
-            "ntp_default"       string => "/etc/sysconfig/ntp";
-            "ntpdate_default"   string => "/etc/sysconfig/ntpdate";
+            "config_file"       string => "/etc/ntpsec/ntp.conf";
+            "ntp_default"       string => "/etc/sysconfig/ntpsec";
+            "ntpdate_default"   string => "/etc/sysconfig/ntpsec-ntpdate";
             "packages"  data  => parsejson('
                     {
-                        "install": {
+                        "purge": {
                             "ntp" : "",
+                            "ntpdate" : ""
+                        },
+                        "install": {
+                            "ntpsec" : "",
                         }
                     }
                 ');
-            "service_name"      string => "ntpd";
+            "service_name"      string => "ntpsec";
 }
 
 bundle agent ntp_autorun()
@@ -119,6 +133,11 @@ bundle agent ntp_config()
 
     files:
         any::
+            "$(ntp.logdir)/."
+                perms  => mog("755", "$(ntp.owner)", "$(ntp.group)"),
+                create => "true",
+                classes => if_repaired("ntp_log_dir_created");
+
             "$(ntp.config_file)"
                 perms => mog("$(ntp.mode)", "$(ntp.owner)", "$(ntp.group)");
             "$(ntp.ntp_default)"
@@ -134,10 +153,13 @@ bundle agent ntp_config()
     methods:
         any::
             "" usebundle => scl_mustache_autorun("ntp");
-        NTP_RESTART::
+
+        NTP_RESTART|ntp_log_dir_created::
             "" usebundle => ntp_daemons_restart();
 
-
+    reports:
+        ntp_log_dir_created::
+            "$(this.bundle): logdir $(ntp.logdir) created";
 }
 
 bundle agent ntp_daemons_check()
@@ -171,9 +193,9 @@ bundle agent ntp_daemons_restart()
 Source: [ntp.cf](/services/ntp.cf)
 
 This bundle will generate these files from mustache templates:
- * /etc/ntp.conf
- * /etc/default/ntpdate (debian), /etc/sysconfig/ntpdate (centos)
- * /etc/default/ntp (debian), /etc/sysconfig/ntpd (centos)
+ * /etc/ntpsec/ntp.conf
+ * /etc/default/ntpsec-ntpdate (debian), /etc/sysconfig/ntpdate (centos)
+ * /etc/default/ntpsec (debian), /etc/sysconfig/ntpd (centos)
 
 if one of the files is changed then the following ''class'' will be set:
  * scl_etc_ntp_conf

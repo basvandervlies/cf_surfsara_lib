@@ -1,4 +1,5 @@
-### Controlled by CFengine3, template file @SURF
+### Controlled by CFEngine3, template file [ {{#vars.resolv.template_2_destination}}{{$.}}{{/vars.resolv.template_2_destination}} ]  @SURF
+#   files: {{{vars.scl.resolv_json_files}}}
 #
 
 search {{#vars.scl.resolv.search}}{{{domain}}} {{/vars.scl.resolv.search}}
@@ -6,6 +7,4 @@ search {{#vars.scl.resolv.search}}{{{domain}}} {{/vars.scl.resolv.search}}
 nameserver {{{ip}}}
 {{/vars.scl.resolv.nameservers}}
 
-{{#vars.scl.resolv.options}}
-options {{{.}}} 
-{{/vars.scl.resolv.options}}
+options {{#vars.scl.resolv.options}}{{{.}}} {{/vars.scl.resolv.options}}

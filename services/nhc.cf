@@ -42,7 +42,7 @@ bundle agent nhc_install()
             "packages"  data  => parsejson('
                 {
                     "install": {
-                        "lbnl-nhc" : "latest"
+                        "lbnl-nhc" : ""
                     }
                 }
             ');

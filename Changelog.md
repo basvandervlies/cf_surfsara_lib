@@ -39,6 +39,8 @@ SCL enhancements:
  * `scl_service_install_tarballs` extract when tarball is copied even if `check_dir` exists (bug fix)
  * renamed `scl_template_local_dcp` to `scl_dereference_dcp`.  Is also useful in other service files
  * renamed `boot_run` to `scl_boot_run`. It is a SCL agent bundle.
+ * added a new variable that can be used in mustache to show which `json_files` are used, eg:
+   * `scl.<service_name>_json_files` --> `scl.resolv_json_files`
 
 These services have bug fixes or new features:
  * apt:
@@ -71,6 +73,8 @@ amdgpu: {
     * Make sure that `log_dir` exists.
  * ntp:
     * ntp becomes ntpsec by default. Bundle tested on Debian 11 & 12.
+ * resolv:
+    * Fixed a bug in generating `options` line in `resolv.conf`
  * rootfiles:
     * use the `some` function to test if var has a value
  * slurm:

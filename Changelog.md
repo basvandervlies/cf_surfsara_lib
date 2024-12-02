@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.7.0 (2024-12-22, Lena)](#version-170-2024-12-22-lena)
+* [Version: 1.7.0 (2024-12-02, Lena)](#version-170-2024-12-02-lena)
 * [Version: 1.6.0 (2024-01-09)](#version-160-2024-01-09)
 * [Version: 1.5.0 (2023-05-11)](#version-150-2023-05-11)
 * [Version: 1.4.1 (2022-07-12)](#version-141-2022-07-12)
@@ -32,7 +32,10 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.7.0 (2024-12-22, Lena)
+# Version: 1.7.0 (2024-12-02, Lena)
+
+
+There is now a Matrix room to discuss or ask questions: #scl:surf.nl
 
 SCL enhancements:
  * added `scl_dri_fixed_perms` to set rw permissions on /dev/dri/* for all owners

@@ -37,7 +37,7 @@ bundle common scl_stdlib_common
                 "$(this.promise_dirname)/storage.cf",
             };
 
-            "version" string => "SCL 1.6.0";
+            "version" string => "1.7.0";
 
         SCL_SKIP_DEF_CF_INCLUDE::
             "def" slist => { };
@@ -46,7 +46,7 @@ bundle common scl_stdlib_common
 
   reports:
     verbose_mode::
-      "$(this.bundle): adding $(version) inputs='$(standard)'";
+      "$(this.bundle): SCL adding $(version) inputs='$(standard)'";
 }
 
 body file control

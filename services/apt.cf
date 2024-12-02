@@ -46,6 +46,9 @@ bundle common apt
             "non_free_component" string => "non-free";
         debian_12::
             "os_name" string => "bookworm";
+
+        SCL_INVENTORY_LSCPU_ENABLED::
+            "arch" string => "$(scl_lscpu.apt_arch)";
 }
 
 bundle agent apt_autorun()

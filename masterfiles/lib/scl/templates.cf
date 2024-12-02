@@ -42,6 +42,9 @@ bundle agent scl(bundle_name, json_files)
         !expand_all_service_bundles::
             "template_dir" string => "$(def.node_template_dir)/$(bundle_name)";
 
+            "$(bundle_name)_json_files"  string  => join(":", json_files),
+                comment => "Can be use in mustache to display which json files are used";
+
             "$(bundle_name)"  data  => parsejson("{}");
 
             "$(bundle_name)" data => mergedata("$(bundle_name)", readdata("$(template_dir)/$(json_files)", auto)),

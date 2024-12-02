@@ -21,8 +21,8 @@ package(s) to install/remove and/or purge. It can be overriden with json data, e
 }
 ```
 
-This will install the 'openssh-server' package and override the package definitions in the service bundle ssh.
-The `[version]` can be empty `""`. It will install any version of the package.
+This will install the `openssh-server` package and override the package definitions in the service
+bundle ssh. The `[version]` can be empty `""`. It will install any version of the package.
 
 Another example is to install and remove ssh packages in 'def.json':
 ```
@@ -43,7 +43,7 @@ Another example is to install and remove ssh packages in 'def.json':
 The following package actions are implemented:
  * install: install the package
  * install_backports: install the package from backports (Debian)
- * purge: delete the package and all it configuration files
+ * purge: delete the package and all it configuration files (Debian)
  * remove: delete the package and preserve the configuration files
 @endif
 bundle agent scl_service_packages(service_name, data)

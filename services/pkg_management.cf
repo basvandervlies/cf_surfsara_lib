@@ -68,7 +68,7 @@ Pin-Priority: $(scl.pkg_management[pin_priority])
 
     methods:
         any::
-            "" usebundle => scl_show_data("$(this.bundle)", "packages"),
+            "" usebundle => scl_show_data("$(this.bundle).packages"),
                 if => "DEBUG_$(this.bundle)|DEBUG_pkg_management|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 

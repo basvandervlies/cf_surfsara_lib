@@ -8,7 +8,7 @@
     ],
     "ssh_keys": {
     },
-    "stepping_stone": [
+    "stepping_stone_authorized_keys": [
         { "key_type": "#",  "key": "stepping_stone",  "comment": "to override" }
     ]
 }

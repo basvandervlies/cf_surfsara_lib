@@ -50,7 +50,7 @@ bundle agent jupyterhub_daemons_check()
 {
     vars:
             "names" slist => getindices("scl.jupyterhub[hubs]");
-            "daemon_$(names)" string => "^$(scl.jupyterhub[dir]).*$(names).py";
+            "daemon_$(names)" string => "^$(scl.jupyterhub[sw_dir]).*$(names).py";
 
     processes:
         any::
@@ -80,13 +80,23 @@ bundle agent jupyterhub_config()
             "current" string => "$(scl.jupyterhub[current])";
             "template_files" slist => getindices("jupyterhub.template_2_destination");
 
-            "names" slist => getindices("scl.jupyterhub[hubs]");
+            "names" slist => sort(getindices("scl.jupyterhub[hubs]"),"lex");
 
             "data_$(names)" data => mergedata(
                 "scl.jupyterhub[config_default]", "scl.jupyterhub[hubs][$(names)]" ),
                 comment => "Merge the default hub settings with the one defined in the config";
 
-            "data_$(names)" data => mergedata("data_$(names)", '{ "name": "${names}" }'),
+            "data_$(names)" data => mergedata("data_$(names)",
+                     '{
+                        "oauth_client_id": "$(scl.jupyterhub[oauth_client_id])",
+                        "oauth_client_secret": "$(scl.jupyterhub[oauth_client_secret])",
+                        "name": "${names}",
+                        "public_url": "https://$(scl.jupyterhub[server_name])"
+                     }'
+                 ),
+                comment => "We need these varriables in the generation of the hub configuration file";
+
+            "data_$(names)" data => mergedata("data_$(names)", '{ "keycloak_client_id": "$(scl.jupyterhub[keycloak_client_id])" }'),
                 comment => "We need the hub name in json data";
 
     classes:
@@ -101,7 +111,7 @@ bundle agent jupyterhub_config()
                 move_obstructions => "true";
 
             "$(scl.jupyterhub[dir])/current"
-                link_from => ln_s("$(scl.jupyterhub[dir])/$(scl.jupyterhub[current])"),
+                link_from => ln_s("$(scl.jupyterhub[sw_dir])/$(scl.jupyterhub[current])"),
                 move_obstructions => "true";
 
             "$(scl.jupyterhub[etc_dir])/."
@@ -176,13 +186,6 @@ bundle agent jupyterhub_config()
         copy_dirs_set::
             "" usebundle => scl_service_copy_dirs("jupyterhub");
 
-    services:
-        any::
-            "jupyterhub-$(names)"
-                comment => "enable and start the jupyterhub service if systemd unit has been changed",
-                service_policy => "start",
-                if => canonify("scl$(systemd.dir)/jupyterhub-$(names).service");
-
     commands:
         any::
             "$(apache.restart)"
@@ -191,6 +194,10 @@ bundle agent jupyterhub_config()
 
             "$(paths.path[systemctl]) daemon-reload"
                 comment => "If service file has been changed reload systemd daemon",
+                if => canonify("scl$(systemd.dir)/jupyterhub-$(names).service");
+
+            "$(paths.path[systemctl])  restart jupyterhub-$(names)"
+                comment => "enable and start the jupyterhub service if systemd unit has been changed",
                 if => canonify("scl$(systemd.dir)/jupyterhub-$(names).service");
 }
 

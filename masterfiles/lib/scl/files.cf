@@ -356,7 +356,7 @@ files:
 
 methods:
     any::
-        "" usebundle => scl_show_data("$(this.bundle)", "rotate_files_data[$(index)]"),
+        "" usebundle => scl_show_data("$(this.bundle).rotate_files_data[$(index)]"),
             handle => "$(this.bundle):$(bundle_name):$(index)",
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }
@@ -435,11 +435,11 @@ methods:
                 );
 
 @if minimum_version(3.11)
-        "" usebundle => scl_show_data("scl", "$(bundle_name)[copy_dirs][$(index)]"),
+        "" usebundle => scl_show_data("scl.$(bundle_name)[copy_dirs][$(index)]"),
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
-        "" usebundle => scl_show_data("$(this.bundle)", "exclude_dir_$(index)"),
+        "" usebundle => scl_show_data("$(this.bundle).exclude_dir_$(index)"),
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
-        "" usebundle => scl_show_data("$(this.bundle)", "cp_attr_$(index)"),
+        "" usebundle => scl_show_data("$(this.bundle).cp_attr_$(index)"),
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 @endif
 
@@ -469,9 +469,16 @@ bundle agent scl_service_install_tarballs(bundle_name)
         "check_tarball_dir" expression => isdir("$(scl.$(bundle_name)[tarball_dir])"),
             comment => "Check if target directory exists";
 
+        "check_software_dir" expression => isdir("$(scl.$(bundle_name)[software_dir])"),
+            comment => "Check if target directory exists";
+
     files:
         !check_tarball_dir::
             "$(scl.$(bundle_name)[tarball_dir])/."
+                create => "true";
+
+        !check_software_dir::
+            "$(scl.$(bundle_name)[software_dir])/."
                 create => "true";
 
     methods:
@@ -499,7 +506,7 @@ bundle agent scl_service_install_tarballs(bundle_name)
                     "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)"
                     );
 
-            "$(this.bundle): Software directory does not exists: $(scl.$(bundle_name)[install_tarballs][$(index)][check_dir]) force reinstall"
+            "$(this.bundle): tarball directory does not exists: $(scl.$(bundle_name)[install_tarballs][$(index)][check_dir]) force reinstall"
                 if => and(
                     "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)",
                     "!check_dir_$(index)"
@@ -574,10 +581,8 @@ methods:
                 canonify("$(bundle_name)_$(section)_$(index)_run_bundle")
                 );
 
-@if minimum_version(3.11)
-        "" usebundle => scl_show_data("scl", "$(bundle_name)[$(section)][$(index)]"),
+        "" usebundle => scl_show_data("scl.$(bundle_name)[$(section)][$(index)]"),
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
-@endif
 
 reports:
     any::

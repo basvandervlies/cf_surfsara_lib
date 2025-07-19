@@ -56,6 +56,18 @@ bundle agent pam_radius_install()
                 }
             ');
 
+    classes:
+        "lib_dir" expression => isdir("/lib"),
+            comment => "lib is not a symbolic link";
+        "pam_radius_file" expression => fileexists("/usr/lib/x86_64-linux-gnu/security/pam_radius_auth.so"),
+            comment => "new location for >= 3.0.0";
+
+    files:
+        debian.lib_dir.pam_radius_file::
+            "/lib/x86_64-linux-gnu/security/pam_radius_auth.so"
+                comment => "fix for version >= 3.0.0",
+                link_from => ln_s("/usr/lib/x86_64-linux-gnu/security/pam_radius_auth.so");
+
     methods:
         any::
             "" usebundle => scl_service_packages("pam_radius", "@(pam_radius_install.packages)");
@@ -63,12 +75,11 @@ bundle agent pam_radius_install()
 
 bundle agent pam_radius_config()
 {
-    vars:
-        any::
-            "pam_config_file_class"    string => canonify("scl$(pam_radius.config_file)");
-
     classes:
-        "pam_radius_report" or => { $(pam_config_file_class) };
+        "pam_radius_report"
+            if => or(
+                canonify("scl$(pam_radius.config_file)")
+            );
 
     methods:
         any::

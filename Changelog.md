@@ -1,5 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.8.0 (2025-07-19)](#version-180-2025-07-19)
 * [Version: 1.7.0 (2024-12-02, Lena)](#version-170-2024-12-02-lena)
 * [Version: 1.6.0 (2024-01-09)](#version-160-2024-01-09)
 * [Version: 1.5.0 (2023-05-11)](#version-150-2023-05-11)
@@ -32,10 +33,62 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.8.0 (2025-07-19)
+
+SCL enhancements:
+ * removed support for cfengine 3.12 and lower
+ * rewrote logic for scl json reading and merging. It is easier to debug and read
+ * `scl_show_data`:
+    * only allow one argument instead of two (https://tracker.mender.io/browse/CFE-2434 solved)
+    * remove `date_expand`. Show raw variables for debuging no expansion required.
+ * `scl_service_install_tarballs`:
+    * Added check for `software_dir` and create it if not exists
+ * These variables can be used in the mustache template to show which files are used for rendering
+    * `scl.template_file` --> The mustache template used for rendering
+    * `scl.json_files` --> The json files used for rendering
+ * After parsing all service json files bundle(s) with tag `scl_override_json_service_hook` will run to allow overriding variables  with classes set by the service json files
+ * new bundle `scl_json_merge_data`:
+    * Here you can override service variables with the aid of json data, eg:
+```
+bundle agent service_override_json_data
+{
+    meta:
+        "tags" slist => { "scl_override_json_service_hook" };
+
+    vars:
+        QUOBYTE_CLIENT::
+            "fuse_data" data => parsejson('{ "allow" : "user_allow_other" }'),
+                comment => "Needed for quobyte mounts";
+
+    methods:
+        QUOBYTE_CLIENT::
+            "" usebundle => scl_json_merge_data("fuse", "@(fuse_data)");
+}
+```
+
+These services have bug fixes or new features:
+ * ssh:
+    * added Ciphers and MACs entries to improve security
+ * cron:
+    * the created files should be world reabable to enable cron for an user.
+ * jupyterhub:
+    * make rewriterule flags configurable `apache_rewriterule_flags`
+    * software directory can be different then configuration directory `sw_dir`
+    * hub configurtion files can also access OIDC variables `oauth_client_id` and `oauth_client_secret`
+ * tripwire:
+    * set `TRIPWIRE<file>` class if hash has been changed so we can use it other service files
+ * pam_radius:
+    * debian fix for >=3.0.0 detect if `/lib` is a directory instead of symlink to `/usr/lib`
+ * postfix:
+    * Enabled restart when postmap is used for generating hash files
+ * rootfiles:
+    * Must use `stepping_stone_authorized_keys` instead `stepping_stone`
+ * slurm
+    * Use standard `/sbin` path for service files
+
 # Version: 1.7.0 (2024-12-02, Lena)
 
-
-There is now a Matrix room to discuss or ask questions: #scl:surf.nl
+There is now an Element ( https://element.io/ fka Matrix ) room to discuss or ask questions: #scl:surf.nl
 
 SCL enhancements:
  * added `scl_dri_fixed_perms` to set rw permissions on /dev/dri/* for all owners
@@ -128,7 +181,7 @@ SCL enhancements:
 ```
 "ssh": {
    "json_files": [
-                "soil_$(def.cluster_role).json"
+                "liza_$(def.cluster_role).json"
    ]
 ```
  *  New method for copy/expanding mustache templates `scl_mustache_service_autorun`, Each bundle can define templats to be used, eg:

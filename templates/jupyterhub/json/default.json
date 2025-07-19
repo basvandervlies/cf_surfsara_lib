@@ -50,7 +50,7 @@
         "url_hub_bind": "http://:82",
         "url_ws": "ws://127.0.0.1:80"
     },
-    "hubs": [
+    "hubs": {
         "example": {
             "number": "01",
             "batch_lines": [
@@ -68,8 +68,8 @@
             ],
             "template_file": "jupyterhub_example.mustache"
         }
-    ],
-    "current": "1.0.0",
+    },
+    "current": "5.1.1",
     "install_tarballs": [
         {
             "check_dir": "$(scl.jupyterhub[dir])/1.0.0",
@@ -84,8 +84,10 @@
     ],
     "etc_dir": "$(scl.jupyterhub[dir])/etc" ,
     "dir": "/opt/jupyterhub",
+    "sw_dir": "/surf/sw/jupyterhub",
     "mog_dirs": [ "0750", "root", "root"],
     "mog_config_files": [ "0640", "root", "root"],
     "server_name": "jupyter.lisa.surfsara.nl",
+    "apache_rewriterule_flags": "NE,P,L,UnsafeAllow3F",
     "state_dir": "$(scl.jupyterhub[dir])/state"
 }

@@ -368,8 +368,8 @@ bundle agent apt_repository_generate(template_file, repo_files)
                 comment => "Check if the repo key is known";
 
         DEBUG|DEBUG_apt|DEBUG_apt_repository::
-            "" usebundle => scl_show_data("$(this.bundle)", "repo_data");
-            "" usebundle => scl_show_data("$(this.bundle)", "repo_exclude_files");
+            "" usebundle => scl_show_data("$(this.bundle).repo_data");
+            "" usebundle => scl_show_data("$(this.bundle).repo_exclude_files");
 
     reports:
         DEBUG|DEBUG_apt|DEBUG_apt_repository::
@@ -482,10 +482,9 @@ bundle agent apt_debconf()
                 "$(scl.apt[debconf][$(index)][type])",
                 "$(scl.apt[debconf][$(index)][value])");
 
-@if minimum_version(3.11)
-            "" usebundle => scl_show_data("scl", "apt[debconf][$(index)]"),
+            "" usebundle => scl_show_data("scl.apt[debconf][$(index)]"),
                 if => "DEBGU|DEBUG_apt)|DEBUG_$(this.bundle)";
-@endif
+
     reports:
         !debconf_module_exists::
             "$(this.bundle): Module '$(scl.apt[debconf_module])' not found, skipping debconf settings";

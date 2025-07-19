@@ -30,7 +30,10 @@ This will run the ssh service only for debian and centos hosts.
 
 When `def.scl_services_enabled` is defined it will execute these bundles:
  1. first read merge all json data for all defined services (`scl_services_data`)
+ 1. call the common/agent bundle for all enabled services
  1. expand the CFengine variables for all service bundle data (`scl_services_data_expand`)
+ 1. run the bundles that have the tag `scl_override_json_service_hook`. Simple `key:value` overrides
+ 1. show template data used if in DEBUG mode
  1. run the service  with the specified json data `(scl_services_run`)
 @endif
 bundle common scl_services
@@ -57,7 +60,12 @@ bundle common scl_services
 bundle agent scl_services_autorun
 {
     vars:
-        "inputs" slist => maplist("$(scl_services.dir)/$(this).cf", @(scl_services.enabled));
+        "inputs" slist => maplist("$(scl_services.dir)/$(this).cf", @(scl_services.enabled)),
+            comment => "Mkae a list of enable services cfengine files";
+
+        # These bundles can use all classes that are defined bye the service json files
+        "override_bundles" slist => bundlesmatching(".*", "scl_override_json_service_hook"),
+            comment => "Get a list of bundles to run were we override json data for service(s)";
 
     classes:
         "SCL_SERVICE_$(with)_ENABLED"
@@ -70,21 +78,30 @@ bundle agent scl_services_autorun
             "" usebundle => scl_services_data(@(scl_services.enabled)),
                 comment => "fetch/merge json data for all enabled services";
 
-            "" usebundle => scl_services_data_expand(),
-                comment => "Expand cross reference bundle variables";
-
             "" usebundle => "$(scl_services.enabled)",
                 comment => "Always run the service bundle, mostly it is the common bundle";
+
+            "" usebundle => scl_service_data_expand("@(scl_services.enabled)"),
+                comment => "Expand 2 levels deep bundle variables + cross reference";
+
+            "" usebundle => "$(override_bundles)",
+                comment => "call the def bundle again for mergedata/parsejson statements";
+
+            "" usebundle => scl_show_data("scl.$(scl_services.enabled)"),
+                comment => "The data to be used for service",
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)|DEBUG_$(scl_services.enabled)";
 
             "" usebundle => scl_services_run("$(scl_services.enabled)");
 
     reports:
         scl_services_set::
+            "$(this.bundle): json override hook bundle: $(override_bundles)"
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)|DEBUG_$(scl_services.enabled)";
             "$(this.bundle) service enabled: $(scl_services.enabled)"
-                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)|DEBUG_$(scl_services.enabled)";
         !scl_services_set::
             "$(this.bundle) no service enabled, set 'def.scl_services_enabled'"
-                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)";
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)|DEBUG_$(scl_services.enabled)";
 }
 
 bundle agent scl_services_data(services)
@@ -93,15 +110,22 @@ bundle agent scl_services_data(services)
         "" usebundle => scl_data_autorun("$(services)");
 }
 
-bundle agent scl_services_data_expand()
+## This will expand variables 2 level deep, eg:
+# dir : /etc/ntp
+# config_dir: $(dir)/config
+# sub_config_dir: $)config_dir)/sub
+#
+bundle agent scl_service_data_expand(services)
 {
     vars:
         any::
-            "empty_list" slist  => { };
+            "scl.$(services)" data => data_expand("scl.$(services)"),
+                handle => "$(this.bundle)_$(services)";
 
-    methods:
+    reports:
         any::
-            "" usebundle => scl("expand_all_service_data", "@(empty_list)");
+            "$(this.bundle) service:'$(services)' has been run"
+                if => "DEBUG|DEBUG_services|DEBUG_$(this.bundle)|DEBUG_$(services)";
 }
 
 bundle agent scl_services_run(service)

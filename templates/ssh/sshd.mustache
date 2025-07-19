@@ -1,7 +1,7 @@
-##
-# Managed by CFengine, template generated
-# SURFsara Bas van der Vlies
-
+### Controlled by CFEngine3
+#   template file: {{{vars.scl.template_file}}}
+#   files: {{{vars.scl.json_files}}}
+#
 # What ports, IPs and protocols we listen for
 Port {{{vars.scl.ssh.Port}}}
 
@@ -30,6 +30,13 @@ AllowTcpForwarding {{{vars.scl.ssh.AllowTcpForwarding}}}
 # Logging
 SyslogFacility {{{vars.scl.ssh.SyslogFacility}}}
 LogLevel {{{vars.scl.ssh.LogLevel}}}
+
+# Ciphers and keying
+Ciphers {{{vars.scl.ssh.Ciphers}}}
+#RekeyLimit default none
+
+# Exclude weak MAC algorithms
+MACs -{{{vars.scl.ssh.MACs}}}
 
 # Authentication:
 LoginGraceTime {{{vars.scl.ssh.LoginGraceTime}}}

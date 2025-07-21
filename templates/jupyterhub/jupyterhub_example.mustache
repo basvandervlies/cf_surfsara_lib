@@ -114,10 +114,10 @@ module load <%.%>
 # Provide various profiles using the ProfilesSpawner
 c.ProfilesSpawner.profiles = [
   ( "Quantum SURFsara 20 cores)", 'jupyterhub_quantum_cpu', 'batchspawner.SlurmSpawner',
-      dict(req_partition="fat_soil_shared", req_nprocs="20")
+      dict(req_partition="fat_liza_shared", req_nprocs="20")
   ),
   ( "Quantum SURFara 1 GPU/20 cores ", 'jupyterhub_quantum_gpu', 'batchspawner.SlurmSpawner',
-      dict(req_partition='fat_soil_shared', req_options="--gres=gpu:1")
+      dict(req_partition='fat_liza_shared', req_options="--gres=gpu:1")
   ),
 ]
 

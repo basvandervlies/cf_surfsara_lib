@@ -12,7 +12,7 @@ Type={{{vars.scl.slurm.slurmd_service.type}}}
 {{#classes.SLURM_CONFIGLESS}}
 ExecStartPre=-/bin/rm /run/slurm/conf/slurm.conf
 {{/classes.SLURM_CONFIGLESS}}
-ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmd {{{vars.scl.slurm.slurmd_service.options}}}
+ExecStart=/sbin/slurmd {{{vars.scl.slurm.slurmd_service.options}}}
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile={{{vars.scl.slurm.slurmd_service.pid_file}}}
 KillMode=process

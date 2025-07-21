@@ -17,9 +17,9 @@ bundle common cron()
         debian|centos::
             "allow_file" string => "/etc/cron.allow";
             "deny_file"  string => "/etc/cron.deny";
-            "allow_owner" string => "root";
-            "allow_group" string => "root";
-            "allow_mode"  string => "0644";
+            "owner" string => "root";
+            "group" string => "root";
+            "mode"  string => "0644";
 }
 
 bundle agent cron_autorun()
@@ -28,15 +28,27 @@ bundle agent cron_autorun()
          "tags" slist => { "service_cron", "template_cron" };
 
     methods:
-        "" usebundle => scl_template_autorun("cron"),
-            classes => results("namespace", "cron");
-
+        any::
+            "" usebundle => scl_template_autorun("cron"),
+                classes => results("namespace", "cron");
+            "" usebundle => cron_config();
     reports:
         any::
             "$(this.bundle): has been called"
                 if => "DEBUG|DEBUG_cron|DEBUG_$(this.bundle)";
 
 }
+bundle agent cron_config()
+{
+    files:
+        any::
+            "$(cron.allow_file)"
+                perms => mog("$(cron.mode)", "$(cron.owner)", "$(cron.group)");
+
+            "$(cron.deny_file)"
+                perms => mog("$(cron.mode)", "$(cron.owner)", "$(cron.group)");
+}
+
 @if minimum_version(99.9)
 
 # cron
@@ -80,7 +92,7 @@ vars:
 
 The variable must be `cron_json_files` and with this setup 1 extra json file will be merged.
 
-###  DEBUG 
+###  DEBUG
 
 If you want to debug this bundle set the `DEBUG_cron` class, eg:
  * `-DDEBUG_cron`

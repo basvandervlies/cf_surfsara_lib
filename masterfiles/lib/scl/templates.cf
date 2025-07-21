@@ -9,12 +9,14 @@ Source: [templates.cf](/masterfiles/lib/scl/templates.cf)
 Here all bundles are listed that are involved in parsing json data and
 generating the templates files.
 
-## scl(bundle_name, json_files)
+## scl_json_merge(bundle_name, json_files)
 
 This bundle will merge the json files into a data container which has the same name
 as the given `bundle_name`. This data container can be accessed by other bundles
 as:
  * `scl.<bundle_name>.<variable_name>`
+
+There is `NO` bundle `scl` that is why we can set remote variables for this bundle
 
 NOTE: cfengine variables that are definied in the json files, eg: `$(def.hostname)`
 are expanded.
@@ -36,72 +38,40 @@ Now service bundles can can reference variables of other service bundles,eg
 }
 ```
 @endif
-bundle agent scl(bundle_name, json_files)
+bundle agent scl_json_merge(bundle_name, json_files)
 {
     vars:
-        !expand_all_service_bundles::
+        any::
             "template_dir" string => "$(def.node_template_dir)/$(bundle_name)";
 
-            "$(bundle_name)_json_files"  string  => join(":", json_files),
-                comment => "Can be use in mustache to display which json files are used";
+            "scl.$(bundle_name)_json_files"  string  => join(":", json_files),
+                comment => "Can be use in mustache to display which json files are used, is mapped to scl.json_files when rendering";
 
-            "$(bundle_name)"  data  => parsejson("{}");
+            "scl.$(bundle_name)"  data  => parsejson("{}");
 
-            "$(bundle_name)" data => mergedata("$(bundle_name)", readdata("$(template_dir)/$(json_files)", auto)),
+            "scl.$(bundle_name)" data => mergedata("scl.$(bundle_name)", readdata("$(template_dir)/$(json_files)", auto)),
                 comment => "Merge the given json files",
                 if => canonify("scl_json_file_exists_$(json_files)");
 
-            "$(bundle_name)" data => mergedata("$(bundle_name)", "def.$(bundle_name)"),
+            "scl.$(bundle_name)" data => mergedata("scl.$(bundle_name)", "def.$(bundle_name)"),
                 comment => "Merge the bundle section in def.json",
                 if => canonify("scl_def_json_$(bundle_name)");
 
-            "$(bundle_name)" data => data_expand($(bundle_name)),
-                comment => "Expand CFengine variables found in countainer",
-                handle => "scl_$(bundle)_expand_data";
-
-            "$(bundle_name)" data => data_expand($(bundle_name)),
-                comment => "Expand CFengine variables found in countainer",
-                handle => "scl_$(bundle)_expand_data_2";
-
-
-        expand_all_service_bundles::
-            "services_enabled" slist => { @(def.scl_services_enabled) },
-                comment => "To prevent an error in setting foreign vars, needed for backports, will be removed";
-
-            "$(def.scl_services_enabled)" data => data_expand($(def.scl_services_enabled)),
-                handle => "scl_expand_cross_reference_vars";
+            "scl.$(bundle_name)" data => data_expand("scl.$(bundle_name)");
 
     classes:
         any::
-            "expand_all_service_bundles" expression => strcmp("expand_all_service_data", "$(bundle_name)"),
-                comment => "Try to solve cross reference bundle variables";
-
-        !expand_all_service_bundles::
             "scl_json_file_exists_$(json_files)" expression => fileexists("$(template_dir)/$(json_files)"),
                 comment => "Check if json file exists, then we can read it";
 
             "scl_def_json_$(bundle_name)" expression => isvariable("def.$(bundle_name)"),
                 comment => "Def.json data defined";
 
-
     reports:
-@if minimum_version(3.11)
-        expand_all_service_bundles::
-            "$(this.bundle): Cross reference variable expanding for bundles
-                $(with)"
-                with => format("%S", "def.scl_services_enabled"),
-                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE|DEBUG_services";
-
-        !expand_all_service_bundles::
+        any::
             "$(this.bundle)($(bundle_name)): using json files
                 $(with)"
                 with => format("%S", "json_files"),
-                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
-
-            "$(this.bundle)($(bundle_name)): template_data:
-                $(with)"
-                comment => "Display the used template data",
-                with => string_mustache("{{$-top-}}", "$(bundle_name)"),
                 if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 
             "$(this.bundle)($(bundle_name)): def.json/def.cf:
@@ -114,7 +84,16 @@ bundle agent scl(bundle_name, json_files)
                 $(with)"
                 with => string_mustache("{{$-top-}}", data_expand(readdata("$(template_dir)/$(json_files)", "auto"))),
                 if => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
-@endif
+}
+
+bundle agent scl_json_merge_data(service_name, d)
+{
+    vars:
+        "scl.$(service_name)" data => mergedata("scl.$(service_name)", d);
+
+    reports:
+            "$(this.bundle)($(service_name)): has run"
+                if => "DEBUG_$(service_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
 @if minimum_version(99.9)
@@ -136,7 +115,6 @@ bundle agent scl_data_autorun(bundle_name)
         "" usebundle => scl_json_copy_and_merge("$(bundle_name)");
         "" usebundle => scl_json_classes_2_cfengine("$(bundle_name)");
 }
-
 
 @if minimum_version(99.9)
 ## scl_json_classes_2_cfengine(bundle_name)
@@ -178,7 +156,7 @@ bundle agent scl_json_classes_2_cfengine(bundle_name)
 }
 
 @if minimum_version(99.9)
-## scl_json_copy(bundle_name, json_files)
+## scl_json_copy(service_name, json_files)
 
 The bundle is internally and will take care of copying the json file(s) from the bundle data directory
 on the policy hub to a the local node directory.
@@ -190,15 +168,8 @@ bundle agent scl_json_copy(service_name, files)
             "service_json_dir"   string => "templates/scl/$(service_name)/json";
 
         SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
-            "local_dir" string => "$(this.promise_dirname)/../../../../$(service_json_dir)",
-                comment => "Can be replaced by $(sys.policy_entry_dirname)/../...";
-            #"local_dir" string => "$(sys.policy_entry_dirname)/../$(service_json_dir)",
-            #    comment => "Can be replaced by $(sys.policy_entry_dirname)/../";
-
-    classes:
-        cfengine_3_12_0|cfengine_3_12_1::
-            "CF_COPY_BUG" expression => "any",
-                comment =>  "https://github.com/cfengine/core/pull/3468";
+            "local_dir" string => "$(sys.policy_entry_dirname)/../$(service_json_dir)",
+                comment => "This is for local copy";
 
     files:
         any::
@@ -215,20 +186,12 @@ bundle agent scl_json_copy(service_name, files)
                 copy_from   => remote_dcp("$(service_json_dir)/$(files)", "$(sys.policy_hub)"),
                 classes     => results("bundle","$(service_name)$(files)");
 
-        !CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
+        SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
                 perms       => mog("0600", "root", "root"),
                 copy_from   => scl_dereference_dcp("$(local_dir)/$(files)"),
-                classes     => results("bundle","$(service_name)$(files)");
-
-        CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|JSON_LOCAL_COPY)::
-            "$(def.node_template_dir)/$(service_name)/$(files)"
-                comment     => "Let's copy the json files",
-                move_obstructions => "true",
-                perms       => mog("0600", "root", "root"),
-                copy_from   => local_dcp("$(local_dir)/$(files)"),
                 classes     => results("bundle","$(service_name)$(files)");
 
     reports:
@@ -249,23 +212,26 @@ bundle agent scl_json_copy(service_name, files)
 }
 
 @if minimum_version(99.9)
-## scl_json_copy_and_merge(bundle_name)
+## scl_json_copy_and_merge(service_name)
+
+The `def_json_files` variables are first set by the auguments files (def.json) and can be overriden
+by the cfengine `bundle common|agent def`
 
 It use the same setup as above. So the variables must be defined in:
- * `def.$(bundle_name)_json_files` (for global definitions)
- * `def.$(bundle_name)[json_files]`(used to override/extend the global ones)
- * `def.$(bundle_name)_local_generated_json_files` (for global definitions)
- * `def.$(bundle_name)[local_generated_json_files]` (used to override/extend the global ones)
+ * `def.$(service_name)_json_files` (for global definitions)
+ * `def.$(service_name)[json_files]`(used to override/extend the global ones)
+ * `def.$(service_name)_local_generated_json_files` (for global definitions)
+ * `def.$(service_name)[local_generated_json_files]` (used to override/extend the global ones)
 
-This bundle will copy `def.$(bundle_name)_json_files` data files to `$(def.node_template_dir)/$(bundle_name)` directory.
+This bundle will copy `def.$(bundle_name)_json_files` data files to `$(def.node_template_dir)/$(service_name)` directory.
 It uses the following bundles:
  * `bundle agent scl_json_copy`
  * `bundle agent scl`
 
 The bundle is called by:
- * scl_data_autorun or scl_mustache_autorun
+ * scl_data_autorun
 @endif
-bundle agent scl_json_copy_and_merge(bundle_name)
+bundle agent scl_json_copy_and_merge(service_name)
 {
     vars:
         "files" data => parsejson('[
@@ -279,48 +245,47 @@ bundle agent scl_json_copy_and_merge(bundle_name)
             ');
 
 
-        ### Used in top level json files van be overriden by bundle definitions
+        ### Used in top level json files van be overriden by bundle json files definition
         #
         def_set::
-            "names" data => data_expand("def.$(bundle_name)_json_files");
+            "names" data => data_expand("def.$(service_name)_json_files");
             "files" data => mergedata("files", "names");
             "copy_files" data => mergedata("copy_files", "names");
         bundle_set::
-            "names" data => data_expand("def.$(bundle_name)[json_files]");
+            "names" data => data_expand("def.$(service_name)[json_files]");
             "files" data => mergedata("files", "names");
             "copy_files" data => mergedata("copy_files", "names");
 
         def_local_set::
-            "names" data => data_expand("def.$(bundle_name)_local_generated_json_files");
+            "names" data => data_expand("def.$(service_name)_local_generated_json_files");
             "files" data => mergedata("files", "names");
         bundle_local_set::
-            "names" data => data_expand("def.$(bundle_name)[local_generated_json_files]");
+            "names" data => data_expand("def.$(service_name)[local_generated_json_files]");
             "files" data => mergedata("files", "names");
 
     classes:
         any::
-            "bundle_set" expression => isvariable("def.$(bundle_name)[json_files]");
-            "def_set" expression => isvariable("def.$(bundle_name)_json_files");
+            "bundle_set" expression => isvariable("def.$(service_name)[json_files]");
+            "def_set" expression => isvariable("def.$(service_name)_json_files");
 
-            "def_local_set" expression => isvariable("def.$(bundle_name)_local_generated_json_files");
-            "bundle_local_set" expression => isvariable("def.$(bundle_name)[local_generated_json_files]");
+            "def_local_set" expression => isvariable("def.$(service_name)_local_generated_json_files");
+            "bundle_local_set" expression => isvariable("def.$(service_name)[local_generated_json_files]");
 
     methods:
         any::
-            "" usebundle => scl_json_copy("$(bundle_name)", "@(copy_files)");
+            "" usebundle => scl_json_copy("$(service_name)", "@(copy_files)");
 
-            ## Now for each template run this method, loop over the key values of data files
-            "" usebundle => scl("$(bundle_name)", "@(files)"),
-               comment => "Sara mustache merge data files bundle";
+            "" usebundle => scl_json_merge("$(service_name)", "@(files)"),
+               comment => "SCL merge json file(s) into service data variable ";
 
         def_local_set|bundle_local_set::
-            "" usebundle => scl_show_data("$(this.bundle)", "files"),
-                if => "(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
+            "" usebundle => scl_show_data("$(this.bundle).files"),
+                if => "(DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE)";
 
     reports:
         any::
             "$(this.bundle) Note: only using: default.json"
-                if => "!(bundle_set|def_set|local_set).(DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE)";
+                if => "!(bundle_set|def_set|local_set).(DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE)";
 }
 
 @if minimum_version(99.9)
@@ -387,15 +352,10 @@ bundle agent scl_mustache_copy(service_name, files)
                 comment => "make sure the argument is a list else debug output fails";
 
         SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
-            "local_dir" string => "$(this.promise_dirname)/../../../../$(service_template_dir)",
-                comment => "Can be replaced by $(sys.policy_entry_dirname)/../...";
-            #"local_dir" string => "$(sys.policy_entry_dirname)/../$(service_template_dir)",
-            #    comment => "Can be replaced by $(sys.policy_entry_dirname)/../";
+            "local_dir" string => "$(sys.policy_entry_dirname)/../$(service_template_dir)",
+                comment => "This is for local copy";
 
     classes:
-        cfengine_3_12_0|cfengine_3_12_1::
-            "CF_COPY_BUG" expression => "any",
-                comment =>  "https://github.com/cfengine/core/pull/3468";
 
     files:
         any::
@@ -412,7 +372,7 @@ bundle agent scl_mustache_copy(service_name, files)
                 classes     => if_repaired("$(service_name)_mustache_copied"),
                 copy_from   => remote_dcp("$(service_template_dir)/$(files)", "$(sys.policy_hub)");
 
-       !CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
+       SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY::
             "$(def.node_template_dir)/$(service_name)/$(files)"
                 comment     => "Let's copy the json files",
                 move_obstructions => "true",
@@ -420,17 +380,9 @@ bundle agent scl_mustache_copy(service_name, files)
                 copy_from   => scl_dereference_dcp("$(local_dir)/$(files)"),
                 classes     => if_repaired("$(service_name)_mustache_copied");
 
-       CF_COPY_BUG.(SCLOCAL|TEMPLATE_LOCAL_COPY|MUSTACHE_LOCAL_COPY)::
-            "$(def.node_template_dir)/$(service_name)/$(files)"
-                comment     => "Let's copy the json files",
-                move_obstructions => "true",
-                perms       => mog("0600", "root", "root"),
-                copy_from   => local_dcp("$(local_dir)/$(files)"),
-                classes     => if_repaired("$(service_name)_mustache_copied");
-
     methods:
         any::
-            "" usebundle => scl_show_data("scl_mustache_copy", "files"),
+            "" usebundle => scl_show_data("scl_mustache_copy.files"),
                 comment => "So we can call this more than once in same bundle",
                 handle => "$(service_name).$(files)",
                 if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
@@ -502,6 +454,9 @@ bundle agent scl_mustache_cf_data_2_file(service_name, template_file, destinatio
             "data_section_str" string => format("%S", "$(data_section)"),
                 if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE";
 
+            "scl.template_file" string => "$(scl_mustache_cf_data_2_file.template_file)";
+            "scl.json_files" string =>  "$(scl.$(service_name)_json_files)";
+
     classes:
         #"data_section"     expression => isvariable("data_section"),
         "data_section"     expression => regcmp("[a-zA-Z].*", "$(data_section)"),
@@ -548,17 +503,14 @@ bundle agent scl_mustache_cf_data_2_file(service_name, template_file, destinatio
                 if => "DEBUG_$(service_name)|DEBUG|DEBUG_MUSTACHE";
 }
 
-bundle agent scl_show_data(bundle_name, var)
+bundle agent scl_show_data(var)
 {
-    ## https://tracker.mender.io/browse/CFE-2434 bug in passing data containers with vars
     reports:
         any::
-@if minimum_version(3.11)
-            "$(this.bundle): $(bundle_name).$(var)
+            "$(this.bundle): $(var)
                 $(with)"
                 comment => "Display the bundle variable data",
-                with => string_mustache("{{$-top-}}", data_expand("$(bundle_name).$(var)"));
-@endif
+                with => string_mustache("{{$-top-}}", "$(var)");
 }
 
 bundle agent scl_template_autorun(service_name)

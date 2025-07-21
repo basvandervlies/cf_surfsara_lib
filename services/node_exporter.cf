@@ -5,7 +5,8 @@ bundle common node_exporter()
 {
     vars:
         any::
-            "service_name" string => "node_exporter";
+            "service_name" string => "$(scl.node_exporter[name])";
+            "service_dir"  string => "$(scl.node_exporter[dir])";
             "systemd_file" string => "/etc/systemd/system/node_exporter.service";
             "initd_file"   string => "/etc/init.d/$(service_name)";
             "default_file" string => "/etc/default/node_exporter";
@@ -79,6 +80,12 @@ bundle agent node_exporter_config()
                     canonify("scl$(node_exporter.default_file)")
                 );
     files:
+        any::
+            "$(node_exporter.service_dir)/$(node_exporter.service_name)"
+                comment => "node_exporter client program link to right arch",
+                link_from => ln_s("$(node_exporter.service_dir)/$(node_exporter.service_name)-$(scl_lscpu.arch)"),
+                move_obstructions => "true";
+
         systemd::
             "$(node_exporter.initd_file)"
                 delete => tidy;

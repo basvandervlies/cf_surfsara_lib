@@ -36,8 +36,6 @@ services included and these are used at SURF for our HPC clusters and Office Aut
 this is also useful for others and that will grow as the standard repo for cfengine services. In Ansible
 they call it playbooks and in Salt terms formulas.
 
-There ia a public Matrix room to discuss or ask questions: #scl:surf.nl
-
 ## mustache/json rules
 
 The project started as library for generating configuration files with mustache/json.  In our CFengine

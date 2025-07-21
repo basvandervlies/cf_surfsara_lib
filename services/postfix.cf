@@ -50,7 +50,7 @@ bundle common postfix() {
             "pflogsumm_dir"     string => "/opt/pflogsumm";
             "newaliases"        string => "/usr/bin/newaliases";
             "postmap_cmd"       string => "/usr/sbin/postmap";
-            "config_dir"        string => "/etc/postfix/";
+            "config_dir"        string => "/etc/postfix";
             "setpermissions"    string => "/usr/sbin/postfix set-permissions";
 
             ## Mustache templates
@@ -136,16 +136,23 @@ bundle agent postfix_daemons_check
 bundle agent postfix_config
 {
     classes:
-        "POSTFIX_NEWALIAS"
+        "postfix_newalias"
             if => or(
                 canonify("scl/etc/aliases")
             );
 
-        "POSTFIX_RELOAD"
+        "postfix_reload"
             if => or(
                 canonify("scl/etc/postfix/main.cf"),
                 canonify("scl/etc/postfix/master.cf"),
                 canonify("scl/etc/postfix/dynamicmaps.cf")
+        );
+
+        "postfix_restart"
+            if => or(
+                canonify("scl//etc/postfix/canonical_map"),
+                canonify("scl/etc/postfix/header_checks"),
+                canonify("scl/etc/postfix/transport")
         );
 
     files:
@@ -157,12 +164,6 @@ bundle agent postfix_config
         "" usebundle => scl_mustache_autorun("postfix");
 
     commands:
-        POSTFIX_NEWALIAS::
-            "$(postfix.newaliases)";
-
-        POSTFIX_RELOAD::
-            "$(postfix.postfix_reload)";
-
         scl_etc_postfix_transport::
             "$(postfix.postmap_cmd) $(postfix.config_dir)/transport"
                 comment => "This is a hashed file, so we need to use postmap after a change";
@@ -174,6 +175,16 @@ bundle agent postfix_config
         scl_etc_postfix_canonical_map::
             "$(postfix.postmap_cmd) $(postfix.config_dir)/canonical_map"
                 comment => "This is a hashed file, so we need to use postmap after a change";
+
+        postfix_newalias::
+            "$(postfix.newaliases)";
+
+        postfix_reload::
+            "$(postfix.postfix_reload)";
+
+        postfix_restart::
+            "$(postfix.postfix_restart)";
+
 }
 
 bundle agent postfix_virtual_alias_maps_expand(virtual_map_id)

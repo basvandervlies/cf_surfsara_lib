@@ -7,7 +7,7 @@ Documentation=man:slurmctld(8)
 [Service]
 Type={{{vars.scl.slurm.slurmctld_service.type}}}
 #EnvironmentFile=-/etc/default/slurmctld
-ExecStart={{{vars.slurm.software_dir}}}/current/sbin/slurmctld {{{vars.scl.slurm.slurmctld_service.options}}}
+ExecStart=/sbin/slurmctld {{{vars.scl.slurm.slurmctld_service.options}}}
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile={{{vars.scl.slurm.slurmctld_service.pid_file}}}
 LimitNOFILE=65536

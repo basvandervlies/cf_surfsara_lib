@@ -14,8 +14,8 @@
         RewriteEngine On
         RewriteCond %{HTTP:Connection} Upgrade [NC]
         RewriteCond %{HTTP:Upgrade} websocket [NC]
-        RewriteRule /{{@}}/(.*) {{config_default.url_ws}}{{.number}}/{{@}}/$1 [NE,P,L]
-        RewriteRule /{{@}}/(.*) {{config_default.url_bind}}{{.number}}/{{@}}/$1 [NE,P,L]
+        RewriteRule /{{@}}/(.*) {{config_default.url_ws}}{{.number}}/{{@}}/$1 [{{{apache_rewriterule_flags}}}]
+        RewriteRule /{{@}}/(.*) {{config_default.url_bind}}{{.number}}/{{@}}/$1 [{{{apache_rewriterule_flags}}}]
 
         # preserve Host header to avoid cross-origin problems
         ProxyPreserveHost on

@@ -40,7 +40,8 @@ bundle agent tripwire_config()
     files:
         "$(files)"
             comment => "Security check",
-            changes => detect_all_change_using("md5");
+            changes => detect_all_change_using("md5"),
+            classes => results("namespace", "TRIPWIRE$(files)");
 
     reports:
         DEBUG_tripwire::

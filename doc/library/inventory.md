@@ -39,7 +39,7 @@ Is a wrapper script around the `lscpu` command. It converts the output to json a
 file. If the file exists it will load the data and convert it to the json module data protocol. The
 data can be accessed in cfengine:
  * `$(lscpu.data[Model_name])`
- * `"" usebundle => scl_show_data("lscpu", "data")`
+ * `"" usebundle => scl_show_data("lscpu.data")`
 
 Required argument: `"$(scl_inventory.cache_dir)"`
 
@@ -49,6 +49,6 @@ Is a wrapper script around the `dmidecode` command. It converts the output to js
 file. If the file exists it will load the data and convert it to the json module data protocol. The
 data can be accessed in cfengine:
  * `$(dmidecode.data[Base_Board_Information][0][Manufacturer])`
- * `"" usebundle => scl_show_data("dmidecode", "data")`
+ * `"" usebundle => scl_show_data("dmidecode.data")`
 
 Required arguments: `"--output $(scl_inventory.cache_dir)/dmidecode.json --cf"`

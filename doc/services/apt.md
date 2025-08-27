@@ -18,8 +18,6 @@ The following actions are proctected by a class:
  * setting debconf values for package field(s), controlled via json data
  * disable systemctl timer services for apt, may interfere with CFEngine (APT_SYSTEMD_DISABLE)
  * remove /etc/apt/sources.list file (SOURCES_FILE_REMOVE)
- * automatic perform a dist-upgrade (DIST_UPGRADE)
-
 
 
 The classes can be set in def.cf/json:

@@ -5,12 +5,14 @@ Source: [templates.cf](/masterfiles/lib/scl/templates.cf)
 Here all bundles are listed that are involved in parsing json data and
 generating the templates files.
 
-## scl(bundle_name, json_files)
+## scl_json_merge(bundle_name, json_files)
 
 This bundle will merge the json files into a data container which has the same name
 as the given `bundle_name`. This data container can be accessed by other bundles
 as:
  * `scl.<bundle_name>.<variable_name>`
+
+There is `NO` bundle `scl` that is why we can set remote variables for this bundle
 
 NOTE: cfengine variables that are definied in the json files, eg: `$(def.hostname)`
 are expanded.
@@ -56,25 +58,28 @@ variable defined in the bundle json data, eg:
 
 This will set the class: `DHCLIENT_RESOLV_CONF` for class expression `any`.
 all classes wil be prefix by the `bundle_name` in uppercase.
-## scl_json_copy(bundle_name, json_files)
+## scl_json_copy(service_name, json_files)
 
 The bundle is internally and will take care of copying the json file(s) from the bundle data directory
 on the policy hub to a the local node directory.
-## scl_json_copy_and_merge(bundle_name)
+## scl_json_copy_and_merge(service_name)
+
+The `def_json_files` variables are first set by the auguments files (def.json) and can be overriden
+by the cfengine `bundle common|agent def`
 
 It use the same setup as above. So the variables must be defined in:
- * `def.$(bundle_name)_json_files` (for global definitions)
- * `def.$(bundle_name)[json_files]`(used to override/extend the global ones)
- * `def.$(bundle_name)_local_generated_json_files` (for global definitions)
- * `def.$(bundle_name)[local_generated_json_files]` (used to override/extend the global ones)
+ * `def.$(service_name)_json_files` (for global definitions)
+ * `def.$(service_name)[json_files]`(used to override/extend the global ones)
+ * `def.$(service_name)_local_generated_json_files` (for global definitions)
+ * `def.$(service_name)[local_generated_json_files]` (used to override/extend the global ones)
 
-This bundle will copy `def.$(bundle_name)_json_files` data files to `$(def.node_template_dir)/$(bundle_name)` directory.
+This bundle will copy `def.$(bundle_name)_json_files` data files to `$(def.node_template_dir)/$(service_name)` directory.
 It uses the following bundles:
  * `bundle agent scl_json_copy`
  * `bundle agent scl`
 
 The bundle is called by:
- * scl_data_autorun or scl_mustache_autorun
+ * scl_data_autorun
 ## scl_mustache_autorun(bundle_name)
 
 This bundle will take of copying the mustache template file(s) and expanding the template(s)

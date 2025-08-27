@@ -3,9 +3,9 @@
 Source: [ntp.cf](/services/ntp.cf)
 
 This bundle will generate these files from mustache templates:
- * /etc/ntp.conf
- * /etc/default/ntpdate (debian), /etc/sysconfig/ntpdate (centos)
- * /etc/default/ntp (debian), /etc/sysconfig/ntpd (centos)
+ * /etc/ntpsec/ntp.conf
+ * /etc/default/ntpsec-ntpdate (debian), /etc/sysconfig/ntpdate (centos)
+ * /etc/default/ntpsec (debian), /etc/sysconfig/ntpd (centos)
 
 if one of the files is changed then the following ''class'' will be set:
  * scl_etc_ntp_conf

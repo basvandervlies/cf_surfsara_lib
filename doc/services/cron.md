@@ -40,7 +40,7 @@ vars:
 
 The variable must be `cron_json_files` and with this setup 1 extra json file will be merged.
 
-###  DEBUG 
+###  DEBUG
 
 If you want to debug this bundle set the `DEBUG_cron` class, eg:
  * `-DDEBUG_cron`

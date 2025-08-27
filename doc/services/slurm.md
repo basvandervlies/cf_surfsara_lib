@@ -32,7 +32,9 @@ The following `classes` can be set via def.cf/json:
  * CLIENT: Configure the machine as client
  * CONFIGLESS: Do not generate the configuration files. It will server by slurmctld
  * CONFIGLESS_CONF_LINKS: Some old utils need `slurm.conf` in the sysconfig directory
+ * INSTALL_ONLY: Only install the slurm software via tarball or packages, NO configuration
  * LOGROTATE: When set disable logrotate configs and use cfengne logrotate (no daemons restart)
+ * RESTD: Configure the machine as restd server
  * SLURMD_DISABLE: Disable the slurmd systemd service
  * SERVER: Configure the machine as server
  * SUBMIT: Configure the machine as submit host

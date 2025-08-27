@@ -177,3 +177,7 @@ methods:
 Save an 'variable' to a file.  The file will be emptied id the 'variable' is not
 present in the file and then added.
 
+## scl_dri_fixed_file_perms
+
+Used to set permissions on device files in the directory `/dev/dri/` so everybody can use them.
+

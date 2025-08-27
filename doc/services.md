@@ -18,6 +18,7 @@
  * [nsswitch](services/nsswitch.md)
  * [ntp](services/ntp.md)
  * [nvidia_gpu_prometheus_exporter](services/nvidia_gpu_prometheus_exporter.md)
+ * [openssl](services/openssl.md)
  * [pam](services/pam.md)
  * [pam_radius](services/pam_radius.md)
  * [pkg_management](services/pkg_management.md)

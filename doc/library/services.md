@@ -26,5 +26,8 @@ This will run the ssh service only for debian and centos hosts.
 
 When `def.scl_services_enabled` is defined it will execute these bundles:
  1. first read merge all json data for all defined services (`scl_services_data`)
+ 1. call the common/agent bundle for all enabled services
  1. expand the CFengine variables for all service bundle data (`scl_services_data_expand`)
+ 1. run the bundles that have the tag `scl_override_json_service_hook`. Simple `key:value` overrides
+ 1. show template data used if in DEBUG mode
  1. run the service  with the specified json data `(scl_services_run`)

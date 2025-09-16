@@ -19,7 +19,8 @@ bundle common rsyslog()
         "packages"  data  => parsejson('
                 {
                     "install": {
-                        "rsyslog" : ""
+                        "rsyslog" : "",
+                        "rsyslog-gnutls" : ""
                     }
                 }
             ');

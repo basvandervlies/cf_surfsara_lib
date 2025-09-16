@@ -1,23 +1,49 @@
 ####
-# Maintained by CFEngine
+### Controlled by CFEngine
+#    template file: {{{vars.scl.template_file}}}
+#.   files: {{{vars.scl.json_files}}}
+
+global(
+  PreserveFQDN="on"
+{{#vars.scl.rsyslog.tls_enabled}}
+  DefaultNetstreamDriver="gtls"
+{{/vars.scl.rsyslog.tls_enabled}}
+)
 
 {{#vars.scl.rsyslog.udp_enabled}}
-## For syslog just use UDP and not TCP
-$ModLoad imudp.so
-$UDPServerRun 514
+module(load="imudp")
+input(type="imudp" port="514")
 {{/vars.scl.rsyslog.udp_enabled}}
 
-{{#classes.RSYSLOG_ACCEPT_REMOTE_LOG}}
-## Accept external logs
-$PreserveFQDN on
+{{#vars.scl.rsyslog.tls_enabled}}
+module(load="imtcp")
 
+input(
+  type="imtcp"
+  port="6514"
+  StreamDriver.Name="gtls"
+  StreamDriver.Mode="1"
+  StreamDriver.Authmode="anon"
+  StreamDriver.CAFile="/etc/certificate/chain.pem"
+  StreamDriver.CertFile="/etc/certificate/certificate_only.pem"
+  StreamDriver.KeyFile="/etc/certificate/private_key.pem"
+)
+{{/vars.scl.rsyslog.tls_enabled}}
+
+{{#classes.RSYSLOG_ACCEPT_REMOTE_LOG}}
 ## Only store the logs from external hosts
 if ( $fromhost != "{{{ vars.scl.rsyslog.hostname }}}" ) then {
     $template IGNORE_REMOTE_TIMESTAMP,"%timegenerated:::date-rfc3339% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%\n"
-    $template FILENAME,"{{{ vars.scl.rsyslog.target_remote_log }}}/%fromhost%.log"
+    $template FILENAME,"{{{ vars.scl.rsyslog.target_remote_log }}}/%fromhost%/%$year%-%$month%-%$day%.log"
+
+    ## Create directory structure automatically
+    $CreateDirs on
+    $DirCreateMode 0755
+    $FileCreateMode 0644
 
     ## For now log all!
     *.* ?FILENAME;IGNORE_REMOTE_TIMESTAMP
+    & stop
 }
 {{/classes.RSYSLOG_ACCEPT_REMOTE_LOG}}
 

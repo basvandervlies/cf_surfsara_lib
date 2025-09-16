@@ -159,6 +159,11 @@ EnforcePartLimits=ALL
 PartitionName={{{name}}} {{#settings}}{{{@}}}={{{.}}} {{/settings}}
 {{/vars.scl.slurm.partition_section}}
 
+# Preempt configuration
+{{#vars.scl.slurm.preempt_section}}
+{{{@}}}={{{.}}}
+{{/vars.scl.slurm.preempt_section}}
+
 # Licenses
 Licenses={{#vars.scl.slurm.licenses_section}}{{{.}}},{{/vars.scl.slurm.licenses_section}}
 

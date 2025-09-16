@@ -92,6 +92,7 @@
     "packages_server": { },
     "packages_submit": { },
     "partition_section": [],
+    "preempt_section": {},
     "pid_dir": "/var/run/slurm-llnl",
     "powersave_section": {
         "ResumeTimeout": "60"

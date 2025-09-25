@@ -39,6 +39,7 @@ SCL enhancements:
  *  `scl_override_json_service_hook` must be run after loading all json data and before calling the service bundles
  * `scl_service_copy_dirs` when `exclude_dirs` was set in json data it did not exclude the directories from copying
  * when using `template_method` for files, do not use `create` attribute
+ * `scl_service_rotate_file` transformer changed to `gzip --force`
 
 These services have bug fixes or new features:
  * slurm:

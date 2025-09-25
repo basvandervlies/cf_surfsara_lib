@@ -256,7 +256,6 @@ bundle agent scl_make_cron_file(name, data)
             "CRON_VIXIE" expression => isdir("$(cron_dir)");
 
     files:
-@if minimum_version(3.12)
         CRON_VIXIE::
             "$(cron_dir)/$(name)"
                 comment => "Vixie cron: one command per file",
@@ -264,12 +263,6 @@ bundle agent scl_make_cron_file(name, data)
                 edit_template_string   => "$(template)$(const.n)",
                 template_method => "inline_mustache",
                 template_data => "@(data)",
-                classes => results("namespace", "scl_make_cron_file_$(name)");
-@endif
-
-    methods:
-        CRON_VIXIE.(cfengine_3_10|cfengine_3_7)::
-            "" usebundle => file_make("$(cron_dir)/$(name)", "$(job_str)"),
                 classes => results("namespace", "scl_make_cron_file_$(name)");
 
     reports:
@@ -348,7 +341,7 @@ files:
 
         "$(rotate_files_data[$(index)][log_file]).1"
             comment     => "rotate_files: gzip $(rotate_files_data[$(index)][log_file]).1",
-            transformer => "$(paths.path[gzip]) $(this.promiser)",
+            transformer => "$(paths.path[gzip]) --force $(this.promiser)",
             if => or(
                 "run_class",
                 "!run_class_set"
@@ -370,22 +363,17 @@ vars:
         "cp_attr_$(index)" data => mergedata("scl_cp_dir_default.attributes", "scl.$(bundle_name)[copy_dirs][$(index)]"),
             comment => "Merge each definition the copy default attributes";
 
-        "exclude_dir_$(index)" slist => { ".git", ".svn" },
+        "exclude_dir_$(index)" slist => { "\.git", "\.svn" },
             comment => "Default exclude directories settings for copy_dirs",
             if => and(
                 not(isvariable("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"))
             );
 
-        "exclude_dir_$(index)" data => mergedata("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"),
-            comment => "Exclude directory settings from json data",
+        "exclude_dir_$(index)" slist => getvalues("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]"),
+            comment => "Get exclude directory settings from json data",
             if => and(
                 isvariable("scl.$(bundle_name)[copy_dirs][$(index)][exclude_dirs]")
             );
-
-    cfengine_3_7|cfengine_3_10::
-        "debug_str" string => format("%S", "scl.$(bundle_name)[copy_dirs]"),
-            comment => "Old debug method",
-            if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 
 classes:
     any::
@@ -434,19 +422,12 @@ methods:
                 canonify("$(bundle_name)_copy_dirs_$(index)_run_bundle")
                 );
 
-@if minimum_version(3.11)
         "" usebundle => scl_show_data("scl.$(bundle_name)[copy_dirs][$(index)]"),
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
         "" usebundle => scl_show_data("$(this.bundle).exclude_dir_$(index)"),
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
         "" usebundle => scl_show_data("$(this.bundle).cp_attr_$(index)"),
             if => "DEBGU|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
-@endif
-
-reports:
-    cfengine_3_7|cfengine_3_10::
-        "$(this.bundle):$(bundle_name):$(debug_str)"
-            if => "DEBUG|DEBUG_$(bundle_name)|DEBUG_$(this.bundle)";
 }
 
 

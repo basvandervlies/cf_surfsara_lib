@@ -1,5 +1,6 @@
-#####
-# This file is maintained by CFEngine
+### Controlled by CFEngine3
+#   template file: {{{vars.scl.template_file}}}
+#   files: {{{vars.scl.json_files}}}
 
 # Overview of the used configuration files and layout
 
@@ -21,16 +22,6 @@ ServerRoot "{{{vars.apache.configdir}}}"
 User {{{vars.scl.apache.user}}}
 Group {{{vars.scl.apache.group}}}
 
-## Server-tuning
-# We only configure the MPM Event engine
-<IfModule mpm_event_module>
-    ServerLimit                 {{{vars.scl.apache.tuning_servers_limit}}}
-    MaxRequestWorkers           {{{vars.scl.apache.tuning_max_workers}}}
-    StartServers                {{{vars.scl.apache.tuning_start_servers}}}
-    ThreadsPerChild             {{{vars.scl.apache.tuning_threads_p_child}}}
-    ThreadLimit                 {{{vars.scl.apache.tuning_threads_limit}}}
-</IfModule>
-
 ## Loadmodule
 
 {{#classes.debian}}
@@ -44,6 +35,16 @@ LoadModule {{@}}_module /usr/lib/apache2/modules/mod_{{@}}.so
 LoadModule {{@}}_module /usr/lib64/apache2-worker/mod_{{@}}.so
 {{/vars.scl.apache.modules}}
 {{/classes.sles}}
+
+## Server-tuning
+# We only configure the MPM Event engine
+<IfModule mpm_event_module>
+    ServerLimit                 {{{vars.scl.apache.tuning_servers_limit}}}
+    MaxRequestWorkers           {{{vars.scl.apache.tuning_max_workers}}}
+    StartServers                {{{vars.scl.apache.tuning_start_servers}}}
+    ThreadsPerChild             {{{vars.scl.apache.tuning_threads_p_child}}}
+    ThreadLimit                 {{{vars.scl.apache.tuning_threads_limit}}}
+</IfModule>
 
 IncludeOptional {{{vars.apache.modules_conf_dir}}}/*.conf
 

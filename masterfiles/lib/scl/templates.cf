@@ -470,7 +470,6 @@ bundle agent scl_mustache_cf_data_2_file(service_name, template_file, destinatio
        data_section.destination_set::
                 "$(destination)"
                     comment         => "Mustache expand with defined data_section variable ",
-                    create          => "true",
                     edit_template   => "$(template_dir)/$(template_file)",
                     template_method => "mustache",
                     #template_data   => mergedata("scl.$(service_name)[$(data_section)]"),
@@ -480,7 +479,6 @@ bundle agent scl_mustache_cf_data_2_file(service_name, template_file, destinatio
        !data_section.destination_set::
                 "$(destination)"
                     comment         => "Mustache expand with cfengine json data",
-                    create          => "true",
                     edit_template   => "$(template_dir)/$(template_file)",
                     template_method => "mustache",
                     classes         => if_repaired("scl$(destination)");

@@ -29,6 +29,7 @@ bundle agent cron_autorun()
 
     methods:
         any::
+            "" usebundle => cron_install();
             "" usebundle => scl_template_autorun("cron"),
                 classes => results("namespace", "cron");
             "" usebundle => cron_config();
@@ -38,6 +39,34 @@ bundle agent cron_autorun()
                 if => "DEBUG|DEBUG_cron|DEBUG_$(this.bundle)";
 
 }
+
+bundle agent cron_install()
+{
+    vars:
+        debian::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "cron": ""
+                     }
+                }
+            ');
+
+        centos::
+            "packages" data => parsejson('
+                {
+                    "install": {
+                        "cronnie": "",
+                        "crontabs": ""
+                     }
+                }
+            ');
+
+    methods:
+        "" usebundle => scl_service_packages("cron", "@(cron_install.packages)"),
+            classes => results("bundle", "cron_packages");
+}
+
 bundle agent cron_config()
 {
     files:

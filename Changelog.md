@@ -37,6 +37,8 @@
 # Version: 1.X.1 (2025-09-15)
 SCL enhancements:
  *  `scl_override_json_service_hook` must be run after loading all json data and before calling the service bundles
+ * `scl_service_copy_dirs` when `exclude_dirs` was set in json data it did not exclude the directories from copying
+ * when using `template_method` for files, do not use `create` attribute
 
 These services have bug fixes or new features:
  * slurm:
@@ -50,6 +52,10 @@ These services have bug fixes or new features:
  * rsyslog:
    * Added support for syslog over TLS on port 6514 with the GNU TLS module
    * Slightly modernised the configuration for the Global definitions
+ * node_exporter, slurm_prometheus_exporter and nvidia_gpu_prometheus_exporter
+   * systemd mustache template update remove the redirection `>/dev/null 2>&1`
+ * apache; Fixed order for the tuning of the mpm_event_module after loading the module
+ * cron; Not only configure but also install cron
 
 # Version: 1.8.0 (2025-07-19)
 

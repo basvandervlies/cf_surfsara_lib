@@ -1,4 +1,6 @@
-## CFengine generated this file
+#### Controlled by CFEngine3
+#   template file: {{{vars.scl.template_file}}}
+#   files: {{{vars.scl.json_files}}}
 #
 #  slurm_prometheus systemd  @SURfsara
 #
@@ -9,7 +11,7 @@ Documentation=https://github.com/vpenso/prometheus-slurm-exporter
 [Service]
 Restart=always
 EnvironmentFile=/etc/default/slurm_prometheus_exporter
-ExecStartPre=-/bin/mkdir -p {{{vars.scl.slurm_prometheus_exporter.collector_dir}}} >/dev/null 2>&1
+ExecStartPre=-/bin/mkdir -p {{{vars.scl.slurm_prometheus_exporter.collector_dir}}}
 ExecStart={{{vars.scl.slurm_prometheus_exporter.dir}}}/slurm_prometheus_exporter $ARGS
 ExecReload=/bin/kill -HUP $MAINPID
 TimeoutStopSec=20s

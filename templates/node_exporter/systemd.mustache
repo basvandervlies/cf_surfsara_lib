@@ -1,7 +1,6 @@
-## CFengine generated this file
-#
-#  node_exporter systemd  @SURfsara
-#
+### Controlled by CFEngine3
+#   template file: {{{vars.scl.template_file}}}
+#   files: {{{vars.scl.json_files}}}
 [Unit]
 Description=Prometheus exporter for machine metrics
 Documentation=https://github.com/prometheus/node_exporter
@@ -9,7 +8,7 @@ Documentation=https://github.com/prometheus/node_exporter
 [Service]
 Restart=always
 EnvironmentFile=/etc/default/node_exporter
-ExecStartPre=-/bin/mkdir -p {{{vars.scl.node_exporter.collector_dir}}} >/dev/null 2>&1
+ExecStartPre=-/bin/mkdir -p {{{vars.scl.node_exporter.collector_dir}}}
 ExecStart={{{vars.scl.node_exporter.dir}}}/node_exporter $ARGS
 ExecReload=/bin/kill -HUP $MAINPID
 TimeoutStopSec=20s

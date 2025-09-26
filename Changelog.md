@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.X.1 (2025-09-15)](#version-1x1-2025-09-15)
+* [Version: 1.8.2 (2025-09-26)](#version-182-2025-09-26)
 * [Version: 1.8.0 (2025-07-19)](#version-180-2025-07-19)
 * [Version: 1.7.0 (2024-12-02, Lena)](#version-170-2024-12-02-lena)
 * [Version: 1.6.0 (2024-01-09)](#version-160-2024-01-09)
@@ -34,7 +34,7 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.X.1 (2025-09-15)
+# Version: 1.8.2 (2025-09-26)
 SCL enhancements:
  *  `scl_override_json_service_hook` must be run after loading all json data and before calling the service bundles
  * `scl_service_copy_dirs` when `exclude_dirs` was set in json data it did not exclude the directories from copying

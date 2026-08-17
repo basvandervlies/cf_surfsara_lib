@@ -127,13 +127,11 @@ bundle agent scl_service_packages_install_backports(service_name, pkg_data)
         any::
             "packages" slist => getindices("pkg_data[install_backports]");
 
-@if minimum_version(3.12)
         debian::
             "release" string => regex_replace("$(sys.os_release[VERSION])", ".*\((\w+).*", "\1", "");
             "pkg_options" string => "--target-release=$(release)-backports";
-@endif
 
-        (!debian|cfengine_3_7|cfengine_3_10)::
+        !debian::
             "pkg_options" string => "";
 
     methods:

@@ -1,8 +1,7 @@
-###
+### Controlled by CFEngine3
+#   template file: {{{vars.scl.template_file}}}
+#   files: {{{vars.scl.json_files}}}
 #
-# This file is maintained by CFEngine
-#
-
 alias_database = {{#vars.scl.postfix.alias_database}}{{{.}}},{{/vars.scl.postfix.alias_database}}
 
 alias_maps = {{#vars.scl.postfix.alias_maps}}{{{.}}},{{/vars.scl.postfix.alias_maps}}
@@ -78,6 +77,7 @@ smtpd_recipient_restrictions = {{#vars.scl.postfix.smtpd_recipient_restrictions}
 smtpd_helo_restrictions = {{#vars.scl.postfix.smtpd_helo_restrictions}}{{{.}}},{{/vars.scl.postfix.smtpd_helo_restrictions}}
 
 smtpd_relay_restrictions = {{#vars.scl.postfix.smtpd_relay_restrictions}}{{{.}}} {{/vars.scl.postfix.smtpd_relay_restrictions}}
+smtpd_sender_restrictions = check_sender_access pcre:/etc/postfix/sender_access
 {{/classes.POSTFIX_STRICT_HANDLING}}
 
 {{#classes.POSTFIX_REJECT_LOCAL}}

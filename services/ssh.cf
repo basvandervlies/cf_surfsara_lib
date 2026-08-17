@@ -38,14 +38,13 @@ bundle common ssh()
             "sftp_server_path"  string => "/usr/lib/openssh/sftp-server",
                 comment => "Used in ssh default.json";
 
-        centos::
+        centos|rocky::
             "packages"  data  => parsejson('
                     {
                         "install": {
                             "openssh" : "",
                             "openssh-askpass" : "",
                             "openssh-clients" : "",
-                            "openssh-ldap" : "",
                             "openssh-server" : "",
                         }
                     }
@@ -102,7 +101,7 @@ bundle agent ssh_daemons_restart()
 bundle agent ssh_daemons_check()
 {
     processes:
-        debian|centos::
+        debian|centos|rocky::
             "/usr/sbin/sshd.*"
                 comment     => "Check if sshd is running",
                 process_count   => check_range("ssh", "1", "999999"),
@@ -160,13 +159,6 @@ bundle agent ssh_config()
            "$(ssh_config_files)"
                 comment         => "Make sure that the config files are 0644 and owner root",
                 perms           => mog("0644", "root", "root");
-
-        centos::
-            "/usr/bin/rsh"
-                comment         => "This is only needed for CentOS for software that still depend on rsh command",
-                perms           => mog("0777", "root", "root"),
-                link_from       => ln_s("/usr/bin/ssh"),
-                move_obstructions => "true";
 
     commands:
         SSH_KEYGEN::

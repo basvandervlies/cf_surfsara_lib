@@ -77,8 +77,8 @@ bundle agent apache_config()
 {
     vars:
         "modules" data => mergedata("scl.apache[modules_standard]", "scl.apache[modules_extra]");
-        "names" slist => getindices("modules");
-        "module_conf_files" slist => maplist("$(this).conf", @(names));
+        "module_names" slist => getindices("modules");
+        "module_conf_files" slist => maplist("$(this).conf", @(module_names));
 
         "apache_dirs_needed" slist => {
             "$(apache.configdir)/local.d",
@@ -125,15 +125,15 @@ bundle agent apache_config()
                 classes => results("namespace", "$(apache_dirs_needed)"),
                 if => "apache_config_dir_exists";
 
-            "$(apache.modules_conf_dir)/$(names).conf"
+            "$(apache.modules_conf_dir)/$(module_names).conf"
                 comment => "Only copy configuration files if defined",
                 perms => mog("644", "$(scl.apache[user])", "$(scl.apache[group])"),
-                copy_from => scl_sync_no_perms_cp("$(modules[$(names)])", "hash"),
+                copy_from => scl_sync_no_perms_cp("$(modules[$(module_names)])", "hash"),
                 move_obstructions => "true",
                 classes => results("namespace", "APACHE_MODULES"),
                 if => and(
                     "apache_config_dir_exists",
-                    not(strcmp("$(modules[$(names)])", ""))
+                    not(strcmp("$(modules[$(module_names)])", ""))
                     );
 
             "$(apache.sites_dir)/$(scl.apache[sites])"
@@ -176,7 +176,7 @@ bundle agent apache_config()
 
     reports:
         any::
-            "$(this.bundle) modules: '$(names)':'$(modules[$(names)])'"
+            "$(this.bundle) modules: '$(module_names)':'$(modules[$(module_names)])'"
                 if => "DEBUG|DEBUG_apache|DEBUG_$(this.bundle)";
 
             "$(this.bundle) site: '$(site_files)'"

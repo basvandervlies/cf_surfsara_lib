@@ -46,6 +46,8 @@ bundle common apt
             "non_free_component" string => "non-free";
         debian_12::
             "os_name" string => "bookworm";
+        debian_13::
+            "os_name" string => "trixie";
 
         SCL_INVENTORY_LSCPU_ENABLED::
             "arch" string => "$(scl_lscpu.apt_arch)";
@@ -339,11 +341,11 @@ bundle agent apt_repository_generate(template_file, repo_files)
                 edit_template   => "/etc/node_status/templates/apt/$(template_file)",
                 template_method => "mustache",
                 template_data   => mergedata("repo_data[$(repo_names)]"),
-                if => canonify("$(repo_data[$(repo_names)][run_class])");
+                if => or("$(repo_data[$(repo_names)][run_class])");
 
             "$(apt.repos_dir)/$(repo_names).list"
                 delete          => scl_tidyfiles,
-                unless => canonify("$(repo_data[$(repo_names)][run_class])");
+                unless => or("$(repo_data[$(repo_names)][run_class])");
 
             "$(apt.repos_dir)"
                 comment         => "Remove apt repository files that are not maintained by CFEngine",
@@ -373,14 +375,14 @@ bundle agent apt_repository_generate(template_file, repo_files)
 
     reports:
         DEBUG|DEBUG_apt|DEBUG_apt_repository::
-            "$(this.bundle): delete file:s $(apt.repos_dir)/$(repo_names).list,  not class: $(repo_data[$(repo_names)][run_class])"
+            "$(this.bundle): delete files $(apt.repos_dir)/$(repo_names).list,  not class: $(repo_data[$(repo_names)][run_class])"
                 unless => and(
-                    canonify("$(repo_data[$(repo_names)][run_class])")
+                        "$(repo_data[$(repo_names)][run_class])"
                     );
 
             "$(this.bundle): generated files:  $(apt.repos_dir)/$(repo_names).list"
                 if => and(
-                    canonify("$(repo_data[$(repo_names)][run_class])")
+                        "$(repo_data[$(repo_names)][run_class])"
                     );
 
         !apt_import_key_cmd_exists::

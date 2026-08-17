@@ -28,10 +28,11 @@ bundle common sssd()
             }
         ');
 
-    redhat::
+    centos|rocky::
         "packages" data => parsejson('
             {
                 "install": {
+                    "openldap-clients": "",
                     "sssd-client": "",
                     "sssd-common": "",
                     "sssd-ldap": "",

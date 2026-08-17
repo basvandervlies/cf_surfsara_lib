@@ -65,20 +65,7 @@ bundle common slurm()
             "reload_database"   string => "$(paths.path[systemctl]) reload $(database_service_name)";
             "reload_restd"   string => "$(paths.path[systemctl]) reload $(restd_service_name)";
 
-        SLURM_22_05::
-            "template_2_destination" data => parsejson('{
-                    "acct_gather.mustache": "$(acct_gather_file)",
-                    "cgroup.mustache": "$(cgroup_config_file)",
-                    "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
-                    "gres.mustache": "$(gres_config_file)",
-                    "nodes.mustache": "$(nodes_config_file)",
-                    "plugstack.conf.mustache": "$(plugstack_config_file)",
-                    "slurm.mustache": "$(config_file)",
-                    "slurmdbd.mustache": "$(slurmdbd_file)",
-                    "topology.mustache": "$(topology_config_file)",
-            }');
-
-        !SLURM_22_05::
+        any::
             # cgroup_allowd_devices is not needed anymore
             #       "cgroup_allowed_devices_file.mustache": "$(cgroup_allowed_file)",
             "template_2_destination" data => parsejson('{
@@ -96,7 +83,20 @@ bundle common slurm()
     classes:
         "SLURM_$(slurm.major_version)"
             comment => "Set this as class is usefull as each SLURM major has big changes",
-            scope => "namespace";
+            scope => "namespace",
+            if => isvariable("slurm.major_version");
+
+        ## these classes are used in the templates sometimes options are changed/renamed
+        # in major releases
+        "SLURM_JOBCONTAINER_TYPE"
+            comment => "Only valide before version 25.11",
+            scope => "namespace",
+            if => version_compare("$(slurm.major_version)", "<", "25.11");
+
+        "SLURM_NAMESPACE_TYPE"
+            comment => "Only valide after version 25.11",
+            scope => "namespace",
+            if => version_compare("$(slurm.major_version)", ">=", "25.11");
 }
 
 bundle agent slurm_autorun()
@@ -726,6 +726,14 @@ bundle agent slurm_generate_systemd_services()
 # SLURM
 
 Source: [slurm.cf](/services/slurm.cf)
+
+This bundle will follow the Slurm philosphy it will only support 3 versions. So if the current
+release is `25.11` it will support:
+ * 25.11
+ * 25.05
+ * 24.11
+
+The slurm release cycle is 6 months.
 
 This bundle will generate these/this file(s) from mustache templates:
  * debian in `/etc/slurm-llnl`

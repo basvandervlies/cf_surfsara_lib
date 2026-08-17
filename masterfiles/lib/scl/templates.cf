@@ -18,7 +18,7 @@ as:
 
 There is `NO` bundle `scl` that is why we can set remote variables for this bundle
 
-NOTE: cfengine variables that are definied in the json files, eg: `$(def.hostname)`
+NOTE: cfengine variables that are defined in the json files, eg: `$(def.hostname)`
 are expanded.
 
 The json files are read from the following local directory on the host:
@@ -57,8 +57,6 @@ bundle agent scl_json_merge(bundle_name, json_files)
                 comment => "Merge the bundle section in def.json",
                 if => canonify("scl_def_json_$(bundle_name)");
 
-            "scl.$(bundle_name)" data => data_expand("scl.$(bundle_name)");
-
     classes:
         any::
             "scl_json_file_exists_$(json_files)" expression => fileexists("$(template_dir)/$(json_files)"),
@@ -67,22 +65,19 @@ bundle agent scl_json_merge(bundle_name, json_files)
             "scl_def_json_$(bundle_name)" expression => isvariable("def.$(bundle_name)"),
                 comment => "Def.json data defined";
 
+
+    methods:
+        any::
+            "" usebundle => scl_show_data("def.$(bundle_name)"),
+                comment => "show def.service_name data if nothing then $with is displayed",
+                if => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+            "" usebundle => scl_show_file_data("$(template_dir)/$(json_files)"),
+                comment => "raw json data file by file: https://northerntech.atlassian.net/browse/CFE-4618",
+                if => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
+
     reports:
         any::
-            "$(this.bundle)($(bundle_name)): using json files
-                $(with)"
-                with => format("%S", "json_files"),
-                if => "DEBUG_$(bundle_name)|DEBUG|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
-
-            "$(this.bundle)($(bundle_name)): def.json/def.cf:
-              $(with)"
-                comment => "Display the bundle json data defined in def.json/def.cf",
-                with => string_mustache("{{$-top-}}", data_expand("def.$(bundle_name)")),
-                if => "scl_def_json_$(bundle_name).(DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE)";
-
-            "$(this.bundle)($(bundle_name)): $(json_files)
-                $(with)"
-                with => string_mustache("{{$-top-}}", data_expand(readdata("$(template_dir)/$(json_files)", "auto"))),
+            "$(this.bundle)($(bundle_name)): has run"
                 if => "DEBUG_$(bundle_name)|DEBUG_MUSTACHE_JSON|DEBUG_MUSTACHE";
 }
 
@@ -511,9 +506,19 @@ bundle agent scl_show_data(var)
                 with => string_mustache("{{$-top-}}", "$(var)");
 }
 
+bundle agent scl_show_file_data(file)
+{
+    reports:
+        any::
+            "$(this.bundle): $(file)
+                $(with)"
+                with => string_mustache("{{$-top-}}", readdata("$(file)", "auto"));
+}
+
 bundle agent scl_template_autorun(service_name)
 {
     methods:
         "" usebundle => scl_data_autorun("$(service_name)");
         "" usebundle => scl_mustache_service_autorun("$(service_name)", "");
 }
+

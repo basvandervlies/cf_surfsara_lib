@@ -14,7 +14,7 @@ as:
 
 There is `NO` bundle `scl` that is why we can set remote variables for this bundle
 
-NOTE: cfengine variables that are definied in the json files, eg: `$(def.hostname)`
+NOTE: cfengine variables that are defined in the json files, eg: `$(def.hostname)`
 are expanded.
 
 The json files are read from the following local directory on the host:
@@ -119,3 +119,4 @@ files must be merged via scl, as we only can merge data from this bundle, eg:
 
 This data will then be used as toplevel for the mustache template. You can just use the variables
 name(s): `<variable_name>`
+

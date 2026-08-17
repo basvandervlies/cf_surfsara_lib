@@ -68,6 +68,9 @@
     "smtpd_relay_restrictions": [
         "permit_mynetworks", "reject_unauth_destination"
     ],
+    "smtpd_sender_restrictions": [
+        ""
+    ],
     "transport_maps": [
         "hash:/etc/postfix/transport"
     ],

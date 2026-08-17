@@ -3,7 +3,7 @@
 Source: [pkg_management.cf](/services/pkg_management.cf)
 
 This will install/delete packages that are not installed via other services files. You just want to make sure that some handy
-utilities are installed or some anoying utilities are removed, eg:
+utilities are installed or some annoying utilities are removed, eg:
 ```
 {
     "jq": {
@@ -91,3 +91,4 @@ vars:
     }
 }
 ```
+

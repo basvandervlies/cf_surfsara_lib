@@ -81,11 +81,11 @@ bundle agent scl_services_autorun
             "" usebundle => "$(override_bundles)",
                 comment => "call the def bundle again for mergedata/parsejson statements";
 
-            "" usebundle => "$(scl_services.enabled)",
-                comment => "Always run the service bundle, mostly it is the common bundle";
-
             "" usebundle => scl_service_data_expand("@(scl_services.enabled)"),
-                comment => "Expand 2 levels deep bundle variables + cross reference";
+                comment => "Expand all JSOM data variables";
+
+            "" usebundle => "$(scl_services.enabled)",
+                comment => "Call the service common bundle, so all JSON reference data variables are expanded";
 
             "" usebundle => scl_show_data("scl.$(scl_services.enabled)"),
                 comment => "The data to be used for service",
@@ -121,6 +121,7 @@ bundle agent scl_service_data_expand(services)
         any::
             "scl.$(services)" data => data_expand("scl.$(services)"),
                 handle => "$(this.bundle)_$(services)";
+
 
     reports:
         any::

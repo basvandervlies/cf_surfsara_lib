@@ -102,9 +102,9 @@ AuthorizedKeysCommandUser {{vars.scl.ssh.authorized_keys_commanduser}}
     {{#classes.debian}}
 AuthorizedKeysCommandUser {{vars.scl.ssh.authorized_keys_commanduser}}
     {{/classes.debian}}
-    {{#classes.centos}}
-AuthorizedKeysCommandRunAs {{vars.scl.ssh.authorized_keys_commanduser}}
-    {{/classes.centos}}
+    {{#classes.redhat}}
+AuthorizedKeysCommandUser {{vars.scl.ssh.authorized_keys_commanduser}}
+    {{/classes.redhat}}
 {{/classes.SSH_PUBKEY_AUTHENTICATION}}
 
 ##@ Must be the last section

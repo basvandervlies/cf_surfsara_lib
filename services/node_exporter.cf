@@ -7,13 +7,19 @@ bundle common node_exporter()
         any::
             "service_name" string => "$(scl.node_exporter[name])";
             "service_dir"  string => "$(scl.node_exporter[dir])";
-            "systemd_file" string => "/etc/systemd/system/node_exporter.service";
+            "systemd_file" string => "$(systemd.dir)/node_exporter.service";
+            "custom_metrics_dir" string => "$(scl.node_exporter[custom_metrics_dir])";
+            "custom_metrics_service_file" string => "$(systemd.dir)/node_exporter_custom_metrics.service";
+            "custom_metrics_timer_file" string => "$(systemd.dir)/node_exporter_custom_metrics.timer";
             "initd_file"   string => "/etc/init.d/$(service_name)";
             "default_file" string => "/etc/default/node_exporter";
 
         systemd::
             "template_2_destination" data => parsejson('
                 {
+                    "custom_metrics_ln.sh.mustache": "$(service_dir)/custom_metrics_ln.sh",
+                    "custom_metrics.service.mustache": "$(custom_metrics_service_file)",
+                    "custom_metrics.timer.mustache": "$(custom_metrics_timer_file)",
                     "node_exporter.default.mustache": "$(default_file)",
                     "systemd.mustache": "$(systemd_file)"
                 }
@@ -26,8 +32,8 @@ bundle common node_exporter()
         !systemd::
             "template_2_destination" data => parsejson('
                 {
+                    "initd.mustache": "$(initd_file)",
                     "node_exporter.default.mustache": "$(default_file)"
-                    "initd.mustache": "$(initd_file)"
                 }
             ');
             "reload"  string => "$(initd_file) reload";
@@ -47,12 +53,67 @@ bundle agent node_exporter_install()
 
 bundle agent node_exporter_config()
 {
+    vars:
+        any::
+            "metrics" slist => getindices("scl.node_exporter[custom_metrics]");
+
     classes:
-        "node_exporter_cron" expression => isvariable("scl.node_exporter[cron_job]");
+        any::
+            "node_exporter_cron" expression => isvariable("scl.node_exporter[cron_job]");
+            "custom_metrics_set" expression => reglist("@(metrics)", ".+");
+
+    files:
+        any::
+            "$(node_exporter.service_dir)/$(node_exporter.service_name)"
+                comment => "node_exporter client program link to right arch",
+                link_from => ln_s("$(node_exporter.service_dir)/$(node_exporter.service_name)-$(scl_lscpu.arch)"),
+                move_obstructions => "true";
+
+            "$(node_exporter.custom_metrics_dir)/."
+                perms => mog("751", "root", "root"),
+                create => "true",
+                move_obstructions => "true",
+                classes => results("bundle", "custom_dir");
+
+            "$(node_exporter.custom_metrics_dir)/$(metrics)/."
+                comment => "If the 'metrics' variable ie empty then cfengine skips execution",
+                perms => mog(
+                    "$(scl.node_exporter[custom_metrics][$(metrics)][0])",
+                    "$(scl.node_exporter[custom_metrics][$(metrics)][1])",
+                    "$(scl.node_exporter[custom_metrics][$(metrics)][2])"
+                    ),
+                create => "true",
+                move_obstructions => "true",
+                classes => results("bundle", "custom_dir");
+
+        systemd::
+            "$(node_exporter.initd_file)"
+                delete => tidy;
+
+            "$(node_exporter.service_dir)/custom_metrics_ln.sh)"
+                perms => mog("0755", "root", "root");
+
+            "$(node_exporter.systemd_file)"
+                perms => mog("644", "root", "root");
+
+            "$(node_exporter.custom_metrics_service_file)"
+                perms => mog("644", "root", "root");
+
+            "$(node_exporter.custom_metrics_timer_file)"
+                perms => mog("644", "root", "root");
 
     services:
-        "$(node_exporter.service_name)"
-            service_policy => "start";
+        any::
+            "$(node_exporter.service_name)"
+                service_policy => "start";
+
+        custom_metrics_set::
+            "node_exporter_custom_metrics.timer"
+                service_policy => "start";
+
+        !custom_metrics_set::
+            "node_exporter_custom_metrics.timer"
+                service_policy => "stop";
 
     methods:
         any::
@@ -64,7 +125,9 @@ bundle agent node_exporter_config()
         systemd::
             "$(node_exporter.daemon_reload)"
                 if => or(
-                    canonify("scl$(node_exporter.systemd_file)")
+                    canonify("scl$(node_exporter.systemd_file)"),
+                    canonify("scl$(node_exporter.custom_metrics_service_file)"),
+                    canonify("scl$(node_exporter.custom_metrics_timer_file)")
                     );
 
             "$(node_exporter.restart)"
@@ -73,25 +136,25 @@ bundle agent node_exporter_config()
                     canonify("scl$(node_exporter.default_file)")
                 );
 
+        systemd.custom_metrics_set::
+            "$(paths.path[systemctl]) start node_exporter_custom_metrics.service"
+                comment => "start once when timer service is installed/updated",
+                if => or(
+                    canonify("scl$(node_exporter.custom_metrics_timer_file)"),
+                    "custom_dir_repaired"
+                    );
+
         !systemd::
             "$(node_exporter.restart)"
                 if => or(
                     canonify("scl$(node_exporter.initd_file)"),
                     canonify("scl$(node_exporter.default_file)")
                 );
-    files:
-        any::
-            "$(node_exporter.service_dir)/$(node_exporter.service_name)"
-                comment => "node_exporter client program link to right arch",
-                link_from => ln_s("$(node_exporter.service_dir)/$(node_exporter.service_name)-$(scl_lscpu.arch)"),
-                move_obstructions => "true";
 
-        systemd::
-            "$(node_exporter.initd_file)"
-                delete => tidy;
-
-            "$(node_exporter.systemd_file)"
-                perms => mog("644", "root", "root");
+    reports:
+        custom_metrics_set::
+            "$(this.bundle): custon metrics enabled: '$(metrics)'"
+                if => "DEBUG|DEBUG_node_exporter|DEBUG_$(this.bundle)";
 }
 
 bundle agent node_exporter_restart

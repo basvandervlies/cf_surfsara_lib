@@ -1,5 +1,7 @@
 <!-- vim-markdown-toc GFM -->
 
+* [Version: 1.X.X (2025-XX-X](#version-1xx-2025-xx-x)
+    * [Custom node exporter](#custom-node-exporter)
 * [Version: 1.8.2 (2025-09-26)](#version-182-2025-09-26)
 * [Version: 1.8.0 (2025-07-19)](#version-180-2025-07-19)
 * [Version: 1.7.0 (2024-12-02, Lena)](#version-170-2024-12-02-lena)
@@ -34,12 +36,75 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
+# Version: 1.X.X (2025-XX-X
+SCL enhancements:
+ * The services bundles must run after all json data has been expamded.
+ * Improved template/json parsing:
+   * No need to expand json data anymore.
+   * Only show raw json data. No data expanded
+   * New bundle `scl_show_file_data`. Read file and show json/yaml data
+ * Added new time based class `SCL_WORKDAY`, all days execpt Saturday and Sunday
+
+These services have bug fixes or new features:
+ * apt:
+    * Fixed generating apt source file(s) when `run_class` is set, eg: `linux_x86_64.!LSPCI_AXELERA_AIPU_METIS`
+    * added os name `trixie` ala `debian_13`
+ * munge:
+    * added `rocky` support
+    * daemon check now uses `services` promise type
+ * node_exporter:
+    * Added a custom node exporter service with a custom merics script, see subsection
+ * pam:
+    * added `rocky` support
+    * removed minimum_version 3.11|3.12 code
+    * generated files now show json file(s) used
+ * pam_radius:
+    * added `rocky` support
+ * postfix:
+    * redhat package must be `s-nail`
+    * added package: `postfix-pcre`
+    * added `smtpd_sender_restrictions : [ "" ]` to `default,json`
+    * updated CFEngine header in mustache
+ * ssh:
+    * added `rocky|redhat` support
+ * sssd:
+    * added `rocky` support
+    * added autofs support debug level
+ * slurm:
+    * The service file omly support 3 major versions. Follow the release schedule that schedmd used
+    * removed the 22.02 code too old
+    * 25.11 changed variable `JobContainerType` to `NamespaceType`. We can handle both situations with the aid of classes
+    * added MCS section for "Multi-Category Security" configuration
+    * deleted `CgroupAutomount` from cgroup_section is deprecated
+
+## Custom node exporter
+
+This is default enabled. It will symbolic link `prom` files from different directories to the node exporter `collector_dir`.
+The script detects dead links in the `collector_dir` and will remove them. The service is onshot service connected to systemctl
+timer service:
+ * /etc/systemd/system/node_exporter_custom_metrics.service
+ * /etc/systemd/system/node_exporter_custom_metrics.timer
+ * /opt/node_exporter/custom_metrics_ln.sh
+
+Per custom metrics directory you set the permission.
+```
+custom_metrics: {
+    willma: [ 0770, willma, willma ]
+}
+```
+
 # Version: 1.8.2 (2025-09-26)
 SCL enhancements:
- *  `scl_override_json_service_hook` must be run after loading all json data and before calling the service bundles
+ * `scl_override_json_service_hook` must be run after loading all json data and before calling the service bundles
  * `scl_service_copy_dirs` when `exclude_dirs` was set in json data it did not exclude the directories from copying
  * when using `template_method` for files, do not use `create` attribute
  * `scl_service_rotate_file` transformer changed to `gzip --force`
+ * `scl_show_file_data` new bundle to show raw file data. To bypass this bug: https://northerntech.atlassian.net/browse/CFE-4618
+ * `scl_json_merge` disable expoanding variables they can be overriden by json merge hooks. It is the last step in the process
+ * Improved expanding of JSON data variables:
+   1. First expand all JSON data variables in the specified JSON files
+   1. Then expnad the JSON reference data variables in the service bundles, eg: `bundle common ssh`
+   1. Then run the mustache service bundle(s) with the expanded variables
 
 These services have bug fixes or new features:
  * slurm:

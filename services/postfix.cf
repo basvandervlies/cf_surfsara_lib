@@ -9,7 +9,8 @@ bundle common postfix() {
                         "install": {
                             "bsd-mailx" : "",
                             "postfix" : "",
-                            "postfix-ldap" : ""
+                            "postfix-ldap" : "",
+                            "postfix-pcre" : ""
                         },
                         "purge": {
                             "heirloom-mailx": ""
@@ -23,8 +24,9 @@ bundle common postfix() {
             "packages"  data  => parsejson('
                     {
                         "install": {
-                            "mailx" : "",
+                            "s-nail" : "",
                             "postfix" : ""
+                            "postfix-pcre" : ""
                         },
                         "remove": {
                             "heirloom-mailx": ""
@@ -62,6 +64,7 @@ bundle common postfix() {
                     "dynamicmaps.cf.mustache" : "/etc/postfix/dynamicmaps.cf",
                     "canonical_map.mustache" : "/etc/postfix/canonical_map",
                     "header_checks.mustache": "/etc/postfix/header_checks",
+                    "sender_access.mustache": "/etc/postfix/sender_access",
                     "transport.mustache": "/etc/postfix/transport"
                 }
             ');
@@ -150,8 +153,9 @@ bundle agent postfix_config
 
         "postfix_restart"
             if => or(
-                canonify("scl//etc/postfix/canonical_map"),
+                canonify("scl/etc/postfix/canonical_map"),
                 canonify("scl/etc/postfix/header_checks"),
+                canonify("scl/etc/postfix/sender_access"),
                 canonify("scl/etc/postfix/transport")
         );
 
@@ -174,6 +178,10 @@ bundle agent postfix_config
 
         scl_etc_postfix_canonical_map::
             "$(postfix.postmap_cmd) $(postfix.config_dir)/canonical_map"
+                comment => "This is a hashed file, so we need to use postmap after a change";
+
+        scl_etc_postfix_sender_access::
+            "$(postfix.postmap_cmd) $(postfix.config_dir)/sender_access"
                 comment => "This is a hashed file, so we need to use postmap after a change";
 
         postfix_newalias::

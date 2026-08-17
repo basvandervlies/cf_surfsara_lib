@@ -26,7 +26,7 @@ bundle common munge()
             "gid" string => "$(scl.munge[id_group])";
             "uid" string => "$(scl.munge[id_user])";
 
-        debian::
+        debian|rocky::
             "service_name"     string => "munge";
             "default_file"     string => "/etc/default/$(service_name)";
         systemd::
@@ -60,22 +60,9 @@ bundle agent munge_daemons_restart()
 
 bundle agent munge_daemons_check()
 {
-    processes:
-        any::
-            "/usr/sbin/munged"
-                comment     => "Check if munged is running",
-                process_count   => check_range("munge", "1", "1"),
-                process_select  => scl_select_parent_process("1");
-
-    methods:
-        any::
-            "" usebundle => munge_daemons_restart,
-                if => canonify("munge_out_of_range");
-
-    reports:
-        munge_out_of_range::
-            "No munged process is running with PPID 1";
-
+    services:
+        "munge.service"
+            service_policy => "start";
 }
 
 ### will be scl agent

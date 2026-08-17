@@ -1,5 +1,7 @@
 #####
 # This file is maintained by CFEngine
+#   template file: {{{vars.scl.template_file}}}
+#   files: {{{vars.scl.json_files}}}
 
 [sssd]
 config_file_version = {{{ vars.scl.sssd.config_file_version }}}
@@ -8,6 +10,9 @@ domains = {{#vars.scl.sssd.domains}}{{{ name }}},{{/vars.scl.sssd.domains}}
 
 [ssh]
 debug_level = {{ vars.scl.sssd.ssh_debug_level }}
+
+[autofs]
+debug_level = {{ vars.scl.sssd.autofs_debug_level }}
 
 {{#vars.scl.sssd.domains}}
 [domain/{{{ name }}}]

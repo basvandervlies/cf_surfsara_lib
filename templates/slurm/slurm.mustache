@@ -32,7 +32,13 @@ TmpFS={{{vars.scl.slurm.tmpfs}}}
 #
 # job steps/allocation parameters
 #
+{{#classes.SLURM_JOBCONTAINER_TYPE}}
 JobContainerType={{{vars.scl.slurm.JobContainerType}}}
+{{/classes.SLURM_JOBCONTAINER_TYPE}}
+{{#classes.SLURM_NAMESPACE_TYPE}}
+NamespaceType={{{vars.scl.slurm.NamespaceType}}}
+{{/classes.SLURM_NAMESPACE_TYPE}}
+
 #ProctrackType=proctrack/pgid
 ProctrackType=proctrack/cgroup
 
@@ -110,6 +116,10 @@ MailProg=/usr/bin/mail
 {{#vars.scl.slurm.taskplugin_section}}
 {{{@}}}={{{.}}}
 {{/vars.scl.slurm.taskplugin_section}}
+# MCS plugin
+{{#vars.scl.slurm.mcs_section}}
+{{{@}}}={{{.}}}
+{{/vars.scl.slurm.mcs_section}}
 
 ## Launch Parameters for job launch plugin
 {{#vars.scl.slurm.launch_parameters}}

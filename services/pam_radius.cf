@@ -11,13 +11,13 @@ bundle common pam_radius()
                 }');
 
         debian::
-            "config_file" string => "/etc/pam_radius_auth.conf";
+            "config_file"       string => "/etc/pam_radius_auth.conf";
             "owner"             string => "root";
             "group"             string => "root";
             "mode"              string => "0600";
 
-        centos::
-            "config_file" string => "/etc/pam_radius.conf";
+        centos|rocky::
+            "config_file"       string => "/etc/pam_radius_auth.conf";
             "owner"             string => "root";
             "group"             string => "root";
             "mode"              string => "0600";
@@ -47,11 +47,11 @@ bundle agent pam_radius_install()
                 }
             ');
 
-        centos::
+        centos|rocky::
             "packages" data => parsejson('
                 {
                     "install": {
-                        "pam_radius": ""
+                        "pam_radius_auth": ""
                     }
                 }
             ');

@@ -13,7 +13,7 @@ generate_lscpu_json_file()
     map(split(":")) |
     map({
         "id": (.[0] | gsub(" "; "_") | gsub("[\\(\\)]";"")),
-        "value": (.[1] | gsub("^ ";""))
+        "value": (.[1] | sub("^\\s+"; "") | gsub("^ ";""))
     })|
     map(
         { (.id): .value }

@@ -45,6 +45,16 @@ bundle common scl_stdlib_common
         !SCL_SKIP_DEF_CF_INCLUDE::
             "def" slist => { "$(this.promise_dirname)/def.cf" };
 
+    classes:
+        any::
+            "SCL_WORKDAY" or => {
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+                };
+
   reports:
     verbose_mode::
       "$(this.bundle): adding $(version) inputs='$(standard)'";

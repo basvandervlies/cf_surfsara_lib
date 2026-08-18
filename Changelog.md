@@ -1,6 +1,6 @@
 <!-- vim-markdown-toc GFM -->
 
-* [Version: 1.X.X (2025-XX-X](#version-1xx-2025-xx-x)
+* [Version: 1.9.0 (2026-08-17)](#version-190-2026-08-17)
     * [Custom node exporter](#custom-node-exporter)
 * [Version: 1.8.2 (2025-09-26)](#version-182-2025-09-26)
 * [Version: 1.8.0 (2025-07-19)](#version-180-2025-07-19)
@@ -36,7 +36,7 @@
 * [Version: 0.9.0 (2018-08-24)](#version-090-2018-08-24)
 
 <!-- vim-markdown-toc -->
-# Version: 1.X.X (2025-XX-X
+# Version: 1.9.0 (2026-08-17)
 SCL enhancements:
  * The services bundles must run after all json data has been expamded.
  * Improved template/json parsing:

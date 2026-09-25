@@ -1,8 +1,0 @@
-{
-    "packages": {
-        "install": {
-            "enroot-hardened": "",
-            "enroot-hardened+caps": ""
-        }
-    }
-}

@@ -1,6 +1,0 @@
-{
-    "system_conf": {
-        "DefaultCPUAccounting": "yes",
-        "DefaultMemoryAccounting": "yes"
-    }
-}

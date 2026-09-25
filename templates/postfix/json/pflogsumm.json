@@ -1,9 +1,0 @@
-{
-    "copy_dirs" : [ 
-        {   
-            "dest": "$(postfix.pflogsumm_dir)",
-            "source": "data/postfix/pflogsumm",
-            "mog": [ "0755", "root", "root" ]
-        }   
-    ]
-}

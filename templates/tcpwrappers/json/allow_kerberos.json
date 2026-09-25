@@ -1,8 +1,0 @@
-{
-    "allow_kerberos": [
-        { 
-            "allow": "ALL", 
-            "desc": "kerberos access is allowed"
-        }
-    ]
-}

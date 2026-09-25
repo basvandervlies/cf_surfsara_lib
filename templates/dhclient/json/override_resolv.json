@@ -1,9 +1,0 @@
-{
-    "vars": {
-        "dhclient": {
-            "classes": {
-                "RESOLV_CONF": "any"
-            }   
-        }
-    }
-}

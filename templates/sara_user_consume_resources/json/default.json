@@ -1,6 +1,0 @@
-{
-    "exclude_owners": [ "root", "daemon", "postfix", "nslcd", "ntp", "bind" ],
-    "exclude_processes": "^(/bin/|/usr/bin)?(ssh|scp|rsync|cp|mv|tar|gzip|bzip2|unzip|zip).*",
-    "max_memory": "1038336",
-    "max_minutes": "10"
-}

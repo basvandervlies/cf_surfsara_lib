@@ -1,8 +1,0 @@
-{
-    "allow_http": [
-        { 
-            "allow": "ALL", 
-            "desc": "http/https access is allowed"
-        }
-    ]
-}
